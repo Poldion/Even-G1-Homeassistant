@@ -34,4 +34,5 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
-          ignore: brands
+          # Repository settings (description, topics) and the license must be set on GitHub.
+          ignore: brands description topics license

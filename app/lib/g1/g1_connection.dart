@@ -156,7 +156,11 @@ class G1Connection extends ChangeNotifier {
         if (changed) controller.add(pairs.values.toList());
       });
       try {
-        await FlutterBluePlus.startScan(timeout: timeout);
+        await FlutterBluePlus.startScan(
+          timeout: timeout,
+          // BLUETOOTH_SCAN is declared with neverForLocation.
+          androidCheckLocationServices: false,
+        );
         await FlutterBluePlus.isScanning.where((s) => !s).first;
       } catch (e) {
         controller.addError(e);

@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'bridge.dart';
 import 'settings.dart';
@@ -16,15 +15,17 @@ Future<void> main() async {
   runApp(EvenG1App(bridge: bridge));
 }
 
-/// Requests the runtime permissions and keeps the app alive in the background.
+/// Keeps the app alive in the background (Android foreground service).
+///
+/// Bluetooth permissions are requested by flutter_blue_plus when scanning or
+/// connecting. The connectedDevice service type needs them to be granted, so
+/// this is called again after the glasses were paired.
 Future<void> ensureBackgroundOperation() async {
   if (Platform.isAndroid) {
-    await [
-      Permission.bluetoothScan,
-      Permission.bluetoothConnect,
-      Permission.locationWhenInUse, // only needed up to Android 11
-      Permission.notification,
-    ].request();
+    if (await FlutterForegroundTask.checkNotificationPermission() !=
+        NotificationPermission.granted) {
+      await FlutterForegroundTask.requestNotificationPermission();
+    }
 
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
@@ -40,15 +41,16 @@ Future<void> ensureBackgroundOperation() async {
       ),
     );
     if (!await FlutterForegroundTask.isRunningService) {
-      await FlutterForegroundTask.startService(
+      final result = await FlutterForegroundTask.startService(
         serviceId: 4711,
         serviceTypes: [ForegroundServiceTypes.connectedDevice],
         notificationTitle: 'Even G1 ↔ Home Assistant',
         notificationText: 'Verbindung aktiv',
       );
+      if (result is ServiceRequestFailure) {
+        debugPrint('Foreground service not started: ${result.error}');
+      }
     }
-  } else {
-    await Permission.bluetooth.request();
   }
 }
 

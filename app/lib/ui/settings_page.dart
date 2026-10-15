@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../bridge.dart';
 import '../g1/g1_connection.dart';
 import '../ha/ha_client.dart';
+import '../main.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.bridge});
@@ -125,6 +126,7 @@ class _SettingsPageState extends State<SettingsPage> {
     s.leftId = pair.leftId!;
     s.rightId = pair.rightId!;
     s.glassesName = 'G1 #${pair.channel}';
+    await ensureBackgroundOperation();
     await widget.bridge.reconnectGlasses();
     if (mounted) Navigator.of(context).pop();
   }
