@@ -1,0 +1,31 @@
+name: even_g1_ha
+description: "Companion app connecting Even Realities G1 glasses with Home Assistant."
+publish_to: 'none'
+
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_blue_plus: ^2.3.14
+  web_socket_channel: ^3.0.3
+  shared_preferences: ^2.5.6
+  permission_handler: ^13.0.2
+  flutter_foreground_task: ^11.0.3
+  lc3_codec:
+    path: packages/lc3_codec
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+
+  uses-material-design: true
+

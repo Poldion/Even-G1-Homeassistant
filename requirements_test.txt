@@ -1,0 +1,9 @@
+pytest-homeassistant-custom-component==0.13.316
+# Requirements of assist_pipeline and its dependencies (not installed by the
+# pytest plugin).
+ha-ffmpeg==3.2.2
+hassil==3.5.0
+home-assistant-intents==2026.1.28
+mutagen==1.47.0
+pymicro-vad==1.0.1
+pyspeex-noise==1.0.2

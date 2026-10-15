@@ -1,0 +1,54 @@
+show_text:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: even_g1
+          multiple: true
+    title:
+      example: "Waschmaschine"
+      selector:
+        text:
+    message:
+      required: true
+      example: "Die Wäsche ist fertig."
+      selector:
+        text:
+          multiline: true
+    duration:
+      example: 10
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: s
+          mode: box
+    mode:
+      default: screen
+      selector:
+        select:
+          translation_key: mode
+          options:
+            - screen
+            - notification
+clear:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: even_g1
+          multiple: true
+show_dashboard:
+  fields:
+    device_id:
+      selector:
+        device:
+          integration: even_g1
+          multiple: true
+    duration:
+      selector:
+        number:
+          min: 0
+          max: 3600
+          unit_of_measurement: s
+          mode: box

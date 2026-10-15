@@ -1,0 +1,21 @@
+{
+  "entity": {
+    "sensor": {
+      "last_query": { "default": "mdi:account-voice" },
+      "last_response": { "default": "mdi:robot-outline" }
+    },
+    "binary_sensor": {
+      "app_connected": { "default": "mdi:cellphone-link" },
+      "glasses_connected": { "default": "mdi:glasses" },
+      "worn": { "default": "mdi:face-man-outline" }
+    },
+    "event": {
+      "gesture": { "default": "mdi:gesture-tap" }
+    }
+  },
+  "services": {
+    "show_text": { "service": "mdi:message-text" },
+    "clear": { "service": "mdi:close-box-outline" },
+    "show_dashboard": { "service": "mdi:view-dashboard-outline" }
+  }
+}

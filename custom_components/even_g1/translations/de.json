@@ -1,0 +1,156 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Even Realities G1",
+        "description": "Lege einen Eintrag für deine G1-Brille an. Verbinde danach die Even-G1-Companion-App auf deinem Smartphone mit Home Assistant und wähle diesen Eintrag aus.",
+        "data": {
+          "name": "Name"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Eine Brille mit diesem Namen ist bereits eingerichtet."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Even-G1-Optionen",
+        "data": {
+          "assist_pipeline": "Assist-Pipeline",
+          "show_transcript": "Erkannte Frage auf der Brille anzeigen",
+          "display_duration": "Standard-Anzeigedauer (0 = bis zum Wegtippen)",
+          "dashboard_gesture": "Geste, die das Dashboard anzeigt",
+          "dashboard_template": "Dashboard-Template"
+        },
+        "data_description": {
+          "assist_pipeline": "Wird verwendet, wenn du die linke Touchbar gedrückt hältst.",
+          "dashboard_template": "Jinja-Template, das bei der Dashboard-Geste oder der Aktion show_dashboard gerendert und auf der Brille angezeigt wird."
+        }
+      }
+    }
+  },
+  "selector": {
+    "assist_pipeline": {
+      "options": {
+        "preferred": "Bevorzugte Pipeline"
+      }
+    },
+    "dashboard_gesture": {
+      "options": {
+        "none": "Deaktiviert",
+        "single_tap_left": "Einfaches Tippen links",
+        "single_tap_right": "Einfaches Tippen rechts",
+        "head_up": "Kopf gehoben"
+      }
+    },
+    "mode": {
+      "options": {
+        "screen": "Text im Vollbild",
+        "notification": "Benachrichtigung"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery_left": {
+        "name": "Akku links"
+      },
+      "battery_right": {
+        "name": "Akku rechts"
+      },
+      "last_query": {
+        "name": "Letzte Frage"
+      },
+      "last_response": {
+        "name": "Letzte Antwort"
+      }
+    },
+    "binary_sensor": {
+      "app_connected": {
+        "name": "App verbunden"
+      },
+      "glasses_connected": {
+        "name": "Brille verbunden"
+      },
+      "worn": {
+        "name": "Getragen"
+      }
+    },
+    "event": {
+      "gesture": {
+        "name": "Geste",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "single_tap_left": "Einfaches Tippen links",
+              "single_tap_right": "Einfaches Tippen rechts",
+              "double_tap": "Doppeltippen",
+              "triple_tap": "Dreifachtippen",
+              "head_up": "Kopf gehoben",
+              "head_down": "Kopf gesenkt",
+              "worn": "Brille aufgesetzt",
+              "removed": "Brille abgesetzt",
+              "long_press": "Langes Drücken (Assistent-Start)",
+              "long_press_release": "Langes Drücken beendet",
+              "other": "Andere"
+            }
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "show_text": {
+      "name": "Text anzeigen",
+      "description": "Zeigt einen Text auf dem Display der G1 an.",
+      "fields": {
+        "device_id": {
+          "name": "Brille",
+          "description": "Brillen, auf denen der Text angezeigt wird. Leer = alle."
+        },
+        "title": {
+          "name": "Titel",
+          "description": "Optionaler Titel (erste Zeile)."
+        },
+        "message": {
+          "name": "Nachricht",
+          "description": "Anzuzeigender Text. Lange Texte werden auf Seiten verteilt."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Sekunden bis die Brille zum Dashboard zurückkehrt. 0 = bis zum Doppeltippen."
+        },
+        "mode": {
+          "name": "Modus",
+          "description": "Text im Vollbild oder als normale Benachrichtigung."
+        }
+      }
+    },
+    "clear": {
+      "name": "Anzeige schließen",
+      "description": "Schaltet die Brille zurück zum Dashboard.",
+      "fields": {
+        "device_id": {
+          "name": "Brille",
+          "description": "Brillen, deren Anzeige geschlossen wird. Leer = alle."
+        }
+      }
+    },
+    "show_dashboard": {
+      "name": "Dashboard anzeigen",
+      "description": "Rendert das Dashboard-Template und zeigt es an.",
+      "fields": {
+        "device_id": {
+          "name": "Brille",
+          "description": "Brillen, auf denen das Dashboard angezeigt wird. Leer = alle."
+        },
+        "duration": {
+          "name": "Dauer",
+          "description": "Anzeigedauer in Sekunden."
+        }
+      }
+    }
+  }
+}

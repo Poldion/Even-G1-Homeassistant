@@ -1,0 +1,156 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Even Realities G1",
+        "description": "Create an entry for your G1 glasses. Afterwards connect the Even G1 companion app on your phone to Home Assistant and select this entry.",
+        "data": {
+          "name": "Name"
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Glasses with this name are already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Even G1 options",
+        "data": {
+          "assist_pipeline": "Assist pipeline",
+          "show_transcript": "Show recognized question on the glasses",
+          "display_duration": "Default display duration (0 = until dismissed)",
+          "dashboard_gesture": "Gesture that shows the dashboard",
+          "dashboard_template": "Dashboard template"
+        },
+        "data_description": {
+          "assist_pipeline": "Used when you hold the left touch bar.",
+          "dashboard_template": "Jinja template rendered and shown on the glasses for the dashboard gesture or the show_dashboard action."
+        }
+      }
+    }
+  },
+  "selector": {
+    "assist_pipeline": {
+      "options": {
+        "preferred": "Preferred pipeline"
+      }
+    },
+    "dashboard_gesture": {
+      "options": {
+        "none": "Disabled",
+        "single_tap_left": "Single tap left",
+        "single_tap_right": "Single tap right",
+        "head_up": "Head up"
+      }
+    },
+    "mode": {
+      "options": {
+        "screen": "Full screen text",
+        "notification": "Notification"
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery_left": {
+        "name": "Battery left"
+      },
+      "battery_right": {
+        "name": "Battery right"
+      },
+      "last_query": {
+        "name": "Last question"
+      },
+      "last_response": {
+        "name": "Last answer"
+      }
+    },
+    "binary_sensor": {
+      "app_connected": {
+        "name": "App connected"
+      },
+      "glasses_connected": {
+        "name": "Glasses connected"
+      },
+      "worn": {
+        "name": "Worn"
+      }
+    },
+    "event": {
+      "gesture": {
+        "name": "Gesture",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "single_tap_left": "Single tap left",
+              "single_tap_right": "Single tap right",
+              "double_tap": "Double tap",
+              "triple_tap": "Triple tap",
+              "head_up": "Head up",
+              "head_down": "Head down",
+              "worn": "Glasses put on",
+              "removed": "Glasses taken off",
+              "long_press": "Long press (assistant start)",
+              "long_press_release": "Long press released",
+              "other": "Other"
+            }
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "show_text": {
+      "name": "Show text",
+      "description": "Shows a text on the G1 display.",
+      "fields": {
+        "device_id": {
+          "name": "Glasses",
+          "description": "Glasses to show the text on. All if empty."
+        },
+        "title": {
+          "name": "Title",
+          "description": "Optional title (first line)."
+        },
+        "message": {
+          "name": "Message",
+          "description": "Text to show. Long texts are split into pages."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "Seconds until the glasses return to the dashboard. 0 = until dismissed with a double tap."
+        },
+        "mode": {
+          "name": "Mode",
+          "description": "Full screen text or a regular notification."
+        }
+      }
+    },
+    "clear": {
+      "name": "Clear display",
+      "description": "Returns the glasses to their dashboard.",
+      "fields": {
+        "device_id": {
+          "name": "Glasses",
+          "description": "Glasses to clear. All if empty."
+        }
+      }
+    },
+    "show_dashboard": {
+      "name": "Show dashboard",
+      "description": "Renders the dashboard template and shows it.",
+      "fields": {
+        "device_id": {
+          "name": "Glasses",
+          "description": "Glasses to show the dashboard on. All if empty."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "Seconds to show the dashboard."
+        }
+      }
+    }
+  }
+}
