@@ -17,7 +17,6 @@ from homeassistant.components.assist_pipeline import (
     PipelineStage,
 )
 from homeassistant.components.assist_pipeline.error import PipelineError
-from homeassistant.components.assist_pipeline.pipeline import PipelineRunValidationError
 from homeassistant.core import HomeAssistant, callback
 
 from .const import DOMAIN, GESTURES
@@ -198,6 +197,20 @@ async def ws_assist_run(
         connection.send_error(msg_id, err.code, err.message)
         return
 
+    if pipeline.stt_engine is None:
+        connection.send_result(msg_id)
+        connection.send_event(
+            msg_id,
+            {
+                "type": "error",
+                "data": {
+                    "code": "stt-provider-missing",
+                    "message": f"Pipeline {pipeline.name} has no speech-to-text engine",
+                },
+            },
+        )
+        return
+
     audio_queue: asyncio.Queue[bytes] = asyncio.Queue()
 
     async def stt_stream() -> AsyncGenerator[bytes]:
@@ -266,9 +279,6 @@ async def ws_assist_run(
             )
         except PipelineError as err:
             send_error(err.code, err.message)
-        except PipelineRunValidationError as err:
-            # e.g. the pipeline has no speech-to-text engine
-            send_error("stt-provider-missing", str(err))
         except Exception as err:
             _LOGGER.exception("Error running assist for %s", device.name)
             send_error("unknown", str(err))

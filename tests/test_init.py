@@ -13,7 +13,6 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers import device_registry as dr
 
 
 async def test_config_flow(hass: HomeAssistant) -> None:
@@ -99,12 +98,12 @@ async def test_subscribe_and_show_text(
 
     assert hass.states.get("binary_sensor.even_g1_app_connected").state == "on"
 
-    device = dr.async_get(hass).async_get_device(identifiers={(DOMAIN, entry.entry_id)})
+    device_id = entry.runtime_data.device_id
     await hass.services.async_call(
         DOMAIN,
         "show_text",
         {
-            "device_id": device.id,
+            "device_id": device_id,
             "title": "Tür",
             "message": "Haustür offen",
             "duration": 5,

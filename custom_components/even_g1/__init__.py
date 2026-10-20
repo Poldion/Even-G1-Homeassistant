@@ -131,13 +131,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: EvenG1ConfigEntry) -> bo
     """Set up Even G1 from a config entry."""
     entry.runtime_data = EvenG1Device(hass, entry)
 
-    dr.async_get(hass).async_get_or_create(
+    device_entry = dr.async_get(hass).async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(DOMAIN, entry.entry_id)},
         manufacturer="Even Realities",
         model="G1",
         name=entry.title,
     )
+    entry.runtime_data.device_id = device_entry.id
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))

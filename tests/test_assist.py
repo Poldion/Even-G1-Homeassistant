@@ -155,7 +155,7 @@ async def test_assist_run_without_stt(
         {"type": "even_g1/assist_run", "entry_id": entry.entry_id}
     )
     assert (await client.receive_json())["success"]
-    assert (await client.receive_json())["event"]["type"] == "audio-ready"
     async with asyncio.timeout(5):
         event = (await client.receive_json())["event"]
     assert event["type"] == "error", event
+    assert event["data"]["code"] == "stt-provider-missing"

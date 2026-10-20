@@ -10,7 +10,6 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError, TemplateError
-from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.event import (
     TrackTemplate,
     TrackTemplateResult,
@@ -39,7 +38,6 @@ from .const import (
     DEFAULT_DASHBOARD_TEMPLATE,
     DEFAULT_DISPLAY_DURATION,
     DEFAULT_NOISE_SUPPRESSION,
-    DOMAIN,
     EVENT_ASSIST,
     EVENT_GESTURE,
     GESTURE_HEAD_UP,
@@ -86,6 +84,8 @@ class EvenG1Device:
         self._listeners: list[CALLBACK_TYPE] = []
         self._gesture_listeners: list[Callable[[str, dict[str, Any]], None]] = []
         self._next_subscriber_id = 0
+        # Device registry id, set in async_setup_entry.
+        self.device_id: str | None = None
         self._dashboard_tracker: Any = None
         self.dashboard_text: str = ""
 
@@ -370,11 +370,3 @@ class EvenG1Device:
             {"device_id": self.device_id, "query": query, "response": response},
         )
         self._notify_listeners()
-
-    @property
-    def device_id(self) -> str | None:
-        """Return the device registry id."""
-        device = dr.async_get(self.hass).async_get_device(
-            identifiers={(DOMAIN, self.entry_id)}
-        )
-        return device.id if device else None
