@@ -22,11 +22,15 @@
           "show_transcript": "Erkannte Frage auf der Brille anzeigen",
           "display_duration": "Standard-Anzeigedauer (0 = bis zum Wegtippen)",
           "dashboard_gesture": "Geste, die das Dashboard anzeigt",
-          "dashboard_template": "Dashboard-Template"
+          "dashboard_template": "Dashboard-Template",
+          "auto_gain": "Automatische Verstärkung des Mikrofons",
+          "noise_suppression": "Rauschunterdrückung"
         },
         "data_description": {
           "assist_pipeline": "Wird verwendet, wenn du die linke Touchbar gedrückt hältst.",
-          "dashboard_template": "Jinja-Template, das bei der Dashboard-Geste oder der Aktion show_dashboard gerendert und auf der Brille angezeigt wird."
+          "dashboard_template": "Jinja-Template, das bei der Dashboard-Geste oder der Aktion show_dashboard gerendert und auf der Brille angezeigt wird.",
+          "auto_gain": "Hebt leise Sprache an (0 = aus, 31 = maximal). Hilft, wenn Fragen oft nicht verstanden werden.",
+          "noise_suppression": "0 = aus, 4 = stark. Hilft in lauter Umgebung."
         }
       }
     }

@@ -58,7 +58,13 @@ Danach: *Einstellungen → Geräte & Dienste → Integration hinzufügen → „
 ### 4. Assist konfigurieren
 
 In der Integration unter *Konfigurieren* wählst du die **Assist-Pipeline** (Standard: bevorzugte Pipeline).
-Die Pipeline braucht eine **Spracherkennung (STT)**, z. B. *Home Assistant Cloud*, *Whisper* oder *Speech-to-Phrase*.
+Die Pipeline braucht eine **Spracherkennung (STT)**, z. B. *Home Assistant Cloud* oder *Whisper*. Die Spracherkennung läuft
+immer in Home Assistant, nicht auf dem Handy: Die App leitet nur das Mikrofon-Audio der Brille weiter. Die Qualität hängt
+daher vom STT-Dienst der Pipeline ab. *Speech-to-Phrase* versteht nur vordefinierte Befehle, für freie Fragen eignen sich
+*Whisper* oder *Home Assistant Cloud* besser.
+
+Die Aufnahme dauert genau so lange, wie du die Touchbar gedrückt hältst. Sprechpausen beenden sie nicht (keine
+automatische Sprachende-Erkennung).
 Sprachausgabe (TTS) wird nicht genutzt, da die Brille keinen Lautsprecher hat.
 
 Weitere Optionen:
@@ -66,6 +72,8 @@ Weitere Optionen:
 | Option | Bedeutung |
 | --- | --- |
 | Erkannte Frage anzeigen | Zeigt nach dem Loslassen kurz `» erkannte Frage «` an |
+| Automatische Verstärkung | Hebt leise Sprache an (0 = aus, bis 31 dBFS). Hilft, wenn Fragen oft nicht verstanden werden |
+| Rauschunterdrückung | 0 = aus bis 4 = stark, für laute Umgebungen |
 | Standard-Anzeigedauer | Sekunden bis die Brille wieder zum Dashboard wechselt (0 = bis Doppeltippen) |
 | Dashboard-Geste | Geste, die das Dashboard-Template anzeigt (z. B. *Einfaches Tippen rechts* oder *Kopf gehoben*) |
 | Dashboard-Template | Jinja-Template, das für die Dashboard-Geste bzw. `even_g1.show_dashboard` gerendert wird |
@@ -172,13 +180,12 @@ Licht an: {{ states.light | selectattr('state', 'eq', 'on') | list | count }}
 ## Technische Details
 
 - **Protokoll:** Die App spricht das BLE-Protokoll aus der offiziellen [EvenDemoApp](https://github.com/even-realities/EvenDemoApp): Text über `0x4E` (5 Zeilen à ~488 px pro Seite, zuerst links, dann rechts nach Bestätigung), Mikrofon über `0x0E`, Audio über `0xF1` (LC3, 16 kHz, 10-ms-Frames, 20 Byte/Frame), Touch-Events über `0xF5` (`0x17` = Assist-Start, `0x18` = Ende), Heartbeat `0x25` alle 8 s.
-- **Assist:** Die App nutzt den Websocket-Befehl `assist_pipeline/run` (Stufen `stt` → `intent`) und streamt das dekodierte PCM-Audio als Binärnachrichten. Die Gerätezuordnung (`device_id`) wird mitgeschickt, damit Befehle wie „Licht an“ den Bereich der Brille berücksichtigen können.
-- **Integration ↔ App:** Websocket-Befehle `even_g1/devices`, `even_g1/subscribe` (Anzeigebefehle und Konfiguration als Push), `even_g1/update_state`, `even_g1/gesture`, `even_g1/assist`, `even_g1/dashboard`.
+- **Assist:** Die App streamt das dekodierte PCM-Audio als Binärnachrichten an den Websocket-Befehl `even_g1/assist_run` der Integration. Diese startet die konfigurierte Assist-Pipeline (Stufen `stt` → `intent`) ohne Voice Activity Detection und mit den eingestellten Audio-Optionen. Die Gerätezuordnung (`device_id`) wird mitgegeben, damit Befehle wie „Licht an“ den Bereich der Brille berücksichtigen können. Während der Aufnahme zeigt die App eigene Statusbildschirme („Ich höre zu …“, „Einen Moment …“) statt der Even-AI-Hinweise der Brillen-Firmware.
+- **Integration ↔ App:** Websocket-Befehle `even_g1/devices`, `even_g1/subscribe` (Anzeigebefehle und Konfiguration als Push), `even_g1/update_state`, `even_g1/gesture`, `even_g1/assist_run`, `even_g1/dashboard`.
 
 ## Hinweise & Grenzen
 
 - Die Gesten-Codes für Kopf heben/senken und Auf-/Absetzen sowie die Akku-Abfrage (`0x2C`) stammen nicht aus der offiziellen Dokumentation, sondern aus Community-Analysen, und können je nach Firmware abweichen. Unbekannte Codes kommen als `other` mit `code` in Home Assistant an.
-- Die Home-Assistant-Spracherkennung beendet die Aufnahme bei längeren Sprechpausen eventuell vor dem Loslassen der Touchbar (Voice Activity Detection).
 - Benachrichtigungen im Modus `notification` setzen eine App-Whitelist auf der Brille. Die offizielle Even-App überschreibt diese beim nächsten Verbinden wieder.
 - Die BLE-Bibliothek [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) ist für private/nicht-kommerzielle Nutzung frei (`License.nonprofit`).
 - Dies ist kein offizielles Produkt von Even Realities.

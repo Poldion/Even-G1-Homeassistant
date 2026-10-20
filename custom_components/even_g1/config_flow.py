@@ -26,14 +26,18 @@ from homeassistant.util import slugify
 
 from .const import (
     CONF_ASSIST_PIPELINE,
+    CONF_AUTO_GAIN,
     CONF_DASHBOARD_GESTURE,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DISPLAY_DURATION,
+    CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
     DASHBOARD_GESTURES,
+    DEFAULT_AUTO_GAIN,
     DEFAULT_DASHBOARD_TEMPLATE,
     DEFAULT_DISPLAY_DURATION,
+    DEFAULT_NOISE_SUPPRESSION,
     DOMAIN,
     PIPELINE_PREFERRED,
 )
@@ -44,6 +48,8 @@ DEFAULT_OPTIONS: dict[str, Any] = {
     CONF_DASHBOARD_GESTURE: DASHBOARD_GESTURE_NONE,
     CONF_DASHBOARD_TEMPLATE: DEFAULT_DASHBOARD_TEMPLATE,
     CONF_SHOW_TRANSCRIPT: True,
+    CONF_AUTO_GAIN: DEFAULT_AUTO_GAIN,
+    CONF_NOISE_SUPPRESSION: DEFAULT_NOISE_SUPPRESSION,
 }
 
 
@@ -111,6 +117,24 @@ class EvenG1OptionsFlow(OptionsFlow):
                 vol.Required(
                     CONF_SHOW_TRANSCRIPT, default=options[CONF_SHOW_TRANSCRIPT]
                 ): BooleanSelector(),
+                vol.Required(
+                    CONF_AUTO_GAIN, default=options[CONF_AUTO_GAIN]
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=0,
+                        max=31,
+                        step=1,
+                        unit_of_measurement="dBFS",
+                        mode=NumberSelectorMode.SLIDER,
+                    )
+                ),
+                vol.Required(
+                    CONF_NOISE_SUPPRESSION, default=options[CONF_NOISE_SUPPRESSION]
+                ): NumberSelector(
+                    NumberSelectorConfig(
+                        min=0, max=4, step=1, mode=NumberSelectorMode.SLIDER
+                    )
+                ),
                 vol.Required(
                     CONF_DISPLAY_DURATION, default=options[CONF_DISPLAY_DURATION]
                 ): NumberSelector(

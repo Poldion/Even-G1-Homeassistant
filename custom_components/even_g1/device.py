@@ -19,13 +19,17 @@ from .const import (
     CMD_RELOAD,
     CMD_SHOW_TEXT,
     CONF_ASSIST_PIPELINE,
+    CONF_AUTO_GAIN,
     CONF_DASHBOARD_GESTURE,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DISPLAY_DURATION,
+    CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
+    DEFAULT_AUTO_GAIN,
     DEFAULT_DASHBOARD_TEMPLATE,
     DEFAULT_DISPLAY_DURATION,
+    DEFAULT_NOISE_SUPPRESSION,
     DOMAIN,
     EVENT_ASSIST,
     EVENT_GESTURE,
@@ -94,15 +98,30 @@ class EvenG1Device:
         """Return the default display duration in seconds."""
         return int(self.options.get(CONF_DISPLAY_DURATION, DEFAULT_DISPLAY_DURATION))
 
+    @property
+    def pipeline_id(self) -> str | None:
+        """Return the configured Assist pipeline (None = preferred)."""
+        pipeline = self.options.get(CONF_ASSIST_PIPELINE, PIPELINE_PREFERRED)
+        return None if pipeline == PIPELINE_PREFERRED else pipeline
+
+    @property
+    def auto_gain(self) -> int:
+        """Return the automatic gain in dBFS (0 = off)."""
+        return int(self.options.get(CONF_AUTO_GAIN, DEFAULT_AUTO_GAIN))
+
+    @property
+    def noise_suppression(self) -> int:
+        """Return the noise suppression level (0 = off, 4 = max)."""
+        return int(self.options.get(CONF_NOISE_SUPPRESSION, DEFAULT_NOISE_SUPPRESSION))
+
     def app_config(self) -> dict[str, Any]:
         """Return the configuration the app needs."""
-        pipeline = self.options.get(CONF_ASSIST_PIPELINE, PIPELINE_PREFERRED)
         return {
             "type": CMD_CONFIG,
             "name": self.name,
             "device_id": self.device_id,
             "display_duration": self.display_duration,
-            "assist_pipeline": None if pipeline == PIPELINE_PREFERRED else pipeline,
+            "assist_pipeline": self.pipeline_id,
             "show_transcript": self.options.get(CONF_SHOW_TRANSCRIPT, True),
         }
 

@@ -22,11 +22,15 @@
           "show_transcript": "Show recognized question on the glasses",
           "display_duration": "Default display duration (0 = until dismissed)",
           "dashboard_gesture": "Gesture that shows the dashboard",
-          "dashboard_template": "Dashboard template"
+          "dashboard_template": "Dashboard template",
+          "auto_gain": "Automatic microphone gain",
+          "noise_suppression": "Noise suppression"
         },
         "data_description": {
           "assist_pipeline": "Used when you hold the left touch bar.",
-          "dashboard_template": "Jinja template rendered and shown on the glasses for the dashboard gesture or the show_dashboard action."
+          "dashboard_template": "Jinja template rendered and shown on the glasses for the dashboard gesture or the show_dashboard action.",
+          "auto_gain": "Boosts quiet speech (0 = off, 31 = max). Helps if questions are often not understood.",
+          "noise_suppression": "0 = off, 4 = strong. Helps in noisy surroundings."
         }
       }
     }

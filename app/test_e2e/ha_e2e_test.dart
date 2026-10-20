@@ -1,6 +1,7 @@
 // End-to-end test against a running Home Assistant with the even_g1
-// integration. Run with HA_URL and HA_TOKEN set (and a pipeline that has an
-// STT engine, given as HA_STT_ENGINE, e.g. stt.faster_whisper).
+// integration. Run with HA_URL and HA_TOKEN set. HA_STT_ENGINE names the STT
+// entity for the test pipeline (default stt.fake). The test pipeline becomes
+// the preferred one, so only use a test instance.
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -82,20 +83,28 @@ void main() {
         'wake_word_id': null,
       }) as Map;
 
+      // The integration uses the preferred pipeline unless configured.
+      await client.call({
+        'type': 'assist_pipeline/pipeline/set_preferred',
+        'pipeline_id': pipeline['id'],
+      });
+
       String? transcript;
       final session = AssistSession(
         client,
-        pipelineId: pipeline['id'] as String,
-        deviceId: deviceId,
+        entryId: entryId,
         onTranscript: (t) => transcript = t,
       );
-      // Audio before start() is buffered until run-start.
+      // Audio before start() is buffered until the integration is ready.
       session.addAudio(_sine(0.2));
       await session.start();
       for (var i = 0; i < 10; i++) {
         session.addAudio(_sine(0.1));
         await Future<void>.delayed(const Duration(milliseconds: 20));
       }
+      // A pause while speaking must not end the recording.
+      session.addAudio(Uint8List(16000 * 2 * 2));
+      session.addAudio(_sine(0.5));
       session.finishAudio();
       final result = await session.result.timeout(const Duration(seconds: 30));
       // ignore: avoid_print
@@ -107,13 +116,6 @@ void main() {
       expect(transcript, isNotEmpty);
       expect(result.response, isNotEmpty);
       expect(result.conversationId, isNotNull);
-
-      await client.call({
-        'type': 'even_g1/assist',
-        'entry_id': entryId,
-        'query': result.query,
-        'response': result.response,
-      });
 
       await sub.cancel();
       await client.close();

@@ -47,6 +47,11 @@ class Bridge extends ChangeNotifier {
   static const followUpWindow = Duration(minutes: 5);
   static const maxRecording = Duration(seconds: 30);
 
+  // Own screens shown during Assist. They replace the Even AI screens of the
+  // glasses firmware (e.g. its "release to ask" hint).
+  static const listeningText = 'Home Assistant\nIch höre zu …';
+  static const thinkingText = 'Home Assistant\nEinen Moment …';
+
   final Settings settings;
   final G1Connection g1 = G1Connection();
   late final G1Display display;
@@ -308,15 +313,14 @@ class Bridge extends ChangeNotifier {
     _decoder = decoder;
     final session = AssistSession(
       client,
-      pipelineId: haConfig.assistPipeline,
+      entryId: settings.entryId,
       conversationId: followUp ? _conversationId : null,
-      deviceId: haConfig.deviceId,
       onTranscript: (text) {
         _log('Erkannt: $text');
         lastQuery = text;
         notifyListeners();
         if (haConfig.showTranscript && text.isNotEmpty) {
-          display.showAiStatus('» $text «\n…');
+          display.showAiStatus('» $text «\nEinen Moment …');
         }
       },
     );
@@ -330,8 +334,11 @@ class Bridge extends ChangeNotifier {
         _log('Audio: $e');
       }
     });
-    final micOn = await g1.setMic(true);
-    if (!micOn) _log('Mikrofon konnte nicht aktiviert werden');
+    // Mic first (it is on the right arm and starts the audio), then replace
+    // the firmware's Even AI screen with our own.
+    final micOn = g1.setMic(true);
+    unawaited(display.showAiStatus(listeningText));
+    if (!await micOn) _log('Mikrofon konnte nicht aktiviert werden');
 
     _recordTimer = Timer(maxRecording, _finishAssist);
     try {
@@ -349,6 +356,7 @@ class Bridge extends ChangeNotifier {
     _recordTimer?.cancel();
     session.finishAudio();
     unawaited(g1.setMic(false));
+    unawaited(display.showAiStatus(thinkingText));
 
     final result = await session.result.timeout(
       const Duration(seconds: 60),
@@ -375,15 +383,11 @@ class Bridge extends ChangeNotifier {
     notifyListeners();
 
     final duration = haConfig.displayDuration;
+    // The integration records question and answer in Home Assistant.
     await display.showAiAnswer(
       result.response.isEmpty ? 'Erledigt.' : result.response,
       closeAfter: duration > 0 ? Duration(seconds: max(duration, 8)) : null,
     );
-    await _call({
-      'type': 'even_g1/assist',
-      'query': result.query,
-      'response': result.response,
-    });
   }
 
   Future<void> _abortAssist() async {

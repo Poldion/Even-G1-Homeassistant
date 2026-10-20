@@ -21,21 +21,21 @@ class AssistResult {
 
 /// One run of an Assist pipeline: speech (16 kHz PCM) in, text answer out.
 ///
-/// Uses the `assist_pipeline/run` websocket command from `stt` to `intent`.
-/// The glasses have no speaker, so text-to-speech is skipped.
+/// Uses the `even_g1/assist_run` command of the integration. It runs the
+/// Assist pipeline configured in Home Assistant from `stt` to `intent`
+/// without voice activity detection, so the recording lasts exactly as long
+/// as the touch bar is held. Speech recognition happens in Home Assistant.
 class AssistSession {
   AssistSession(
     this.client, {
-    this.pipelineId,
+    required this.entryId,
     this.conversationId,
-    this.deviceId,
     this.onTranscript,
   });
 
   final HaClient client;
-  final String? pipelineId;
+  final String entryId;
   final String? conversationId;
-  final String? deviceId;
 
   /// Called as soon as the speech was recognized.
   final void Function(String text)? onTranscript;
@@ -52,14 +52,9 @@ class AssistSession {
 
   Future<void> start() async {
     _subscription = await client.subscribe({
-      'type': 'assist_pipeline/run',
-      'start_stage': 'stt',
-      'end_stage': 'intent',
-      'input': {'sample_rate': 16000},
-      'pipeline': ?pipelineId,
+      'type': 'even_g1/assist_run',
+      'entry_id': entryId,
       'conversation_id': ?conversationId,
-      'device_id': ?deviceId,
-      'timeout': 120,
     });
     _subscription!.events.listen(
       _onEvent,
@@ -78,9 +73,9 @@ class AssistSession {
   void _onEvent(Map<String, dynamic> event) {
     final data = (event['data'] as Map?)?.cast<String, dynamic>() ?? {};
     switch (event['type']) {
-      case 'run-start':
-        final runner = (data['runner_data'] as Map?) ?? {};
-        _handlerId = runner['stt_binary_handler_id'] as int?;
+      case 'audio-ready':
+        _handlerId = data['handler_id'] as int?;
+        if (_handlerId == null) return;
         if (_buffer.isNotEmpty) _sendAudio(_buffer.takeBytes());
         if (_audioDone) _sendEnd();
       case 'stt-end':

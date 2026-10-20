@@ -9,6 +9,8 @@ CONF_DASHBOARD_GESTURE: Final = "dashboard_gesture"
 CONF_DISPLAY_DURATION: Final = "display_duration"
 CONF_ASSIST_PIPELINE: Final = "assist_pipeline"
 CONF_SHOW_TRANSCRIPT: Final = "show_transcript"
+CONF_AUTO_GAIN: Final = "auto_gain"
+CONF_NOISE_SUPPRESSION: Final = "noise_suppression"
 
 DEFAULT_DISPLAY_DURATION: Final = 10
 DEFAULT_DASHBOARD_TEMPLATE: Final = (
@@ -17,6 +19,8 @@ DEFAULT_DASHBOARD_TEMPLATE: Final = (
     "{% if sun %}Sonne: {{ sun.state }}{% endif %}"
 )
 PIPELINE_PREFERRED: Final = "preferred"
+DEFAULT_AUTO_GAIN: Final = 0
+DEFAULT_NOISE_SUPPRESSION: Final = 0
 
 DASHBOARD_GESTURE_NONE: Final = "none"
 
