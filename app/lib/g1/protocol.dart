@@ -30,6 +30,8 @@ class G1Uuids {
 
 class G1Cmd {
   static const whitelist = 0x04;
+  static const headUpAngle = 0x0B;
+  static const dashboardPosition = 0x26;
   static const mic = 0x0E;
   static const exit = 0x18;
   static const heartbeat = 0x25;
@@ -60,17 +62,23 @@ class G1ScreenStatus {
 /// Sub commands of the 0xF5 event sent by the glasses.
 ///
 /// 0x00, 0x01, 0x04/0x05, 0x17 and 0x18 are documented by Even Realities.
-/// The others are community findings and may differ between firmwares; every
-/// event is forwarded to Home Assistant with its raw code anyway.
+/// The others are community findings (as used by MentraOS) and may differ
+/// between firmwares; every event is forwarded to Home Assistant with its raw
+/// code anyway.
 class G1Event {
   static const doubleTap = 0x00;
   static const singleTap = 0x01;
+
+  /// Head raised / lowered. Both arms may report it, only the right one is
+  /// used.
   static const headUp = 0x02;
   static const headDown = 0x03;
   static const silentModeOn = 0x04;
   static const silentModeOff = 0x05;
-  static const worn = 0x06;
-  static const removed = 0x07;
+  static const caseRemoved = 0x06;
+  static const caseRemoved2 = 0x07;
+  static const caseOpened = 0x08;
+  static const caseClosed = 0x0B;
   static const evenAiStart = 0x17;
   static const evenAiStop = 0x18;
 }
@@ -89,10 +97,13 @@ String gestureName(int code, G1Side side) {
     case G1Event.silentModeOn:
     case G1Event.silentModeOff:
       return 'triple_tap';
-    case G1Event.worn:
-      return 'worn';
-    case G1Event.removed:
-      return 'removed';
+    case G1Event.caseRemoved:
+    case G1Event.caseRemoved2:
+      return 'case_removed';
+    case G1Event.caseOpened:
+      return 'case_opened';
+    case G1Event.caseClosed:
+      return 'case_closed';
     case G1Event.evenAiStart:
       return 'long_press';
     case G1Event.evenAiStop:
@@ -117,6 +128,23 @@ class G1Packets {
   static Uint8List init() => Uint8List.fromList([G1Cmd.init, 0x01]);
 
   static Uint8List battery() => Uint8List.fromList([G1Cmd.battery, 0x01]);
+
+  /// Angle (0–60°) at which raising the head shows the dashboard.
+  static Uint8List headUpAngle(int angle) =>
+      Uint8List.fromList([G1Cmd.headUpAngle, angle.clamp(0, 60), 0x01]);
+
+  /// Dashboard height (0–8) and depth (1–9).
+  static Uint8List dashboardPosition(int height, int depth, int counter) =>
+      Uint8List.fromList([
+        G1Cmd.dashboardPosition,
+        0x08,
+        0x00,
+        counter & 0xff,
+        0x02,
+        0x01,
+        height.clamp(0, 8),
+        depth.clamp(1, 9),
+      ]);
 
   static Uint8List heartbeat(int seq) {
     const length = 6;

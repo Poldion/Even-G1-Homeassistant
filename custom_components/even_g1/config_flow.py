@@ -27,9 +27,12 @@ from homeassistant.util import slugify
 from .const import (
     CONF_ASSIST_PIPELINE,
     CONF_AUTO_GAIN,
+    CONF_DASHBOARD_DEPTH,
     CONF_DASHBOARD_GESTURE,
+    CONF_DASHBOARD_HEIGHT,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DISPLAY_DURATION,
+    CONF_HEAD_UP_ANGLE,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
@@ -158,6 +161,26 @@ class EvenG1OptionsFlow(OptionsFlow):
                 vol.Required(
                     CONF_DASHBOARD_TEMPLATE, default=options[CONF_DASHBOARD_TEMPLATE]
                 ): TemplateSelector(),
+                # Glasses settings: empty = leave as set in the Even app.
+                **{
+                    vol.Optional(
+                        key,
+                        description={"suggested_value": options.get(key)},
+                    ): NumberSelector(
+                        NumberSelectorConfig(
+                            min=low,
+                            max=high,
+                            step=1,
+                            mode=NumberSelectorMode.BOX,
+                            **({"unit_of_measurement": unit} if unit else {}),
+                        )
+                    )
+                    for key, low, high, unit in (
+                        (CONF_HEAD_UP_ANGLE, 0, 60, "°"),
+                        (CONF_DASHBOARD_HEIGHT, 0, 8, None),
+                        (CONF_DASHBOARD_DEPTH, 1, 9, None),
+                    )
+                },
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)

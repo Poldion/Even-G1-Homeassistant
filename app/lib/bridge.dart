@@ -18,20 +18,40 @@ class HaConfig {
       deviceId = json['device_id'] as String?,
       displayDuration = (json['display_duration'] as num?)?.toInt() ?? 10,
       assistPipeline = json['assist_pipeline'] as String?,
-      showTranscript = json['show_transcript'] as bool? ?? true;
+      showTranscript = json['show_transcript'] as bool? ?? true,
+      dashboardOnHeadUp = json['dashboard_on_head_up'] as bool? ?? false,
+      headUpAngle = (json['head_up_angle'] as num?)?.toInt(),
+      dashboardHeight = (json['dashboard_height'] as num?)?.toInt(),
+      dashboardDepth = (json['dashboard_depth'] as num?)?.toInt();
 
   HaConfig.defaults()
     : name = '',
       deviceId = null,
       displayDuration = 10,
       assistPipeline = null,
-      showTranscript = true;
+      showTranscript = true,
+      dashboardOnHeadUp = false,
+      headUpAngle = null,
+      dashboardHeight = null,
+      dashboardDepth = null;
 
   final String name;
   final String? deviceId;
   final int displayDuration;
   final String? assistPipeline;
   final bool showTranscript;
+
+  /// Show the Home Assistant dashboard when the head is raised.
+  final bool dashboardOnHeadUp;
+
+  /// Glasses settings, null = leave unchanged.
+  final int? headUpAngle;
+  final int? dashboardHeight;
+  final int? dashboardDepth;
+
+  /// Key of the glasses settings, to send them only when they change.
+  String get glassesSettingsKey =>
+      '$headUpAngle/$dashboardHeight/$dashboardDepth';
 }
 
 /// Connects the glasses with Home Assistant.
@@ -76,6 +96,12 @@ class Bridge extends ChangeNotifier {
   bool _whitelistSent = false;
   int _notificationId = 0;
   Map<String, Object?>? _lastReported;
+
+  /// Rendered dashboard template, pushed by Home Assistant on changes.
+  String _dashboardText = '';
+  bool _dashboardShown = false;
+  String? _appliedGlassesSettings;
+  int _dashboardCounter = 0;
 
   void _log(String line) {
     final now = DateTime.now();
@@ -188,12 +214,25 @@ class Bridge extends ChangeNotifier {
       case 'config':
         haConfig = HaConfig.fromJson(event);
         _log('Konfiguration erhalten (${haConfig.name})');
+        if (!haConfig.dashboardOnHeadUp && _dashboardShown) {
+          _dashboardShown = false;
+          if (g1.connected) await display.clear();
+        }
         notifyListeners();
+        unawaited(_applyGlassesSettings());
+      case 'dashboard':
+        _dashboardText = (event['text'] as String? ?? '').trim();
+        // Refresh only while it is on the display; otherwise the glasses
+        // are not woken up for updates.
+        if (_dashboardShown && display.active && g1.connected) {
+          await display.showText(_dashboardText);
+        }
       case 'show_text':
         final title = (event['title'] as String? ?? '').trim();
         final message = (event['message'] as String? ?? '').trim();
         final duration = (event['duration'] as num?)?.toInt() ?? 0;
         _log('Anzeige: ${title.isEmpty ? message : title}');
+        _dashboardShown = false;
         if (!g1.connected) {
           _log('Brille nicht verbunden – Text verworfen');
           return;
@@ -255,12 +294,65 @@ class Bridge extends ChangeNotifier {
   // ---------------------------------------------------------------------------
 
   void _onGlassesChanged() {
-    if (!g1.connected) _whitelistSent = false;
+    if (!g1.connected) {
+      _whitelistSent = false;
+      _appliedGlassesSettings = null;
+      _dashboardShown = false;
+    } else {
+      unawaited(_applyGlassesSettings());
+    }
     unawaited(_reportState());
     notifyListeners();
   }
 
+  /// Sends head up angle and dashboard position if configured in HA.
+  Future<void> _applyGlassesSettings() async {
+    final key = haConfig.glassesSettingsKey;
+    if (!g1.connected || !haConnected || key == _appliedGlassesSettings) {
+      return;
+    }
+    _appliedGlassesSettings = key;
+    final angle = haConfig.headUpAngle;
+    if (angle != null) {
+      _log('Kopfneigungswinkel: $angle°');
+      await g1.sendSetting(G1Packets.headUpAngle(angle));
+    }
+    final height = haConfig.dashboardHeight;
+    final depth = haConfig.dashboardDepth;
+    if (height != null || depth != null) {
+      _log('Dashboard-Position: Höhe ${height ?? 4}, Tiefe ${depth ?? 5}');
+      await g1.sendSetting(
+        G1Packets.dashboardPosition(
+          height ?? 4,
+          depth ?? 5,
+          _dashboardCounter++,
+        ),
+      );
+    }
+  }
+
+  /// Head raised: cover the Even dashboard with the Home Assistant one.
+  Future<void> _onHeadUp() async {
+    if (!haConfig.dashboardOnHeadUp || assistRunning) return;
+    // Do not cover a text or answer that is currently shown.
+    if (display.active && !_dashboardShown) return;
+    _dashboardShown = true;
+    await display.showText(
+      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+    );
+  }
+
+  Future<void> _onHeadDown() async {
+    if (!_dashboardShown) return;
+    _dashboardShown = false;
+    if (display.active) await display.clear();
+  }
+
   Future<void> _onGlassesEvent(G1TouchEvent event) async {
+    final isHeadEvent =
+        event.code == G1Event.headUp || event.code == G1Event.headDown;
+    // Both arms report head movements; only the right one is used.
+    if (isHeadEvent && event.side != G1Side.right) return;
     final gesture = gestureName(event.code, event.side);
 
     switch (event.code) {
@@ -272,11 +364,12 @@ class Bridge extends ChangeNotifier {
         await display.onTap(event.side);
       case G1Event.doubleTap:
         display.onDismissed();
+        _dashboardShown = false;
         if (assistRunning) await _abortAssist();
-      case G1Event.worn:
-        unawaited(_call({'type': 'even_g1/update_state', 'worn': true}));
-      case G1Event.removed:
-        unawaited(_call({'type': 'even_g1/update_state', 'worn': false}));
+      case G1Event.headUp:
+        unawaited(_onHeadUp());
+      case G1Event.headDown:
+        unawaited(_onHeadDown());
     }
 
     unawaited(
@@ -301,6 +394,7 @@ class Bridge extends ChangeNotifier {
       return;
     }
     assistRunning = true;
+    _dashboardShown = false;
     notifyListeners();
     _log('Assist gestartet');
 

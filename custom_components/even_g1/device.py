@@ -11,18 +11,27 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError, TemplateError
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.event import (
+    TrackTemplate,
+    TrackTemplateResult,
+    async_track_template_result,
+)
 from homeassistant.helpers.template import Template
 
 from .const import (
     CMD_CLEAR,
     CMD_CONFIG,
+    CMD_DASHBOARD,
     CMD_RELOAD,
     CMD_SHOW_TEXT,
     CONF_ASSIST_PIPELINE,
     CONF_AUTO_GAIN,
+    CONF_DASHBOARD_DEPTH,
     CONF_DASHBOARD_GESTURE,
+    CONF_DASHBOARD_HEIGHT,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DISPLAY_DURATION,
+    CONF_HEAD_UP_ANGLE,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
@@ -33,11 +42,17 @@ from .const import (
     DOMAIN,
     EVENT_ASSIST,
     EVENT_GESTURE,
+    GESTURE_HEAD_UP,
     MODE_SCREEN,
     PIPELINE_PREFERRED,
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _optional_int(value: Any) -> int | None:
+    return None if value is None else int(value)
+
 
 type EvenG1ConfigEntry = ConfigEntry[EvenG1Device]
 
@@ -49,7 +64,6 @@ class EvenG1State:
     glasses_connected: bool = False
     battery_left: int | None = None
     battery_right: int | None = None
-    worn: bool | None = None
     last_query: str | None = None
     last_response: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
@@ -72,6 +86,8 @@ class EvenG1Device:
         self._listeners: list[CALLBACK_TYPE] = []
         self._gesture_listeners: list[Callable[[str, dict[str, Any]], None]] = []
         self._next_subscriber_id = 0
+        self._dashboard_tracker: Any = None
+        self.dashboard_text: str = ""
 
     @property
     def entry_id(self) -> str:
@@ -114,6 +130,16 @@ class EvenG1Device:
         """Return the noise suppression level (0 = off, 4 = max)."""
         return int(self.options.get(CONF_NOISE_SUPPRESSION, DEFAULT_NOISE_SUPPRESSION))
 
+    @property
+    def dashboard_gesture(self) -> str:
+        """Return the gesture that shows the dashboard."""
+        return self.options.get(CONF_DASHBOARD_GESTURE, DASHBOARD_GESTURE_NONE)
+
+    @property
+    def dashboard_on_head_up(self) -> bool:
+        """Return True if the app shows the dashboard when the head is raised."""
+        return self.dashboard_gesture == GESTURE_HEAD_UP
+
     def app_config(self) -> dict[str, Any]:
         """Return the configuration the app needs."""
         return {
@@ -123,6 +149,11 @@ class EvenG1Device:
             "display_duration": self.display_duration,
             "assist_pipeline": self.pipeline_id,
             "show_transcript": self.options.get(CONF_SHOW_TRANSCRIPT, True),
+            "dashboard_on_head_up": self.dashboard_on_head_up,
+            # Glasses settings, None = leave the glasses setting unchanged.
+            "head_up_angle": _optional_int(self.options.get(CONF_HEAD_UP_ANGLE)),
+            "dashboard_height": _optional_int(self.options.get(CONF_DASHBOARD_HEIGHT)),
+            "dashboard_depth": _optional_int(self.options.get(CONF_DASHBOARD_DEPTH)),
         }
 
     # ------------------------------------------------------------------
@@ -171,6 +202,8 @@ class EvenG1Device:
         self._next_subscriber_id += 1
         self._subscribers[subscriber_id] = send
         send(self.app_config())
+        if self.dashboard_on_head_up:
+            send({"type": CMD_DASHBOARD, "text": self.dashboard_text})
         self._notify_listeners()
 
         @callback
@@ -185,13 +218,60 @@ class EvenG1Device:
     @callback
     def async_shutdown(self) -> None:
         """Tell connected apps to resubscribe (entry is being unloaded)."""
+        self._stop_dashboard_tracking()
         self._send({"type": CMD_RELOAD})
         self._subscribers.clear()
 
     @callback
     def async_push_config(self) -> None:
         """Send the current configuration to all connected apps."""
+        self.async_update_dashboard_tracking()
         self._send(self.app_config())
+
+    # ------------------------------------------------------------------
+    # Dashboard on head up
+    # ------------------------------------------------------------------
+
+    @callback
+    def async_update_dashboard_tracking(self) -> None:
+        """Keep the rendered dashboard up to date for the head up mode.
+
+        The app shows the dashboard locally as soon as the head is raised, so
+        the text is pushed to the app whenever the template result changes
+        (not on every head movement). Nothing is sent to the glasses until
+        the dashboard is actually shown.
+        """
+        self._stop_dashboard_tracking()
+        if not self.dashboard_on_head_up:
+            return
+
+        template = Template(
+            self.options.get(CONF_DASHBOARD_TEMPLATE, DEFAULT_DASHBOARD_TEMPLATE),
+            self.hass,
+        )
+
+        @callback
+        def updated(_event: Any, updates: list[TrackTemplateResult]) -> None:
+            result = updates[-1].result
+            if isinstance(result, TemplateError):
+                text = f"Template error: {result}"
+            else:
+                text = str(result).strip()
+            if text == self.dashboard_text:
+                return
+            self.dashboard_text = text
+            self._send({"type": CMD_DASHBOARD, "text": text})
+
+        self._dashboard_tracker = async_track_template_result(
+            self.hass, [TrackTemplate(template, None)], updated
+        )
+        self._dashboard_tracker.async_refresh()
+
+    @callback
+    def _stop_dashboard_tracking(self) -> None:
+        if self._dashboard_tracker is not None:
+            self._dashboard_tracker.async_remove()
+            self._dashboard_tracker = None
 
     @callback
     def _send(self, payload: dict[str, Any]) -> None:
@@ -273,10 +353,11 @@ class EvenG1Device:
         for gesture_callback in list(self._gesture_listeners):
             gesture_callback(gesture, data)
 
-        dashboard_gesture = self.options.get(
-            CONF_DASHBOARD_GESTURE, DASHBOARD_GESTURE_NONE
-        )
-        if dashboard_gesture != DASHBOARD_GESTURE_NONE and gesture == dashboard_gesture:
+        # Head up is handled by the app itself (no round trip to HA).
+        if (
+            self.dashboard_gesture not in (DASHBOARD_GESTURE_NONE, GESTURE_HEAD_UP)
+            and gesture == self.dashboard_gesture
+        ):
             self.async_show_dashboard()
 
     @callback

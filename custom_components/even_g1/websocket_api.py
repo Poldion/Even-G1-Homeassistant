@@ -98,7 +98,6 @@ def ws_subscribe(
         vol.Optional("glasses_connected"): bool,
         vol.Optional("battery_left"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
         vol.Optional("battery_right"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
-        vol.Optional("worn"): vol.Any(None, bool),
     }
 )
 @callback

@@ -66,6 +66,21 @@ void main() {
     expect(gestureName(0x01, G1Side.right), 'single_tap_right');
     expect(gestureName(0x17, G1Side.left), 'long_press');
     expect(gestureName(0x42, G1Side.left), 'other');
+    expect(gestureName(0x02, G1Side.right), 'head_up');
+    expect(gestureName(0x03, G1Side.right), 'head_down');
+    expect(gestureName(0x06, G1Side.left), 'case_removed');
+    expect(gestureName(0x07, G1Side.left), 'case_removed');
+    expect(gestureName(0x08, G1Side.left), 'case_opened');
+    expect(gestureName(0x0B, G1Side.left), 'case_closed');
+  });
+
+  test('builds glasses setting packets (as MentraOS)', () {
+    expect(G1Packets.headUpAngle(30), [0x0B, 30, 0x01]);
+    expect(G1Packets.headUpAngle(90), [0x0B, 60, 0x01]);
+    expect(G1Packets.dashboardPosition(3, 5, 7), [
+      0x26, 0x08, 0x00, 7, 0x02, 0x01, 3, 5, //
+    ]);
+    expect(G1Packets.dashboardPosition(20, 0, 0).sublist(6), [8, 1]);
   });
 
   test('converts Home Assistant URLs', () {

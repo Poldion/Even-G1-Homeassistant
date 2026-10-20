@@ -24,13 +24,20 @@
           "dashboard_gesture": "Geste, die das Dashboard anzeigt",
           "dashboard_template": "Dashboard-Template",
           "auto_gain": "Automatische Verstärkung des Mikrofons",
-          "noise_suppression": "Rauschunterdrückung"
+          "noise_suppression": "Rauschunterdrückung",
+          "head_up_angle": "Kopfneigungswinkel für das Dashboard",
+          "dashboard_height": "Dashboard-Höhe (0–8)",
+          "dashboard_depth": "Dashboard-Tiefe (1–9)"
         },
         "data_description": {
           "assist_pipeline": "Wird verwendet, wenn du die linke Touchbar gedrückt hältst.",
           "dashboard_template": "Jinja-Template, das bei der Dashboard-Geste oder der Aktion show_dashboard gerendert und auf der Brille angezeigt wird.",
           "auto_gain": "Hebt leise Sprache an (0 = aus, 31 = maximal). Hilft, wenn Fragen oft nicht verstanden werden.",
-          "noise_suppression": "0 = aus, 4 = stark. Hilft in lauter Umgebung."
+          "noise_suppression": "0 = aus, 4 = stark. Hilft in lauter Umgebung.",
+          "head_up_angle": "Ab welchem Winkel (0–60°) die Brille das Dashboard zeigt. Leer = Einstellung der Even-App behalten.",
+          "dashboard_height": "Leer = Einstellung der Even-App behalten.",
+          "dashboard_depth": "Leer = Einstellung der Even-App behalten.",
+          "dashboard_gesture": "Bei „Kopf gehoben“ zeigt die App das Template sofort beim Hochschauen über dem Even-Dashboard an und schließt es beim Runterschauen wieder."
         }
       }
     }
@@ -77,9 +84,6 @@
       },
       "glasses_connected": {
         "name": "Brille verbunden"
-      },
-      "worn": {
-        "name": "Getragen"
       }
     },
     "event": {
@@ -94,11 +98,12 @@
               "triple_tap": "Dreifachtippen",
               "head_up": "Kopf gehoben",
               "head_down": "Kopf gesenkt",
-              "worn": "Brille aufgesetzt",
-              "removed": "Brille abgesetzt",
               "long_press": "Langes Drücken (Assistent-Start)",
               "long_press_release": "Langes Drücken beendet",
-              "other": "Andere"
+              "other": "Andere",
+              "case_removed": "Aus dem Etui genommen",
+              "case_opened": "Etui geöffnet",
+              "case_closed": "Etui geschlossen"
             }
           }
         }

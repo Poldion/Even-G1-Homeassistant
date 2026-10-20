@@ -10,6 +10,9 @@ CONF_DISPLAY_DURATION: Final = "display_duration"
 CONF_ASSIST_PIPELINE: Final = "assist_pipeline"
 CONF_SHOW_TRANSCRIPT: Final = "show_transcript"
 CONF_AUTO_GAIN: Final = "auto_gain"
+CONF_HEAD_UP_ANGLE: Final = "head_up_angle"
+CONF_DASHBOARD_HEIGHT: Final = "dashboard_height"
+CONF_DASHBOARD_DEPTH: Final = "dashboard_depth"
 CONF_NOISE_SUPPRESSION: Final = "noise_suppression"
 
 DEFAULT_DISPLAY_DURATION: Final = 10
@@ -32,8 +35,9 @@ GESTURE_DOUBLE_TAP: Final = "double_tap"
 GESTURE_TRIPLE_TAP: Final = "triple_tap"
 GESTURE_HEAD_UP: Final = "head_up"
 GESTURE_HEAD_DOWN: Final = "head_down"
-GESTURE_WORN: Final = "worn"
-GESTURE_REMOVED: Final = "removed"
+GESTURE_CASE_REMOVED: Final = "case_removed"
+GESTURE_CASE_OPENED: Final = "case_opened"
+GESTURE_CASE_CLOSED: Final = "case_closed"
 GESTURE_LONG_PRESS: Final = "long_press"
 GESTURE_LONG_PRESS_RELEASE: Final = "long_press_release"
 GESTURE_OTHER: Final = "other"
@@ -45,8 +49,9 @@ GESTURES: Final = [
     GESTURE_TRIPLE_TAP,
     GESTURE_HEAD_UP,
     GESTURE_HEAD_DOWN,
-    GESTURE_WORN,
-    GESTURE_REMOVED,
+    GESTURE_CASE_REMOVED,
+    GESTURE_CASE_OPENED,
+    GESTURE_CASE_CLOSED,
     GESTURE_LONG_PRESS,
     GESTURE_LONG_PRESS_RELEASE,
     GESTURE_OTHER,
@@ -80,3 +85,4 @@ CMD_SHOW_TEXT: Final = "show_text"
 CMD_CLEAR: Final = "clear"
 CMD_CONFIG: Final = "config"
 CMD_RELOAD: Final = "reload"
+CMD_DASHBOARD: Final = "dashboard"

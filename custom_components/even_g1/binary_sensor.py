@@ -37,11 +37,6 @@ BINARY_SENSORS: tuple[EvenG1BinarySensorDescription, ...] = (
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         value_fn=lambda device: device.app_connected and device.state.glasses_connected,
     ),
-    EvenG1BinarySensorDescription(
-        key="worn",
-        device_class=BinarySensorDeviceClass.OCCUPANCY,
-        value_fn=lambda device: device.state.worn,
-    ),
 )
 
 

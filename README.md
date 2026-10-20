@@ -5,7 +5,8 @@ Verbindet die Smart-Glasses **Even Realities G1** mit **Home Assistant**:
 - 📟 **Texte aus Home Assistant auf der Brille anzeigen**: per Aktion, Notify-Entität oder Automation (z. B. „Waschmaschine fertig“, „Haustür offen“, Wetter oder ein eigenes Dashboard-Template)
 - 🎙️ **Home Assistant Assist per Brille**: **linke Touchbar gedrückt halten**, sprechen, loslassen. Die Frage geht über das Brillen-Mikrofon an deine Assist-Pipeline, die Antwort erscheint auf dem Display. Rückfragen innerhalb von 5 Minuten setzen dieselbe Unterhaltung fort.
 - 👆 **Gesten als Trigger**: Tippen links/rechts, Doppeltippen, Kopf heben, Brille auf-/absetzen usw. als Event-Entität für Automationen
-- 🔋 **Sensoren**: Akku links/rechts, verbunden, getragen, letzte Frage/Antwort
+- 🏠 **Home-Assistant-Dashboard beim Hochschauen**: Beim Hochschauen erscheint dein eigenes Dashboard-Template über dem Even-Dashboard, beim Runterschauen verschwindet es wieder
+- 🔋 **Sensoren**: Akku links/rechts, verbunden, letzte Frage/Antwort
 
 ```
 ┌──────────────┐  BLE (2× Nordic UART)  ┌──────────────────┐  Websocket-API  ┌──────────────────────────┐
@@ -75,8 +76,21 @@ Weitere Optionen:
 | Automatische Verstärkung | Hebt leise Sprache an (0 = aus, bis 31 dBFS). Hilft, wenn Fragen oft nicht verstanden werden |
 | Rauschunterdrückung | 0 = aus bis 4 = stark, für laute Umgebungen |
 | Standard-Anzeigedauer | Sekunden bis die Brille wieder zum Dashboard wechselt (0 = bis Doppeltippen) |
-| Dashboard-Geste | Geste, die das Dashboard-Template anzeigt (z. B. *Einfaches Tippen rechts* oder *Kopf gehoben*) |
+| Dashboard-Geste | Geste, die das Dashboard-Template anzeigt: *Einfaches Tippen links/rechts* oder *Kopf gehoben* (siehe unten) |
 | Dashboard-Template | Jinja-Template, das für die Dashboard-Geste bzw. `even_g1.show_dashboard` gerendert wird |
+| Kopfneigungswinkel | Ab welchem Winkel (0–60°) die Brille beim Hochschauen das Dashboard zeigt. Leer = Einstellung der Even-App behalten |
+| Dashboard-Höhe / -Tiefe | Position des Dashboards im Sichtfeld (Höhe 0–8, Tiefe 1–9). Leer = Einstellung der Even-App behalten |
+
+### Dashboard beim Hochschauen
+
+Mit der Dashboard-Geste **Kopf gehoben** funktioniert das Dashboard wie bei MentraOS:
+
+- Home Assistant rendert das Dashboard-Template laufend und schickt den Text an die App, **nur wenn sich das Ergebnis ändert**.
+- Schaust du hoch, meldet die Brille das der App (`0xF5 0x02`). Die App zeigt den zuletzt erhaltenen Text sofort an, ohne erst bei Home Assistant nachzufragen.
+- Ändert sich der Inhalt, während du hochschaust, wird die Anzeige aktualisiert. Schaust du wieder runter (`0xF5 0x03`), wird sie geschlossen.
+- Läuft gerade eine Assist-Antwort oder ein Text aus Home Assistant, wird dieser nicht überdeckt.
+
+Das Even-Dashboard selbst lässt sich nicht abschalten. Die App übermalt es mit deinem Inhalt, es kann also beim Hochschauen kurz aufblitzen.
 
 ## Bedienung an der Brille
 
@@ -85,7 +99,7 @@ Weitere Optionen:
 | Linke Touchbar **gedrückt halten** | Assist: sprechen, solange gedrückt (max. 30 s) |
 | Tippen links / rechts | Bei mehrseitigen Texten: Seite zurück / vor |
 | Doppeltippen | Anzeige schließen, laufende Assist-Anfrage abbrechen |
-| Konfigurierte Dashboard-Geste | Dashboard-Template anzeigen |
+| Konfigurierte Dashboard-Geste | Dashboard-Template anzeigen (bei *Kopf gehoben*: beim Hochschauen) |
 
 ## Home Assistant: Aktionen, Entitäten, Events
 
@@ -125,10 +139,9 @@ data:
 | --- | --- |
 | `binary_sensor.<name>_app_verbunden` | App ist mit HA verbunden |
 | `binary_sensor.<name>_brille_verbunden` | Beide Bügel sind per Bluetooth verbunden |
-| `binary_sensor.<name>_getragen` | Brille wird getragen (sofern von der Firmware gemeldet) |
 | `sensor.<name>_akku_links` / `_akku_rechts` | Akkustand der Bügel |
 | `sensor.<name>_letzte_frage` / `_letzte_antwort` | Letzte Assist-Interaktion (voller Text im Attribut `full_text`) |
-| `event.<name>_geste` | Gesten-Event (`event_type`: `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `worn`, `removed`, `long_press`, `long_press_release`, `other`) |
+| `event.<name>_geste` | Gesten-Event (`event_type`: `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `case_removed`, `case_opened`, `case_closed`, `long_press`, `long_press_release`, `other`) |
 
 ### Events
 
@@ -185,7 +198,7 @@ Licht an: {{ states.light | selectattr('state', 'eq', 'on') | list | count }}
 
 ## Hinweise & Grenzen
 
-- Die Gesten-Codes für Kopf heben/senken und Auf-/Absetzen sowie die Akku-Abfrage (`0x2C`) stammen nicht aus der offiziellen Dokumentation, sondern aus Community-Analysen, und können je nach Firmware abweichen. Unbekannte Codes kommen als `other` mit `code` in Home Assistant an.
+- Die Codes für Kopf heben/senken und das Etui, die Einstellungen für Kopfneigungswinkel (`0x0B`) und Dashboard-Position (`0x26`) sowie die Akku-Abfrage (`0x2C`) stammen nicht aus der offiziellen Dokumentation. Sie sind aus Community-Projekten wie MentraOS übernommen und können je nach Firmware abweichen. Unbekannte Codes kommen als `other` mit `code` in Home Assistant an.
 - Benachrichtigungen im Modus `notification` setzen eine App-Whitelist auf der Brille. Die offizielle Even-App überschreibt diese beim nächsten Verbinden wieder.
 - Die BLE-Bibliothek [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) ist für private/nicht-kommerzielle Nutzung frei (`License.nonprofit`).
 - Dies ist kein offizielles Produkt von Even Realities.

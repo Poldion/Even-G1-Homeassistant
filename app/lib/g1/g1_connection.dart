@@ -452,6 +452,20 @@ class G1Connection extends ChangeNotifier {
     return sendBoth(packets, retries: 3);
   }
 
+  /// Sends a setting to both arms. The glasses do not reliably acknowledge
+  /// these commands, so the response is not required (like MentraOS).
+  Future<void> sendSetting(Uint8List packet) async {
+    for (final side in G1Side.values) {
+      try {
+        await request(side, packet, timeout: const Duration(milliseconds: 300));
+      } on G1TimeoutException {
+        // no answer is fine
+      } catch (e) {
+        _debug('setting 0x${packet[0].toRadixString(16)}: $e');
+      }
+    }
+  }
+
   /// Returns the glasses to the dashboard.
   Future<bool> exitToDashboard() => sendBoth([G1Packets.exit()]);
 

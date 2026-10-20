@@ -141,6 +141,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: EvenG1ConfigEntry) -> bo
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))
+    entry.runtime_data.async_update_dashboard_tracking()
     return True
 
 

@@ -163,14 +163,12 @@ async def test_state_and_gestures(
             "glasses_connected": True,
             "battery_left": 80,
             "battery_right": 75,
-            "worn": True,
         }
     )
     assert (await client.receive_json())["success"]
     assert hass.states.get("sensor.even_g1_battery_left").state == "80"
     assert hass.states.get("sensor.even_g1_battery_right").state == "75"
     assert hass.states.get("binary_sensor.even_g1_glasses_connected").state == "on"
-    assert hass.states.get("binary_sensor.even_g1_worn").state == "on"
 
     events = []
     hass.bus.async_listen(EVENT_GESTURE, events.append)
@@ -229,3 +227,63 @@ async def test_unknown_entry(
     msg = await client.receive_json()
     assert not msg["success"]
     assert msg["error"]["code"] == "not_found"
+
+
+async def test_dashboard_on_head_up(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """The rendered dashboard is pushed to the app whenever it changes."""
+    hass.states.async_set("sensor.temperature", "21")
+    hass.config_entries.async_update_entry(
+        entry,
+        options={
+            **entry.options,
+            CONF_DASHBOARD_GESTURE: "head_up",
+            CONF_DASHBOARD_TEMPLATE: "Temp {{ states('sensor.temperature') }}",
+            "head_up_angle": 25,
+        },
+    )
+    await hass.async_block_till_done()
+
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    assert (await client.receive_json())["success"]
+    config = (await client.receive_json())["event"]
+    assert config["dashboard_on_head_up"] is True
+    assert config["head_up_angle"] == 25
+    assert config["dashboard_height"] is None
+    assert (await client.receive_json())["event"] == {
+        "type": "dashboard",
+        "text": "Temp 21",
+    }
+
+    hass.states.async_set("sensor.temperature", "22")
+    await hass.async_block_till_done()
+    assert (await client.receive_json())["event"] == {
+        "type": "dashboard",
+        "text": "Temp 22",
+    }
+
+    # Head up is shown by the app itself: HA does not push a text.
+    await client.send_json_auto_id(
+        {
+            "type": "even_g1/gesture",
+            "entry_id": entry.entry_id,
+            "gesture": "head_up",
+            "side": "right",
+        }
+    )
+    assert (await client.receive_json())["success"]
+
+    # Switching the mode off stops the updates.
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, CONF_DASHBOARD_GESTURE: "none"}
+    )
+    await hass.async_block_till_done()
+    assert (await client.receive_json())["event"]["dashboard_on_head_up"] is False
+    hass.states.async_set("sensor.temperature", "23")
+    await hass.async_block_till_done()
+    await client.send_json_auto_id({"type": "ping"})
+    assert (await client.receive_json())["type"] == "pong"

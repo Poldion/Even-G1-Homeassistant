@@ -6,8 +6,7 @@
     },
     "binary_sensor": {
       "app_connected": { "default": "mdi:cellphone-link" },
-      "glasses_connected": { "default": "mdi:glasses" },
-      "worn": { "default": "mdi:face-man-outline" }
+      "glasses_connected": { "default": "mdi:glasses" }
     },
     "event": {
       "gesture": { "default": "mdi:gesture-tap" }
