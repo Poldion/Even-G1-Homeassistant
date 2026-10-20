@@ -59,21 +59,36 @@ class _Arm {
   StreamSubscription<BluetoothConnectionState>? stateSub;
   bool ready = false;
 
-  /// Serializes requests: the glasses answer with the command byte only, so
-  /// only one request per command and arm may be in flight.
-  Future<void> _lock = Future.value();
+  /// Requests waiting for a response with the given command byte.
   final Map<int, Completer<G1Response>> pending = {};
 
-  Future<T> locked<T>(Future<T> Function() action) {
-    final result = _lock.then((_) => action());
-    _lock = result.then((_) {}, onError: (_) {});
-    return result;
-  }
+  /// Replaces the BLE write in tests.
+  Future<void> Function(Uint8List data)? writeOverride;
 }
 
 /// Connection to both arms of a G1 and the request/response handling.
 class G1Connection extends ChangeNotifier {
   G1Connection();
+
+  /// Connection with simulated arms for tests: [write] receives every packet
+  /// and [receive] feeds data as if it came from the glasses.
+  @visibleForTesting
+  G1Connection.fake(Future<void> Function(G1Side side, Uint8List data) write) {
+    for (final side in G1Side.values) {
+      final arm =
+          _Arm(side, BluetoothDevice.fromId('00:00:00:00:00:0${side.index}'))
+            ..ready = true
+            ..writeOverride = (data) => write(side, data);
+      if (side == G1Side.left) {
+        _left = arm;
+      } else {
+        _right = arm;
+      }
+    }
+  }
+
+  @visibleForTesting
+  void receive(G1Side side, Uint8List data) => _onData(_armOrNull(side)!, data);
 
   _Arm? _left;
   _Arm? _right;
@@ -83,6 +98,10 @@ class G1Connection extends ChangeNotifier {
   Timer? _reconnectTimer;
   int _heartbeatSeq = 0;
   int _textSeq = 0;
+
+  /// All writes go through one queue, so commands never interleave and both
+  /// arms always receive the same packets in the same order (like MentraOS).
+  Future<void> _queue = Future.value();
 
   final _events = StreamController<G1TouchEvent>.broadcast();
   final _audio = StreamController<Uint8List>.broadcast();
@@ -256,7 +275,6 @@ class G1Connection extends ChangeNotifier {
       }
       arm.ready = true;
       _debug('${arm.side.name} arm ready');
-      await _write(arm, G1Packets.init());
       notifyListeners();
       if (connected) _onBothConnected();
     } catch (e) {
@@ -278,6 +296,9 @@ class G1Connection extends ChangeNotifier {
   }
 
   void _onBothConnected() {
+    // Same start sequence as the official app / MentraOS.
+    unawaited(send([G1Packets.init()]));
+    unawaited(send([G1Packets.initDisplay()]));
     _heartbeat?.cancel();
     _heartbeat = Timer.periodic(
       const Duration(seconds: 8),
@@ -315,6 +336,10 @@ class G1Connection extends ChangeNotifier {
       _events.add(G1TouchEvent(arm.side, data[1], data));
       return;
     }
+    if (data.length > 1 && data[1] == G1Status.failure) {
+      // Makes left/right differences visible in the app log.
+      _debug('${arm.side.code} rejected 0x${cmd.toRadixString(16)}');
+    }
     final completer = arm.pending.remove(cmd);
     if (completer != null && !completer.isCompleted) {
       completer.complete(G1Response(arm.side, data));
@@ -322,71 +347,86 @@ class G1Connection extends ChangeNotifier {
   }
 
   Future<void> _write(_Arm arm, Uint8List data) async {
+    final override = arm.writeOverride;
+    if (override != null) return override(data);
     final tx = arm.tx;
     if (tx == null || !arm.ready) {
       throw StateError('${arm.side.name} arm not connected');
     }
-    await tx.write(data, withoutResponse: true);
+    // Write with response: completes when the arm received the packet.
+    await tx.write(data, withoutResponse: false, timeout: 3);
   }
 
-  _Arm _arm(G1Side side) {
-    final arm = side == G1Side.left ? _left : _right;
-    if (arm == null) throw StateError('Glasses not connected');
-    return arm;
+  _Arm? _armOrNull(G1Side side) => side == G1Side.left ? _left : _right;
+
+  Future<T> _enqueue<T>(Future<T> Function() action) {
+    final result = _queue.then((_) => action());
+    _queue = result.then((_) {}, onError: (_) {});
+    return result;
   }
 
-  /// Sends [data] to one arm and waits for the response with the same command.
+  /// Sends packets to the selected arms. Each packet is written to both arms
+  /// at the same time and the next packet follows once both received it.
+  ///
+  /// The glasses' answers are not awaited: waiting for one arm before
+  /// writing to the other made both arms show different content when one
+  /// arm was busy (e.g. streaming the microphone).
+  Future<bool> send(
+    List<Uint8List> packets, {
+    bool left = true,
+    bool right = true,
+    Duration waitAfter = Duration.zero,
+  }) {
+    return _enqueue(() async {
+      var ok = true;
+      for (final packet in packets) {
+        final writes = <Future<void>>[
+          if (right && _right != null) _write(_right!, packet),
+          if (left && _left != null) _write(_left!, packet),
+        ];
+        final results = await Future.wait(
+          writes.map(
+            (w) => w.then(
+              (_) => true,
+              onError: (Object e) {
+                _debug('write 0x${packet[0].toRadixString(16)} failed: $e');
+                return false;
+              },
+            ),
+          ),
+        );
+        ok = ok && results.isNotEmpty && results.every((r) => r);
+        await Future<void>.delayed(const Duration(milliseconds: 5));
+      }
+      if (waitAfter > Duration.zero) await Future<void>.delayed(waitAfter);
+      return ok;
+    });
+  }
+
+  /// Sends [data] to one arm and waits for the response with the same
+  /// command byte (only used where the answer carries data).
   Future<G1Response> request(
     G1Side side,
     Uint8List data, {
     Duration timeout = const Duration(milliseconds: 1500),
-  }) {
-    final arm = _arm(side);
+  }) async {
+    final arm = _armOrNull(side);
+    if (arm == null) throw StateError('Glasses not connected');
     final cmd = data[0];
-    return arm.locked(() async {
-      final completer = Completer<G1Response>();
-      arm.pending[cmd] = completer;
-      try {
-        await _write(arm, data);
-        return await completer.future.timeout(timeout);
-      } on TimeoutException {
-        throw G1TimeoutException(side, cmd);
-      } finally {
-        if (arm.pending[cmd] == completer) arm.pending.remove(cmd);
-      }
-    });
-  }
-
-  /// Sends a list of packets to one arm, each one must be acknowledged.
-  Future<bool> requestList(
-    G1Side side,
-    List<Uint8List> packets, {
-    Duration timeout = const Duration(milliseconds: 1500),
-  }) async {
-    for (final packet in packets) {
-      final response = await request(side, packet, timeout: timeout);
-      if (!response.ok) return false;
+    final completer = Completer<G1Response>();
+    arm.pending[cmd] = completer;
+    try {
+      await send(
+        [data],
+        left: side == G1Side.left,
+        right: side == G1Side.right,
+      );
+      return await completer.future.timeout(timeout);
+    } on TimeoutException {
+      throw G1TimeoutException(side, cmd);
+    } finally {
+      if (arm.pending[cmd] == completer) arm.pending.remove(cmd);
     }
-    return true;
-  }
-
-  /// Sends packets to the left arm, then (after its ack) to the right arm.
-  Future<bool> sendBoth(
-    List<Uint8List> packets, {
-    Duration timeout = const Duration(milliseconds: 1500),
-    int retries = 2,
-  }) async {
-    for (var attempt = 0; attempt <= retries; attempt++) {
-      try {
-        if (await requestList(G1Side.left, packets, timeout: timeout) &&
-            await requestList(G1Side.right, packets, timeout: timeout)) {
-          return true;
-        }
-      } on G1TimeoutException catch (e) {
-        _debug('$e (attempt ${attempt + 1})');
-      }
-    }
-    return false;
   }
 
   // ---------------------------------------------------------------------------
@@ -395,15 +435,7 @@ class G1Connection extends ChangeNotifier {
 
   Future<bool> sendHeartbeat() async {
     if (!connected) return false;
-    final packet = G1Packets.heartbeat(_heartbeatSeq++);
-    try {
-      await request(G1Side.left, packet);
-      await request(G1Side.right, packet);
-      return true;
-    } catch (e) {
-      _debug('heartbeat failed: $e');
-      return false;
-    }
+    return send([G1Packets.heartbeat(_heartbeatSeq++)]);
   }
 
   Future<void> refreshBattery() async {
@@ -424,68 +456,34 @@ class G1Connection extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Enables or disables the microphone (right arm).
-  Future<bool> setMic(bool enable) async {
-    try {
-      final r = await request(G1Side.right, G1Packets.micEnable(enable));
-      return r.status == G1Status.success;
-    } catch (e) {
-      _debug('mic ${enable ? 'on' : 'off'} failed: $e');
-      return false;
-    }
+  /// Enables or disables the microphone (right arm). Like MentraOS, the next
+  /// command waits a moment so the microphone can start.
+  Future<bool> setMic(bool enable) => send(
+    [G1Packets.micEnable(enable)],
+    left: false,
+    waitAfter: Duration(milliseconds: enable ? 300 : 0),
+  );
+
+  /// Shows one screen of text on both arms (0x4E, text mode 0x71).
+  Future<bool> sendText(String text) {
+    return send(G1Packets.text(text, seq: _textSeq++));
   }
 
-  /// Sends one screen of text (0x4E).
-  Future<bool> sendText(
-    String text, {
-    required int newScreen,
-    required int currentPage,
-    required int maxPage,
-  }) {
-    final packets = G1Packets.text(
-      text,
-      seq: _textSeq++,
-      newScreen: newScreen,
-      currentPage: currentPage,
-      maxPage: maxPage,
-    );
-    return sendBoth(packets, retries: 3);
-  }
-
-  /// Sends a setting to both arms. The glasses do not reliably acknowledge
-  /// these commands, so the response is not required (like MentraOS).
-  Future<void> sendSetting(Uint8List packet) async {
-    for (final side in G1Side.values) {
-      try {
-        await request(side, packet, timeout: const Duration(milliseconds: 300));
-      } on G1TimeoutException {
-        // no answer is fine
-      } catch (e) {
-        _debug('setting 0x${packet[0].toRadixString(16)}: $e');
-      }
-    }
-  }
+  /// Sends a setting to both arms (like MentraOS, with a short pause).
+  Future<bool> sendSetting(Uint8List packet) =>
+      send([packet], waitAfter: const Duration(milliseconds: 100));
 
   /// Returns the glasses to the dashboard.
-  Future<bool> exitToDashboard() => sendBoth([G1Packets.exit()]);
+  Future<bool> exitToDashboard() => send([G1Packets.exit()]);
 
-  Future<bool> sendWhitelist(Map<String, String> apps) async {
-    try {
-      return await requestList(G1Side.left, G1Packets.whitelist(apps));
-    } catch (e) {
-      _debug('whitelist failed: $e');
-      return false;
-    }
-  }
+  Future<bool> sendWhitelist(Map<String, String> apps) => send(
+    G1Packets.whitelist(apps),
+    right: false,
+    waitAfter: const Duration(milliseconds: 100),
+  );
 
-  Future<bool> sendNotification(List<Uint8List> packets) async {
-    try {
-      return await requestList(G1Side.left, packets);
-    } catch (e) {
-      _debug('notification failed: $e');
-      return false;
-    }
-  }
+  Future<bool> sendNotification(List<Uint8List> packets) =>
+      send(packets, right: false);
 
   @override
   void dispose() {

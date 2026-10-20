@@ -14,29 +14,22 @@ void main() {
     expect(G1Name.parse('Some headphones'), isNull);
   });
 
-  test('builds text packets like the official app', () {
-    final packets = G1Packets.text(
-      'Hallo',
-      seq: 3,
-      newScreen: 0x71,
-      currentPage: 1,
-      maxPage: 2,
-    );
+  test('builds text packets like MentraOS (text mode 0x71)', () {
+    final packets = G1Packets.text('Hallo', seq: 3);
     expect(packets, hasLength(1));
-    expect(packets.first.sublist(0, 9), [0x4E, 3, 1, 0, 0x71, 0, 0, 1, 2]);
+    expect(packets.first.sublist(0, 9), [0x4E, 3, 1, 0, 0x71, 0, 0, 0, 1]);
     expect(utf8.decode(packets.first.sublist(9)), 'Hallo');
 
-    final long = G1Packets.text(
-      'x' * 400,
-      seq: 0,
-      newScreen: 0x31,
-      currentPage: 1,
-      maxPage: 1,
-    );
+    final long = G1Packets.text('x' * 400, seq: 0);
     expect(long, hasLength(3));
     expect([for (final p in long) p[3]], [0, 1, 2]);
     expect([for (final p in long) p[2]], [3, 3, 3]);
+    expect([for (final p in long) p[4]], [0x71, 0x71, 0x71]);
     expect(long.map((p) => p.length - 9).reduce((a, b) => a + b), 400);
+    expect(long.first.length - 9, 176);
+
+    // Empty text still updates the screen.
+    expect(utf8.decode(G1Packets.text('', seq: 0).first.sublist(9)), ' ');
   });
 
   test('builds heartbeat and mic packets', () {

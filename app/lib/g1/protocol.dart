@@ -115,7 +115,7 @@ String gestureName(int code, G1Side side) {
 
 class G1Packets {
   /// Maximum payload of one 0x4E packet.
-  static const textChunk = 191;
+  static const textChunk = 176;
 
   /// Maximum payload of one 0x4B packet.
   static const notificationChunk = 176;
@@ -126,6 +126,9 @@ class G1Packets {
   static Uint8List exit() => Uint8List.fromList([G1Cmd.exit]);
 
   static Uint8List init() => Uint8List.fromList([G1Cmd.init, 0x01]);
+
+  /// Start command sent by MentraOS and Gadgetbridge after connecting.
+  static Uint8List initDisplay() => Uint8List.fromList([0x4D, 0xFB]);
 
   static Uint8List battery() => Uint8List.fromList([G1Cmd.battery, 0x01]);
 
@@ -158,17 +161,13 @@ class G1Packets {
     ]);
   }
 
-  /// Text / Even AI result (0x4E). Returns the packets for one screen.
-  static List<Uint8List> text(
-    String text, {
-    required int seq,
-    required int newScreen,
-    required int currentPage,
-    required int maxPage,
-    int pos = 0,
-  }) {
-    final data = utf8.encode(text);
-    final total = data.isEmpty ? 1 : (data.length / textChunk).ceil();
+  /// One screen of text (0x4E) in plain text mode (0x71 = new content +
+  /// text show), like MentraOS. The Even AI modes (0x30–0x60) are not used:
+  /// they interfere with the Even AI screens of the firmware and made the two
+  /// arms show different content. Paging is done by the app.
+  static List<Uint8List> text(String text, {required int seq}) {
+    final data = utf8.encode(text.trim().isEmpty ? ' ' : text);
+    final total = (data.length / textChunk).ceil();
     return [
       for (var i = 0; i < total; i++)
         Uint8List.fromList([
@@ -176,11 +175,11 @@ class G1Packets {
           seq & 0xff,
           total,
           i,
-          newScreen,
-          (pos >> 8) & 0xff,
-          pos & 0xff,
-          currentPage,
-          maxPage,
+          G1ScreenStatus.textShow | G1ScreenStatus.newContent,
+          0x00, // new_char_pos0
+          0x00, // new_char_pos1
+          0x00, // current page (paging is done by the app)
+          0x01, // max page
           ...data.sublist(
             i * textChunk,
             ((i + 1) * textChunk).clamp(0, data.length),

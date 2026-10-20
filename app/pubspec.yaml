@@ -2,7 +2,7 @@ name: even_g1_ha
 description: "Companion app connecting Even Realities G1 glasses with Home Assistant."
 publish_to: 'none'
 
-version: 0.3.0+3
+version: 0.4.0+4
 
 environment:
   sdk: ^3.13.5
