@@ -67,6 +67,11 @@ void main() {
     expect(gestureName(0x0B, G1Side.left), 'case_closed');
   });
 
+  test('builds silent mode packets', () {
+    expect(G1Packets.silentMode(true), [0x03, 0x0C, 0x00]);
+    expect(G1Packets.silentMode(false), [0x03, 0x0A, 0x00]);
+  });
+
   test('builds head up mode and screen state packets', () {
     expect(G1Packets.headUpMode(0x02), [0x08, 0x06, 0x00, 0x00, 0x03, 0x02]);
     expect(G1Packets.headUpMode(0x00), [0x08, 0x06, 0x00, 0x00, 0x03, 0x00]);

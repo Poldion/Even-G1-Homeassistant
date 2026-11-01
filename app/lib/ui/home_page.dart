@@ -76,6 +76,22 @@ class _HomePageState extends State<HomePage> {
                 child: const Text('Neu verbinden'),
               ),
             ),
+            Card(
+              child: SwitchListTile(
+                secondary: Icon(
+                  bridge.silentMode == true
+                      ? Icons.notifications_off
+                      : Icons.notifications_active,
+                ),
+                title: const Text('Ruhemodus'),
+                subtitle: const Text(
+                  'Keine Texte, Benachrichtigungen oder Dashboards. '
+                  'Assist funktioniert weiter. Auf der Brille: dreimal tippen.',
+                ),
+                value: bridge.silentMode ?? false,
+                onChanged: bridge.g1.connected ? bridge.setSilentMode : null,
+              ),
+            ),
             _StatusCard(
               icon: Icons.home,
               title: bridge.settings.entryName.isEmpty

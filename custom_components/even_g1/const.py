@@ -93,6 +93,7 @@ MODE_NOTIFICATION: Final = "notification"
 # Payload "type" values sent from Home Assistant to the app.
 CMD_SHOW_TEXT: Final = "show_text"
 CMD_CLEAR: Final = "clear"
+CMD_SILENT_MODE: Final = "silent_mode"
 CMD_CONFIG: Final = "config"
 CMD_RELOAD: Final = "reload"
 CMD_DASHBOARD: Final = "dashboard"

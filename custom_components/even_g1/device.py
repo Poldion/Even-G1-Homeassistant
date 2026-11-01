@@ -23,6 +23,7 @@ from .const import (
     CMD_DASHBOARD,
     CMD_RELOAD,
     CMD_SHOW_TEXT,
+    CMD_SILENT_MODE,
     CONF_ASSIST_PIPELINE,
     CONF_AUTO_GAIN,
     CONF_DASHBOARD_DEPTH,
@@ -63,6 +64,7 @@ class EvenG1State:
     """State reported by the companion app."""
 
     glasses_connected: bool = False
+    silent_mode: bool | None = None
     battery_left: int | None = None
     battery_right: int | None = None
     last_query: str | None = None
@@ -313,6 +315,15 @@ class EvenG1Device:
                 "mode": mode,
             }
         )
+
+    @callback
+    def async_set_silent_mode(self, enabled: bool) -> None:
+        """Switch the silent mode of the glasses."""
+        self._ensure_connected()
+        self._send({"type": CMD_SILENT_MODE, "enabled": enabled})
+        # Optimistic until the app confirms with update_state.
+        self.state.silent_mode = enabled
+        self._notify_listeners()
 
     @callback
     def async_clear(self) -> None:

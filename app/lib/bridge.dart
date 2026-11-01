@@ -97,6 +97,11 @@ class Bridge extends ChangeNotifier {
   String? lastResponse;
   bool assistRunning = false;
 
+  /// Silent mode of the glasses (null = unknown until switched or reported
+  /// by a triple tap). While on, no texts, notifications or dashboards are
+  /// pushed; Assist still works.
+  bool? silentMode;
+
   AssistSession? _assist;
   Lc3Decoder? _decoder;
   StreamSubscription<Uint8List>? _audioSub;
@@ -242,6 +247,10 @@ class Bridge extends ChangeNotifier {
         final message = (event['message'] as String? ?? '').trim();
         final duration = (event['duration'] as num?)?.toInt() ?? 0;
         _log('Anzeige: ${title.isEmpty ? message : title}');
+        if (silentMode == true) {
+          _log('Ruhemodus – Text nicht angezeigt');
+          return;
+        }
         _dashboardShown = false;
         if (!g1.connected) {
           _log('Brille nicht verbunden – Text verworfen');
@@ -257,6 +266,8 @@ class Bridge extends ChangeNotifier {
         }
       case 'clear':
         if (g1.connected) await display.clear();
+      case 'silent_mode':
+        await setSilentMode(event['enabled'] == true);
     }
   }
 
@@ -315,7 +326,7 @@ class Bridge extends ChangeNotifier {
       notifyListeners();
     }
     if (!settings.forwardNotifications || !(app?.enabled ?? true)) return;
-    if (!g1.connected) return;
+    if (!g1.connected || silentMode == true) return;
     _log('Benachrichtigung: ${n.appName} – ${n.title}');
     await _sendGlassesNotification(
       appIdentifier: n.packageName,
@@ -354,6 +365,7 @@ class Bridge extends ChangeNotifier {
       'glasses_connected': g1.connected,
       'battery_left': g1.batteryLeft,
       'battery_right': g1.batteryRight,
+      'silent_mode': silentMode,
     };
     if (mapEquals(state, _lastReported)) return;
     _lastReported = state;
@@ -414,6 +426,7 @@ class Bridge extends ChangeNotifier {
   /// Head raised: cover the Even dashboard with the Home Assistant one.
   Future<void> _onHeadUp() async {
     if (!haConfig.dashboardOnHeadUp || assistRunning) return;
+    if (silentMode == true) return;
     // Do not cover a text or answer that is currently shown.
     if (display.active && !_dashboardShown) return;
     _dashboardShown = true;
@@ -450,6 +463,13 @@ class Bridge extends ChangeNotifier {
         unawaited(_onHeadUp());
       case G1Event.headDown:
         unawaited(_onHeadDown());
+      case G1Event.silentModeOn:
+      case G1Event.silentModeOff:
+        // Triple tap: the glasses switched silent mode themselves.
+        silentMode = event.code == G1Event.silentModeOn;
+        _log(silentMode! ? 'Ruhemodus an (Brille)' : 'Ruhemodus aus (Brille)');
+        notifyListeners();
+        unawaited(_reportState());
     }
 
     unawaited(
@@ -563,6 +583,23 @@ class Bridge extends ChangeNotifier {
     );
     // Logs what each arm shows, to spot left/right differences.
     unawaited(Future<void>.delayed(const Duration(seconds: 1), checkDisplay));
+  }
+
+  /// Switches the silent mode of the glasses.
+  Future<void> setSilentMode(bool enabled) async {
+    if (!g1.connected) {
+      _log('Ruhemodus: Brille nicht verbunden');
+      return;
+    }
+    _log(enabled ? 'Ruhemodus an' : 'Ruhemodus aus');
+    if (enabled) {
+      _dashboardShown = false;
+      if (display.active) await display.clear();
+    }
+    await g1.sendSetting(G1Packets.silentMode(enabled));
+    silentMode = enabled;
+    notifyListeners();
+    await _reportState();
   }
 
   /// Asks both arms which screen they show and writes it to the log.

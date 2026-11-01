@@ -289,3 +289,50 @@ async def test_dashboard_on_head_up(
     await hass.async_block_till_done()
     await client.send_json_auto_id({"type": "ping"})
     assert (await client.receive_json())["type"] == "pong"
+
+
+async def test_silent_mode_switch(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """The silent mode switch sends a command to the app and follows its state."""
+    assert hass.states.get("switch.even_g1_silent_mode").state == "unavailable"
+
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    await client.receive_json()
+    await client.send_json_auto_id(
+        {
+            "type": "even_g1/update_state",
+            "entry_id": entry.entry_id,
+            "glasses_connected": True,
+            "silent_mode": False,
+        }
+    )
+    assert (await client.receive_json())["success"]
+    assert hass.states.get("switch.even_g1_silent_mode").state == "off"
+
+    await hass.services.async_call(
+        "switch",
+        "turn_on",
+        {"entity_id": "switch.even_g1_silent_mode"},
+        blocking=True,
+    )
+    assert (await client.receive_json())["event"] == {
+        "type": "silent_mode",
+        "enabled": True,
+    }
+    assert hass.states.get("switch.even_g1_silent_mode").state == "on"
+
+    # Triple tap on the glasses switches it off again (reported by the app).
+    await client.send_json_auto_id(
+        {
+            "type": "even_g1/update_state",
+            "entry_id": entry.entry_id,
+            "silent_mode": False,
+        }
+    )
+    assert (await client.receive_json())["success"]
+    assert hass.states.get("switch.even_g1_silent_mode").state == "off"

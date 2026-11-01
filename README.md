@@ -151,6 +151,7 @@ data:
 | `binary_sensor.<name>_app_verbunden` | App ist mit HA verbunden |
 | `binary_sensor.<name>_brille_verbunden` | Beide Bügel sind per Bluetooth verbunden |
 | `sensor.<name>_akku_links` / `_akku_rechts` | Akkustand der Bügel |
+| `switch.<name>_ruhemodus` | Ruhemodus der Brille (siehe unten), auch per Dreifachtippen umschaltbar |
 | `sensor.<name>_letzte_frage` / `_letzte_antwort` | Letzte Assist-Interaktion (voller Text im Attribut `full_text`) |
 | `event.<name>_geste` | Gesten-Event (`event_type`: `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `case_removed`, `case_opened`, `case_closed`, `long_press`, `long_press_release`, `other`) |
 
@@ -158,6 +159,28 @@ data:
 
 - `even_g1_gesture` mit `device_id`, `gesture`, `side`, `code` (Roh-Code des Protokolls)
 - `even_g1_assist` mit `device_id`, `query`, `response`
+
+### Ruhemodus
+
+Der Ruhemodus lässt sich in Home Assistant über `switch.<name>_ruhemodus`, in der App über den Schalter auf der Startseite oder an der Brille durch dreimaliges Tippen umschalten. Die Brille meldet das Dreifachtippen, sodass Schalter und App immer den aktuellen Stand zeigen. Im Ruhemodus:
+
+- schaltet die Brille ihren eigenen Ruhemodus ein (Befehl `03 0C 00`, aus: `03 0A 00`, wie im eveng1-Python-SDK und in MentraOS),
+- zeigt die App keine Texte aus Home Assistant, keine Handy-Benachrichtigungen und kein Dashboard beim Hochschauen an,
+- funktioniert Assist (linke Touchbar halten) weiter.
+
+Beispiel: Ruhemodus nachts automatisch einschalten.
+
+```yaml
+automation:
+  - alias: G1 – Ruhemodus nachts
+    triggers:
+      - trigger: time
+        at: "22:30:00"
+    actions:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.even_g1_ruhemodus
+```
 
 ### Beispiel-Automationen
 

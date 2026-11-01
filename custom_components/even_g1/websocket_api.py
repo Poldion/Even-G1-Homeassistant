@@ -95,6 +95,7 @@ def ws_subscribe(
         vol.Required("type"): f"{DOMAIN}/update_state",
         vol.Required("entry_id"): str,
         vol.Optional("glasses_connected"): bool,
+        vol.Optional("silent_mode"): vol.Any(None, bool),
         vol.Optional("battery_left"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
         vol.Optional("battery_right"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
     }

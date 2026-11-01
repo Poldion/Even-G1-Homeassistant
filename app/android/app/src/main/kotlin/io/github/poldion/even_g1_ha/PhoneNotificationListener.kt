@@ -1,6 +1,7 @@
 package io.github.poldion.even_g1_ha
 
 import android.app.Notification
+import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
@@ -65,6 +66,12 @@ class PhoneNotificationListener : NotificationListenerService() {
             "postTime" to sbn.postTime,
         )
         mainHandler.post { target.success(event) }
+    }
+
+    override fun onListenerDisconnected() {
+        // Android may unbind the listener (e.g. memory pressure); without a
+        // rebind it stays silent until access is toggled again.
+        requestRebind(ComponentName(this, PhoneNotificationListener::class.java))
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification) {

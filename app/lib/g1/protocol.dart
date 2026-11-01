@@ -29,6 +29,7 @@ class G1Uuids {
 }
 
 class G1Cmd {
+  static const silentMode = 0x03;
   static const whitelist = 0x04;
   static const headUpMode = 0x08;
   static const screenState = 0x39;
@@ -150,6 +151,10 @@ class G1Packets {
   static Uint8List initDisplay() => Uint8List.fromList([0x4D, 0xFB]);
 
   static Uint8List battery() => Uint8List.fromList([G1Cmd.battery, 0x01]);
+
+  /// Silent mode on/off (as in the eveng1 Python SDK and MentraOS).
+  static Uint8List silentMode(bool enabled) =>
+      Uint8List.fromList([G1Cmd.silentMode, enabled ? 0x0C : 0x0A, 0x00]);
 
   /// What the glasses show when the head is raised (persisted on the
   /// glasses): 0x00 = Even dashboard, 0x02 = nothing (the head up/down
