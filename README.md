@@ -6,6 +6,7 @@ Verbindet die Smart-Glasses **Even Realities G1** mit **Home Assistant**:
 - 🎙️ **Home Assistant Assist per Brille**: **linke Touchbar gedrückt halten**, sprechen, loslassen. Die Frage geht über das Brillen-Mikrofon an deine Assist-Pipeline, die Antwort erscheint auf dem Display. Rückfragen innerhalb von 5 Minuten setzen dieselbe Unterhaltung fort.
 - 👆 **Gesten als Trigger**: Tippen links/rechts, Doppeltippen, Kopf heben, Brille auf-/absetzen usw. als Event-Entität für Automationen
 - 🏠 **Home-Assistant-Dashboard beim Hochschauen**: Beim Hochschauen erscheint dein eigenes Dashboard-Template über dem Even-Dashboard, beim Runterschauen verschwindet es wieder
+- 📱 **Handy-Benachrichtigungen auf der Brille** (Android): wie mit der offiziellen Even-App, pro App ein- und ausschaltbar
 - 🔋 **Sensoren**: Akku links/rechts, verbunden, letzte Frage/Antwort
 
 ```
@@ -92,6 +93,15 @@ Mit der Dashboard-Geste **Kopf gehoben** funktioniert das Dashboard wie bei Ment
 - Läuft gerade eine Assist-Antwort oder ein Text aus Home Assistant, wird dieser nicht überdeckt.
 
 Stelle dazu **Even-Dashboard beim Hochschauen** auf **Ausblenden**. Dann zeigt die Brille beim Hochschauen selbst nichts mehr an, meldet die Kopfbewegung aber weiter, und es erscheint nur dein Home-Assistant-Dashboard. Mit *Unverändert lassen* übermalt die App das Even-Dashboard, es kann dann kurz aufblitzen. Die Einstellung bleibt auf der Brille gespeichert, auch wenn du später wieder die offizielle Even-App nutzt.
+
+### 5. Handy-Benachrichtigungen (Android)
+
+Die App leitet die Benachrichtigungen deines Handys an die Brille weiter, so wie die offizielle Even-App. Die Brille zeigt sie mit ihrer eigenen Benachrichtigungsanzeige.
+
+1. In der App: ⚙️ → *Benachrichtigungen* → **Erlauben** und in den Android-Einstellungen „Even G1 HA“ den Zugriff auf Benachrichtigungen geben.
+2. Jede App, die eine Benachrichtigung schickt, erscheint dort in der Liste und wird standardmäßig weitergeleitet. Per Schalter kannst du einzelne Apps ausschließen oder das Weiterleiten ganz abschalten.
+
+Nicht weitergeleitet werden dauerhafte Benachrichtigungen (Musik, Navigation, Downloads), Gruppen-Zusammenfassungen und wiederholte Updates mit gleichem Inhalt.
 
 ## Bedienung an der Brille
 

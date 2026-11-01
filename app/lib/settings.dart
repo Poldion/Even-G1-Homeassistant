@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Persistent app settings.
@@ -31,8 +33,44 @@ class Settings {
   String get glassesName => _prefs.getString('glasses_name') ?? '';
   set glassesName(String v) => _prefs.setString('glasses_name', v);
 
+  /// Forward phone notifications to the glasses.
+  bool get forwardNotifications =>
+      _prefs.getBool('forward_notifications') ?? true;
+  set forwardNotifications(bool v) =>
+      _prefs.setBool('forward_notifications', v);
+
+  /// Apps that posted notifications: package -> {name, enabled}.
+  Map<String, NotificationApp> get notificationApps {
+    final raw = _prefs.getString('notification_apps');
+    if (raw == null) return {};
+    final json = jsonDecode(raw) as Map<String, dynamic>;
+    return json.map(
+      (k, v) => MapEntry(
+        k,
+        NotificationApp(
+          (v as Map)['name'] as String? ?? k,
+          v['enabled'] as bool? ?? true,
+        ),
+      ),
+    );
+  }
+
+  set notificationApps(Map<String, NotificationApp> apps) => _prefs.setString(
+    'notification_apps',
+    jsonEncode(
+      apps.map((k, v) => MapEntry(k, {'name': v.name, 'enabled': v.enabled})),
+    ),
+  );
+
   bool get haConfigured =>
       haUrl.isNotEmpty && haToken.isNotEmpty && entryId.isNotEmpty;
 
   bool get glassesConfigured => leftId.isNotEmpty && rightId.isNotEmpty;
+}
+
+class NotificationApp {
+  NotificationApp(this.name, this.enabled);
+
+  final String name;
+  final bool enabled;
 }

@@ -9,6 +9,7 @@ import 'g1/g1_connection.dart';
 import 'g1/protocol.dart';
 import 'ha/assist_session.dart';
 import 'ha/ha_client.dart';
+import 'notifications/phone_notifications.dart';
 import 'settings.dart';
 
 /// Configuration pushed by the Home Assistant integration.
@@ -66,6 +67,10 @@ class Bridge extends ChangeNotifier {
     g1.addListener(_onGlassesChanged);
     g1.events.listen(_onGlassesEvent);
     g1.log.listen(_log);
+    PhoneNotifications.stream.listen(
+      _onPhoneNotification,
+      onError: (Object e) => _log('Benachrichtigungen: $e'),
+    );
   }
 
   static const notificationAppId = 'io.github.poldion.even_g1_ha';
@@ -256,21 +261,82 @@ class Bridge extends ChangeNotifier {
   }
 
   Future<void> _sendNotification(String title, String message) async {
+    await _sendGlassesNotification(
+      appIdentifier: notificationAppId,
+      displayName: 'Home Assistant',
+      title: title.isEmpty ? 'Home Assistant' : title,
+      message: message,
+    );
+  }
+
+  /// Shows a notification with the glasses' own notification display
+  /// (0x4B). Only apps on the whitelist (0x04) are shown by the firmware.
+  Future<void> _sendGlassesNotification({
+    required String appIdentifier,
+    required String displayName,
+    required String title,
+    required String message,
+    String subtitle = '',
+  }) async {
     if (!_whitelistSent) {
-      _whitelistSent = await g1.sendWhitelist({
-        notificationAppId: 'Home Assistant',
+      final apps = <String, String>{notificationAppId: 'Home Assistant'};
+      settings.notificationApps.forEach((pkg, app) {
+        if (app.enabled) apps[pkg] = app.name;
       });
+      _whitelistSent = await g1.sendWhitelist(apps);
     }
-    _notificationId = (_notificationId + 1) & 0xff;
+    // Distinct ids: the glasses replace a notification with the same id.
+    _notificationId = _notificationId % 255 + 1;
+    String cut(String s, int max) =>
+        s.length <= max ? s : '${s.substring(0, max - 1)}…';
     await g1.sendNotification(
       G1Packets.notification(
         msgId: _notificationId,
-        appIdentifier: notificationAppId,
-        displayName: 'Home Assistant',
-        title: title.isEmpty ? 'Home Assistant' : title,
-        message: message,
+        appIdentifier: appIdentifier,
+        displayName: cut(displayName, 40),
+        title: cut(title, 80),
+        subtitle: cut(subtitle, 80),
+        message: cut(message, 500),
       ),
     );
+  }
+
+  /// A notification was posted on the phone.
+  Future<void> _onPhoneNotification(PhoneNotification n) async {
+    final apps = settings.notificationApps;
+    final app = apps[n.packageName];
+    if (app == null) {
+      // New app: remember it (forwarded by default, can be switched off).
+      settings.notificationApps = {
+        ...apps,
+        n.packageName: NotificationApp(n.appName, true),
+      };
+      _whitelistSent = false;
+      notifyListeners();
+    }
+    if (!settings.forwardNotifications || !(app?.enabled ?? true)) return;
+    if (!g1.connected) return;
+    _log('Benachrichtigung: ${n.appName} – ${n.title}');
+    await _sendGlassesNotification(
+      appIdentifier: n.packageName,
+      displayName: n.appName,
+      title: n.title.isEmpty ? n.appName : n.title,
+      subtitle: n.subText,
+      message: n.text,
+    );
+  }
+
+  /// Enables or disables forwarding for one app.
+  void setNotificationAppEnabled(String packageName, bool enabled) {
+    final apps = settings.notificationApps;
+    final app = apps[packageName];
+    if (app == null) return;
+    settings.notificationApps = {
+      ...apps,
+      packageName: NotificationApp(app.name, enabled),
+    };
+    _whitelistSent = false;
+    notifyListeners();
   }
 
   Future<void> _call(Map<String, dynamic> message) async {

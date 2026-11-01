@@ -6,6 +6,7 @@ import '../bridge.dart';
 import '../g1/g1_connection.dart';
 import '../ha/ha_client.dart';
 import '../main.dart';
+import 'notification_settings.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key, required this.bridge});
@@ -241,6 +242,10 @@ class _SettingsPageState extends State<SettingsPage> {
               enabled: pair.complete,
               onTap: pair.complete ? () => _selectPair(pair) : null,
             ),
+          const Divider(height: 48),
+          Text('Benachrichtigungen', style: text.titleLarge),
+          const SizedBox(height: 8),
+          NotificationSettings(bridge: widget.bridge),
         ],
       ),
     );
