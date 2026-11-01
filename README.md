@@ -99,6 +99,7 @@ Stelle dazu **Even-Dashboard beim Hochschauen** auf **Ausblenden**. Dann zeigt d
 Die App leitet die Benachrichtigungen deines Handys an die Brille weiter, so wie die offizielle Even-App. Die Brille zeigt sie mit ihrer eigenen Benachrichtigungsanzeige.
 
 1. In der App: ⚙️ → *Benachrichtigungen* → **Erlauben** und in den Android-Einstellungen „Even G1 HA“ den Zugriff auf Benachrichtigungen geben.
+   Meldet Android „App wurde Zugriff verweigert“ (Schutz für Apps außerhalb des Play Stores, ab Android 13): *Einstellungen → Apps → Even G1 HA → ⋮ → Eingeschränkte Einstellungen zulassen*, danach erneut auf *Erlauben* tippen.
 2. Jede App, die eine Benachrichtigung schickt, erscheint dort in der Liste und wird standardmäßig weitergeleitet. Per Schalter kannst du einzelne Apps ausschließen oder das Weiterleiten ganz abschalten.
 
 Nicht weitergeleitet werden dauerhafte Benachrichtigungen (Musik, Navigation, Downloads), Gruppen-Zusammenfassungen und wiederholte Updates mit gleichem Inhalt.

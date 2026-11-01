@@ -76,8 +76,13 @@ class _NotificationSettingsState extends State<NotificationSettings>
                   title: const Text('Zugriff auf Benachrichtigungen fehlt'),
                   subtitle: const Text(
                     'Erlaube „Even G1 HA“ in den Android-Einstellungen, '
-                    'Benachrichtigungen zu lesen.',
+                    'Benachrichtigungen zu lesen.\n'
+                    'Meldet Android „App wurde Zugriff verweigert“: '
+                    'Einstellungen → Apps → Even G1 HA → ⋮ → '
+                    '„Eingeschränkte Einstellungen zulassen“, dann erneut '
+                    'auf Erlauben tippen.',
                   ),
+                  isThreeLine: true,
                   trailing: FilledButton(
                     onPressed: PhoneNotifications.openSettings,
                     child: const Text('Erlauben'),
