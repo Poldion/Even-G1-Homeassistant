@@ -27,7 +27,8 @@
           "noise_suppression": "Rauschunterdrückung",
           "head_up_angle": "Kopfneigungswinkel für das Dashboard",
           "dashboard_height": "Dashboard-Höhe (0–8)",
-          "dashboard_depth": "Dashboard-Tiefe (1–9)"
+          "dashboard_depth": "Dashboard-Tiefe (1–9)",
+          "head_up_mode": "Even-Dashboard beim Hochschauen"
         },
         "data_description": {
           "assist_pipeline": "Wird verwendet, wenn du die linke Touchbar gedrückt hältst.",
@@ -37,7 +38,8 @@
           "head_up_angle": "Ab welchem Winkel (0–60°) die Brille das Dashboard zeigt. Leer = Einstellung der Even-App behalten.",
           "dashboard_height": "Leer = Einstellung der Even-App behalten.",
           "dashboard_depth": "Leer = Einstellung der Even-App behalten.",
-          "dashboard_gesture": "Bei „Kopf gehoben“ zeigt die App das Template sofort beim Hochschauen über dem Even-Dashboard an und schließt es beim Runterschauen wieder."
+          "dashboard_gesture": "Bei „Kopf gehoben“ zeigt die App das Template sofort beim Hochschauen über dem Even-Dashboard an und schließt es beim Runterschauen wieder.",
+          "head_up_mode": "Wird auf der Brille gespeichert. „Ausblenden“ empfiehlt sich mit der Dashboard-Geste „Kopf gehoben“: dann erscheint nur noch das Home-Assistant-Dashboard."
         }
       }
     }
@@ -60,6 +62,13 @@
       "options": {
         "screen": "Text im Vollbild",
         "notification": "Benachrichtigung"
+      }
+    },
+    "head_up_mode": {
+      "options": {
+        "unchanged": "Unverändert lassen",
+        "even_dashboard": "Anzeigen",
+        "nothing": "Ausblenden"
       }
     }
   },

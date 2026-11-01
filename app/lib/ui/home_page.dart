@@ -161,6 +161,18 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
+                    TextButton.icon(
+                      onPressed: bridge.g1.connected
+                          ? () async {
+                              final text = await bridge.checkDisplay();
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(content: Text(text)));
+                            }
+                          : null,
+                      icon: const Icon(Icons.compare),
+                      label: const Text('Anzeige links/rechts prüfen'),
+                    ),
                   ],
                 ),
               ),

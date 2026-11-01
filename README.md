@@ -80,6 +80,7 @@ Weitere Optionen:
 | Dashboard-Template | Jinja-Template, das für die Dashboard-Geste bzw. `even_g1.show_dashboard` gerendert wird |
 | Kopfneigungswinkel | Ab welchem Winkel (0–60°) die Brille beim Hochschauen das Dashboard zeigt. Leer = Einstellung der Even-App behalten |
 | Dashboard-Höhe / -Tiefe | Position des Dashboards im Sichtfeld (Höhe 0–8, Tiefe 1–9). Leer = Einstellung der Even-App behalten |
+| Even-Dashboard beim Hochschauen | *Anzeigen*, *Ausblenden* oder *Unverändert lassen*. Wird auf der Brille gespeichert (Befehl `0x08 … 03 <wert>`, gefunden vom Projekt [even-g1-companion](https://github.com/Cheddies1/even-g1-companion)) |
 
 ### Dashboard beim Hochschauen
 
@@ -90,13 +91,13 @@ Mit der Dashboard-Geste **Kopf gehoben** funktioniert das Dashboard wie bei Ment
 - Ändert sich der Inhalt, während du hochschaust, wird die Anzeige aktualisiert. Schaust du wieder runter (`0xF5 0x03`), wird sie geschlossen.
 - Läuft gerade eine Assist-Antwort oder ein Text aus Home Assistant, wird dieser nicht überdeckt.
 
-Das Even-Dashboard selbst lässt sich nicht abschalten. Die App übermalt es mit deinem Inhalt, es kann also beim Hochschauen kurz aufblitzen.
+Stelle dazu **Even-Dashboard beim Hochschauen** auf **Ausblenden**. Dann zeigt die Brille beim Hochschauen selbst nichts mehr an, meldet die Kopfbewegung aber weiter, und es erscheint nur dein Home-Assistant-Dashboard. Mit *Unverändert lassen* übermalt die App das Even-Dashboard, es kann dann kurz aufblitzen. Die Einstellung bleibt auf der Brille gespeichert, auch wenn du später wieder die offizielle Even-App nutzt.
 
 ## Bedienung an der Brille
 
 | Geste | Aktion |
 | --- | --- |
-| Linke Touchbar **gedrückt halten** | Assist: sprechen, solange gedrückt (max. 30 s) |
+| Linke Touchbar **gedrückt halten** | Assist: sprechen, solange gedrückt (max. 30 s). Währenddessen zeigt die Brille ihre eigene Even-AI-Zuhör-Anzeige, danach erscheint die Antwort aus Home Assistant |
 | Tippen links / rechts | Bei mehrseitigen Texten: Seite zurück / vor |
 | Doppeltippen | Anzeige schließen, laufende Assist-Anfrage abbrechen |
 | Konfigurierte Dashboard-Geste | Dashboard-Template anzeigen (bei *Kopf gehoben*: beim Hochschauen) |
@@ -194,7 +195,8 @@ Licht an: {{ states.light | selectattr('state', 'eq', 'on') | list | count }}
 
 - **Protokoll:** Die App spricht das BLE-Protokoll aus der offiziellen [EvenDemoApp](https://github.com/even-realities/EvenDemoApp): Text über `0x4E` im Textmodus `0x71` (5 Zeilen à ~488 px pro Seite, Blättern übernimmt die App), Mikrofon über `0x0E`, Audio über `0xF1` (LC3, 16 kHz, 10-ms-Frames, 20 Byte/Frame), Touch-Events über `0xF5` (`0x17` = Assist-Start, `0x18` = Ende), Heartbeat `0x25` alle 8 s.
 - **Senden an beide Bügel:** Wie bei MentraOS laufen alle Befehle über eine gemeinsame Warteschlange. Jedes Paket wird gleichzeitig an den linken und rechten Bügel geschrieben (mit Bluetooth-Bestätigung), bevor das nächste folgt. So zeigen beide Seiten immer denselben Inhalt, auch wenn ein Bügel gerade beschäftigt ist (z. B. mit dem Mikrofon). Die Even-AI-Anzeigemodi der Firmware werden nicht verwendet. Lehnt ein Bügel einen Befehl ab, steht das im App-Protokoll (`L/R rejected 0x..`).
-- **Assist:** Die App streamt das dekodierte PCM-Audio als Binärnachrichten an den Websocket-Befehl `even_g1/assist_run` der Integration. Diese startet die konfigurierte Assist-Pipeline (Stufen `stt` → `intent`) ohne Voice Activity Detection und mit den eingestellten Audio-Optionen. Die Gerätezuordnung (`device_id`) wird mitgegeben, damit Befehle wie „Licht an“ den Bereich der Brille berücksichtigen können. Während der Aufnahme zeigt die App eigene Statusbildschirme („Ich höre zu …“, „Einen Moment …“) statt der Even-AI-Hinweise der Brillen-Firmware.
+- **Assist:** Die App streamt das dekodierte PCM-Audio als Binärnachrichten an den Websocket-Befehl `even_g1/assist_run` der Integration. Diese startet die konfigurierte Assist-Pipeline (Stufen `stt` → `intent`) ohne Voice Activity Detection und mit den eingestellten Audio-Optionen. Die Gerätezuordnung (`device_id`) wird mitgegeben, damit Befehle wie „Licht an“ den Bereich der Brille berücksichtigen können. Während die Touchbar gehalten wird, zeichnet die App nichts: Der rechte Bügel (Master) zeichnet seine Even-AI-Zuhör-Anzeige laufend neu, eigener Text kam deshalb nur links an. Nach dem Loslassen folgen „Einen Moment …“, die erkannte Frage und die Antwort auf beiden Bügeln.
+- **Anzeige prüfen:** Mit `0x39` fragt die App jeden Bügel einzeln, was er gerade anzeigt (Button *Anzeige links/rechts prüfen*, automatisch auch nach jeder Assist-Antwort im Protokoll). Unterschiede zwischen links und rechts werden markiert.
 - **Integration ↔ App:** Websocket-Befehle `even_g1/devices`, `even_g1/subscribe` (Anzeigebefehle und Konfiguration als Push), `even_g1/update_state`, `even_g1/gesture`, `even_g1/assist_run`, `even_g1/dashboard`.
 
 ## Hinweise & Grenzen

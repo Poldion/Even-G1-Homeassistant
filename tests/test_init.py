@@ -66,6 +66,7 @@ async def test_options_flow(
     assert event["type"] == "config"
     assert event["display_duration"] == 25
     assert event["show_transcript"] is False
+    assert event["head_up_mode"] is None
 
 
 async def test_show_text_requires_app(
@@ -240,6 +241,7 @@ async def test_dashboard_on_head_up(
             CONF_DASHBOARD_GESTURE: "head_up",
             CONF_DASHBOARD_TEMPLATE: "Temp {{ states('sensor.temperature') }}",
             "head_up_angle": 25,
+            "head_up_mode": "nothing",
         },
     )
     await hass.async_block_till_done()
@@ -253,6 +255,7 @@ async def test_dashboard_on_head_up(
     assert config["dashboard_on_head_up"] is True
     assert config["head_up_angle"] == 25
     assert config["dashboard_height"] is None
+    assert config["head_up_mode"] == 0x02
     assert (await client.receive_json())["event"] == {
         "type": "dashboard",
         "text": "Temp 21",

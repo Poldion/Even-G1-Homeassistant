@@ -31,6 +31,7 @@ from .const import (
     CONF_DASHBOARD_TEMPLATE,
     CONF_DISPLAY_DURATION,
     CONF_HEAD_UP_ANGLE,
+    CONF_HEAD_UP_MODE,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
@@ -41,6 +42,8 @@ from .const import (
     EVENT_ASSIST,
     EVENT_GESTURE,
     GESTURE_HEAD_UP,
+    HEAD_UP_MODE_UNCHANGED,
+    HEAD_UP_MODES,
     MODE_SCREEN,
     PIPELINE_PREFERRED,
 )
@@ -154,6 +157,9 @@ class EvenG1Device:
             "head_up_angle": _optional_int(self.options.get(CONF_HEAD_UP_ANGLE)),
             "dashboard_height": _optional_int(self.options.get(CONF_DASHBOARD_HEIGHT)),
             "dashboard_depth": _optional_int(self.options.get(CONF_DASHBOARD_DEPTH)),
+            "head_up_mode": HEAD_UP_MODES.get(
+                self.options.get(CONF_HEAD_UP_MODE, HEAD_UP_MODE_UNCHANGED)
+            ),
         }
 
     # ------------------------------------------------------------------

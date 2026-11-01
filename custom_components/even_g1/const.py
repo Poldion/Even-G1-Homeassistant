@@ -11,6 +11,7 @@ CONF_ASSIST_PIPELINE: Final = "assist_pipeline"
 CONF_SHOW_TRANSCRIPT: Final = "show_transcript"
 CONF_AUTO_GAIN: Final = "auto_gain"
 CONF_HEAD_UP_ANGLE: Final = "head_up_angle"
+CONF_HEAD_UP_MODE: Final = "head_up_mode"
 CONF_DASHBOARD_HEIGHT: Final = "dashboard_height"
 CONF_DASHBOARD_DEPTH: Final = "dashboard_depth"
 CONF_NOISE_SUPPRESSION: Final = "noise_suppression"
@@ -23,6 +24,15 @@ DEFAULT_DASHBOARD_TEMPLATE: Final = (
 )
 PIPELINE_PREFERRED: Final = "preferred"
 DEFAULT_AUTO_GAIN: Final = 0
+
+# What the glasses show on head up (persisted on the glasses, sent as
+# 0x08 06 00 00 03 <value>).
+HEAD_UP_MODE_UNCHANGED: Final = "unchanged"
+HEAD_UP_MODES: Final = {
+    HEAD_UP_MODE_UNCHANGED: None,
+    "even_dashboard": 0x00,
+    "nothing": 0x02,
+}
 DEFAULT_NOISE_SUPPRESSION: Final = 0
 
 DASHBOARD_GESTURE_NONE: Final = "none"

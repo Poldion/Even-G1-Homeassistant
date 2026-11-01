@@ -469,6 +469,18 @@ class G1Connection extends ChangeNotifier {
     return send(G1Packets.text(text, seq: _textSeq++));
   }
 
+  /// Which screen the given arm currently shows (0x39), or null.
+  Future<int?> readScreenState(G1Side side) async {
+    try {
+      final r = await request(side, G1Packets.screenState());
+      if (r.data.length < 6 || r.data[5] == 0xff) return null;
+      return r.data[5];
+    } catch (e) {
+      _debug('screen state ${side.name}: $e');
+      return null;
+    }
+  }
+
   /// Sends a setting to both arms (like MentraOS, with a short pause).
   Future<bool> sendSetting(Uint8List packet) =>
       send([packet], waitAfter: const Duration(milliseconds: 100));

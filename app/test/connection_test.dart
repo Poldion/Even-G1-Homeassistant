@@ -66,6 +66,18 @@ void main() {
     expect((await result).data[2], 87);
   });
 
+  test('reads the screen state of one arm (byte 5)', () async {
+    final result = g1.readScreenState(G1Side.right);
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(writes.single.$1, G1Side.right);
+    expect(writes.single.$2, [0x39, 0x04, 0x00, 0x00]);
+    g1.receive(
+      G1Side.right,
+      Uint8List.fromList([0x39, 0x04, 0x00, 0x00, 0x00, 0x10]),
+    );
+    expect(await result, 0x10);
+  });
+
   test('assist screens and answers use the text mode on both arms', () async {
     final display = G1Display(g1);
     await display.showAiStatus('Home Assistant\nIch höre zu …');

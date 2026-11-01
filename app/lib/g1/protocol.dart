@@ -30,6 +30,8 @@ class G1Uuids {
 
 class G1Cmd {
   static const whitelist = 0x04;
+  static const headUpMode = 0x08;
+  static const screenState = 0x39;
   static const headUpAngle = 0x0B;
   static const dashboardPosition = 0x26;
   static const mic = 0x0E;
@@ -83,6 +85,23 @@ class G1Event {
   static const evenAiStop = 0x18;
 }
 
+/// Screen ids reported by 0x39 (firmware `ui_task_handler`, documented by
+/// the even-g1-companion project).
+String screenName(int id) => switch (id) {
+  0x00 => 'idle',
+  0x01 => 'wait',
+  0x04 || 0x05 => 'notification',
+  0x06 => 'Even dashboard',
+  0x07 => 'bitmap',
+  0x09 => 'teleprompter',
+  0x0a => 'navigation',
+  0x0b => 'translate',
+  0x0c => 'QuickNote',
+  0x10 => 'Even AI / text',
+  0x14 => 'Even AI v2',
+  _ => '0x${id.toRadixString(16)}',
+};
+
 /// Gesture names as understood by the Home Assistant integration.
 String gestureName(int code, G1Side side) {
   switch (code) {
@@ -131,6 +150,23 @@ class G1Packets {
   static Uint8List initDisplay() => Uint8List.fromList([0x4D, 0xFB]);
 
   static Uint8List battery() => Uint8List.fromList([G1Cmd.battery, 0x01]);
+
+  /// What the glasses show when the head is raised (persisted on the
+  /// glasses): 0x00 = Even dashboard, 0x02 = nothing (the head up/down
+  /// events are still sent). Source: even-g1-companion settings capture.
+  static Uint8List headUpMode(int value) => Uint8List.fromList([
+    G1Cmd.headUpMode,
+    0x06,
+    0x00,
+    0x00,
+    0x03,
+    value & 0xff,
+  ]);
+
+  /// Asks one arm which screen it shows (0x39). The answer's byte 5 is the
+  /// screen id, see [screenName].
+  static Uint8List screenState() =>
+      Uint8List.fromList([G1Cmd.screenState, 0x04, 0x00, 0x00]);
 
   /// Angle (0–60°) at which raising the head shows the dashboard.
   static Uint8List headUpAngle(int angle) =>

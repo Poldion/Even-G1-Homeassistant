@@ -22,7 +22,8 @@ class HaConfig {
       dashboardOnHeadUp = json['dashboard_on_head_up'] as bool? ?? false,
       headUpAngle = (json['head_up_angle'] as num?)?.toInt(),
       dashboardHeight = (json['dashboard_height'] as num?)?.toInt(),
-      dashboardDepth = (json['dashboard_depth'] as num?)?.toInt();
+      dashboardDepth = (json['dashboard_depth'] as num?)?.toInt(),
+      headUpMode = (json['head_up_mode'] as num?)?.toInt();
 
   HaConfig.defaults()
     : name = '',
@@ -33,7 +34,8 @@ class HaConfig {
       dashboardOnHeadUp = false,
       headUpAngle = null,
       dashboardHeight = null,
-      dashboardDepth = null;
+      dashboardDepth = null,
+      headUpMode = null;
 
   final String name;
   final String? deviceId;
@@ -49,9 +51,12 @@ class HaConfig {
   final int? dashboardHeight;
   final int? dashboardDepth;
 
+  /// What the glasses show on head up: 0x00 Even dashboard, 0x02 nothing.
+  final int? headUpMode;
+
   /// Key of the glasses settings, to send them only when they change.
   String get glassesSettingsKey =>
-      '$headUpAngle/$dashboardHeight/$dashboardDepth';
+      '$headUpAngle/$dashboardHeight/$dashboardDepth/$headUpMode';
 }
 
 /// Connects the glasses with Home Assistant.
@@ -67,9 +72,9 @@ class Bridge extends ChangeNotifier {
   static const followUpWindow = Duration(minutes: 5);
   static const maxRecording = Duration(seconds: 30);
 
-  // Own screens shown during Assist. They replace the Even AI screens of the
-  // glasses firmware (e.g. its "release to ask" hint).
-  static const listeningText = 'Home Assistant\nIch höre zu …';
+  // Shown after the touch bar was released. While it is held, the glasses
+  // firmware shows its own Even AI listening screen: the right (master) arm
+  // redraws it continuously, so drawing over it only reached the left arm.
   static const thinkingText = 'Home Assistant\nEinen Moment …';
 
   final Settings settings;
@@ -317,6 +322,15 @@ class Bridge extends ChangeNotifier {
       _log('Kopfneigungswinkel: $angle°');
       await g1.sendSetting(G1Packets.headUpAngle(angle));
     }
+    final mode = haConfig.headUpMode;
+    if (mode != null) {
+      _log(
+        mode == 0
+            ? 'Hochschauen: Even-Dashboard anzeigen'
+            : 'Hochschauen: Even-Dashboard ausblenden',
+      );
+      await g1.sendSetting(G1Packets.headUpMode(mode));
+    }
     final height = haConfig.dashboardHeight;
     final depth = haConfig.dashboardDepth;
     if (height != null || depth != null) {
@@ -428,11 +442,10 @@ class Bridge extends ChangeNotifier {
         _log('Audio: $e');
       }
     });
-    // Mic first (it is on the right arm and starts the audio), then replace
-    // the firmware's Even AI screen with our own.
-    final micOn = g1.setMic(true);
-    unawaited(display.showAiStatus(listeningText));
-    if (!await micOn) _log('Mikrofon konnte nicht aktiviert werden');
+    // Nothing is drawn while the touch bar is held (see thinkingText).
+    if (!await g1.setMic(true)) {
+      _log('Mikrofon konnte nicht aktiviert werden');
+    }
 
     _recordTimer = Timer(maxRecording, _finishAssist);
     try {
@@ -482,6 +495,19 @@ class Bridge extends ChangeNotifier {
       result.response.isEmpty ? 'Erledigt.' : result.response,
       closeAfter: duration > 0 ? Duration(seconds: max(duration, 8)) : null,
     );
+    // Logs what each arm shows, to spot left/right differences.
+    unawaited(Future<void>.delayed(const Duration(seconds: 1), checkDisplay));
+  }
+
+  /// Asks both arms which screen they show and writes it to the log.
+  Future<String> checkDisplay() async {
+    if (!g1.connected) return 'Brille nicht verbunden';
+    final left = await g1.readScreenState(G1Side.left);
+    final right = await g1.readScreenState(G1Side.right);
+    String name(int? id) => id == null ? 'keine Antwort' : screenName(id);
+    final text = 'Anzeige links: ${name(left)}, rechts: ${name(right)}';
+    _log(left == right ? text : '$text – UNTERSCHIEDLICH');
+    return text;
   }
 
   Future<void> _abortAssist() async {

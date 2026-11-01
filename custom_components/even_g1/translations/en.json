@@ -27,7 +27,8 @@
           "noise_suppression": "Noise suppression",
           "head_up_angle": "Head up angle for the dashboard",
           "dashboard_height": "Dashboard height (0–8)",
-          "dashboard_depth": "Dashboard depth (1–9)"
+          "dashboard_depth": "Dashboard depth (1–9)",
+          "head_up_mode": "Even dashboard on head up"
         },
         "data_description": {
           "assist_pipeline": "Used when you hold the left touch bar.",
@@ -37,7 +38,8 @@
           "head_up_angle": "Angle (0–60°) at which the glasses show the dashboard. Empty = keep the Even app setting.",
           "dashboard_height": "Empty = keep the Even app setting.",
           "dashboard_depth": "Empty = keep the Even app setting.",
-          "dashboard_gesture": "With \"Head up\" the app shows the template as soon as you look up, on top of the Even dashboard, and closes it when you look down."
+          "dashboard_gesture": "With \"Head up\" the app shows the template as soon as you look up, on top of the Even dashboard, and closes it when you look down.",
+          "head_up_mode": "Stored on the glasses. \"Hide\" is recommended with the dashboard gesture \"Head up\": then only the Home Assistant dashboard appears."
         }
       }
     }
@@ -60,6 +62,13 @@
       "options": {
         "screen": "Full screen text",
         "notification": "Notification"
+      }
+    },
+    "head_up_mode": {
+      "options": {
+        "unchanged": "Leave unchanged",
+        "even_dashboard": "Show",
+        "nothing": "Hide"
       }
     }
   },

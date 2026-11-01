@@ -67,6 +67,15 @@ void main() {
     expect(gestureName(0x0B, G1Side.left), 'case_closed');
   });
 
+  test('builds head up mode and screen state packets', () {
+    expect(G1Packets.headUpMode(0x02), [0x08, 0x06, 0x00, 0x00, 0x03, 0x02]);
+    expect(G1Packets.headUpMode(0x00), [0x08, 0x06, 0x00, 0x00, 0x03, 0x00]);
+    expect(G1Packets.screenState(), [0x39, 0x04, 0x00, 0x00]);
+    expect(screenName(0x10), 'Even AI / text');
+    expect(screenName(0x06), 'Even dashboard');
+    expect(screenName(0x42), '0x42');
+  });
+
   test('builds glasses setting packets (as MentraOS)', () {
     expect(G1Packets.headUpAngle(30), [0x0B, 30, 0x01]);
     expect(G1Packets.headUpAngle(90), [0x0B, 60, 0x01]);

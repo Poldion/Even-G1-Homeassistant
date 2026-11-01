@@ -33,6 +33,7 @@ from .const import (
     CONF_DASHBOARD_TEMPLATE,
     CONF_DISPLAY_DURATION,
     CONF_HEAD_UP_ANGLE,
+    CONF_HEAD_UP_MODE,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
@@ -42,6 +43,8 @@ from .const import (
     DEFAULT_DISPLAY_DURATION,
     DEFAULT_NOISE_SUPPRESSION,
     DOMAIN,
+    HEAD_UP_MODE_UNCHANGED,
+    HEAD_UP_MODES,
     PIPELINE_PREFERRED,
 )
 
@@ -53,6 +56,7 @@ DEFAULT_OPTIONS: dict[str, Any] = {
     CONF_SHOW_TRANSCRIPT: True,
     CONF_AUTO_GAIN: DEFAULT_AUTO_GAIN,
     CONF_NOISE_SUPPRESSION: DEFAULT_NOISE_SUPPRESSION,
+    CONF_HEAD_UP_MODE: HEAD_UP_MODE_UNCHANGED,
 }
 
 
@@ -161,6 +165,15 @@ class EvenG1OptionsFlow(OptionsFlow):
                 vol.Required(
                     CONF_DASHBOARD_TEMPLATE, default=options[CONF_DASHBOARD_TEMPLATE]
                 ): TemplateSelector(),
+                vol.Required(
+                    CONF_HEAD_UP_MODE, default=options[CONF_HEAD_UP_MODE]
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(HEAD_UP_MODES),
+                        mode=SelectSelectorMode.DROPDOWN,
+                        translation_key=CONF_HEAD_UP_MODE,
+                    )
+                ),
                 # Glasses settings: empty = leave as set in the Even app.
                 **{
                     vol.Optional(
