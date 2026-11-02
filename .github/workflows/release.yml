@@ -1,10 +1,13 @@
 name: Release
 
-# Creates a GitHub release for a version tag (vX.Y.Z): signed APK, the
-# integration as ZIP and the notes from CHANGELOG.md.
+# Creates a GitHub release (vX.Y.Z): signed APK, the integration as ZIP and
+# the notes from CHANGELOG.md. Runs for a pushed version tag, or manually:
+# then the version comes from the files and the tag is created on the
+# selected commit.
 on:
   push:
     tags: ["v*.*.*"]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -24,8 +27,16 @@ jobs:
       - name: Check that the tag matches all versions
         id: version
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
           APP=$(grep '^version:' app/pubspec.yaml | cut -d' ' -f2 | cut -d+ -f1)
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            TAG="${GITHUB_REF_NAME#v}"
+          else
+            TAG="$APP"
+            if git ls-remote --exit-code --tags origin "refs/tags/v$TAG" >/dev/null; then
+              echo "::error::Release v$TAG already exists. Bump the version first."
+              exit 1
+            fi
+          fi
           INTEGRATION=$(python3 -c "import json;print(json.load(open('custom_components/even_g1/manifest.json'))['version'])")
           CHANGELOG=$(grep -m1 -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md)
           echo "tag=$TAG app=$APP integration=$INTEGRATION changelog=$CHANGELOG"
@@ -100,5 +111,6 @@ jobs:
           # Remove the former rolling pre-release (replaced by versioned releases).
           gh release delete app-latest --cleanup-tag --yes 2>/dev/null || true
           gh release create "v$V" "even-g1-ha-v$V.apk" "even_g1-v$V.zip" \
+            --target "$GITHUB_SHA" \
             --title "v$V" \
             --notes-file "$RUNNER_TEMP/notes.md"

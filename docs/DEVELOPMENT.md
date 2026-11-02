@@ -41,7 +41,9 @@ Release erstellen:
    ein neues leeres `[Unreleased]` darüber anlegen und die Links unten
    ergänzen.
 2. Versionen in `pubspec.yaml` und `manifest.json` setzen, committen.
-3. Tag `vX.Y.Z` erstellen und pushen: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+3. Tag `vX.Y.Z` erstellen und pushen (`git tag vX.Y.Z && git push origin vX.Y.Z`)
+   oder unter *Actions → Release → Run workflow* den Branch wählen; dann legt
+   der Workflow den Tag selbst an.
 
 Der Workflow `.github/workflows/release.yml` prüft, dass Tag, App,
 Integration und Changelog übereinstimmen, baut die signierte APK und legt das
