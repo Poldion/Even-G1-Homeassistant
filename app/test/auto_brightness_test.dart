@@ -28,7 +28,7 @@ void main() {
       ..readInterval = const Duration(milliseconds: 10);
 
     auto.start(8);
-    await Future<void>.delayed(const Duration(milliseconds: 200));
+    await Future<void>.delayed(const Duration(milliseconds: 500));
     final settings = writes.where((w) => w[0] == G1Cmd.brightness).toList();
     expect(settings.first, [0x01, 21, 0x01]); // measure in auto mode
     expect(settings.last, [0x01, 18, 0x00]); // sensor 10 + offset 8, manual
@@ -37,7 +37,8 @@ void main() {
     // A new offset is applied right away from the known sensor level.
     writes.clear();
     auto.start(-4);
-    await Future<void>.delayed(const Duration(milliseconds: 20));
+    // Settings pause the send queue for 100 ms.
+    await Future<void>.delayed(const Duration(milliseconds: 300));
     expect(writes.where((w) => w[0] == G1Cmd.brightness).single, [
       0x01,
       6,
