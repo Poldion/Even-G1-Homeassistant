@@ -4,6 +4,7 @@ import '../bridge.dart';
 import '../main.dart';
 import 'overview_page.dart';
 import 'settings_tab.dart';
+import 'update_settings.dart';
 
 /// Main screen with the tabs "Übersicht" and "Einstellungen".
 class AppShell extends StatefulWidget {
@@ -26,6 +27,7 @@ class _AppShellState extends State<AppShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ensureBackgroundOperation();
       await widget.bridge.start();
+      if (mounted) await checkForAppUpdate(context);
     });
   }
 

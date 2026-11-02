@@ -7,6 +7,11 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+### Added
+- App: Selbst-Update wie bei BasaltNotes. Die App sucht einmal am Tag auf
+  der Releases-Seite nach einer neuen Version (oder per *Einstellungen →
+  App-Update*), lädt die APK und startet die Installation.
+
 ## [0.9.0] - 2026-11-02
 
 ### Added

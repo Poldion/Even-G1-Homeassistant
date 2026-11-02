@@ -10,6 +10,8 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
 
+    private val updater by lazy { AppUpdater(this) }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         val messenger = flutterEngine.dartExecutor.binaryMessenger
@@ -39,6 +41,24 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        MethodChannel(messenger, "even_g1/updater").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "version" -> result.success(updater.versionName())
+                "install" -> result.success(updater.download(call.argument<String>("url") ?: ""))
+                else -> result.notImplemented()
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updater.onResume()
+    }
+
+    override fun onDestroy() {
+        updater.onDestroy()
+        super.onDestroy()
     }
 
     private fun isNotificationAccessGranted(): Boolean {

@@ -5,6 +5,7 @@ import 'diagnostics.dart';
 import 'glasses_settings.dart';
 import 'ha_settings.dart';
 import 'notification_settings.dart';
+import 'update_settings.dart';
 
 /// All settings, grouped in collapsible sections.
 class SettingsTab extends StatelessWidget {
@@ -57,6 +58,12 @@ class SettingsTab extends StatelessWidget {
             title: 'Diagnose',
             subtitle: 'Testanzeige, Anzeige prüfen, Protokoll',
             child: Diagnostics(bridge: bridge),
+          ),
+          const _Section(
+            icon: Icons.system_update,
+            title: 'App-Update',
+            subtitle: 'Version und neue Versionen von GitHub',
+            child: UpdateSettings(),
           ),
         ],
       ),

@@ -38,8 +38,11 @@ Danach *Einstellungen → Geräte & Dienste → Integration hinzufügen →
 
 `even-g1-ha-vX.Y.Z.apk` von der
 [Releases-Seite](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
-auf dem Handy herunterladen und installieren. Neue Versionen lassen sich als
-Update über die vorhandene installieren, die Einstellungen bleiben erhalten.
+auf dem Handy herunterladen und installieren. Danach aktualisiert sich die
+App selbst: Sie sucht einmal am Tag nach einer neuen Version (oder unter
+*Einstellungen → App-Update*) und installiert sie auf Nachfrage. Beim ersten
+Update fragt Android einmalig, ob die App Apps installieren darf. Die
+Einstellungen bleiben erhalten.
 
 App und Integration sollten dieselbe Version haben.
 
