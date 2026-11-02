@@ -29,6 +29,8 @@ class G1Uuids {
 }
 
 class G1Cmd {
+  static const brightness = 0x01;
+  static const brightnessQuery = 0x29;
   static const silentMode = 0x03;
   static const whitelist = 0x04;
   static const headUpMode = 0x08;
@@ -179,6 +181,19 @@ class G1Packets {
   static Uint8List initDisplay() => Uint8List.fromList([0x4D, 0xFB]);
 
   static Uint8List battery() => Uint8List.fromList([G1Cmd.battery, 0x01]);
+
+  /// Display brightness in percent (sent as 0–63 like MentraOS) and the
+  /// automatic brightness of the glasses (their own light sensor).
+  static Uint8List brightness(int percent, {required bool auto}) =>
+      Uint8List.fromList([
+        G1Cmd.brightness,
+        percent.clamp(0, 100) * 63 ~/ 100,
+        auto ? 0x01 : 0x00,
+      ]);
+
+  /// Reads brightness and auto mode (right arm): [0x29, 0x65, level, auto].
+  static Uint8List brightnessQuery() =>
+      Uint8List.fromList([G1Cmd.brightnessQuery]);
 
   /// Silent mode on/off (as in the eveng1 Python SDK and MentraOS).
   static Uint8List silentMode(bool enabled) =>

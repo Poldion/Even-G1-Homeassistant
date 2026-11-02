@@ -109,6 +109,8 @@ class OverviewPage extends StatelessWidget {
                 onChanged: g1.connected ? bridge.setSilentMode : null,
               ),
             ),
+            // ---------------------------------------------------- brightness
+            Card(child: _Brightness(bridge: bridge)),
             // ---------------------------------------------------- HA + Assist
             Card(
               child: Padding(
@@ -235,6 +237,72 @@ class _Battery extends StatelessWidget {
             style: theme.textTheme.titleSmall,
           ),
           Text(label, style: theme.textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+}
+
+/// Brightness slider and automatic brightness switch.
+class _Brightness extends StatelessWidget {
+  const _Brightness({required this.bridge});
+
+  final Bridge bridge;
+
+  @override
+  Widget build(BuildContext context) {
+    final connected = bridge.g1.connected;
+    final auto = bridge.autoBrightness ?? false;
+    final percent = bridge.brightness;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Icon(auto ? Icons.brightness_auto : Icons.brightness_6),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  'Helligkeit',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              Text(auto ? 'Automatisch' : (percent == null ? '–' : '$percent %')),
+              const SizedBox(width: 8),
+              Switch(
+                value: auto,
+                onChanged: connected ? bridge.setAutoBrightness : null,
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              const Icon(Icons.brightness_low, size: 20),
+              Expanded(
+                child: Slider(
+                  value: (percent ?? 50).toDouble(),
+                  max: 100,
+                  divisions: 20,
+                  label: '${percent ?? 50} %',
+                  onChanged: connected
+                      ? (v) => bridge.setBrightness(v.round())
+                      : null,
+                ),
+              ),
+              const Icon(Icons.brightness_high, size: 20),
+              const SizedBox(width: 8),
+            ],
+          ),
+          if (auto)
+            Padding(
+              padding: const EdgeInsets.only(right: 8, bottom: 4),
+              child: Text(
+                'Die Brille regelt die Helligkeit selbst über ihren '
+                'Lichtsensor. Den Regler bewegen schaltet auf manuell.',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
         ],
       ),
     );

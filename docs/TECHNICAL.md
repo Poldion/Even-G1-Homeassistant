@@ -41,6 +41,8 @@ ergänzt um Erkenntnisse aus [MentraOS](https://github.com/Mentra-Community/Ment
 | `0x25` | Heartbeat (alle 8 s) |
 | `0x03` | Ruhemodus `0C` an / `0A` aus |
 | `0x08 … 03 <v>` | Even-Dashboard beim Hochschauen (`00` anzeigen, `02` ausblenden) |
+| `0x01 <h> <a>` | Helligkeit `h` (0–63, wie MentraOS) und automatische Helligkeit `a` (`00`/`01`) |
+| `0x29` | Helligkeit abfragen (rechter Bügel), Antwort `29 65 <h> <a>` |
 | `0x0B` | Aktivierungswinkel (0–60°) |
 | `0x26 … 02 01 <h> <d>` | Höhe (0–8) und Distanz (1–9) der Anzeige |
 | `0x39` | Abfrage, was ein Bügel gerade anzeigt |

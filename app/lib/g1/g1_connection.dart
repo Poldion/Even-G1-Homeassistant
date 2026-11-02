@@ -544,6 +544,22 @@ class G1Connection extends ChangeNotifier {
     }
   }
 
+  /// Brightness in percent and auto mode as set on the glasses, null if the
+  /// glasses do not answer.
+  Future<({int percent, bool auto})?> readBrightness() async {
+    try {
+      final r = await request(G1Side.right, G1Packets.brightnessQuery());
+      if (r.data.length < 4 || r.data[1] == G1Status.failure) return null;
+      return (
+        percent: (r.data[2].clamp(0, 63) * 100 / 63).round(),
+        auto: r.data[3] == 0x01,
+      );
+    } catch (e) {
+      _debug('brightness: $e');
+      return null;
+    }
+  }
+
   /// Sends a setting to both arms (like MentraOS, with a short pause).
   Future<bool> sendSetting(Uint8List packet) =>
       send([packet], waitAfter: const Duration(milliseconds: 100));

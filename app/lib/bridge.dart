@@ -396,6 +396,65 @@ class Bridge extends ChangeNotifier {
     if (settings.displayHeight != null || settings.displayDepth != null) {
       await _sendDisplayPosition();
     }
+    if (settings.brightness != null || settings.autoBrightness != null) {
+      // Like MentraOS: the app's setting is sent on every connection.
+      await _sendBrightness();
+    } else {
+      // Not set in this app yet: show what the glasses use.
+      final current = await g1.readBrightness();
+      if (current != null) {
+        brightness = current.percent;
+        autoBrightness = current.auto;
+        notifyListeners();
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Brightness
+  // ---------------------------------------------------------------------------
+
+  /// Display brightness in percent (null = unknown).
+  late int? brightness = settings.brightness;
+
+  /// Automatic brightness by the light sensor of the glasses.
+  late bool? autoBrightness = settings.autoBrightness;
+
+  Timer? _brightnessTimer;
+
+  /// Sets the brightness; switches the automatic brightness off like the
+  /// Even app. Sent with a short delay so dragging the slider does not flood
+  /// the glasses.
+  void setBrightness(int percent) {
+    brightness = percent.clamp(0, 100);
+    autoBrightness = false;
+    settings.brightness = brightness;
+    settings.autoBrightness = false;
+    notifyListeners();
+    _brightnessTimer?.cancel();
+    _brightnessTimer = Timer(
+      const Duration(milliseconds: 150),
+      () => unawaited(_sendBrightness()),
+    );
+  }
+
+  /// Switches the automatic brightness of the glasses on or off.
+  Future<void> setAutoBrightness(bool enabled) async {
+    autoBrightness = enabled;
+    brightness ??= 50;
+    settings.autoBrightness = enabled;
+    settings.brightness = brightness;
+    notifyListeners();
+    _brightnessTimer?.cancel();
+    await _sendBrightness();
+  }
+
+  Future<void> _sendBrightness() async {
+    if (!g1.connected) return;
+    final percent = brightness ?? 50;
+    final auto = autoBrightness ?? false;
+    _log(auto ? 'Helligkeit: automatisch' : 'Helligkeit: $percent %');
+    await g1.sendSetting(G1Packets.brightness(percent, auto: auto));
   }
 
   Future<void> _sendHeadUpAngle(int angle) async {

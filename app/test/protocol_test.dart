@@ -73,6 +73,10 @@ void main() {
   test('builds silent mode packets', () {
     expect(G1Packets.silentMode(true), [0x03, 0x0C, 0x00]);
     expect(G1Packets.silentMode(false), [0x03, 0x0A, 0x00]);
+    expect(G1Packets.brightness(100, auto: false), [0x01, 63, 0x00]);
+    expect(G1Packets.brightness(50, auto: true), [0x01, 31, 0x01]);
+    expect(G1Packets.brightness(150, auto: false), [0x01, 63, 0x00]);
+    expect(G1Packets.brightnessQuery(), [0x29]);
   });
 
   test('builds head up mode and screen state packets', () {

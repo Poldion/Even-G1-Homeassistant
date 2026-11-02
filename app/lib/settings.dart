@@ -87,6 +87,18 @@ class Settings {
   int? get headUpMode => _optInt('head_up_mode');
   set headUpMode(int? v) => _setOptInt('head_up_mode', v);
 
+  /// Display brightness in percent.
+  int? get brightness => _optInt('brightness');
+  set brightness(int? v) => _setOptInt('brightness', v);
+
+  /// Automatic brightness of the glasses.
+  bool? get autoBrightness => switch (_optInt('auto_brightness')) {
+    null => null,
+    final v => v == 1,
+  };
+  set autoBrightness(bool? v) =>
+      _setOptInt('auto_brightness', v == null ? null : (v ? 1 : 0));
+
   /// Experimental: Assist answers in the Even AI mode of the official app.
   bool get evenAiAnswers => _prefs.getBool('even_ai_answers') ?? false;
   set evenAiAnswers(bool v) => _prefs.setBool('even_ai_answers', v);
