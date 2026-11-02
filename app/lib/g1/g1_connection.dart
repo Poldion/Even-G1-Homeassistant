@@ -85,6 +85,8 @@ class G1Connection extends ChangeNotifier {
         _right = arm;
       }
     }
+    // The fake glasses do not answer text packets unless a test enables it.
+    _leftAcks = false;
   }
 
   @visibleForTesting
@@ -431,15 +433,30 @@ class G1Connection extends ChangeNotifier {
   /// The glasses' answers are not awaited: waiting for one arm before
   /// writing to the other made both arms show different content when one
   /// arm was busy (e.g. streaming the microphone).
+  ///
+  /// With [ackLeft] the reply of the left arm (slave) is awaited for every
+  /// packet, and the packet is sent to the left arm again if it is missing
+  /// or negative. The left arm answers each 0x4E packet right away
+  /// (even-g1-companion firmware analysis), the right arm (master) only
+  /// later; the official app also waits for these replies.
   Future<bool> send(
     List<Uint8List> packets, {
     bool left = true,
     bool right = true,
     Duration waitAfter = Duration.zero,
+    bool ackLeft = false,
   }) {
     return _enqueue(() async {
       var ok = true;
       for (final packet in packets) {
+        final leftArm = _left;
+        final waitForLeft =
+            ackLeft && left && leftArm != null && _leftAcks != false;
+        Completer<G1Response>? ack;
+        if (waitForLeft) {
+          ack = Completer<G1Response>();
+          leftArm.pending[packet[0]] = ack;
+        }
         final writes = <Future<void>>[
           if (right && _right != null) _write(_right!, packet),
           if (left && _left != null) _write(_left!, packet),
@@ -456,11 +473,75 @@ class G1Connection extends ChangeNotifier {
           ),
         );
         ok = ok && results.isNotEmpty && results.every((r) => r);
+        if (waitForLeft) {
+          ok = await _awaitLeftAck(leftArm, packet, ack!) && ok;
+        }
         await Future<void>.delayed(const Duration(milliseconds: 5));
       }
       if (waitAfter > Duration.zero) await Future<void>.delayed(waitAfter);
       return ok;
     });
+  }
+
+  /// Whether the left arm answers text packets: null = not known yet,
+  /// false = it never did (then the app stops waiting for it).
+  bool? _leftAcks;
+  int _leftAckMisses = 0;
+
+  /// Tests: the fake glasses do not answer unless a test says so.
+  @visibleForTesting
+  set leftAcks(bool? value) => _leftAcks = value;
+  static const leftAckTimeout = Duration(milliseconds: 300);
+  static const leftAckRetries = 2;
+
+  Future<bool> _awaitLeftAck(
+    _Arm arm,
+    Uint8List packet,
+    Completer<G1Response> first,
+  ) async {
+    final cmd = packet[0];
+    var ack = first;
+    for (var attempt = 0; ; attempt++) {
+      G1Response? reply;
+      try {
+        reply = await ack.future.timeout(leftAckTimeout);
+      } catch (_) {
+        // Timeout, or the arm disconnected meanwhile.
+        reply = null;
+      } finally {
+        if (arm.pending[cmd] == ack) arm.pending.remove(cmd);
+      }
+      final good =
+          reply != null &&
+          reply.data.length > 1 &&
+          reply.data[1] != G1Status.failure;
+      if (good) {
+        _leftAcks = true;
+        _leftAckMisses = 0;
+        return true;
+      }
+      if (reply == null && _leftAcks == null && ++_leftAckMisses >= 3) {
+        // This firmware does not answer: do not slow every text down.
+        _leftAcks = false;
+        _debug('L bestätigt Texte nicht – Prüfung aus');
+        return true;
+      }
+      if (attempt >= leftAckRetries || !arm.ready) {
+        _debug('L: Text nicht bestätigt');
+        return false;
+      }
+      _debug(
+        'L: Text ${reply == null ? 'unbeantwortet' : 'abgelehnt'} – '
+        'erneut gesendet',
+      );
+      ack = Completer<G1Response>();
+      arm.pending[cmd] = ack;
+      try {
+        await _write(arm, packet);
+      } catch (e) {
+        _debug('write 0x${cmd.toRadixString(16)} L failed: $e');
+      }
+    }
   }
 
   /// Sends [data] to one arm and waits for the response with the same
@@ -543,6 +624,7 @@ class G1Connection extends ChangeNotifier {
       ),
       left: left,
       right: right,
+      ackLeft: true,
     );
   }
 

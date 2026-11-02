@@ -96,6 +96,33 @@ void main() {
     expect(texts.where((w) => w.$1 == G1Side.right), hasLength(2));
   });
 
+  test('a text the left arm rejects or misses is sent to it again', () async {
+    final log = <(G1Side, List<int>)>[];
+    var leftReplies = [G1Status.failure, null, G1Status.success];
+    late G1Connection glasses;
+    glasses = G1Connection.fake((side, data) async {
+      log.add((side, data));
+      if (side == G1Side.left && data[0] == G1Cmd.text) {
+        final status = leftReplies.removeAt(0);
+        if (status != null) {
+          scheduleMicrotask(
+            () => glasses.receive(
+              G1Side.left,
+              Uint8List.fromList([G1Cmd.text, status, data[1]]),
+            ),
+          );
+        }
+      }
+    })..leftAcks = null;
+    expect(await glasses.sendText('Hallo'), isTrue);
+    final texts = log.where((w) => w.$2[0] == G1Cmd.text).toList();
+    // rejected, unanswered, accepted: three times to the left arm ...
+    expect(texts.where((w) => w.$1 == G1Side.left), hasLength(3));
+    // ... once to the right arm.
+    expect(texts.where((w) => w.$1 == G1Side.right), hasLength(1));
+    leftReplies = [];
+  });
+
   test('a text missing on one arm is sent to that arm again', () async {
     final display = G1Display(g1);
     await display.showText('Dashboard');

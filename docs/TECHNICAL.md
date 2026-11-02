@@ -53,7 +53,10 @@ Community-Projekten und kann je nach Firmware abweichen.
 
 **Senden an beide Bügel:** Wie bei MentraOS laufen alle Befehle über eine
 gemeinsame Warteschlange. Jedes Paket wird gleichzeitig an beide Bügel
-geschrieben (mit Bluetooth-Bestätigung), bevor das nächste folgt. Lehnt ein
+geschrieben (mit Bluetooth-Bestätigung), bevor das nächste folgt. Bei Texten
+(`0x4E`) wartet die App wie die offizielle App zusätzlich auf die Antwort des
+linken Bügels (`4E C9`/`CB`, der rechte antwortet erst später) und schickt das
+Paket bis zu zweimal erneut, wenn sie fehlt oder `CA` lautet. Lehnt ein
 Bügel einen Befehl ab, steht das im App-Protokoll (`L/R rejected 0x..`).
 
 **Assist:** Während die Touchbar gehalten wird, zeigt die Firmware ihre eigene

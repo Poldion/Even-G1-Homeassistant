@@ -7,6 +7,14 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-11-02
+
+### Fixed
+- Linkes Auge bleibt leer: Wie die offizielle App wartet die App jetzt auf
+  die Antwort des linken Bügels zu jedem Textpaket und schickt es erneut,
+  wenn sie fehlt oder negativ ist (bis zu zweimal). Im Protokoll steht dann
+  „L: Text unbeantwortet – erneut gesendet“.
+
 ## [0.15.0] - 2026-11-02
 
 ### Added
@@ -153,7 +161,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.12.1...v0.13.0
