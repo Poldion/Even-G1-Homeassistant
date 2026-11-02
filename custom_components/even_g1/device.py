@@ -179,6 +179,7 @@ class EvenG1Device:
             "show_transcript": self.options.get(CONF_SHOW_TRANSCRIPT, True),
             "assist_pipeline_name": self.pipeline_name,
             "dashboard_on_head_up": self.dashboard_on_head_up,
+            "dashboard_gesture": self.dashboard_gesture,
         }
 
     @property
@@ -284,7 +285,7 @@ class EvenG1Device:
         self._next_subscriber_id += 1
         self._subscribers[subscriber_id] = send
         send(self.app_config())
-        if self.dashboard_on_head_up:
+        if self.dashboard_gesture != DASHBOARD_GESTURE_NONE:
             send({"type": CMD_DASHBOARD, "text": self.dashboard_text})
         self._notify_listeners()
 
@@ -364,15 +365,15 @@ class EvenG1Device:
 
     @callback
     def async_update_dashboard_tracking(self) -> None:
-        """Keep the rendered dashboard up to date for the head up mode.
+        """Keep the rendered dashboard up to date in the app.
 
-        The app shows the dashboard locally as soon as the head is raised, so
+        The app shows the dashboard locally on the dashboard gesture, so
         the text is pushed to the app whenever the template result changes
         (not on every head movement). Nothing is sent to the glasses until
         the dashboard is actually shown.
         """
         self._stop_dashboard_tracking()
-        if not self.dashboard_on_head_up:
+        if self.dashboard_gesture == DASHBOARD_GESTURE_NONE:
             return
 
         template = Template(
@@ -509,13 +510,8 @@ class EvenG1Device:
         self.hass.bus.async_fire(EVENT_GESTURE, event_data)
         for gesture_callback in list(self._gesture_listeners):
             gesture_callback(gesture, data)
-
-        # Head up is handled by the app itself (no round trip to HA).
-        if (
-            self.dashboard_gesture not in (DASHBOARD_GESTURE_NONE, GESTURE_HEAD_UP)
-            and gesture == self.dashboard_gesture
-        ):
-            self.async_show_dashboard()
+        # The dashboard gesture is handled by the app itself with the text
+        # pushed by async_update_dashboard_tracking (no round trip to HA).
 
     @callback
     def async_handle_assist(self, query: str, response: str) -> None:

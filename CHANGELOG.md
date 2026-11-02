@@ -7,6 +7,22 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-02
+
+### Fixed
+- Dashboard per Tippen links/rechts: Die App zeigt das Dashboard jetzt selbst
+  an (wie beim Hochschauen), ohne Umweg über Home Assistant. Erneutes Tippen
+  schließt es. Wird gerade ein anderer Text angezeigt, blättert Tippen wie
+  bisher.
+
+### Added
+- Diagnose: Pakete, die die Brille von sich aus schickt, erscheinen im
+  Protokoll (`L rx …` / `R rx …`).
+
+### Changed
+- App und Integration müssen für das Dashboard per Tippen beide auf 0.11.0
+  sein.
+
 ## [0.10.0] - 2026-11-02
 
 ### Added
@@ -87,7 +103,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Poldion/Even-G1-Homeassistant/releases/tag/v0.8.0

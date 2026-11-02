@@ -21,7 +21,11 @@ class HaConfig {
       assistPipeline = json['assist_pipeline'] as String?,
       assistName = json['assist_pipeline_name'] as String?,
       showTranscript = json['show_transcript'] as bool? ?? true,
-      dashboardOnHeadUp = json['dashboard_on_head_up'] as bool? ?? false;
+      dashboardGesture =
+          json['dashboard_gesture'] as String? ??
+          ((json['dashboard_on_head_up'] as bool? ?? false)
+              ? 'head_up'
+              : 'none');
 
   HaConfig.defaults()
     : name = '',
@@ -30,7 +34,7 @@ class HaConfig {
       assistPipeline = null,
       assistName = null,
       showTranscript = true,
-      dashboardOnHeadUp = false;
+      dashboardGesture = 'none';
 
   final String name;
   final String? deviceId;
@@ -41,8 +45,12 @@ class HaConfig {
   final String? assistName;
   final bool showTranscript;
 
+  /// Gesture that shows the Home Assistant dashboard: "head_up",
+  /// "single_tap_left", "single_tap_right" or "none".
+  final String dashboardGesture;
+
   /// Show the Home Assistant dashboard when the head is raised.
-  final bool dashboardOnHeadUp;
+  bool get dashboardOnHeadUp => dashboardGesture == 'head_up';
 }
 
 /// Connects the glasses with Home Assistant.
@@ -215,7 +223,7 @@ class Bridge extends ChangeNotifier {
       case 'config':
         haConfig = HaConfig.fromJson(event);
         _log('Konfiguration erhalten (${haConfig.name})');
-        if (!haConfig.dashboardOnHeadUp && _dashboardShown) {
+        if (haConfig.dashboardGesture == 'none' && _dashboardShown) {
           _dashboardShown = false;
           if (g1.connected) await display.clear();
         }
@@ -456,6 +464,31 @@ class Bridge extends ChangeNotifier {
 
   bool _positionPreviewShown = false;
 
+  /// Single tap configured as dashboard gesture: show the dashboard, or
+  /// close it if it is shown. Returns false if the tap is meant for paging
+  /// (another text is on the display).
+  Future<bool> _onTapDashboard(String gesture) async {
+    if (haConfig.dashboardGesture != gesture || assistRunning) return false;
+    if (_dashboardShown && display.active) {
+      _dashboardShown = false;
+      await display.clear();
+      return true;
+    }
+    if (display.active) return false;
+    if (silentMode == true) {
+      _log('Ruhemodus – Dashboard nicht angezeigt');
+      return true;
+    }
+    _log('Dashboard (Tippen)');
+    _dashboardShown = true;
+    final seconds = haConfig.displayDuration;
+    await display.showText(
+      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+      closeAfter: seconds > 0 ? Duration(seconds: seconds) : null,
+    );
+    return true;
+  }
+
   /// Head raised: cover the Even dashboard with the Home Assistant one.
   Future<void> _onHeadUp() async {
     if (!haConfig.dashboardOnHeadUp || assistRunning) return;
@@ -488,7 +521,7 @@ class Bridge extends ChangeNotifier {
       case G1Event.evenAiStop:
         unawaited(_finishAssist());
       case G1Event.singleTap:
-        await display.onTap(event.side);
+        if (!await _onTapDashboard(gesture)) await display.onTap(event.side);
       case G1Event.doubleTap:
         display.onDismissed();
         _dashboardShown = false;

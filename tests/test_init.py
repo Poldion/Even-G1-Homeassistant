@@ -157,7 +157,11 @@ async def test_state_and_gestures(
         {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
     )
     await client.receive_json()
-    await client.receive_json()
+    config = (await client.receive_json())["event"]
+    assert config["dashboard_gesture"] == "single_tap_right"
+    # The app shows the dashboard itself on a tap, so it gets the text.
+    dashboard = (await client.receive_json())["event"]
+    assert dashboard == {"type": "dashboard", "text": "2 Lampen an"}
 
     await client.send_json_auto_id(
         {
@@ -184,14 +188,7 @@ async def test_state_and_gestures(
             "code": 1,
         }
     )
-    # Dashboard is pushed because of the configured gesture
-    msg = await client.receive_json()
-    if "event" in msg:
-        dashboard, result = msg, await client.receive_json()
-    else:
-        result, dashboard = msg, await client.receive_json()
-    assert result["success"]
-    assert dashboard["event"]["message"] == "2 Lampen an"
+    assert (await client.receive_json())["success"]
     await hass.async_block_till_done()
     assert events[0].data["gesture"] == "single_tap_right"
     assert events[0].data["side"] == "right"

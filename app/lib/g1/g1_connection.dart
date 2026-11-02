@@ -351,6 +351,16 @@ class G1Connection extends ChangeNotifier {
     final completer = arm.pending.remove(cmd);
     if (completer != null && !completer.isCompleted) {
       completer.complete(G1Response(arm.side, data));
+    } else if (cmd != G1Cmd.heartbeat &&
+        !(data.length > 1 &&
+            (data[1] == G1Status.success || data[1] == G1Status.failure))) {
+      // Unsolicited packets (e.g. 0x22 status) for the diagnostics log;
+      // plain acknowledgements are left out.
+      final bytes = data
+          .take(8)
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join(' ');
+      _debug('${arm.side.code} rx $bytes');
     }
   }
 
