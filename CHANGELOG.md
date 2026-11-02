@@ -7,6 +7,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-02
+
 ### Added
 - App: Selbst-Update wie bei BasaltNotes. Die App sucht einmal am Tag auf
   der Releases-Seite nach einer neuen Version (oder per *Einstellungen →
@@ -85,7 +87,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Poldion/Even-G1-Homeassistant/releases/tag/v0.8.0
 [0.7.0]: https://github.com/Poldion/Even-G1-Homeassistant/commits/f545428

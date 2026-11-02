@@ -9,8 +9,8 @@ import '../update/app_update.dart';
 /// and errors are ignored.
 Future<void> checkForAppUpdate(BuildContext context, {bool manual = false}) async {
   if (!AppUpdater.supported) return;
-  if (!manual && (!kReleaseMode || !await AppUpdater.dailyCheckDue())) return;
   final messenger = ScaffoldMessenger.maybeOf(context);
+  if (!manual && (!kReleaseMode || !await AppUpdater.dailyCheckDue())) return;
   AppUpdate? update;
   try {
     update = await AppUpdater.check();
