@@ -89,6 +89,42 @@ void main() {
     expect(texts.where((w) => w.$1 == G1Side.right), hasLength(2));
   });
 
+  test('a text missing on one arm is sent to that arm again', () async {
+    final display = G1Display(g1);
+    await display.showText('Dashboard');
+    writes.clear();
+    await Future<void>.delayed(
+      G1Display.verifyDelay + const Duration(milliseconds: 20),
+    );
+    // Left arm still shows the Even dashboard (0x06) ...
+    expect(writes.single, (G1Side.left, [0x39, 0x04, 0x00, 0x00]));
+    g1.receive(
+      G1Side.left,
+      Uint8List.fromList([0x39, 0x04, 0x00, 0x00, 0x00, 0x06]),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    // ... so the text is sent to the left arm only.
+    final resend = writes.where((w) => w.$2[0] == G1Cmd.text).toList();
+    expect(resend.single.$1, G1Side.left);
+    // The right arm shows the text.
+    g1.receive(
+      G1Side.right,
+      Uint8List.fromList([0x39, 0x04, 0x00, 0x00, 0x00, 0x10]),
+    );
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(writes.where((w) => w.$2[0] == G1Cmd.text), hasLength(1));
+    display.onDismissed();
+  });
+
+  test('clearing sends a blank text instead of the exit command', () async {
+    final display = G1Display(g1)..verifyBothArms = false;
+    await display.showText('Hallo');
+    writes.clear();
+    await display.clear();
+    expect(writes.any((w) => w.$2[0] == G1Cmd.exit), isFalse);
+    expect(writes.where((w) => w.$2[0] == G1Cmd.text), hasLength(2));
+  });
+
   test('optional Even AI mode uses 0x31 and pages', () async {
     final display = G1Display(g1)..evenAiAnswers = true;
     await display.showAiAnswer('Licht im Wohnzimmer ist an.');

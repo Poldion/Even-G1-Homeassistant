@@ -530,6 +530,8 @@ class G1Connection extends ChangeNotifier {
     int status = G1ScreenStatus.textShow | G1ScreenStatus.newContent,
     int page = 0,
     int pages = 1,
+    bool left = true,
+    bool right = true,
   }) {
     return send(
       G1Packets.text(
@@ -539,8 +541,22 @@ class G1Connection extends ChangeNotifier {
         page: page,
         pages: pages,
       ),
+      left: left,
+      right: right,
     );
   }
+
+  /// Empties the display with a blank text, like MentraOS.
+  ///
+  /// The exit command 0x18 leaves the Even AI surface that 0x4E texts use;
+  /// its teardown races in the firmware and sometimes flashes "Even AI is
+  /// listening" on the right lens (even-g1-companion,
+  /// FINDINGS-evenai-flash-on-clear.md). A blank text has nothing to tear
+  /// down.
+  Future<bool> blankScreen() => sendText(' ');
+
+  /// Writes a line to the app log (diagnostics).
+  void note(String message) => _debug(message);
 
   /// Which screen the given arm currently shows (0x39), or null.
   Future<int?> readScreenState(G1Side side) async {

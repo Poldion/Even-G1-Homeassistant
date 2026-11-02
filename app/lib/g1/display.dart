@@ -55,6 +55,9 @@ class G1Display {
 
     final ok = await _showPage(generation);
     if (generation != _generation) return ok;
+    if (!evenAi && verifyBothArms) {
+      unawaited(_verifyBothArms(generation, _page));
+    }
 
     if (_screens.length > 1) {
       _pageTimer = Timer.periodic(pageInterval, (timer) async {
@@ -103,7 +106,7 @@ class G1Display {
   /// Returns to the dashboard.
   Future<bool> clear() async {
     _reset();
-    return g1.exitToDashboard();
+    return g1.blankScreen();
   }
 
   /// The glasses left the text view on their own (double tap).
@@ -141,6 +144,34 @@ class G1Display {
     );
   }
 
+  /// Check after showing a text that both arms display it and send it again
+  /// to an arm that does not (e.g. the left arm while the glasses handle the
+  /// head up movement).
+  bool verifyBothArms = true;
+  static const verifyDelay = Duration(milliseconds: 400);
+
+  /// Screen id (0x39) of the text surface used by 0x4E (even-g1-companion).
+  static const _textScreen = 0x10;
+
+  Future<void> _verifyBothArms(int generation, int page) async {
+    await Future<void>.delayed(verifyDelay);
+    for (final side in G1Side.values) {
+      if (generation != _generation || page != _page || !g1.connected) return;
+      final id = await g1.readScreenState(side);
+      if (id == null || id == _textScreen) continue;
+      if (generation != _generation || page != _page) return;
+      g1.note(
+        'Anzeige ${side == G1Side.left ? 'links' : 'rechts'} fehlte '
+        '(${screenName(id)}) – erneut gesendet',
+      );
+      await g1.sendText(
+        _screens[_page],
+        left: side == G1Side.left,
+        right: side == G1Side.right,
+      );
+    }
+  }
+
   void _scheduleClose() {
     final after = _closeAfter;
     if (after == null) return;
@@ -149,7 +180,7 @@ class G1Display {
     _closeTimer = Timer(after, () async {
       if (generation != _generation) return;
       _reset();
-      await g1.exitToDashboard();
+      await g1.blankScreen();
     });
   }
 
