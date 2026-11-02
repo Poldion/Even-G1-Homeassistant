@@ -1,0 +1,104 @@
+name: Release
+
+# Creates a GitHub release for a version tag (vX.Y.Z): signed APK, the
+# integration as ZIP and the notes from CHANGELOG.md.
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check that the tag matches all versions
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          APP=$(grep '^version:' app/pubspec.yaml | cut -d' ' -f2 | cut -d+ -f1)
+          INTEGRATION=$(python3 -c "import json;print(json.load(open('custom_components/even_g1/manifest.json'))['version'])")
+          CHANGELOG=$(grep -m1 -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md)
+          echo "tag=$TAG app=$APP integration=$INTEGRATION changelog=$CHANGELOG"
+          if [ "$TAG" != "$APP" ] || [ "$TAG" != "$INTEGRATION" ] || [ "$TAG" != "$CHANGELOG" ]; then
+            echo "::error::Tag v$TAG does not match app ($APP), integration ($INTEGRATION) and CHANGELOG ($CHANGELOG)."
+            exit 1
+          fi
+          echo "version=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v v="${{ steps.version.outputs.version }}" '
+            $0 ~ "^## \\[" v "\\]" {found=1; next}
+            found && /^## \[/ {exit}
+            found {print}
+          ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          cat >> "$RUNNER_TEMP/notes.md" <<'EOF'
+
+          ---
+          **Installation:** `even-g1-ha-*.apk` auf dem Android-Handy installieren (Updates lassen sich über die vorherige Version installieren). Die Integration über HACS aktualisieren oder `even_g1-*.zip` nach `config/custom_components/even_g1/` entpacken.
+          EOF
+          cat "$RUNNER_TEMP/notes.md"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.47.7
+          cache: true
+
+      - name: Signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          # Releases must be signed with the fixed key, otherwise they cannot
+          # be installed as updates.
+          CLEAN=$(printf '%s' "$KEYSTORE_BASE64" | tr -d ' \r\n\t')
+          if [ -z "$CLEAN" ]; then
+            echo "::error::Secret ANDROID_KEYSTORE_BASE64 is missing."
+            exit 1
+          fi
+          printf '%s' "$CLEAN" | base64 -d > "$RUNNER_TEMP/release.jks"
+          PASSWORD=$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d '\r\n')
+          keytool -list -keystore "$RUNNER_TEMP/release.jks" -storepass "$PASSWORD" -alias even-g1-ha | grep -i "SHA-256"
+          echo "::add-mask::$PASSWORD"
+          echo "G1_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+          echo "G1_KEYSTORE_PASSWORD=$PASSWORD" >> "$GITHUB_ENV"
+          echo "G1_KEY_ALIAS=even-g1-ha" >> "$GITHUB_ENV"
+
+      - name: Build APK
+        working-directory: app
+        run: |
+          flutter pub get
+          flutter test
+          flutter build apk --release
+
+      - name: Package assets
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          cp app/build/app/outputs/flutter-apk/app-release.apk "even-g1-ha-v$V.apk"
+          (cd custom_components/even_g1 && zip -r "$GITHUB_WORKSPACE/even_g1-v$V.zip" . -x '__pycache__/*')
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          # Remove the former rolling pre-release (replaced by versioned releases).
+          gh release delete app-latest --cleanup-tag --yes 2>/dev/null || true
+          gh release create "v$V" "even-g1-ha-v$V.apk" "even_g1-v$V.zip" \
+            --title "v$V" \
+            --notes-file "$RUNNER_TEMP/notes.md"

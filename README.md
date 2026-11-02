@@ -1,217 +1,128 @@
-# Even Realities G1 ↔ Home Assistant
+# Even Realities G1 für Home Assistant
 
-Verbindet die Smart-Glasses **Even Realities G1** mit **Home Assistant**:
+[![Release](https://img.shields.io/github/v/release/Poldion/Even-G1-Homeassistant)](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
+[![Integration](https://github.com/Poldion/Even-G1-Homeassistant/actions/workflows/integration.yml/badge.svg)](https://github.com/Poldion/Even-G1-Homeassistant/actions/workflows/integration.yml)
+[![App](https://github.com/Poldion/Even-G1-Homeassistant/actions/workflows/app.yml/badge.svg)](https://github.com/Poldion/Even-G1-Homeassistant/actions/workflows/app.yml)
 
-- 📟 **Texte aus Home Assistant auf der Brille anzeigen**: per Aktion, Notify-Entität oder Automation (z. B. „Waschmaschine fertig“, „Haustür offen“, Wetter oder ein eigenes Dashboard-Template)
-- 🎙️ **Home Assistant Assist per Brille**: **linke Touchbar gedrückt halten**, sprechen, loslassen. Die Frage geht über das Brillen-Mikrofon an deine Assist-Pipeline, die Antwort erscheint auf dem Display. Rückfragen innerhalb von 5 Minuten setzen dieselbe Unterhaltung fort.
-- 👆 **Gesten als Trigger**: Tippen links/rechts, Doppeltippen, Kopf heben, Brille auf-/absetzen usw. als Event-Entität für Automationen
-- 🏠 **Home-Assistant-Dashboard beim Hochschauen**: Beim Hochschauen erscheint dein eigenes Dashboard-Template über dem Even-Dashboard, beim Runterschauen verschwindet es wieder
-- 📱 **Handy-Benachrichtigungen auf der Brille** (Android): wie mit der offiziellen Even-App, pro App ein- und ausschaltbar
-- 🔋 **Sensoren**: Akku links/rechts, verbunden, letzte Frage/Antwort
+Verbindet die Smart-Glasses **Even Realities G1** mit **Home Assistant**: Texte
+und ein eigenes Dashboard auf der Brille anzeigen, mit deinem Assistenten
+sprechen und die Brille in Automationen nutzen. Dazu gehören eine
+**Android-App**, die die Brille per Bluetooth verbindet, und eine
+**Home-Assistant-Integration**.
 
-```
-┌──────────────┐  BLE (2× Nordic UART)  ┌──────────────────┐  Websocket-API  ┌──────────────────────────┐
-│  Even G1     │ ◄────────────────────► │  Smartphone-App  │ ◄─────────────► │ Home Assistant           │
-│  L + R Bügel │  Text, Gesten, LC3-Mic │  (Flutter, app/) │  Text, Gesten,  │  + Integration even_g1   │
-└──────────────┘                        └──────────────────┘  Assist-Audio   │  + Assist-Pipeline       │
-                                                                             └──────────────────────────┘
-```
+## Funktionen
 
-Die Brille kann nur über Bluetooth mit einem Smartphone reden. Die **App** hält deshalb die
-Bluetooth-Verbindung zu beiden Bügeln, dekodiert das Mikrofon-Audio (LC3 → PCM) und spricht mit
-Home Assistant. Die **Custom Integration** (`custom_components/even_g1`) ist die Schnittstelle auf
-der Home-Assistant-Seite: Sie stellt Aktionen, Entitäten und Events bereit und schiebt Anzeigebefehle
-in Echtzeit an die App.
-
-## Inhalt des Repositorys
-
-| Pfad | Inhalt |
-| --- | --- |
-| `custom_components/even_g1/` | Home-Assistant-Integration (HACS-kompatibel) |
-| `app/` | Flutter-App für Android (und iOS) |
-| `app/packages/lc3_codec/` | FFI-Plugin mit [google/liblc3](https://github.com/google/liblc3) zum Dekodieren des Brillen-Mikrofons |
-| `tests/` | Tests der Integration (pytest) |
-| `app/test_e2e/` | End-to-End-Test App ↔ echte Home-Assistant-Instanz |
+- **Texte auf der Brille** per Aktion, Notify-Entität oder Automation, z. B. „Waschmaschine fertig“
+- **Assist:** linke Touchbar gedrückt halten, sprechen, loslassen; die Antwort deines Assistenten erscheint auf der Brille
+- **Dashboard für die Brille** aus Entitäten und Templates, auf Wunsch beim Hochschauen
+- **Handy-Benachrichtigungen** auf der Brille, pro App wählbar
+- **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
 
 ## Installation
 
-### 1. Integration in Home Assistant
+### Integration
 
-**Über HACS:** HACS → Integrationen → ⋮ → *Benutzerdefinierte Repositories* →
-`https://github.com/poldion/even-g1-homeassistant` als *Integration* hinzufügen → „Even Realities G1“ installieren → Home Assistant neu starten.
+**HACS:** *HACS → ⋮ → Benutzerdefinierte Repositories* →
+`https://github.com/Poldion/Even-G1-Homeassistant` als *Integration* hinzufügen,
+„Even Realities G1“ installieren, Home Assistant neu starten.
 
-**Manuell:** Den Ordner `custom_components/even_g1` nach `<config>/custom_components/even_g1` kopieren und Home Assistant neu starten.
+**Manuell:** `even_g1-vX.Y.Z.zip` von der
+[Releases-Seite](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
+nach `config/custom_components/even_g1/` entpacken und Home Assistant neu
+starten.
 
-Danach: *Einstellungen → Geräte & Dienste → Integration hinzufügen → „Even Realities G1“* und einen Namen für die Brille vergeben.
+Danach *Einstellungen → Geräte & Dienste → Integration hinzufügen →
+„Even Realities G1“*.
 
-### 2. App auf dem Smartphone
+### App (Android)
 
-- **Android:** Die neueste APK direkt herunterladen: **https://github.com/Poldion/Even-G1-Homeassistant/releases/download/app-latest/even-g1-ha.apk** (wird bei jedem Build aktualisiert, siehe Release „app-latest“). Alternativ als ZIP unter *Actions → App → Artifact `even-g1-ha-apk`*, oder selbst bauen: `cd app && flutter build apk --release`.
-- **iOS:** `cd app && flutter build ios` auf einem Mac mit Xcode (eigene Signierung nötig).
+`even-g1-ha-vX.Y.Z.apk` von der
+[Releases-Seite](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
+auf dem Handy herunterladen und installieren. Neue Versionen lassen sich als
+Update über die vorhandene installieren, die Einstellungen bleiben erhalten.
 
-**Updates:** Damit eine neue APK als Update über die alte installiert werden kann (und deine Einstellungen erhalten bleiben), müssen alle Builds mit demselben Schlüssel signiert sein. Dafür im Repository unter *Settings → Secrets and variables → Actions* die Secrets `ANDROID_KEYSTORE_BASE64` (Keystore als Base64, Alias `even-g1-ha`) und `ANDROID_KEYSTORE_PASSWORD` anlegen. Ohne diese Secrets signiert der Build mit einem wechselnden Testschlüssel, und Android meldet beim Update „Die App wurde nicht installiert“.
+App und Integration sollten dieselbe Version haben.
 
-### 3. Einrichten
+## Einrichtung
 
-1. In Home Assistant: *Profil → Sicherheit → Langlebige Zugriffstoken → Token erstellen*.
-2. **Die offizielle Even-App schließen** (bzw. in den Einstellungen die Bluetooth-Verbindung der Brille trennen). Die G1 verbindet sich immer nur mit einer App.
-3. In der App: *Einstellungen → Home Assistant* → URL (z. B. `http://homeassistant.local:8123`) und Token eintragen → *Verbinden & Brillen aus HA laden* → Brille auswählen → *Speichern*.
-4. *Nach Brillen suchen* → deine G1 antippen (beide Bügel werden über ihre Kanalnummer zusammen erkannt). Auf Android ggf. die Kopplungsanfragen bestätigen.
-5. Unter Android läuft die App mit einer dauerhaften Benachrichtigung als Vordergrunddienst weiter, wenn sie im Hintergrund ist. Für einen stabilen Betrieb die Akku-Optimierung für die App deaktivieren.
+1. In Home Assistant ein Token erstellen: *Profil → Sicherheit → Langlebige Zugriffstoken*.
+2. Die offizielle Even-App schließen; die Brille verbindet sich nur mit einer App.
+3. In der App unter *Einstellungen → Home Assistant* URL und Token eintragen, *Verbinden & Brillen aus HA laden*, Brille wählen, *Speichern*.
+4. Unter *Einstellungen → Brille koppeln* nach Brillen suchen und deine G1 antippen.
+5. Optional *Einstellungen → Benachrichtigungen → Erlauben*. Meldet Android „App wurde Zugriff verweigert“: *Android-Einstellungen → Apps → Even G1 HA → ⋮ → Eingeschränkte Einstellungen zulassen*, dann erneut erlauben.
+6. Für stabilen Betrieb im Hintergrund die Akku-Optimierung für die App deaktivieren.
 
-### 4. Assist konfigurieren
+## Bedienung
 
-Welcher **Assistent** (Assist-Pipeline) antwortet, wählst du in Home Assistant über die Entität **`select.<name>_assistent`** am Brillen-Gerät, z. B. direkt aus einem Dashboard oder per Automation. Alternativ geht das unter *Integration → Konfigurieren*. Standard ist der bevorzugte Assistent.
-Die Pipeline braucht eine **Spracherkennung (STT)**, z. B. *Home Assistant Cloud* oder *Whisper*. Die Spracherkennung läuft
-immer in Home Assistant, nicht auf dem Handy: Die App leitet nur das Mikrofon-Audio der Brille weiter. Die Qualität hängt
-daher vom STT-Dienst der Pipeline ab. *Speech-to-Phrase* versteht nur vordefinierte Befehle, für freie Fragen eignen sich
-*Whisper* oder *Home Assistant Cloud* besser.
-
-Die Aufnahme dauert genau so lange, wie du die Touchbar gedrückt hältst. Sprechpausen beenden sie nicht (keine
-automatische Sprachende-Erkennung).
-Sprachausgabe (TTS) wird nicht genutzt, da die Brille keinen Lautsprecher hat.
-
-Weitere Optionen:
-
-| Option | Bedeutung |
-| --- | --- |
-| Erkannte Frage anzeigen | Zeigt nach dem Loslassen kurz `» erkannte Frage «` an |
-| Automatische Verstärkung | Hebt leise Sprache an (0 = aus, bis 31 dBFS). Hilft, wenn Fragen oft nicht verstanden werden |
-| Rauschunterdrückung | 0 = aus bis 4 = stark, für laute Umgebungen |
-| Standard-Anzeigedauer | Sekunden bis die Brille wieder zum Dashboard wechselt (0 = bis Doppeltippen) |
-| Dashboard-Geste | Geste, die das Dashboard-Template anzeigt: *Einfaches Tippen links/rechts* oder *Kopf gehoben* (siehe unten) |
-| Dashboard-Entitäten | Entitäten, die auf dem Brillen-Dashboard als Zeilen „Name: Zustand Einheit“ erscheinen (siehe unten) |
-| Zusätzlicher Dashboard-Text | Optionales Jinja-Template unter den Entitäten, z. B. Uhrzeit oder eigene Texte |
-
-### Dashboard für die Brille
-
-Das Brillen-Dashboard stellst du in Home Assistant unter *Integration → Konfigurieren* zusammen:
-
-1. **Dashboard-Entitäten** auswählen, etwa Temperaturen, Türen, Lichter oder Müllabfuhr. Jede Entität wird eine Zeile „Name: Zustand Einheit“. Zustände erscheinen übersetzt, also „Offen“ statt `open`.
-2. Optional einen **zusätzlichen Dashboard-Text** als Jinja-Template ergänzen, z. B. `{{ now().strftime('%H:%M') }}`.
-3. Die **Dashboard-Geste** wählen: *Kopf gehoben* (siehe unten) oder Tippen links/rechts. Zusätzlich kannst du es jederzeit mit `even_g1.show_dashboard` anzeigen.
-
-Mehr als fünf Zeilen werden auf mehrere Seiten verteilt; du blätterst mit Tippen links/rechts.
-
-### Dashboard beim Hochschauen
-
-Mit der Dashboard-Geste **Kopf gehoben** funktioniert das Dashboard wie bei MentraOS:
-
-- Home Assistant rendert das Dashboard-Template laufend und schickt den Text an die App, **nur wenn sich das Ergebnis ändert**.
-- Schaust du hoch, meldet die Brille das der App (`0xF5 0x02`). Die App zeigt den zuletzt erhaltenen Text sofort an, ohne erst bei Home Assistant nachzufragen.
-- Ändert sich der Inhalt, während du hochschaust, wird die Anzeige aktualisiert. Schaust du wieder runter (`0xF5 0x03`), wird sie geschlossen.
-- Läuft gerade eine Assist-Antwort oder ein Text aus Home Assistant, wird dieser nicht überdeckt.
-
-Stelle dazu in der App unter *Einstellungen → Anzeige & Aktivierung* **Even-Dashboard beim Hochschauen** auf **Ausblenden**. Dann zeigt die Brille beim Hochschauen selbst nichts mehr an, meldet die Kopfbewegung aber weiter, und es erscheint nur dein Home-Assistant-Dashboard. Mit *Unverändert lassen* übermalt die App das Even-Dashboard, es kann dann kurz aufblitzen. Die Einstellung bleibt auf der Brille gespeichert, auch wenn du später wieder die offizielle Even-App nutzt.
-
-### 5. Die App
-
-Die App hat zwei Tabs:
-
-- **Übersicht:** Verbindung und Akkustand der Brille (links, rechts) und des Case inklusive Laden, Trage-Zustand, Ruhemodus-Schalter, Verbindung zu Home Assistant, gewählter Assistent und letzte Frage/Antwort. Dazu eine einklappbare **Vorschau** dessen, was die App gerade auf der Brille anzeigt.
-- **Einstellungen:**
-  - *Home Assistant*: Verbindung einrichten
-  - *Brille koppeln*
-  - *Anzeige & Aktivierung*: Aktivierungswinkel (0–60°), Höhe (0–8) und Distanz (1–9) des Textes, Even-Dashboard beim Hochschauen. Beim Verschieben von Höhe/Distanz zeigt die Brille kurz einen Beispieltext. Die Werte speichert die App und überträgt sie bei jeder Verbindung.
-  - *Benachrichtigungen*
-  - *Diagnose*: Testtext, Anzeige links/rechts prüfen, Protokoll
-
-### 6. Handy-Benachrichtigungen (Android)
-
-Die App leitet die Benachrichtigungen deines Handys an die Brille weiter, so wie die offizielle Even-App. Die Brille zeigt sie mit ihrer eigenen Benachrichtigungsanzeige.
-
-1. In der App: *Einstellungen → Benachrichtigungen* → **Erlauben** und in den Android-Einstellungen „Even G1 HA“ den Zugriff auf Benachrichtigungen geben.
-   Meldet Android „App wurde Zugriff verweigert“ (Schutz für Apps außerhalb des Play Stores, ab Android 13): *Einstellungen → Apps → Even G1 HA → ⋮ → Eingeschränkte Einstellungen zulassen*, danach erneut auf *Erlauben* tippen.
-2. Jede App, die eine Benachrichtigung schickt, erscheint dort in der Liste und wird standardmäßig weitergeleitet. Per Schalter kannst du einzelne Apps ausschließen oder das Weiterleiten ganz abschalten.
-
-Nicht weitergeleitet werden dauerhafte Benachrichtigungen (Musik, Navigation, Downloads), Gruppen-Zusammenfassungen und wiederholte Updates mit gleichem Inhalt.
-
-## Bedienung an der Brille
+### An der Brille
 
 | Geste | Aktion |
 | --- | --- |
-| Linke Touchbar **gedrückt halten** | Assist: sprechen, solange gedrückt (max. 30 s). Währenddessen zeigt die Brille ihre eigene Even-AI-Zuhör-Anzeige, danach erscheint die Antwort aus Home Assistant |
-| Tippen links / rechts | Bei mehrseitigen Texten: Seite zurück / vor |
-| Doppeltippen | Anzeige schließen, laufende Assist-Anfrage abbrechen |
-| Konfigurierte Dashboard-Geste | Dashboard-Template anzeigen (bei *Kopf gehoben*: beim Hochschauen) |
+| Linke Touchbar gedrückt halten | Assist: sprechen, solange gedrückt (max. 30 s) |
+| Tippen links / rechts | Seite zurück / vor |
+| Doppeltippen | Anzeige schließen, Assist abbrechen |
+| Dreifachtippen | Ruhemodus an/aus |
+| Hochschauen | Home-Assistant-Dashboard (wenn als Dashboard-Geste gewählt) |
 
-## Home Assistant: Aktionen, Entitäten, Events
+### In der App
+
+- **Übersicht:** Verbindung, Akku links/rechts und Case, Trage-Zustand, Ruhemodus, Home Assistant und Assistent, optionale Vorschau der Brillenanzeige.
+- **Einstellungen:** Home Assistant, Brille koppeln, *Anzeige & Aktivierung* (Aktivierungswinkel, Höhe, Distanz, Even-Dashboard beim Hochschauen), Benachrichtigungen, Diagnose.
+
+### In Home Assistant
+
+Optionen unter *Integration → Konfigurieren*:
+
+| Option | Bedeutung |
+| --- | --- |
+| Assistent | Welche Assist-Pipeline antwortet (auch über die Entität „Assistent“) |
+| Erkannte Frage anzeigen | Zeigt nach dem Loslassen die erkannte Frage |
+| Automatische Verstärkung / Rauschunterdrückung | Hilft bei leiser Sprache bzw. lauter Umgebung |
+| Standard-Anzeigedauer | Sekunden bis zum Ausblenden (0 = bis Doppeltippen) |
+| Dashboard-Geste | Kopf gehoben, Tippen links oder rechts |
+| Dashboard-Entitäten | Zeilen „Name: Zustand Einheit“ auf dem Brillen-Dashboard |
+| Zusätzlicher Dashboard-Text | Jinja-Template unter den Entitäten |
+
+Die Assist-Pipeline braucht eine Spracherkennung (z. B. *Home Assistant
+Cloud* oder *Whisper*); *Speech-to-Phrase* versteht nur feste Befehle.
+Damit beim Hochschauen nur das Home-Assistant-Dashboard erscheint, in der App
+*Even-Dashboard beim Hochschauen* auf *Ausblenden* stellen.
+
+## Home-Assistant-Referenz
 
 ### Aktionen
 
 ```yaml
-# Text im Vollbild anzeigen (lange Texte werden automatisch auf Seiten verteilt)
 action: even_g1.show_text
 data:
   title: Waschmaschine
   message: Die Wäsche ist fertig.
   duration: 15          # optional, Sekunden; 0 = bis Doppeltippen
-  mode: screen          # oder "notification" (normale Benachrichtigung der Brille)
-  # device_id: ...      # optional, sonst an alle Brillen
-
-# Zurück zum Dashboard der Brille
-action: even_g1.clear
-
-# Dashboard-Template rendern und anzeigen
-action: even_g1.show_dashboard
+  mode: screen          # oder "notification"
 ```
 
-Zusätzlich gibt es eine **Notify-Entität** (`notify.<name>`), nutzbar mit `notify.send_message`:
-
-```yaml
-action: notify.send_message
-target:
-  entity_id: notify.even_g1
-data:
-  title: Haustür
-  message: Die Haustür ist seit 5 Minuten offen.
-```
+`even_g1.clear` schließt die Anzeige, `even_g1.show_dashboard` zeigt das
+Dashboard. Außerdem gibt es `notify.<name>` für `notify.send_message`.
 
 ### Entitäten
 
 | Entität | Beschreibung |
 | --- | --- |
-| `binary_sensor.<name>_app_verbunden` | App ist mit HA verbunden |
-| `binary_sensor.<name>_brille_verbunden` | Beide Bügel sind per Bluetooth verbunden |
-| `sensor.<name>_akku_links` / `_akku_rechts` / `_akku_case` | Akkustand der Bügel und des Case |
+| `select.<name>_assistent` | Assistent der Brille |
+| `switch.<name>_ruhemodus` | Ruhemodus |
+| `sensor.<name>_akku_links` / `_akku_rechts` / `_akku_case` | Akkustand |
 | `binary_sensor.<name>_case_ladt` | Case hängt am Ladekabel |
-| `sensor.<name>_zustand` | `worn` (getragen), `not_worn` (abgesetzt), `case_open`, `case_closed` (im Case) |
-| `select.<name>_assistent` | Welcher Assistent auf der Brille antwortet |
-| `switch.<name>_ruhemodus` | Ruhemodus der Brille (siehe unten), auch per Dreifachtippen umschaltbar |
-| `sensor.<name>_letzte_frage` / `_letzte_antwort` | Letzte Assist-Interaktion (voller Text im Attribut `full_text`) |
-| `event.<name>_geste` | Gesten-Event (`event_type`: `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `long_press`, `long_press_release`, `other`) |
+| `sensor.<name>_zustand` | `worn`, `not_worn`, `case_open`, `case_closed` |
+| `binary_sensor.<name>_brille_verbunden` / `_app_verbunden` | Verbindungen |
+| `sensor.<name>_letzte_frage` / `_letzte_antwort` | Letzte Assist-Interaktion |
+| `event.<name>_geste` | `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `long_press`, `long_press_release`, `other` |
 
-### Events
+Events: `even_g1_gesture` (`device_id`, `gesture`, `side`, `code`) und
+`even_g1_assist` (`device_id`, `query`, `response`).
 
-- `even_g1_gesture` mit `device_id`, `gesture`, `side`, `code` (Roh-Code des Protokolls)
-- `even_g1_assist` mit `device_id`, `query`, `response`
-
-### Ruhemodus
-
-Der Ruhemodus lässt sich in Home Assistant über `switch.<name>_ruhemodus`, in der App über den Schalter auf der Startseite oder an der Brille durch dreimaliges Tippen umschalten. Die Brille meldet das Dreifachtippen, sodass Schalter und App immer den aktuellen Stand zeigen. Im Ruhemodus:
-
-- schaltet die Brille ihren eigenen Ruhemodus ein (Befehl `03 0C 00`, aus: `03 0A 00`, wie im eveng1-Python-SDK und in MentraOS),
-- zeigt die App keine Texte aus Home Assistant, keine Handy-Benachrichtigungen und kein Dashboard beim Hochschauen an,
-- funktioniert Assist (linke Touchbar halten) weiter.
-
-Beispiel: Ruhemodus nachts automatisch einschalten.
+### Beispiele
 
 ```yaml
-automation:
-  - alias: G1 – Ruhemodus nachts
-    triggers:
-      - trigger: time
-        at: "22:30:00"
-    actions:
-      - action: switch.turn_on
-        target:
-          entity_id: switch.even_g1_ruhemodus
-```
-
-### Beispiel-Automationen
-
-```yaml
-# Wetter anzeigen, wenn rechts getippt wird
 automation:
   - alias: G1 – Wetter bei Tippen rechts
     triggers:
@@ -223,66 +134,27 @@ automation:
       - action: even_g1.show_text
         data:
           title: Wetter
-          message: >
-            {{ state_attr('weather.home', 'temperature') }} °C,
-            {{ states('weather.home') }}
+          message: "{{ state_attr('weather.home', 'temperature') }} °C"
           duration: 8
 
-  # Benachrichtigung bei offenem Fenster
-  - alias: G1 – Fenster offen
+  - alias: G1 – Ruhemodus nachts
     triggers:
-      - trigger: state
-        entity_id: binary_sensor.fenster_bad
-        to: "on"
-        for: "00:10:00"
+      - trigger: time
+        at: "22:30:00"
     actions:
-      - action: even_g1.show_text
-        data:
-          message: Das Badfenster ist seit 10 Minuten offen.
-          mode: notification
+      - action: switch.turn_on
+        target:
+          entity_id: switch.even_g1_ruhemodus
 ```
 
-Beispiel für ein Dashboard-Template:
+## Hinweise
 
-```jinja
-{{ now().strftime('%H:%M') }} · {{ states('sensor.outdoor_temperature') }} °C
-Licht an: {{ states.light | selectattr('state', 'eq', 'on') | list | count }}
-{% if is_state('binary_sensor.haustuer', 'on') %}⚠ Haustür offen{% endif %}
-```
+- Teile des Bluetooth-Protokolls stammen aus Community-Projekten und können je nach Firmware abweichen, siehe [docs/TECHNICAL.md](docs/TECHNICAL.md).
+- Die Bluetooth-Bibliothek [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) ist nur für nicht-kommerzielle Nutzung frei.
+- Kein offizielles Produkt von Even Realities.
 
-## Technische Details
+## Weitere Dokumentation
 
-- **Protokoll:** Die App spricht das BLE-Protokoll aus der offiziellen [EvenDemoApp](https://github.com/even-realities/EvenDemoApp): Text über `0x4E` im Textmodus `0x71` (5 Zeilen à ~488 px pro Seite, Blättern übernimmt die App), Mikrofon über `0x0E`, Audio über `0xF1` (LC3, 16 kHz, 10-ms-Frames, 20 Byte/Frame), Touch-Events über `0xF5` (`0x17` = Assist-Start, `0x18` = Ende), Heartbeat `0x25` alle 8 s.
-- **Senden an beide Bügel:** Wie bei MentraOS laufen alle Befehle über eine gemeinsame Warteschlange. Jedes Paket wird gleichzeitig an den linken und rechten Bügel geschrieben (mit Bluetooth-Bestätigung), bevor das nächste folgt. So zeigen beide Seiten immer denselben Inhalt, auch wenn ein Bügel gerade beschäftigt ist (z. B. mit dem Mikrofon). Die Even-AI-Anzeigemodi der Firmware werden nicht verwendet. Lehnt ein Bügel einen Befehl ab, steht das im App-Protokoll (`L/R rejected 0x..`).
-- **Assist:** Die App streamt das dekodierte PCM-Audio als Binärnachrichten an den Websocket-Befehl `even_g1/assist_run` der Integration. Diese startet die konfigurierte Assist-Pipeline (Stufen `stt` → `intent`) ohne Voice Activity Detection und mit den eingestellten Audio-Optionen. Die Gerätezuordnung (`device_id`) wird mitgegeben, damit Befehle wie „Licht an“ den Bereich der Brille berücksichtigen können. Während die Touchbar gehalten wird, zeichnet die App nichts: Der rechte Bügel (Master) zeichnet seine Even-AI-Zuhör-Anzeige laufend neu, eigener Text kam deshalb nur links an. Nach dem Loslassen folgen „Einen Moment …“, die erkannte Frage und die Antwort auf beiden Bügeln.
-- **Anzeige prüfen:** Mit `0x39` fragt die App jeden Bügel einzeln, was er gerade anzeigt (Button *Anzeige links/rechts prüfen*, automatisch auch nach jeder Assist-Antwort im Protokoll). Unterschiede zwischen links und rechts werden markiert.
-- **Integration ↔ App:** Websocket-Befehle `even_g1/devices`, `even_g1/subscribe` (Anzeigebefehle und Konfiguration als Push), `even_g1/update_state`, `even_g1/gesture`, `even_g1/assist_run`, `even_g1/dashboard`.
-
-## Hinweise & Grenzen
-
-- Die Codes für Kopf heben/senken, Akku und Case (`F5 0A`, `F5 0F`, `F5 0E`), Trage-Zustand (`F5 06/07/08/0B`), die Einstellungen für Aktivierungswinkel (`0x0B`) und Anzeigeposition (`0x26`) sowie der Ruhemodus (`0x03`) stammen nicht aus der offiziellen Dokumentation. Sie sind aus Community-Projekten (MentraOS, even-g1-companion, eveng1 Python SDK) übernommen und können je nach Firmware abweichen. Statusmeldungen werden nicht als Gesten weitergegeben; unbekannte Codes kommen als `other` mit `code` in Home Assistant an.
-- Benachrichtigungen im Modus `notification` setzen eine App-Whitelist auf der Brille. Die offizielle Even-App überschreibt diese beim nächsten Verbinden wieder.
-- Die BLE-Bibliothek [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) ist für private/nicht-kommerzielle Nutzung frei (`License.nonprofit`).
-- Dies ist kein offizielles Produkt von Even Realities.
-
-## Entwicklung
-
-```sh
-# Integration testen
-pip install -r requirements_test.txt
-pytest
-
-# App
-cd app
-flutter pub get
-flutter analyze && flutter test
-
-# LC3-Decoder (Host-Build)
-cd app/packages/lc3_codec
-cmake -S src -B build && cmake --build build
-LC3_CODEC_LIBRARY=build/liblc3_codec.so flutter test
-
-# End-to-End gegen eine laufende HA-Instanz mit der Integration
-cd app
-HA_URL=http://localhost:8123 HA_TOKEN=... HA_STT_ENGINE=stt.dein_stt flutter test test_e2e
-```
+- [Änderungen](CHANGELOG.md)
+- [Technische Details und Protokoll](docs/TECHNICAL.md)
+- [Entwicklung, Tests und Releases](docs/DEVELOPMENT.md)

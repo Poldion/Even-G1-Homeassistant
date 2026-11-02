@@ -4,13 +4,12 @@ on:
   push:
     branches: ["**"]
     paths: ["app/**", ".github/workflows/app.yml"]
-    tags: ["v*"]
   pull_request:
     paths: ["app/**", ".github/workflows/app.yml"]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -77,23 +76,3 @@ jobs:
         with:
           name: even-g1-ha-apk
           path: app/build/app/outputs/flutter-apk/app-release.apk
-      - name: Publish APK for direct download (release "app-latest")
-        # Not for pull requests and only when signed with the fixed key, so
-        # the download can always be installed as an update.
-        if: github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/tags/') && env.G1_KEYSTORE_PATH != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          cp build/app/outputs/flutter-apk/app-release.apk even-g1-ha.apk
-          VERSION=$(grep '^version:' pubspec.yaml | cut -d' ' -f2)
-          gh release delete app-latest --cleanup-tag --yes || true
-          gh release create app-latest even-g1-ha.apk \
-            --prerelease \
-            --target "$GITHUB_SHA" \
-            --title "App $VERSION (neuester Build)" \
-            --notes "Neueste APK vom Branch ${GITHUB_REF_NAME} (Commit ${GITHUB_SHA::7}). Direkt-Download: https://github.com/${GITHUB_REPOSITORY}/releases/download/app-latest/even-g1-ha.apk"
-      - name: Attach APK to release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: app/build/app/outputs/flutter-apk/app-release.apk
