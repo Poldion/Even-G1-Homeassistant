@@ -7,6 +7,20 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-02
+
+### Added
+- Integration: Kalender und To-do-Listen in den Optionen auswählbar. Das
+  Dashboard zeigt Termine von heute und morgen sowie fällige To-dos, ohne
+  Helfer oder YAML.
+- Integration: Standard-Dashboard für eine Seite der Brille mit Uhrzeit,
+  Datum, Entitäten, Terminen und To-dos.
+
+### Changed
+- Das Dashboard-Template ist optional; leer bedeutet Standard-Layout. Das
+  bisherige Standard-Template (Uhrzeit und Sonne) wird durch das neue Layout
+  ersetzt.
+
 ## [0.8.0] - 2026-11-02
 
 ### Added
@@ -66,7 +80,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Poldion/Even-G1-Homeassistant/releases/tag/v0.8.0
 [0.7.0]: https://github.com/Poldion/Even-G1-Homeassistant/commits/f545428
 [0.4.0]: https://github.com/Poldion/Even-G1-Homeassistant/commits/f4d4c19

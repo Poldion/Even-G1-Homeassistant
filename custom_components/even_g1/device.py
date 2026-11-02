@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 import logging
 from typing import Any
 
@@ -15,10 +16,15 @@ from homeassistant.exceptions import HomeAssistantError, TemplateError
 from homeassistant.helpers.event import (
     TrackTemplate,
     TrackTemplateResult,
+    async_track_state_change_event,
     async_track_template_result,
+    async_track_time_change,
+    async_track_time_interval,
 )
 from homeassistant.helpers.template import Template
+from homeassistant.util import dt as dt_util
 
+from . import agenda
 from .const import (
     CMD_CLEAR,
     CMD_CONFIG,
@@ -28,20 +34,22 @@ from .const import (
     CMD_SILENT_MODE,
     CONF_ASSIST_PIPELINE,
     CONF_AUTO_GAIN,
+    CONF_DASHBOARD_CALENDARS,
     CONF_DASHBOARD_ENTITIES,
     CONF_DASHBOARD_GESTURE,
     CONF_DASHBOARD_TEMPLATE,
+    CONF_DASHBOARD_TODOS,
     CONF_DISPLAY_DURATION,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
     DEFAULT_AUTO_GAIN,
-    DEFAULT_DASHBOARD_TEMPLATE,
     DEFAULT_DISPLAY_DURATION,
     DEFAULT_NOISE_SUPPRESSION,
     EVENT_ASSIST,
     EVENT_GESTURE,
     GESTURE_HEAD_UP,
+    LEGACY_DASHBOARD_TEMPLATE,
     MODE_SCREEN,
     PIPELINE_PREFERRED,
 )
@@ -55,6 +63,10 @@ _ENTITY_LINE = (
     "{% if state_attr('ENTITY', 'unit_of_measurement') %} "
     "{{ state_attr('ENTITY', 'unit_of_measurement') }}{% endif %}"
 )
+
+# The display shows 5 lines per page: header plus 4 lines.
+_PAGE_LINES = 5
+_AGENDA_REFRESH = timedelta(minutes=5)
 
 
 type EvenG1ConfigEntry = ConfigEntry[EvenG1Device]
@@ -96,7 +108,14 @@ class EvenG1Device:
         # Device registry id, set in async_setup_entry.
         self.device_id: str | None = None
         self._dashboard_tracker: Any = None
+        self._minute_unsub: CALLBACK_TYPE | None = None
         self.dashboard_text: str = ""
+        # Calendars and to-do lists (refreshed in the background).
+        self._agenda_events: list[agenda.AgendaEvent] = []
+        self._agenda_todos: list[agenda.AgendaTodo] = []
+        self._agenda_unsubs: list[CALLBACK_TYPE] = []
+        # Shared with the template tracker, updated in place.
+        self._dashboard_variables: dict[str, Any] = {}
 
     @property
     def entry_id(self) -> str:
@@ -181,22 +200,43 @@ class EvenG1Device:
             },
         )
 
+    @property
+    def _custom_template(self) -> str | None:
+        """Return the user's dashboard template, None for the built-in layout."""
+        template = self.options.get(CONF_DASHBOARD_TEMPLATE)
+        if template is None or template.strip() in ("", LEGACY_DASHBOARD_TEMPLATE):
+            return None
+        return template
+
     def dashboard_template_source(self) -> str:
         """Return the Jinja source of the dashboard.
 
-        Entities selected in the options are shown as "Name: state unit"
-        lines, followed by the free template.
+        Built-in layout: time and date, the selected entities as
+        "Name: state unit" lines, then appointments and to-dos, all on one
+        page. With a custom template: entity lines followed by the template,
+        which can use the variables ``kopfzeile``, ``agenda`` and
+        ``agenda_mehr``.
         """
         lines = [
             _ENTITY_LINE.replace("ENTITY", entity_id)
             for entity_id in self.options.get(CONF_DASHBOARD_ENTITIES, [])
         ]
-        template = self.options.get(CONF_DASHBOARD_TEMPLATE)
-        if template is None:
-            template = "" if lines else DEFAULT_DASHBOARD_TEMPLATE
-        if template.strip():
-            lines.append(template)
-        return "\n".join(lines)
+        if (template := self._custom_template) is not None:
+            return "\n".join([*lines, template])
+        return "\n".join(["{{ kopfzeile }}", *lines, "{{ agenda }}"])
+
+    def dashboard_variables(self, now: datetime | None = None) -> dict[str, Any]:
+        """Return the variables of the dashboard template."""
+        now = now or dt_util.now()
+        slots = _PAGE_LINES - 1
+        if self._custom_template is None:
+            slots -= len(self.options.get(CONF_DASHBOARD_ENTITIES, []))
+        lines, more = agenda.agenda(self._agenda_events, self._agenda_todos, now, slots)
+        return {
+            "kopfzeile": agenda.header(now, more),
+            "agenda": "\n".join(lines),
+            "agenda_mehr": more,
+        }
 
     # ------------------------------------------------------------------
     # Listeners (entities)
@@ -261,14 +301,62 @@ class EvenG1Device:
     def async_shutdown(self) -> None:
         """Tell connected apps to resubscribe (entry is being unloaded)."""
         self._stop_dashboard_tracking()
+        self._stop_agenda()
         self._send({"type": CMD_RELOAD})
         self._subscribers.clear()
 
     @callback
     def async_push_config(self) -> None:
         """Send the current configuration to all connected apps."""
+        self.async_start_agenda()
         self.async_update_dashboard_tracking()
         self._send(self.app_config())
+
+    # ------------------------------------------------------------------
+    # Calendars and to-do lists
+    # ------------------------------------------------------------------
+
+    @callback
+    def async_start_agenda(self) -> None:
+        """Read the selected calendars and to-do lists and keep them fresh."""
+        self._stop_agenda()
+        calendars = self.options.get(CONF_DASHBOARD_CALENDARS, [])
+        todo_lists = self.options.get(CONF_DASHBOARD_TODOS, [])
+        self._agenda_events, self._agenda_todos = [], []
+        if not calendars and not todo_lists:
+            return
+
+        async def refresh(*_: Any) -> None:
+            result = await agenda.async_fetch(
+                self.hass, calendars, todo_lists, dt_util.now()
+            )
+            if result is None:
+                return
+            if result != (self._agenda_events, self._agenda_todos):
+                self._agenda_events, self._agenda_todos = result
+                self._async_refresh_dashboard()
+
+        @callback
+        def schedule_refresh(*_: Any) -> None:
+            self.entry.async_create_background_task(
+                self.hass, refresh(), f"{self.name} agenda"
+            )
+
+        self._agenda_unsubs = [
+            async_track_time_interval(self.hass, schedule_refresh, _AGENDA_REFRESH),
+            # Calendars switch state when an event starts or ends, to-do
+            # lists when items change.
+            async_track_state_change_event(
+                self.hass, [*calendars, *todo_lists], schedule_refresh
+            ),
+        ]
+        schedule_refresh()
+
+    @callback
+    def _stop_agenda(self) -> None:
+        for unsub in self._agenda_unsubs:
+            unsub()
+        self._agenda_unsubs = []
 
     # ------------------------------------------------------------------
     # Dashboard on head up
@@ -291,6 +379,7 @@ class EvenG1Device:
             self.dashboard_template_source(),
             self.hass,
         )
+        self._dashboard_variables.update(self.dashboard_variables())
 
         @callback
         def updated(_event: Any, updates: list[TrackTemplateResult]) -> None:
@@ -305,12 +394,27 @@ class EvenG1Device:
             self._send({"type": CMD_DASHBOARD, "text": text})
 
         self._dashboard_tracker = async_track_template_result(
-            self.hass, [TrackTemplate(template, None)], updated
+            self.hass, [TrackTemplate(template, self._dashboard_variables)], updated
         )
+        self._dashboard_tracker.async_refresh()
+        # Clock in the header and appointments that end.
+        self._minute_unsub = async_track_time_change(
+            self.hass, self._async_refresh_dashboard, second=0
+        )
+
+    @callback
+    def _async_refresh_dashboard(self, *_: Any) -> None:
+        """Re-render the tracked dashboard with fresh variables."""
+        if self._dashboard_tracker is None:
+            return
+        self._dashboard_variables.update(self.dashboard_variables())
         self._dashboard_tracker.async_refresh()
 
     @callback
     def _stop_dashboard_tracking(self) -> None:
+        if self._minute_unsub is not None:
+            self._minute_unsub()
+            self._minute_unsub = None
         if self._dashboard_tracker is not None:
             self._dashboard_tracker.async_remove()
             self._dashboard_tracker = None
@@ -372,7 +476,9 @@ class EvenG1Device:
             self.hass,
         )
         try:
-            return str(template.async_render(parse_result=False)).strip()
+            return str(
+                template.async_render(self.dashboard_variables(), parse_result=False)
+            ).strip()
         except TemplateError as err:
             _LOGGER.warning("Error rendering dashboard template: %s", err)
             return f"Template error: {err}"

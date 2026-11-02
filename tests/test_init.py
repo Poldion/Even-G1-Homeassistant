@@ -1,5 +1,7 @@
 """Tests for the Even G1 integration."""
 
+from datetime import timedelta
+
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
@@ -10,9 +12,10 @@ from custom_components.even_g1.const import (
     EVENT_GESTURE,
 )
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.util import dt as dt_util
 
 
 async def test_config_flow(hass: HomeAssistant) -> None:
@@ -374,7 +377,7 @@ async def test_dashboard_entities(
         "dashboard_entities": ["sensor.living_room", "lock.front_door"],
         CONF_DASHBOARD_GESTURE: "head_up",
     }
-    options.pop(CONF_DASHBOARD_TEMPLATE)
+    options.pop(CONF_DASHBOARD_TEMPLATE, None)
     hass.config_entries.async_update_entry(entry, options=options)
     await hass.async_block_till_done()
 
@@ -387,9 +390,88 @@ async def test_dashboard_entities(
     dashboard = (await client.receive_json())["event"]
     assert dashboard["type"] == "dashboard"
     lines = dashboard["text"].splitlines()
-    assert lines[0] == "Wohnzimmer: 21.5 °C"
-    assert lines[1].startswith("Haustür: ")
-    assert len(lines) == 2  # no default template when entities are chosen
+    assert " · " in lines[0]  # time and date
+    assert lines[1] == "Wohnzimmer: 21.5 °C"
+    assert lines[2].startswith("Haustür: ")
+    assert len(lines) == 3
+
+
+async def test_dashboard_agenda(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """Appointments and to-dos of the selected lists appear on the dashboard."""
+    now = dt_util.now()
+    later = now + timedelta(hours=1)
+    if later.date() != now.date():
+        later = now + timedelta(minutes=1)
+    calls: list[dict] = []
+
+    async def get_events(call: ServiceCall) -> dict:
+        calls.append(dict(call.data))
+        return {
+            "calendar.familie": {
+                "events": [
+                    {
+                        "start": later.isoformat(),
+                        "end": (later + timedelta(minutes=1)).isoformat(),
+                        "summary": "Zahnarzt",
+                    },
+                    {
+                        "start": (now - timedelta(days=3)).isoformat(),
+                        "end": (now - timedelta(days=2)).isoformat(),
+                        "summary": "Vorbei",
+                    },
+                ]
+            }
+        }
+
+    async def get_items(call: ServiceCall) -> dict:
+        return {
+            "todo.haushalt": {
+                "items": [
+                    {"summary": "Ohne Datum", "status": "needs_action"},
+                    {
+                        "summary": "Müll raus",
+                        "status": "needs_action",
+                        "due": (now.date() + timedelta(days=1)).isoformat(),
+                    },
+                ]
+            }
+        }
+
+    hass.services.async_register(
+        "calendar", "get_events", get_events, supports_response=SupportsResponse.ONLY
+    )
+    hass.services.async_register(
+        "todo", "get_items", get_items, supports_response=SupportsResponse.ONLY
+    )
+    hass.states.async_set("calendar.familie", "off")
+    hass.states.async_set("todo.haushalt", "2")
+    hass.config_entries.async_update_entry(
+        entry,
+        options={
+            **entry.options,
+            CONF_DASHBOARD_GESTURE: "head_up",
+            "dashboard_calendars": ["calendar.familie"],
+            "dashboard_todos": ["todo.haushalt"],
+        },
+    )
+    await hass.async_block_till_done()
+    assert calls and calls[0]["entity_id"] == ["calendar.familie"]
+
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    await client.receive_json()
+    lines = (await client.receive_json())["event"]["text"].splitlines()
+    assert lines == [
+        lines[0],
+        f"» {later:%H:%M}  Zahnarzt",
+        "[ ] Müll raus · morgen",
+    ]
+    assert "+" not in lines[0]
 
 
 async def test_assistant_select(

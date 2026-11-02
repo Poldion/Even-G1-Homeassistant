@@ -7,6 +7,8 @@ DOMAIN: Final = "even_g1"
 CONF_DASHBOARD_TEMPLATE: Final = "dashboard_template"
 CONF_DASHBOARD_ENTITIES: Final = "dashboard_entities"
 CONF_DASHBOARD_GESTURE: Final = "dashboard_gesture"
+CONF_DASHBOARD_CALENDARS: Final = "dashboard_calendars"
+CONF_DASHBOARD_TODOS: Final = "dashboard_todos"
 CONF_DISPLAY_DURATION: Final = "display_duration"
 CONF_ASSIST_PIPELINE: Final = "assist_pipeline"
 CONF_SHOW_TRANSCRIPT: Final = "show_transcript"
@@ -14,7 +16,9 @@ CONF_AUTO_GAIN: Final = "auto_gain"
 CONF_NOISE_SUPPRESSION: Final = "noise_suppression"
 
 DEFAULT_DISPLAY_DURATION: Final = 10
-DEFAULT_DASHBOARD_TEMPLATE: Final = (
+# Default template of versions up to 0.8.0; treated like "no template" so
+# existing entries get the built-in layout.
+LEGACY_DASHBOARD_TEMPLATE: Final = (
     "{{ now().strftime('%H:%M') }}\n"
     "{% set sun = states.sun.sun %}"
     "{% if sun %}Sonne: {{ sun.state }}{% endif %}"

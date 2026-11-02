@@ -14,7 +14,7 @@ sprechen und die Brille in Automationen nutzen. Dazu gehören eine
 
 - **Texte auf der Brille** per Aktion, Notify-Entität oder Automation, z. B. „Waschmaschine fertig“
 - **Assist:** linke Touchbar gedrückt halten, sprechen, loslassen; die Antwort deines Assistenten erscheint auf der Brille
-- **Dashboard für die Brille** aus Entitäten und Templates, auf Wunsch beim Hochschauen
+- **Dashboard für die Brille** mit Uhrzeit, Datum, Entitäten, Terminen und To-dos auf einer Seite, auf Wunsch beim Hochschauen
 - **Handy-Benachrichtigungen** auf der Brille, pro App wählbar
 - **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
 
@@ -81,7 +81,25 @@ Optionen unter *Integration → Konfigurieren*:
 | Standard-Anzeigedauer | Sekunden bis zum Ausblenden (0 = bis Doppeltippen) |
 | Dashboard-Geste | Kopf gehoben, Tippen links oder rechts |
 | Dashboard-Entitäten | Zeilen „Name: Zustand Einheit“ auf dem Brillen-Dashboard |
-| Zusätzlicher Dashboard-Text | Jinja-Template unter den Entitäten |
+| Kalender | Termine von heute (noch nicht vorbei) und morgen |
+| To-do-Listen | Offene To-dos mit Fälligkeitsdatum, die dringendsten zuerst |
+| Eigenes Dashboard-Template | Leer lassen für das Standard-Layout; sonst Jinja-Template unter den Entitäten |
+
+Das Standard-Dashboard passt auf eine Seite der Brille (5 Zeilen):
+
+```
+14:35  ·  Mo, 2. Nov  ·  +2
+» heute  Geburtstag Anna
+» 15:00  Zahnarzt
+» morgen 09:00  Teammeeting
+[ ] Müll raus · morgen
+```
+
+Erste Zeile Uhrzeit und Datum, `+2` heißt: zwei weitere Einträge passen
+nicht mehr drauf. Termine (`»`) kommen zuerst, mindestens eine Zeile bleibt
+für To-dos (`[ ]`, überfällig `[!]`). Ohne Einträge steht dort nur Uhrzeit und
+Datum. In eigenen Templates stehen die Variablen `kopfzeile`, `agenda` und
+`agenda_mehr` zur Verfügung.
 
 Die Assist-Pipeline braucht eine Spracherkennung (z. B. *Home Assistant
 Cloud* oder *Whisper*); *Speech-to-Phrase* versteht nur feste Befehle.

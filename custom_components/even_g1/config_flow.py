@@ -29,19 +29,21 @@ from homeassistant.util import slugify
 from .const import (
     CONF_ASSIST_PIPELINE,
     CONF_AUTO_GAIN,
+    CONF_DASHBOARD_CALENDARS,
     CONF_DASHBOARD_ENTITIES,
     CONF_DASHBOARD_GESTURE,
     CONF_DASHBOARD_TEMPLATE,
+    CONF_DASHBOARD_TODOS,
     CONF_DISPLAY_DURATION,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
     DASHBOARD_GESTURES,
     DEFAULT_AUTO_GAIN,
-    DEFAULT_DASHBOARD_TEMPLATE,
     DEFAULT_DISPLAY_DURATION,
     DEFAULT_NOISE_SUPPRESSION,
     DOMAIN,
+    LEGACY_DASHBOARD_TEMPLATE,
     PIPELINE_PREFERRED,
 )
 
@@ -49,11 +51,12 @@ DEFAULT_OPTIONS: dict[str, Any] = {
     CONF_ASSIST_PIPELINE: PIPELINE_PREFERRED,
     CONF_DISPLAY_DURATION: DEFAULT_DISPLAY_DURATION,
     CONF_DASHBOARD_GESTURE: DASHBOARD_GESTURE_NONE,
-    CONF_DASHBOARD_TEMPLATE: DEFAULT_DASHBOARD_TEMPLATE,
     CONF_SHOW_TRANSCRIPT: True,
     CONF_AUTO_GAIN: DEFAULT_AUTO_GAIN,
     CONF_NOISE_SUPPRESSION: DEFAULT_NOISE_SUPPRESSION,
     CONF_DASHBOARD_ENTITIES: [],
+    CONF_DASHBOARD_CALENDARS: [],
+    CONF_DASHBOARD_TODOS: [],
 }
 
 
@@ -106,6 +109,9 @@ class EvenG1OptionsFlow(OptionsFlow):
             ),
         ]
         options = {**DEFAULT_OPTIONS, **self.config_entry.options}
+        template = options.get(CONF_DASHBOARD_TEMPLATE)
+        if template == LEGACY_DASHBOARD_TEMPLATE:
+            template = None
 
         schema = vol.Schema(
             {
@@ -162,9 +168,17 @@ class EvenG1OptionsFlow(OptionsFlow):
                 vol.Required(
                     CONF_DASHBOARD_ENTITIES, default=options[CONF_DASHBOARD_ENTITIES]
                 ): EntitySelector(EntitySelectorConfig(multiple=True)),
+                vol.Required(
+                    CONF_DASHBOARD_CALENDARS, default=options[CONF_DASHBOARD_CALENDARS]
+                ): EntitySelector(
+                    EntitySelectorConfig(domain="calendar", multiple=True)
+                ),
+                vol.Required(
+                    CONF_DASHBOARD_TODOS, default=options[CONF_DASHBOARD_TODOS]
+                ): EntitySelector(EntitySelectorConfig(domain="todo", multiple=True)),
                 vol.Optional(
                     CONF_DASHBOARD_TEMPLATE,
-                    description={"suggested_value": options[CONF_DASHBOARD_TEMPLATE]},
+                    description={"suggested_value": template},
                 ): TemplateSelector(),
             }
         )

@@ -22,18 +22,22 @@
           "show_transcript": "Show recognized question on the glasses",
           "display_duration": "Default display duration (0 = until dismissed)",
           "dashboard_gesture": "Gesture that shows the dashboard",
-          "dashboard_template": "Additional dashboard text (template)",
           "auto_gain": "Automatic microphone gain",
           "noise_suppression": "Noise suppression",
-          "dashboard_entities": "Dashboard entities"
+          "dashboard_entities": "Dashboard entities",
+          "dashboard_calendars": "Calendars",
+          "dashboard_todos": "To-do lists",
+          "dashboard_template": "Own dashboard template (optional)"
         },
         "data_description": {
           "assist_pipeline": "Answers when you hold the left touch bar. Also selectable with the \"Assistant\" entity of the device.",
-          "dashboard_template": "Optional Jinja template below the entities, e.g. the time. Long dashboards get several pages (tap left/right to flip).",
           "auto_gain": "Boosts quiet speech (0 = off, 31 = max). Helps if questions are often not understood.",
           "noise_suppression": "0 = off, 4 = strong. Helps in noisy surroundings.",
           "dashboard_gesture": "With \"Head up\" the app shows the template as soon as you look up, on top of the Even dashboard, and closes it when you look down.",
-          "dashboard_entities": "Shown as \"Name: state\" lines on the glasses dashboard, in this order."
+          "dashboard_entities": "Shown as \"Name: state\" lines on the glasses dashboard, in this order.",
+          "dashboard_calendars": "Appointments of today (not yet over) and tomorrow appear on the dashboard.",
+          "dashboard_todos": "Open to-dos with a due date appear on the dashboard, the most urgent first.",
+          "dashboard_template": "Empty = built-in layout: time and date, entities, appointments and to-dos on one page. A template replaces the layout below the entities and can use the variables kopfzeile, agenda and agenda_mehr."
         }
       }
     }

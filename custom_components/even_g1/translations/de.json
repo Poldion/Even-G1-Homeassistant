@@ -22,18 +22,22 @@
           "show_transcript": "Erkannte Frage auf der Brille anzeigen",
           "display_duration": "Standard-Anzeigedauer (0 = bis zum Wegtippen)",
           "dashboard_gesture": "Geste, die das Dashboard anzeigt",
-          "dashboard_template": "Zusätzlicher Dashboard-Text (Template)",
           "auto_gain": "Automatische Verstärkung des Mikrofons",
           "noise_suppression": "Rauschunterdrückung",
-          "dashboard_entities": "Dashboard-Entitäten"
+          "dashboard_entities": "Dashboard-Entitäten",
+          "dashboard_calendars": "Kalender",
+          "dashboard_todos": "To-do-Listen",
+          "dashboard_template": "Eigenes Dashboard-Template (optional)"
         },
         "data_description": {
           "assist_pipeline": "Antwortet, wenn du die linke Touchbar gedrückt hältst. Auch über die Entität „Assistent“ des Geräts umschaltbar.",
-          "dashboard_template": "Optionales Jinja-Template unter den Entitäten, z. B. die Uhrzeit. Lange Dashboards bekommen mehrere Seiten (links/rechts tippen zum Blättern).",
           "auto_gain": "Hebt leise Sprache an (0 = aus, 31 = maximal). Hilft, wenn Fragen oft nicht verstanden werden.",
           "noise_suppression": "0 = aus, 4 = stark. Hilft in lauter Umgebung.",
           "dashboard_gesture": "Bei „Kopf gehoben“ zeigt die App das Template sofort beim Hochschauen über dem Even-Dashboard an und schließt es beim Runterschauen wieder.",
-          "dashboard_entities": "Werden auf dem Brillen-Dashboard als Zeilen „Name: Zustand“ angezeigt, in dieser Reihenfolge."
+          "dashboard_entities": "Werden auf dem Brillen-Dashboard als Zeilen „Name: Zustand“ angezeigt, in dieser Reihenfolge.",
+          "dashboard_calendars": "Termine von heute (noch nicht vorbei) und morgen erscheinen auf dem Dashboard.",
+          "dashboard_todos": "Offene To-dos mit Fälligkeitsdatum erscheinen auf dem Dashboard, die dringendsten zuerst.",
+          "dashboard_template": "Leer = Standard-Layout: Uhrzeit und Datum, Entitäten, Termine und To-dos auf einer Seite. Ein Template ersetzt das Layout unter den Entitäten und kann die Variablen kopfzeile, agenda und agenda_mehr nutzen."
         }
       }
     }
