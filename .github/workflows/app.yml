@@ -49,7 +49,14 @@ jobs:
             exit 0
           fi
           # Tolerate line breaks and spaces from copying the secret.
-          printf '%s' "$KEYSTORE_BASE64" | tr -d ' \r\n\t' | base64 -d > "$RUNNER_TEMP/release.jks" || {
+          CLEAN=$(printf '%s' "$KEYSTORE_BASE64" | tr -d ' \r\n\t')
+          # Length only, the value itself stays secret (expected: 5720).
+          echo "ANDROID_KEYSTORE_BASE64: ${#CLEAN} characters"
+          if printf '%s' "$CLEAN" | grep -q '[^A-Za-z0-9+/=]'; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 contains characters that are not Base64 (extra text copied?)."
+            exit 1
+          fi
+          printf '%s' "$CLEAN" | base64 -d > "$RUNNER_TEMP/release.jks" || {
             echo "::error::ANDROID_KEYSTORE_BASE64 is not valid Base64 (incomplete copy?)."
             exit 1
           }
