@@ -39,6 +39,19 @@ jobs:
           cmake --build build
           flutter pub get
           LC3_CODEC_LIBRARY=$PWD/build/liblc3_codec.so flutter test
+      - name: Signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret: the APK is signed with a temporary debug key and cannot be installed as an update."
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "G1_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+          echo "G1_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "G1_KEY_ALIAS=even-g1-ha" >> "$GITHUB_ENV"
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:

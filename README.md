@@ -49,6 +49,8 @@ Danach: *Einstellungen → Geräte & Dienste → Integration hinzufügen → „
 - **Android:** Die APK wird von GitHub Actions gebaut: *Actions → App → letzter Lauf → Artifact `even-g1-ha-apk`* (bei Tags `v*` hängt sie zusätzlich am Release). Alternativ selbst bauen: `cd app && flutter build apk --release`.
 - **iOS:** `cd app && flutter build ios` auf einem Mac mit Xcode (eigene Signierung nötig).
 
+**Updates:** Damit eine neue APK als Update über die alte installiert werden kann (und deine Einstellungen erhalten bleiben), müssen alle Builds mit demselben Schlüssel signiert sein. Dafür im Repository unter *Settings → Secrets and variables → Actions* die Secrets `ANDROID_KEYSTORE_BASE64` (Keystore als Base64, Alias `even-g1-ha`) und `ANDROID_KEYSTORE_PASSWORD` anlegen. Ohne diese Secrets signiert der Build mit einem wechselnden Testschlüssel, und Android meldet beim Update „Die App wurde nicht installiert“.
+
 ### 3. Einrichten
 
 1. In Home Assistant: *Profil → Sicherheit → Langlebige Zugriffstoken → Token erstellen*.
