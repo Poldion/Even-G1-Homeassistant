@@ -19,7 +19,7 @@ from homeassistant.components.assist_pipeline import (
 from homeassistant.components.assist_pipeline.error import PipelineError
 from homeassistant.core import HomeAssistant, callback
 
-from .const import DOMAIN, GESTURES
+from .const import DOMAIN, GESTURES, WEAR_STATES
 from .device import EvenG1ConfigEntry, EvenG1Device
 
 _LOGGER = logging.getLogger(__name__)
@@ -96,6 +96,9 @@ def ws_subscribe(
         vol.Required("entry_id"): str,
         vol.Optional("glasses_connected"): bool,
         vol.Optional("silent_mode"): vol.Any(None, bool),
+        vol.Optional("battery_case"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
+        vol.Optional("case_charging"): vol.Any(None, bool),
+        vol.Optional("wear_state"): vol.Any(None, vol.In(WEAR_STATES)),
         vol.Optional("battery_left"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
         vol.Optional("battery_right"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
     }

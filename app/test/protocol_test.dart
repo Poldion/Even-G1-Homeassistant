@@ -61,10 +61,13 @@ void main() {
     expect(gestureName(0x42, G1Side.left), 'other');
     expect(gestureName(0x02, G1Side.right), 'head_up');
     expect(gestureName(0x03, G1Side.right), 'head_down');
-    expect(gestureName(0x06, G1Side.left), 'case_removed');
-    expect(gestureName(0x07, G1Side.left), 'case_removed');
-    expect(gestureName(0x08, G1Side.left), 'case_opened');
-    expect(gestureName(0x0B, G1Side.left), 'case_closed');
+    // Status pushes are no gestures.
+    expect(gestureName(0x06, G1Side.left), isNull);
+    expect(gestureName(0x0A, G1Side.left), isNull);
+    expect(wearStateName(0x06), 'worn');
+    expect(wearStateName(0x07), 'not_worn');
+    expect(wearStateName(0x08), 'case_open');
+    expect(wearStateName(0x0B), 'case_closed');
   });
 
   test('builds silent mode packets', () {

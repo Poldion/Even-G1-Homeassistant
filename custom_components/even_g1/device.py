@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 import logging
 from typing import Any
 
+from homeassistant.components import assist_pipeline
+from homeassistant.components.assist_pipeline.error import PipelineError
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import CALLBACK_TYPE, HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError, TemplateError
@@ -26,13 +28,10 @@ from .const import (
     CMD_SILENT_MODE,
     CONF_ASSIST_PIPELINE,
     CONF_AUTO_GAIN,
-    CONF_DASHBOARD_DEPTH,
+    CONF_DASHBOARD_ENTITIES,
     CONF_DASHBOARD_GESTURE,
-    CONF_DASHBOARD_HEIGHT,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DISPLAY_DURATION,
-    CONF_HEAD_UP_ANGLE,
-    CONF_HEAD_UP_MODE,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
@@ -43,17 +42,19 @@ from .const import (
     EVENT_ASSIST,
     EVENT_GESTURE,
     GESTURE_HEAD_UP,
-    HEAD_UP_MODE_UNCHANGED,
-    HEAD_UP_MODES,
     MODE_SCREEN,
     PIPELINE_PREFERRED,
 )
 
 _LOGGER = logging.getLogger(__name__)
 
-
-def _optional_int(value: Any) -> int | None:
-    return None if value is None else int(value)
+# One dashboard line per selected entity: "Name: state unit".
+_ENTITY_LINE = (
+    "{{ state_attr('ENTITY', 'friendly_name') or 'ENTITY' }}: "
+    "{{ state_translated('ENTITY') }}"
+    "{% if state_attr('ENTITY', 'unit_of_measurement') %} "
+    "{{ state_attr('ENTITY', 'unit_of_measurement') }}{% endif %}"
+)
 
 
 type EvenG1ConfigEntry = ConfigEntry[EvenG1Device]
@@ -65,6 +66,9 @@ class EvenG1State:
 
     glasses_connected: bool = False
     silent_mode: bool | None = None
+    battery_case: int | None = None
+    case_charging: bool | None = None
+    wear_state: str | None = None
     battery_left: int | None = None
     battery_right: int | None = None
     last_query: str | None = None
@@ -154,15 +158,45 @@ class EvenG1Device:
             "display_duration": self.display_duration,
             "assist_pipeline": self.pipeline_id,
             "show_transcript": self.options.get(CONF_SHOW_TRANSCRIPT, True),
+            "assist_pipeline_name": self.pipeline_name,
             "dashboard_on_head_up": self.dashboard_on_head_up,
-            # Glasses settings, None = leave the glasses setting unchanged.
-            "head_up_angle": _optional_int(self.options.get(CONF_HEAD_UP_ANGLE)),
-            "dashboard_height": _optional_int(self.options.get(CONF_DASHBOARD_HEIGHT)),
-            "dashboard_depth": _optional_int(self.options.get(CONF_DASHBOARD_DEPTH)),
-            "head_up_mode": HEAD_UP_MODES.get(
-                self.options.get(CONF_HEAD_UP_MODE, HEAD_UP_MODE_UNCHANGED)
-            ),
         }
+
+    @property
+    def pipeline_name(self) -> str | None:
+        """Return the name of the Assist pipeline the glasses talk to."""
+        try:
+            return assist_pipeline.async_get_pipeline(self.hass, self.pipeline_id).name
+        except PipelineError:
+            return None
+
+    @callback
+    def async_set_pipeline(self, pipeline_id: str | None) -> None:
+        """Select the Assist pipeline (None = preferred)."""
+        self.hass.config_entries.async_update_entry(
+            self.entry,
+            options={
+                **self.entry.options,
+                CONF_ASSIST_PIPELINE: pipeline_id or PIPELINE_PREFERRED,
+            },
+        )
+
+    def dashboard_template_source(self) -> str:
+        """Return the Jinja source of the dashboard.
+
+        Entities selected in the options are shown as "Name: state unit"
+        lines, followed by the free template.
+        """
+        lines = [
+            _ENTITY_LINE.replace("ENTITY", entity_id)
+            for entity_id in self.options.get(CONF_DASHBOARD_ENTITIES, [])
+        ]
+        template = self.options.get(CONF_DASHBOARD_TEMPLATE)
+        if template is None:
+            template = "" if lines else DEFAULT_DASHBOARD_TEMPLATE
+        if template.strip():
+            lines.append(template)
+        return "\n".join(lines)
 
     # ------------------------------------------------------------------
     # Listeners (entities)
@@ -254,7 +288,7 @@ class EvenG1Device:
             return
 
         template = Template(
-            self.options.get(CONF_DASHBOARD_TEMPLATE, DEFAULT_DASHBOARD_TEMPLATE),
+            self.dashboard_template_source(),
             self.hass,
         )
 
@@ -334,7 +368,7 @@ class EvenG1Device:
     def render_dashboard(self) -> str:
         """Render the configured dashboard template."""
         template = Template(
-            self.options.get(CONF_DASHBOARD_TEMPLATE, DEFAULT_DASHBOARD_TEMPLATE),
+            self.dashboard_template_source(),
             self.hass,
         )
         try:

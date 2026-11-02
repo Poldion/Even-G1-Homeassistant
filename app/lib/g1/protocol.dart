@@ -78,12 +78,36 @@ class G1Event {
   static const headDown = 0x03;
   static const silentModeOn = 0x04;
   static const silentModeOff = 0x05;
-  static const caseRemoved = 0x06;
-  static const caseRemoved2 = 0x07;
-  static const caseOpened = 0x08;
-  static const caseClosed = 0x0B;
   static const evenAiStart = 0x17;
   static const evenAiStop = 0x18;
+
+  // Status pushes (even-g1-companion HCI captures, firmware 1.6.6). They
+  // repeat every few seconds and are not gestures.
+  static const worn = 0x06;
+  static const notWorn = 0x07;
+  static const inCaseOpen = 0x08;
+  static const caseCable = 0x09;
+  static const glassesBattery = 0x0A; // byte 2: 0..100
+  static const inCaseClosed = 0x0B;
+  static const caseCharging = 0x0E; // byte 2: 0/1
+  static const caseBattery = 0x0F; // byte 2: 0..100
+  static const status10 = 0x10;
+  static const connected = 0x11;
+  static const brightness = 0x12;
+
+  static const statusEvents = {
+    worn,
+    notWorn,
+    inCaseOpen,
+    caseCable,
+    glassesBattery,
+    inCaseClosed,
+    caseCharging,
+    caseBattery,
+    status10,
+    connected,
+    brightness,
+  };
 }
 
 /// Screen ids reported by 0x39 (firmware `ui_task_handler`, documented by
@@ -103,8 +127,10 @@ String screenName(int id) => switch (id) {
   _ => '0x${id.toRadixString(16)}',
 };
 
-/// Gesture names as understood by the Home Assistant integration.
-String gestureName(int code, G1Side side) {
+/// Gesture names as understood by the Home Assistant integration, null for
+/// status pushes.
+String? gestureName(int code, G1Side side) {
+  if (G1Event.statusEvents.contains(code)) return null;
   switch (code) {
     case G1Event.doubleTap:
       return 'double_tap';
@@ -117,13 +143,6 @@ String gestureName(int code, G1Side side) {
     case G1Event.silentModeOn:
     case G1Event.silentModeOff:
       return 'triple_tap';
-    case G1Event.caseRemoved:
-    case G1Event.caseRemoved2:
-      return 'case_removed';
-    case G1Event.caseOpened:
-      return 'case_opened';
-    case G1Event.caseClosed:
-      return 'case_closed';
     case G1Event.evenAiStart:
       return 'long_press';
     case G1Event.evenAiStop:
@@ -132,6 +151,15 @@ String gestureName(int code, G1Side side) {
       return 'other';
   }
 }
+
+/// Where the glasses are, from the 0x06/0x07/0x08/0x0B status pushes.
+String? wearStateName(int code) => switch (code) {
+  G1Event.worn => 'worn',
+  G1Event.notWorn => 'not_worn',
+  G1Event.inCaseOpen => 'case_open',
+  G1Event.inCaseClosed => 'case_closed',
+  _ => null,
+};
 
 class G1Packets {
   /// Maximum payload of one 0x4E packet.
@@ -206,7 +234,16 @@ class G1Packets {
   /// text show), like MentraOS. The Even AI modes (0x30–0x60) are not used:
   /// they interfere with the Even AI screens of the firmware and made the two
   /// arms show different content. Paging is done by the app.
-  static List<Uint8List> text(String text, {required int seq}) {
+  ///
+  /// [status] can be set to an Even AI status (0x31 displaying, 0x41
+  /// complete) to show Assist answers the way the official app does.
+  static List<Uint8List> text(
+    String text, {
+    required int seq,
+    int status = G1ScreenStatus.textShow | G1ScreenStatus.newContent,
+    int page = 0,
+    int pages = 1,
+  }) {
     final data = utf8.encode(text.trim().isEmpty ? ' ' : text);
     final total = (data.length / textChunk).ceil();
     return [
@@ -216,11 +253,11 @@ class G1Packets {
           seq & 0xff,
           total,
           i,
-          G1ScreenStatus.textShow | G1ScreenStatus.newContent,
+          status,
           0x00, // new_char_pos0
           0x00, // new_char_pos1
-          0x00, // current page (paging is done by the app)
-          0x01, // max page
+          page, // current page (0: paging is done by the app)
+          pages, // max page
           ...data.sublist(
             i * textChunk,
             ((i + 1) * textChunk).clamp(0, data.length),

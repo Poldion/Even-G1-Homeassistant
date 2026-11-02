@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'g1_connection.dart';
 import 'protocol.dart';
 import 'text_layout.dart';
@@ -27,11 +29,24 @@ class G1Display {
 
   bool get active => _active;
 
+  /// Screen currently shown by the app on the glasses (null = nothing / the
+  /// glasses' own content). Used for the preview in the app.
+  final ValueNotifier<String?> screen = ValueNotifier(null);
+
+  /// Page position for the preview, e.g. "2/3" (empty for single pages).
+  String get pageLabel =>
+      _screens.length > 1 ? '${_page + 1}/${_screens.length}' : '';
+
   /// Shows a text. [closeAfter] returns to the dashboard after the last page
   /// was shown for that long (null or zero: stay until dismissed).
-  Future<bool> showText(String text, {Duration? closeAfter}) async {
+  Future<bool> showText(
+    String text, {
+    Duration? closeAfter,
+    bool evenAi = false,
+  }) async {
     _reset();
     _active = true;
+    _evenAi = evenAi;
     _closeAfter = (closeAfter == null || closeAfter == Duration.zero)
         ? null
         : closeAfter;
@@ -55,17 +70,31 @@ class G1Display {
         }
       });
     } else {
+      if (evenAi) {
+        // Like the official app: 0x30 first, 0x40 after a moment.
+        Future<void>.delayed(const Duration(seconds: 3), () {
+          if (generation == _generation) _showPage(generation, last: true);
+        });
+      }
       _scheduleClose();
     }
     return ok;
   }
 
   /// Short status line during Assist (e.g. "Ich höre zu …").
-  Future<bool> showAiStatus(String text) => showText(text);
+  Future<bool> showAiStatus(String text) =>
+      showText(text, evenAi: evenAiAnswers);
 
   /// Assist answer with automatic paging.
   Future<bool> showAiAnswer(String text, {Duration? closeAfter}) =>
-      showText(text, closeAfter: closeAfter);
+      showText(text, closeAfter: closeAfter, evenAi: evenAiAnswers);
+
+  /// Experimental: show Assist status and answers with the Even AI statuses
+  /// of the official app (0x31 displaying, 0x41 last page) instead of the
+  /// plain text mode. The firmware drives its Even AI screen on both arms
+  /// itself in that mode.
+  bool evenAiAnswers = false;
+  bool _evenAi = false;
 
   /// Error message that closes itself after a few seconds.
   Future<bool> showAiError(String text) =>
@@ -93,9 +122,23 @@ class G1Display {
     _scheduleClose();
   }
 
-  Future<bool> _showPage(int generation) async {
+  Future<bool> _showPage(int generation, {bool last = false}) async {
     if (generation != _generation || !g1.connected) return false;
-    return g1.sendText(_screens[_page]);
+    screen.value = _screens[_page];
+    if (!_evenAi) return g1.sendText(_screens[_page]);
+    final isLast =
+        last || (_screens.length > 1 && _page == _screens.length - 1);
+    final status = _manual
+        ? G1ScreenStatus.aiManual
+        : isLast
+        ? G1ScreenStatus.aiComplete
+        : G1ScreenStatus.aiDisplaying;
+    return g1.sendText(
+      _screens[_page],
+      status: status | G1ScreenStatus.newContent,
+      page: _page + 1,
+      pages: _screens.length,
+    );
   }
 
   void _scheduleClose() {
@@ -120,5 +163,7 @@ class G1Display {
     _manual = false;
     _active = false;
     _closeAfter = null;
+    _evenAi = false;
+    screen.value = null;
   }
 }

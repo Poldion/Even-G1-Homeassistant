@@ -53,13 +53,13 @@ Danach: *Einstellungen → Geräte & Dienste → Integration hinzufügen → „
 
 1. In Home Assistant: *Profil → Sicherheit → Langlebige Zugriffstoken → Token erstellen*.
 2. **Die offizielle Even-App schließen** (bzw. in den Einstellungen die Bluetooth-Verbindung der Brille trennen). Die G1 verbindet sich immer nur mit einer App.
-3. In der App: ⚙️ → URL (z. B. `http://homeassistant.local:8123`) und Token eintragen → *Verbinden & Brillen aus HA laden* → Brille auswählen → *Speichern*.
+3. In der App: *Einstellungen → Home Assistant* → URL (z. B. `http://homeassistant.local:8123`) und Token eintragen → *Verbinden & Brillen aus HA laden* → Brille auswählen → *Speichern*.
 4. *Nach Brillen suchen* → deine G1 antippen (beide Bügel werden über ihre Kanalnummer zusammen erkannt). Auf Android ggf. die Kopplungsanfragen bestätigen.
 5. Unter Android läuft die App mit einer dauerhaften Benachrichtigung als Vordergrunddienst weiter, wenn sie im Hintergrund ist. Für einen stabilen Betrieb die Akku-Optimierung für die App deaktivieren.
 
 ### 4. Assist konfigurieren
 
-In der Integration unter *Konfigurieren* wählst du die **Assist-Pipeline** (Standard: bevorzugte Pipeline).
+Welcher **Assistent** (Assist-Pipeline) antwortet, wählst du in Home Assistant über die Entität **`select.<name>_assistent`** am Brillen-Gerät, z. B. direkt aus einem Dashboard oder per Automation. Alternativ geht das unter *Integration → Konfigurieren*. Standard ist der bevorzugte Assistent.
 Die Pipeline braucht eine **Spracherkennung (STT)**, z. B. *Home Assistant Cloud* oder *Whisper*. Die Spracherkennung läuft
 immer in Home Assistant, nicht auf dem Handy: Die App leitet nur das Mikrofon-Audio der Brille weiter. Die Qualität hängt
 daher vom STT-Dienst der Pipeline ab. *Speech-to-Phrase* versteht nur vordefinierte Befehle, für freie Fragen eignen sich
@@ -78,10 +78,18 @@ Weitere Optionen:
 | Rauschunterdrückung | 0 = aus bis 4 = stark, für laute Umgebungen |
 | Standard-Anzeigedauer | Sekunden bis die Brille wieder zum Dashboard wechselt (0 = bis Doppeltippen) |
 | Dashboard-Geste | Geste, die das Dashboard-Template anzeigt: *Einfaches Tippen links/rechts* oder *Kopf gehoben* (siehe unten) |
-| Dashboard-Template | Jinja-Template, das für die Dashboard-Geste bzw. `even_g1.show_dashboard` gerendert wird |
-| Kopfneigungswinkel | Ab welchem Winkel (0–60°) die Brille beim Hochschauen das Dashboard zeigt. Leer = Einstellung der Even-App behalten |
-| Dashboard-Höhe / -Tiefe | Position des Dashboards im Sichtfeld (Höhe 0–8, Tiefe 1–9). Leer = Einstellung der Even-App behalten |
-| Even-Dashboard beim Hochschauen | *Anzeigen*, *Ausblenden* oder *Unverändert lassen*. Wird auf der Brille gespeichert (Befehl `0x08 … 03 <wert>`, gefunden vom Projekt [even-g1-companion](https://github.com/Cheddies1/even-g1-companion)) |
+| Dashboard-Entitäten | Entitäten, die auf dem Brillen-Dashboard als Zeilen „Name: Zustand Einheit“ erscheinen (siehe unten) |
+| Zusätzlicher Dashboard-Text | Optionales Jinja-Template unter den Entitäten, z. B. Uhrzeit oder eigene Texte |
+
+### Dashboard für die Brille
+
+Das Brillen-Dashboard stellst du in Home Assistant unter *Integration → Konfigurieren* zusammen:
+
+1. **Dashboard-Entitäten** auswählen, etwa Temperaturen, Türen, Lichter oder Müllabfuhr. Jede Entität wird eine Zeile „Name: Zustand Einheit“. Zustände erscheinen übersetzt, also „Offen“ statt `open`.
+2. Optional einen **zusätzlichen Dashboard-Text** als Jinja-Template ergänzen, z. B. `{{ now().strftime('%H:%M') }}`.
+3. Die **Dashboard-Geste** wählen: *Kopf gehoben* (siehe unten) oder Tippen links/rechts. Zusätzlich kannst du es jederzeit mit `even_g1.show_dashboard` anzeigen.
+
+Mehr als fünf Zeilen werden auf mehrere Seiten verteilt; du blätterst mit Tippen links/rechts.
 
 ### Dashboard beim Hochschauen
 
@@ -92,13 +100,25 @@ Mit der Dashboard-Geste **Kopf gehoben** funktioniert das Dashboard wie bei Ment
 - Ändert sich der Inhalt, während du hochschaust, wird die Anzeige aktualisiert. Schaust du wieder runter (`0xF5 0x03`), wird sie geschlossen.
 - Läuft gerade eine Assist-Antwort oder ein Text aus Home Assistant, wird dieser nicht überdeckt.
 
-Stelle dazu **Even-Dashboard beim Hochschauen** auf **Ausblenden**. Dann zeigt die Brille beim Hochschauen selbst nichts mehr an, meldet die Kopfbewegung aber weiter, und es erscheint nur dein Home-Assistant-Dashboard. Mit *Unverändert lassen* übermalt die App das Even-Dashboard, es kann dann kurz aufblitzen. Die Einstellung bleibt auf der Brille gespeichert, auch wenn du später wieder die offizielle Even-App nutzt.
+Stelle dazu in der App unter *Einstellungen → Anzeige & Aktivierung* **Even-Dashboard beim Hochschauen** auf **Ausblenden**. Dann zeigt die Brille beim Hochschauen selbst nichts mehr an, meldet die Kopfbewegung aber weiter, und es erscheint nur dein Home-Assistant-Dashboard. Mit *Unverändert lassen* übermalt die App das Even-Dashboard, es kann dann kurz aufblitzen. Die Einstellung bleibt auf der Brille gespeichert, auch wenn du später wieder die offizielle Even-App nutzt.
 
-### 5. Handy-Benachrichtigungen (Android)
+### 5. Die App
+
+Die App hat zwei Tabs:
+
+- **Übersicht:** Verbindung und Akkustand der Brille (links, rechts) und des Case inklusive Laden, Trage-Zustand, Ruhemodus-Schalter, Verbindung zu Home Assistant, gewählter Assistent und letzte Frage/Antwort. Dazu eine einklappbare **Vorschau** dessen, was die App gerade auf der Brille anzeigt.
+- **Einstellungen:**
+  - *Home Assistant*: Verbindung einrichten
+  - *Brille koppeln*
+  - *Anzeige & Aktivierung*: Aktivierungswinkel (0–60°), Höhe (0–8) und Distanz (1–9) des Textes, Even-Dashboard beim Hochschauen. Beim Verschieben von Höhe/Distanz zeigt die Brille kurz einen Beispieltext. Die Werte speichert die App und überträgt sie bei jeder Verbindung.
+  - *Benachrichtigungen*
+  - *Diagnose*: Testtext, Anzeige links/rechts prüfen, Protokoll
+
+### 6. Handy-Benachrichtigungen (Android)
 
 Die App leitet die Benachrichtigungen deines Handys an die Brille weiter, so wie die offizielle Even-App. Die Brille zeigt sie mit ihrer eigenen Benachrichtigungsanzeige.
 
-1. In der App: ⚙️ → *Benachrichtigungen* → **Erlauben** und in den Android-Einstellungen „Even G1 HA“ den Zugriff auf Benachrichtigungen geben.
+1. In der App: *Einstellungen → Benachrichtigungen* → **Erlauben** und in den Android-Einstellungen „Even G1 HA“ den Zugriff auf Benachrichtigungen geben.
    Meldet Android „App wurde Zugriff verweigert“ (Schutz für Apps außerhalb des Play Stores, ab Android 13): *Einstellungen → Apps → Even G1 HA → ⋮ → Eingeschränkte Einstellungen zulassen*, danach erneut auf *Erlauben* tippen.
 2. Jede App, die eine Benachrichtigung schickt, erscheint dort in der Liste und wird standardmäßig weitergeleitet. Per Schalter kannst du einzelne Apps ausschließen oder das Weiterleiten ganz abschalten.
 
@@ -151,10 +171,13 @@ data:
 | --- | --- |
 | `binary_sensor.<name>_app_verbunden` | App ist mit HA verbunden |
 | `binary_sensor.<name>_brille_verbunden` | Beide Bügel sind per Bluetooth verbunden |
-| `sensor.<name>_akku_links` / `_akku_rechts` | Akkustand der Bügel |
+| `sensor.<name>_akku_links` / `_akku_rechts` / `_akku_case` | Akkustand der Bügel und des Case |
+| `binary_sensor.<name>_case_ladt` | Case hängt am Ladekabel |
+| `sensor.<name>_zustand` | `worn` (getragen), `not_worn` (abgesetzt), `case_open`, `case_closed` (im Case) |
+| `select.<name>_assistent` | Welcher Assistent auf der Brille antwortet |
 | `switch.<name>_ruhemodus` | Ruhemodus der Brille (siehe unten), auch per Dreifachtippen umschaltbar |
 | `sensor.<name>_letzte_frage` / `_letzte_antwort` | Letzte Assist-Interaktion (voller Text im Attribut `full_text`) |
-| `event.<name>_geste` | Gesten-Event (`event_type`: `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `case_removed`, `case_opened`, `case_closed`, `long_press`, `long_press_release`, `other`) |
+| `event.<name>_geste` | Gesten-Event (`event_type`: `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `long_press`, `long_press_release`, `other`) |
 
 ### Events
 
@@ -235,7 +258,7 @@ Licht an: {{ states.light | selectattr('state', 'eq', 'on') | list | count }}
 
 ## Hinweise & Grenzen
 
-- Die Codes für Kopf heben/senken und das Etui, die Einstellungen für Kopfneigungswinkel (`0x0B`) und Dashboard-Position (`0x26`) sowie die Akku-Abfrage (`0x2C`) stammen nicht aus der offiziellen Dokumentation. Sie sind aus Community-Projekten wie MentraOS übernommen und können je nach Firmware abweichen. Unbekannte Codes kommen als `other` mit `code` in Home Assistant an.
+- Die Codes für Kopf heben/senken, Akku und Case (`F5 0A`, `F5 0F`, `F5 0E`), Trage-Zustand (`F5 06/07/08/0B`), die Einstellungen für Aktivierungswinkel (`0x0B`) und Anzeigeposition (`0x26`) sowie der Ruhemodus (`0x03`) stammen nicht aus der offiziellen Dokumentation. Sie sind aus Community-Projekten (MentraOS, even-g1-companion, eveng1 Python SDK) übernommen und können je nach Firmware abweichen. Statusmeldungen werden nicht als Gesten weitergegeben; unbekannte Codes kommen als `other` mit `code` in Home Assistant an.
 - Benachrichtigungen im Modus `notification` setzen eine App-Whitelist auf der Brille. Die offizielle Even-App überschreibt diese beim nächsten Verbinden wieder.
 - Die BLE-Bibliothek [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) ist für private/nicht-kommerzielle Nutzung frei (`License.nonprofit`).
 - Dies ist kein offizielles Produkt von Even Realities.

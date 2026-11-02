@@ -16,6 +16,7 @@ from homeassistant.const import PERCENTAGE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
+from .const import WEAR_STATES
 from .device import EvenG1ConfigEntry, EvenG1Device, EvenG1State
 from .entity import EvenG1Entity
 
@@ -50,6 +51,19 @@ SENSORS: tuple[EvenG1SensorDescription, ...] = (
         native_unit_of_measurement=PERCENTAGE,
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda state: state.battery_right,
+    ),
+    EvenG1SensorDescription(
+        key="battery_case",
+        device_class=SensorDeviceClass.BATTERY,
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda state: state.battery_case,
+    ),
+    EvenG1SensorDescription(
+        key="wear_state",
+        device_class=SensorDeviceClass.ENUM,
+        options=WEAR_STATES,
+        value_fn=lambda state: state.wear_state,
     ),
     EvenG1SensorDescription(
         key="last_query",

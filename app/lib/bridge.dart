@@ -19,54 +19,39 @@ class HaConfig {
       deviceId = json['device_id'] as String?,
       displayDuration = (json['display_duration'] as num?)?.toInt() ?? 10,
       assistPipeline = json['assist_pipeline'] as String?,
+      assistName = json['assist_pipeline_name'] as String?,
       showTranscript = json['show_transcript'] as bool? ?? true,
-      dashboardOnHeadUp = json['dashboard_on_head_up'] as bool? ?? false,
-      headUpAngle = (json['head_up_angle'] as num?)?.toInt(),
-      dashboardHeight = (json['dashboard_height'] as num?)?.toInt(),
-      dashboardDepth = (json['dashboard_depth'] as num?)?.toInt(),
-      headUpMode = (json['head_up_mode'] as num?)?.toInt();
+      dashboardOnHeadUp = json['dashboard_on_head_up'] as bool? ?? false;
 
   HaConfig.defaults()
     : name = '',
       deviceId = null,
       displayDuration = 10,
       assistPipeline = null,
+      assistName = null,
       showTranscript = true,
-      dashboardOnHeadUp = false,
-      headUpAngle = null,
-      dashboardHeight = null,
-      dashboardDepth = null,
-      headUpMode = null;
+      dashboardOnHeadUp = false;
 
   final String name;
   final String? deviceId;
   final int displayDuration;
   final String? assistPipeline;
+
+  /// Name of the Assist pipeline the glasses talk to.
+  final String? assistName;
   final bool showTranscript;
 
   /// Show the Home Assistant dashboard when the head is raised.
   final bool dashboardOnHeadUp;
-
-  /// Glasses settings, null = leave unchanged.
-  final int? headUpAngle;
-  final int? dashboardHeight;
-  final int? dashboardDepth;
-
-  /// What the glasses show on head up: 0x00 Even dashboard, 0x02 nothing.
-  final int? headUpMode;
-
-  /// Key of the glasses settings, to send them only when they change.
-  String get glassesSettingsKey =>
-      '$headUpAngle/$dashboardHeight/$dashboardDepth/$headUpMode';
 }
 
 /// Connects the glasses with Home Assistant.
 class Bridge extends ChangeNotifier {
-  Bridge(this.settings) {
-    display = G1Display(g1);
-    g1.addListener(_onGlassesChanged);
-    g1.events.listen(_onGlassesEvent);
-    g1.log.listen(_log);
+  Bridge(this.settings, {G1Connection? g1}) : g1 = g1 ?? G1Connection() {
+    display = G1Display(this.g1)..evenAiAnswers = settings.evenAiAnswers;
+    this.g1.addListener(_onGlassesChanged);
+    this.g1.events.listen(_onGlassesEvent);
+    this.g1.log.listen(_log);
     PhoneNotifications.stream.listen(
       _onPhoneNotification,
       onError: (Object e) => _log('Benachrichtigungen: $e'),
@@ -83,7 +68,7 @@ class Bridge extends ChangeNotifier {
   static const thinkingText = 'Home Assistant\nEinen Moment …';
 
   final Settings settings;
-  final G1Connection g1 = G1Connection();
+  final G1Connection g1;
   late final G1Display display;
 
   HaClient? _ha;
@@ -115,8 +100,9 @@ class Bridge extends ChangeNotifier {
   /// Rendered dashboard template, pushed by Home Assistant on changes.
   String _dashboardText = '';
   bool _dashboardShown = false;
-  String? _appliedGlassesSettings;
+  bool _glassesSettingsApplied = false;
   int _dashboardCounter = 0;
+  Timer? _positionPreview;
 
   void _log(String line) {
     final now = DateTime.now();
@@ -130,7 +116,7 @@ class Bridge extends ChangeNotifier {
 
   /// Starts both connections with the stored settings.
   Future<void> start() async {
-    if (settings.glassesConfigured) {
+    if (settings.glassesConfigured && !g1.connected) {
       unawaited(g1.connect(settings.leftId, settings.rightId));
     }
     if (settings.haConfigured) {
@@ -366,6 +352,9 @@ class Bridge extends ChangeNotifier {
       'battery_left': g1.batteryLeft,
       'battery_right': g1.batteryRight,
       'silent_mode': silentMode,
+      'battery_case': g1.batteryCase,
+      'case_charging': g1.caseCharging,
+      'wear_state': g1.wearState,
     };
     if (mapEquals(state, _lastReported)) return;
     _lastReported = state;
@@ -379,7 +368,7 @@ class Bridge extends ChangeNotifier {
   void _onGlassesChanged() {
     if (!g1.connected) {
       _whitelistSent = false;
-      _appliedGlassesSettings = null;
+      _glassesSettingsApplied = false;
       _dashboardShown = false;
     } else {
       unawaited(_applyGlassesSettings());
@@ -388,40 +377,84 @@ class Bridge extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Sends head up angle and dashboard position if configured in HA.
+  /// Sends the display settings stored in the app once per connection.
   Future<void> _applyGlassesSettings() async {
-    final key = haConfig.glassesSettingsKey;
-    if (!g1.connected || !haConnected || key == _appliedGlassesSettings) {
-      return;
-    }
-    _appliedGlassesSettings = key;
-    final angle = haConfig.headUpAngle;
-    if (angle != null) {
-      _log('Kopfneigungswinkel: $angle°');
-      await g1.sendSetting(G1Packets.headUpAngle(angle));
-    }
-    final mode = haConfig.headUpMode;
-    if (mode != null) {
-      _log(
-        mode == 0
-            ? 'Hochschauen: Even-Dashboard anzeigen'
-            : 'Hochschauen: Even-Dashboard ausblenden',
-      );
-      await g1.sendSetting(G1Packets.headUpMode(mode));
-    }
-    final height = haConfig.dashboardHeight;
-    final depth = haConfig.dashboardDepth;
-    if (height != null || depth != null) {
-      _log('Dashboard-Position: Höhe ${height ?? 4}, Tiefe ${depth ?? 5}');
-      await g1.sendSetting(
-        G1Packets.dashboardPosition(
-          height ?? 4,
-          depth ?? 5,
-          _dashboardCounter++,
-        ),
-      );
+    if (!g1.connected || _glassesSettingsApplied) return;
+    _glassesSettingsApplied = true;
+    final angle = settings.headUpAngle;
+    if (angle != null) await _sendHeadUpAngle(angle);
+    final mode = settings.headUpMode;
+    if (mode != null) await _sendHeadUpMode(mode);
+    if (settings.displayHeight != null || settings.displayDepth != null) {
+      await _sendDisplayPosition();
     }
   }
+
+  Future<void> _sendHeadUpAngle(int angle) async {
+    _log('Aktivierungswinkel: $angle°');
+    await g1.sendSetting(G1Packets.headUpAngle(angle));
+  }
+
+  Future<void> _sendHeadUpMode(int mode) async {
+    _log(
+      mode == 0
+          ? 'Hochschauen: Even-Dashboard anzeigen'
+          : 'Hochschauen: Even-Dashboard ausblenden',
+    );
+    await g1.sendSetting(G1Packets.headUpMode(mode));
+  }
+
+  Future<void> _sendDisplayPosition() async {
+    final height = settings.displayHeight ?? defaultDisplayHeight;
+    final depth = settings.displayDepth ?? defaultDisplayDepth;
+    _log('Anzeigeposition: Höhe $height, Distanz $depth');
+    await g1.sendSetting(
+      G1Packets.dashboardPosition(height, depth, _dashboardCounter++),
+    );
+  }
+
+  static const defaultHeadUpAngle = 30;
+  static const defaultDisplayHeight = 4;
+  static const defaultDisplayDepth = 5;
+
+  /// Changes the activation angle (stored in the app, sent to the glasses).
+  Future<void> setHeadUpAngle(int angle) async {
+    settings.headUpAngle = angle;
+    notifyListeners();
+    if (g1.connected) await _sendHeadUpAngle(angle);
+  }
+
+  /// Shows (0) or hides (2) the Even dashboard on head up.
+  Future<void> setHeadUpMode(int? mode) async {
+    settings.headUpMode = mode;
+    notifyListeners();
+    if (g1.connected && mode != null) await _sendHeadUpMode(mode);
+  }
+
+  /// Changes height and distance of the display content and shows a short
+  /// sample text so the position can be judged on the glasses.
+  Future<void> setDisplayPosition({int? height, int? depth}) async {
+    if (height != null) settings.displayHeight = height;
+    if (depth != null) settings.displayDepth = depth;
+    notifyListeners();
+    if (!g1.connected) return;
+    await _sendDisplayPosition();
+    _positionPreview?.cancel();
+    if (!display.active || _positionPreviewShown) {
+      _positionPreviewShown = true;
+      await display.showText(
+        'Anzeigeposition\n'
+        'Höhe ${settings.displayHeight ?? defaultDisplayHeight} · '
+        'Distanz ${settings.displayDepth ?? defaultDisplayDepth}',
+      );
+      _positionPreview = Timer(const Duration(seconds: 4), () {
+        _positionPreviewShown = false;
+        display.clear();
+      });
+    }
+  }
+
+  bool _positionPreviewShown = false;
 
   /// Head raised: cover the Even dashboard with the Home Assistant one.
   Future<void> _onHeadUp() async {
@@ -447,6 +480,7 @@ class Bridge extends ChangeNotifier {
     // Both arms report head movements; only the right one is used.
     if (isHeadEvent && event.side != G1Side.right) return;
     final gesture = gestureName(event.code, event.side);
+    if (gesture == null) return; // status push (battery, case, wear)
 
     switch (event.code) {
       case G1Event.evenAiStart:
@@ -583,6 +617,14 @@ class Bridge extends ChangeNotifier {
     );
     // Logs what each arm shows, to spot left/right differences.
     unawaited(Future<void>.delayed(const Duration(seconds: 1), checkDisplay));
+  }
+
+  /// Experimental: Assist answers in the Even AI mode of the official app.
+  void setEvenAiAnswers(bool enabled) {
+    settings.evenAiAnswers = enabled;
+    display.evenAiAnswers = enabled;
+    _log(enabled ? 'Antworten im Even-AI-Modus' : 'Antworten im Textmodus');
+    notifyListeners();
   }
 
   /// Switches the silent mode of the glasses.

@@ -109,6 +109,9 @@ class G1Connection extends ChangeNotifier {
 
   int? batteryLeft;
   int? batteryRight;
+  int? batteryCase;
+  bool? caseCharging;
+  String? wearState;
 
   /// Touch bar and other events (0xF5).
   Stream<G1TouchEvent> get events => _events.stream;
@@ -332,8 +335,13 @@ class G1Connection extends ChangeNotifier {
       return;
     }
     if (cmd == G1Cmd.event && data.length > 1) {
-      _debug('event ${arm.side.code} 0x${data[1].toRadixString(16)}');
-      _events.add(G1TouchEvent(arm.side, data[1], data));
+      final code = data[1];
+      if (G1Event.statusEvents.contains(code)) {
+        _onStatus(arm.side, code, data);
+      } else {
+        _debug('event ${arm.side.code} 0x${code.toRadixString(16)}');
+      }
+      _events.add(G1TouchEvent(arm.side, code, data));
       return;
     }
     if (data.length > 1 && data[1] == G1Status.failure) {
@@ -344,6 +352,38 @@ class G1Connection extends ChangeNotifier {
     if (completer != null && !completer.isCompleted) {
       completer.complete(G1Response(arm.side, data));
     }
+  }
+
+  /// Battery, case and wear status pushed by the glasses.
+  void _onStatus(G1Side side, int code, Uint8List data) {
+    final value = data.length > 2 ? data[2] : null;
+    var changed = false;
+    void set<T>(T current, T next, void Function(T) assign) {
+      if (current != next) {
+        assign(next);
+        changed = true;
+      }
+    }
+
+    switch (code) {
+      case G1Event.glassesBattery when value != null && value <= 100:
+        if (side == G1Side.left) {
+          set(batteryLeft, value, (v) => batteryLeft = v);
+        } else {
+          set(batteryRight, value, (v) => batteryRight = v);
+        }
+      case G1Event.caseBattery when value != null && value <= 100:
+        set(batteryCase, value, (v) => batteryCase = v);
+      case G1Event.caseCharging when value != null:
+        set(caseCharging, value == 1, (v) => caseCharging = v);
+      default:
+        final state = wearStateName(code);
+        if (state != null) {
+          set(wearState, state, (v) => wearState = v);
+          if (changed) _debug('Zustand: $state');
+        }
+    }
+    if (changed) notifyListeners();
   }
 
   Future<void> _write(_Arm arm, Uint8List data) async {
@@ -465,8 +505,21 @@ class G1Connection extends ChangeNotifier {
   );
 
   /// Shows one screen of text on both arms (0x4E, text mode 0x71).
-  Future<bool> sendText(String text) {
-    return send(G1Packets.text(text, seq: _textSeq++));
+  Future<bool> sendText(
+    String text, {
+    int status = G1ScreenStatus.textShow | G1ScreenStatus.newContent,
+    int page = 0,
+    int pages = 1,
+  }) {
+    return send(
+      G1Packets.text(
+        text,
+        seq: _textSeq++,
+        status: status,
+        page: page,
+        pages: pages,
+      ),
+    );
   }
 
   /// Which screen the given arm currently shows (0x39), or null.

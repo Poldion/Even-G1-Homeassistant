@@ -6,6 +6,16 @@
       },
       "last_response": {
         "default": "mdi:robot-outline"
+      },
+      "wear_state": {
+        "default": "mdi:glasses",
+        "state": {
+          "case_open": "mdi:briefcase-outline",
+          "case_closed": "mdi:briefcase"
+        }
+      },
+      "battery_case": {
+        "default": "mdi:briefcase"
       }
     },
     "binary_sensor": {
@@ -27,6 +37,11 @@
         "state": {
           "on": "mdi:bell-off"
         }
+      }
+    },
+    "select": {
+      "assistant": {
+        "default": "mdi:account-voice"
       }
     }
   },

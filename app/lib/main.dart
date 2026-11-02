@@ -5,7 +5,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 import 'bridge.dart';
 import 'settings.dart';
-import 'ui/home_page.dart';
+import 'ui/app_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,7 +73,7 @@ class EvenG1App extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        home: HomePage(bridge: bridge),
+        home: AppShell(bridge: bridge),
       ),
     );
   }

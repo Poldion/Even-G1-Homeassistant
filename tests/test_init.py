@@ -66,7 +66,7 @@ async def test_options_flow(
     assert event["type"] == "config"
     assert event["display_duration"] == 25
     assert event["show_transcript"] is False
-    assert event["head_up_mode"] is None
+    assert event["assist_pipeline_name"]
 
 
 async def test_show_text_requires_app(
@@ -240,8 +240,6 @@ async def test_dashboard_on_head_up(
             **entry.options,
             CONF_DASHBOARD_GESTURE: "head_up",
             CONF_DASHBOARD_TEMPLATE: "Temp {{ states('sensor.temperature') }}",
-            "head_up_angle": 25,
-            "head_up_mode": "nothing",
         },
     )
     await hass.async_block_till_done()
@@ -253,9 +251,6 @@ async def test_dashboard_on_head_up(
     assert (await client.receive_json())["success"]
     config = (await client.receive_json())["event"]
     assert config["dashboard_on_head_up"] is True
-    assert config["head_up_angle"] == 25
-    assert config["dashboard_height"] is None
-    assert config["head_up_mode"] == 0x02
     assert (await client.receive_json())["event"] == {
         "type": "dashboard",
         "text": "Temp 21",
@@ -336,3 +331,115 @@ async def test_silent_mode_switch(
     )
     assert (await client.receive_json())["success"]
     assert hass.states.get("switch.even_g1_silent_mode").state == "off"
+
+
+async def test_status_sensors(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """Battery, case and wear status reported by the app."""
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    await client.receive_json()
+    await client.send_json_auto_id(
+        {
+            "type": "even_g1/update_state",
+            "entry_id": entry.entry_id,
+            "glasses_connected": True,
+            "battery_case": 62,
+            "case_charging": True,
+            "wear_state": "case_open",
+        }
+    )
+    assert (await client.receive_json())["success"]
+    assert hass.states.get("sensor.even_g1_case_battery").state == "62"
+    assert hass.states.get("binary_sensor.even_g1_case_charging").state == "on"
+    assert hass.states.get("sensor.even_g1_state").state == "case_open"
+
+
+async def test_dashboard_entities(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """Selected entities become "Name: state unit" lines of the dashboard."""
+    hass.states.async_set(
+        "sensor.living_room",
+        "21.5",
+        {"friendly_name": "Wohnzimmer", "unit_of_measurement": "°C"},
+    )
+    hass.states.async_set("lock.front_door", "locked", {"friendly_name": "Haustür"})
+    options = {
+        **entry.options,
+        "dashboard_entities": ["sensor.living_room", "lock.front_door"],
+        CONF_DASHBOARD_GESTURE: "head_up",
+    }
+    options.pop(CONF_DASHBOARD_TEMPLATE)
+    hass.config_entries.async_update_entry(entry, options=options)
+    await hass.async_block_till_done()
+
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    await client.receive_json()
+    dashboard = (await client.receive_json())["event"]
+    assert dashboard["type"] == "dashboard"
+    lines = dashboard["text"].splitlines()
+    assert lines[0] == "Wohnzimmer: 21.5 °C"
+    assert lines[1].startswith("Haustür: ")
+    assert len(lines) == 2  # no default template when entities are chosen
+
+
+async def test_assistant_select(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """The assistant can be switched with the select entity."""
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {
+            "type": "assist_pipeline/pipeline/create",
+            "conversation_engine": "conversation.home_assistant",
+            "conversation_language": "de",
+            "language": "de",
+            "name": "Jarvis",
+            "stt_engine": None,
+            "stt_language": None,
+            "tts_engine": None,
+            "tts_language": None,
+            "tts_voice": None,
+            "wake_word_entity": None,
+            "wake_word_id": None,
+        }
+    )
+    pipeline_id = (await client.receive_json())["result"]["id"]
+    await hass.services.async_call(
+        "homeassistant",
+        "update_entity",
+        {"entity_id": "select.even_g1_assistant"},
+        blocking=True,
+    )
+
+    state = hass.states.get("select.even_g1_assistant")
+    assert state.state == "preferred"
+    assert "Jarvis" in state.attributes["options"]
+
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    await client.receive_json()
+
+    await hass.services.async_call(
+        "select",
+        "select_option",
+        {"entity_id": "select.even_g1_assistant", "option": "Jarvis"},
+        blocking=True,
+    )
+    await hass.async_block_till_done()
+    assert entry.options["assist_pipeline"] == pipeline_id
+    assert hass.states.get("select.even_g1_assistant").state == "Jarvis"
+    config = (await client.receive_json())["event"]
+    assert config["assist_pipeline"] == pipeline_id
+    assert config["assist_pipeline_name"] == "Jarvis"

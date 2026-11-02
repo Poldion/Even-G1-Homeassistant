@@ -18,28 +18,22 @@
       "init": {
         "title": "Even-G1-Optionen",
         "data": {
-          "assist_pipeline": "Assist-Pipeline",
+          "assist_pipeline": "Assistent",
           "show_transcript": "Erkannte Frage auf der Brille anzeigen",
           "display_duration": "Standard-Anzeigedauer (0 = bis zum Wegtippen)",
           "dashboard_gesture": "Geste, die das Dashboard anzeigt",
-          "dashboard_template": "Dashboard-Template",
+          "dashboard_template": "Zusätzlicher Dashboard-Text (Template)",
           "auto_gain": "Automatische Verstärkung des Mikrofons",
           "noise_suppression": "Rauschunterdrückung",
-          "head_up_angle": "Kopfneigungswinkel für das Dashboard",
-          "dashboard_height": "Dashboard-Höhe (0–8)",
-          "dashboard_depth": "Dashboard-Tiefe (1–9)",
-          "head_up_mode": "Even-Dashboard beim Hochschauen"
+          "dashboard_entities": "Dashboard-Entitäten"
         },
         "data_description": {
-          "assist_pipeline": "Wird verwendet, wenn du die linke Touchbar gedrückt hältst.",
-          "dashboard_template": "Jinja-Template, das bei der Dashboard-Geste oder der Aktion show_dashboard gerendert und auf der Brille angezeigt wird.",
+          "assist_pipeline": "Antwortet, wenn du die linke Touchbar gedrückt hältst. Auch über die Entität „Assistent“ des Geräts umschaltbar.",
+          "dashboard_template": "Optionales Jinja-Template unter den Entitäten, z. B. die Uhrzeit. Lange Dashboards bekommen mehrere Seiten (links/rechts tippen zum Blättern).",
           "auto_gain": "Hebt leise Sprache an (0 = aus, 31 = maximal). Hilft, wenn Fragen oft nicht verstanden werden.",
           "noise_suppression": "0 = aus, 4 = stark. Hilft in lauter Umgebung.",
-          "head_up_angle": "Ab welchem Winkel (0–60°) die Brille das Dashboard zeigt. Leer = Einstellung der Even-App behalten.",
-          "dashboard_height": "Leer = Einstellung der Even-App behalten.",
-          "dashboard_depth": "Leer = Einstellung der Even-App behalten.",
           "dashboard_gesture": "Bei „Kopf gehoben“ zeigt die App das Template sofort beim Hochschauen über dem Even-Dashboard an und schließt es beim Runterschauen wieder.",
-          "head_up_mode": "Wird auf der Brille gespeichert. „Ausblenden“ empfiehlt sich mit der Dashboard-Geste „Kopf gehoben“: dann erscheint nur noch das Home-Assistant-Dashboard."
+          "dashboard_entities": "Werden auf dem Brillen-Dashboard als Zeilen „Name: Zustand“ angezeigt, in dieser Reihenfolge."
         }
       }
     }
@@ -63,13 +57,6 @@
         "screen": "Text im Vollbild",
         "notification": "Benachrichtigung"
       }
-    },
-    "head_up_mode": {
-      "options": {
-        "unchanged": "Unverändert lassen",
-        "even_dashboard": "Anzeigen",
-        "nothing": "Ausblenden"
-      }
     }
   },
   "entity": {
@@ -85,6 +72,18 @@
       },
       "last_response": {
         "name": "Letzte Antwort"
+      },
+      "battery_case": {
+        "name": "Akku Case"
+      },
+      "wear_state": {
+        "name": "Zustand",
+        "state": {
+          "worn": "Getragen",
+          "not_worn": "Abgesetzt",
+          "case_open": "Im Case (offen)",
+          "case_closed": "Im Case (geschlossen)"
+        }
       }
     },
     "binary_sensor": {
@@ -93,6 +92,9 @@
       },
       "glasses_connected": {
         "name": "Brille verbunden"
+      },
+      "case_charging": {
+        "name": "Case lädt"
       }
     },
     "event": {
@@ -109,10 +111,7 @@
               "head_down": "Kopf gesenkt",
               "long_press": "Langes Drücken (Assistent-Start)",
               "long_press_release": "Langes Drücken beendet",
-              "other": "Andere",
-              "case_removed": "Aus dem Etui genommen",
-              "case_opened": "Etui geöffnet",
-              "case_closed": "Etui geschlossen"
+              "other": "Andere"
             }
           }
         }
@@ -121,6 +120,14 @@
     "switch": {
       "silent_mode": {
         "name": "Ruhemodus"
+      }
+    },
+    "select": {
+      "assistant": {
+        "name": "Assistent",
+        "state": {
+          "preferred": "Bevorzugter Assistent"
+        }
       }
     }
   },

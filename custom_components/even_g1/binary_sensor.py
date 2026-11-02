@@ -33,6 +33,11 @@ BINARY_SENSORS: tuple[EvenG1BinarySensorDescription, ...] = (
         value_fn=lambda device: device.app_connected,
     ),
     EvenG1BinarySensorDescription(
+        key="case_charging",
+        device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
+        value_fn=lambda device: device.state.case_charging,
+    ),
+    EvenG1BinarySensorDescription(
         key="glasses_connected",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         value_fn=lambda device: device.app_connected and device.state.glasses_connected,

@@ -88,4 +88,14 @@ void main() {
     expect(texts.where((w) => w.$1 == G1Side.left), hasLength(2));
     expect(texts.where((w) => w.$1 == G1Side.right), hasLength(2));
   });
+
+  test('optional Even AI mode uses 0x31 and pages', () async {
+    final display = G1Display(g1)..evenAiAnswers = true;
+    await display.showAiAnswer('Licht im Wohnzimmer ist an.');
+    final texts = writes.where((w) => w.$2[0] == G1Cmd.text).toList();
+    expect(texts, hasLength(2)); // both arms
+    expect(texts.every((w) => w.$2[4] == 0x31), isTrue);
+    expect(texts.first.$2.sublist(7, 9), [1, 1]); // page 1 of 1
+    display.onDismissed();
+  });
 }

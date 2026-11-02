@@ -5,15 +5,12 @@ from typing import Final
 DOMAIN: Final = "even_g1"
 
 CONF_DASHBOARD_TEMPLATE: Final = "dashboard_template"
+CONF_DASHBOARD_ENTITIES: Final = "dashboard_entities"
 CONF_DASHBOARD_GESTURE: Final = "dashboard_gesture"
 CONF_DISPLAY_DURATION: Final = "display_duration"
 CONF_ASSIST_PIPELINE: Final = "assist_pipeline"
 CONF_SHOW_TRANSCRIPT: Final = "show_transcript"
 CONF_AUTO_GAIN: Final = "auto_gain"
-CONF_HEAD_UP_ANGLE: Final = "head_up_angle"
-CONF_HEAD_UP_MODE: Final = "head_up_mode"
-CONF_DASHBOARD_HEIGHT: Final = "dashboard_height"
-CONF_DASHBOARD_DEPTH: Final = "dashboard_depth"
 CONF_NOISE_SUPPRESSION: Final = "noise_suppression"
 
 DEFAULT_DISPLAY_DURATION: Final = 10
@@ -25,14 +22,6 @@ DEFAULT_DASHBOARD_TEMPLATE: Final = (
 PIPELINE_PREFERRED: Final = "preferred"
 DEFAULT_AUTO_GAIN: Final = 0
 
-# What the glasses show on head up (persisted on the glasses, sent as
-# 0x08 06 00 00 03 <value>).
-HEAD_UP_MODE_UNCHANGED: Final = "unchanged"
-HEAD_UP_MODES: Final = {
-    HEAD_UP_MODE_UNCHANGED: None,
-    "even_dashboard": 0x00,
-    "nothing": 0x02,
-}
 DEFAULT_NOISE_SUPPRESSION: Final = 0
 
 DASHBOARD_GESTURE_NONE: Final = "none"
@@ -45,9 +34,6 @@ GESTURE_DOUBLE_TAP: Final = "double_tap"
 GESTURE_TRIPLE_TAP: Final = "triple_tap"
 GESTURE_HEAD_UP: Final = "head_up"
 GESTURE_HEAD_DOWN: Final = "head_down"
-GESTURE_CASE_REMOVED: Final = "case_removed"
-GESTURE_CASE_OPENED: Final = "case_opened"
-GESTURE_CASE_CLOSED: Final = "case_closed"
 GESTURE_LONG_PRESS: Final = "long_press"
 GESTURE_LONG_PRESS_RELEASE: Final = "long_press_release"
 GESTURE_OTHER: Final = "other"
@@ -59,9 +45,6 @@ GESTURES: Final = [
     GESTURE_TRIPLE_TAP,
     GESTURE_HEAD_UP,
     GESTURE_HEAD_DOWN,
-    GESTURE_CASE_REMOVED,
-    GESTURE_CASE_OPENED,
-    GESTURE_CASE_CLOSED,
     GESTURE_LONG_PRESS,
     GESTURE_LONG_PRESS_RELEASE,
     GESTURE_OTHER,
@@ -97,3 +80,6 @@ CMD_SILENT_MODE: Final = "silent_mode"
 CMD_CONFIG: Final = "config"
 CMD_RELOAD: Final = "reload"
 CMD_DASHBOARD: Final = "dashboard"
+
+# Where the glasses are (status pushes 0x06/0x07/0x08/0x0B).
+WEAR_STATES: Final = ["worn", "not_worn", "case_open", "case_closed"]

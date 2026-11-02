@@ -12,6 +12,8 @@ from homeassistant.const import CONF_NAME
 from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     BooleanSelector,
+    EntitySelector,
+    EntitySelectorConfig,
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
@@ -27,13 +29,10 @@ from homeassistant.util import slugify
 from .const import (
     CONF_ASSIST_PIPELINE,
     CONF_AUTO_GAIN,
-    CONF_DASHBOARD_DEPTH,
+    CONF_DASHBOARD_ENTITIES,
     CONF_DASHBOARD_GESTURE,
-    CONF_DASHBOARD_HEIGHT,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DISPLAY_DURATION,
-    CONF_HEAD_UP_ANGLE,
-    CONF_HEAD_UP_MODE,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
@@ -43,8 +42,6 @@ from .const import (
     DEFAULT_DISPLAY_DURATION,
     DEFAULT_NOISE_SUPPRESSION,
     DOMAIN,
-    HEAD_UP_MODE_UNCHANGED,
-    HEAD_UP_MODES,
     PIPELINE_PREFERRED,
 )
 
@@ -56,7 +53,7 @@ DEFAULT_OPTIONS: dict[str, Any] = {
     CONF_SHOW_TRANSCRIPT: True,
     CONF_AUTO_GAIN: DEFAULT_AUTO_GAIN,
     CONF_NOISE_SUPPRESSION: DEFAULT_NOISE_SUPPRESSION,
-    CONF_HEAD_UP_MODE: HEAD_UP_MODE_UNCHANGED,
+    CONF_DASHBOARD_ENTITIES: [],
 }
 
 
@@ -163,37 +160,12 @@ class EvenG1OptionsFlow(OptionsFlow):
                     )
                 ),
                 vol.Required(
-                    CONF_DASHBOARD_TEMPLATE, default=options[CONF_DASHBOARD_TEMPLATE]
+                    CONF_DASHBOARD_ENTITIES, default=options[CONF_DASHBOARD_ENTITIES]
+                ): EntitySelector(EntitySelectorConfig(multiple=True)),
+                vol.Optional(
+                    CONF_DASHBOARD_TEMPLATE,
+                    description={"suggested_value": options[CONF_DASHBOARD_TEMPLATE]},
                 ): TemplateSelector(),
-                vol.Required(
-                    CONF_HEAD_UP_MODE, default=options[CONF_HEAD_UP_MODE]
-                ): SelectSelector(
-                    SelectSelectorConfig(
-                        options=list(HEAD_UP_MODES),
-                        mode=SelectSelectorMode.DROPDOWN,
-                        translation_key=CONF_HEAD_UP_MODE,
-                    )
-                ),
-                # Glasses settings: empty = leave as set in the Even app.
-                **{
-                    vol.Optional(
-                        key,
-                        description={"suggested_value": options.get(key)},
-                    ): NumberSelector(
-                        NumberSelectorConfig(
-                            min=low,
-                            max=high,
-                            step=1,
-                            mode=NumberSelectorMode.BOX,
-                            **({"unit_of_measurement": unit} if unit else {}),
-                        )
-                    )
-                    for key, low, high, unit in (
-                        (CONF_HEAD_UP_ANGLE, 0, 60, "°"),
-                        (CONF_DASHBOARD_HEIGHT, 0, 8, None),
-                        (CONF_DASHBOARD_DEPTH, 1, 9, None),
-                    )
-                },
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)
