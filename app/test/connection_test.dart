@@ -104,7 +104,8 @@ void main() {
       G1Display.verifyDelay + const Duration(milliseconds: 20),
     );
     // Left arm still shows the Even dashboard (0x06) ...
-    expect(writes.single, (G1Side.left, [0x39, 0x04, 0x00, 0x00]));
+    expect(writes.single.$1, G1Side.left);
+    expect(writes.single.$2, [0x39, 0x04, 0x00, 0x00]);
     g1.receive(
       G1Side.left,
       Uint8List.fromList([0x39, 0x04, 0x00, 0x00, 0x00, 0x06]),
