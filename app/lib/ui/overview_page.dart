@@ -254,6 +254,7 @@ class _Brightness extends StatelessWidget {
     final connected = bridge.g1.connected;
     final auto = bridge.autoBrightness ?? false;
     final percent = bridge.brightness;
+    final applied = bridge.g1.brightnessPercent;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
       child: Column(
@@ -268,7 +269,11 @@ class _Brightness extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
-              Text(auto ? 'Automatisch' : (percent == null ? '–' : '$percent %')),
+              Text(
+                auto
+                    ? 'Auto${applied == null ? '' : ' · $applied %'}'
+                    : (percent == null ? '–' : '$percent %'),
+              ),
               const SizedBox(width: 8),
               Switch(
                 value: auto,

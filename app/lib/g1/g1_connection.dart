@@ -110,6 +110,10 @@ class G1Connection extends ChangeNotifier {
   int? batteryLeft;
   int? batteryRight;
   int? batteryCase;
+
+  /// Brightness currently applied by the glasses in percent (pushed with
+  /// 0xF5 0x12, also while the automatic brightness changes it).
+  int? brightnessPercent;
   bool? caseCharging;
   String? wearState;
 
@@ -384,6 +388,12 @@ class G1Connection extends ChangeNotifier {
         }
       case G1Event.caseBattery when value != null && value <= 100:
         set(batteryCase, value, (v) => batteryCase = v);
+      case G1Event.brightness when value != null:
+        set(
+          brightnessPercent,
+          G1Packets.brightnessPercent(value),
+          (v) => brightnessPercent = v,
+        );
       case G1Event.caseCharging when value != null:
         set(caseCharging, value == 1, (v) => caseCharging = v);
       default:
@@ -551,7 +561,7 @@ class G1Connection extends ChangeNotifier {
       final r = await request(G1Side.right, G1Packets.brightnessQuery());
       if (r.data.length < 4 || r.data[1] == G1Status.failure) return null;
       return (
-        percent: (r.data[2].clamp(0, 63) * 100 / 63).round(),
+        percent: G1Packets.brightnessPercent(r.data[2]),
         auto: r.data[3] == 0x01,
       );
     } catch (e) {

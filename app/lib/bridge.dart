@@ -471,12 +471,20 @@ class Bridge extends ChangeNotifier {
     await g1.sendSetting(G1Packets.headUpMode(mode));
   }
 
-  Future<void> _sendDisplayPosition() async {
+  Future<void> _sendDisplayPosition({bool preview = false}) async {
     final height = settings.displayHeight ?? defaultDisplayHeight;
     final depth = settings.displayDepth ?? defaultDisplayDepth;
-    _log('Anzeigeposition: Höhe $height, Distanz $depth');
+    _log(
+      'Anzeigeposition: Höhe $height, Distanz $depth'
+      '${preview ? ' (Vorschau)' : ''}',
+    );
     await g1.sendSetting(
-      G1Packets.dashboardPosition(height, depth, _dashboardCounter++),
+      G1Packets.dashboardPosition(
+        height,
+        depth,
+        _dashboardCounter++,
+        preview: preview,
+      ),
     );
   }
 
@@ -498,30 +506,21 @@ class Bridge extends ChangeNotifier {
     if (g1.connected && mode != null) await _sendHeadUpMode(mode);
   }
 
-  /// Changes height and distance of the display content and shows a short
-  /// sample text so the position can be judged on the glasses.
+  /// Changes height and distance of the display content. The glasses show
+  /// their own position preview for a moment, then the position is applied
+  /// (like the official app).
   Future<void> setDisplayPosition({int? height, int? depth}) async {
     if (height != null) settings.displayHeight = height;
     if (depth != null) settings.displayDepth = depth;
     notifyListeners();
     if (!g1.connected) return;
-    await _sendDisplayPosition();
     _positionPreview?.cancel();
-    if (!display.active || _positionPreviewShown) {
-      _positionPreviewShown = true;
-      await display.showText(
-        'Anzeigeposition\n'
-        'Höhe ${settings.displayHeight ?? defaultDisplayHeight} · '
-        'Distanz ${settings.displayDepth ?? defaultDisplayDepth}',
-      );
-      _positionPreview = Timer(const Duration(seconds: 4), () {
-        _positionPreviewShown = false;
-        display.clear();
-      });
-    }
+    await _sendDisplayPosition(preview: true);
+    _positionPreview = Timer(
+      const Duration(seconds: 3),
+      () => unawaited(_sendDisplayPosition()),
+    );
   }
-
-  bool _positionPreviewShown = false;
 
   /// Single tap configured as dashboard gesture: show the dashboard, or
   /// close it if it is shown. Returns false if the tap is meant for paging

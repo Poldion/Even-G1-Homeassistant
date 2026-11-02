@@ -7,6 +7,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.12.1] - 2026-11-02
+
+### Fixed
+- Höhe und Distanz der Anzeige werden jetzt übernommen. Die App öffnet beim
+  Einstellen kurz die Positionsvorschau der Brille und schließt sie danach
+  mit dem Befehl, den auch die offizielle App sendet (Zustand `00`); vorher
+  blieb die Brille im Vorschaumodus und der Beispieltext unterbrach ihn.
+- Helligkeit: Die Brille kennt die Stufen 0–42 (nicht 0–63), der obere Teil
+  des Reglers hatte keine Wirkung. Bei automatischer Helligkeit zeigt die
+  Übersicht die Stufe, die die Brille gerade nutzt.
+
 ## [0.12.0] - 2026-11-02
 
 ### Added
@@ -111,7 +122,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.12.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.12.1...HEAD
+[0.12.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.11.0...v0.12.0
 [0.11.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.9.0...v0.10.0

@@ -182,14 +182,22 @@ class G1Packets {
 
   static Uint8List battery() => Uint8List.fromList([G1Cmd.battery, 0x01]);
 
-  /// Display brightness in percent (sent as 0–63 like MentraOS) and the
-  /// automatic brightness of the glasses (their own light sensor).
+  /// Highest brightness level (0x2A, confirmed by even-g1-companion on
+  /// firmware 1.6.6; MentraOS assumes 63).
+  static const maxBrightness = 42;
+
+  /// Display brightness in percent (sent as 0–42) and the automatic
+  /// brightness of the glasses (light sensor in the right arm).
   static Uint8List brightness(int percent, {required bool auto}) =>
       Uint8List.fromList([
         G1Cmd.brightness,
-        percent.clamp(0, 100) * 63 ~/ 100,
+        (percent.clamp(0, 100) * maxBrightness / 100).round(),
         auto ? 0x01 : 0x00,
       ]);
+
+  /// Brightness level of the glasses (0–42) in percent.
+  static int brightnessPercent(int level) =>
+      (level.clamp(0, maxBrightness) * 100 / maxBrightness).round();
 
   /// Reads brightness and auto mode (right arm): [0x29, 0x65, level, auto].
   static Uint8List brightnessQuery() =>
@@ -220,18 +228,28 @@ class G1Packets {
   static Uint8List headUpAngle(int angle) =>
       Uint8List.fromList([G1Cmd.headUpAngle, angle.clamp(0, 60), 0x01]);
 
-  /// Dashboard height (0–8) and depth (1–9).
-  static Uint8List dashboardPosition(int height, int depth, int counter) =>
-      Uint8List.fromList([
-        G1Cmd.dashboardPosition,
-        0x08,
-        0x00,
-        counter & 0xff,
-        0x02,
-        0x01,
-        height.clamp(0, 8),
-        depth.clamp(1, 9),
-      ]);
+  /// Height (0–8) and depth (1–9) of the display content.
+  ///
+  /// With [preview] the glasses open their own position preview screen
+  /// (state 0x01); state 0x00 closes it and applies the position. The
+  /// official app sends 0x00 (even-g1-companion capture
+  /// `26 08 00 00 02 00 07 03`); the firmware recomputes the canvas origin of
+  /// every screen from these values (g1-reverse `cal_panel_canvas_coord`).
+  static Uint8List dashboardPosition(
+    int height,
+    int depth,
+    int counter, {
+    bool preview = false,
+  }) => Uint8List.fromList([
+    G1Cmd.dashboardPosition,
+    0x08,
+    0x00,
+    counter & 0xff,
+    0x02,
+    preview ? 0x01 : 0x00,
+    height.clamp(0, 8),
+    depth.clamp(1, 9),
+  ]);
 
   static Uint8List heartbeat(int seq) {
     const length = 6;

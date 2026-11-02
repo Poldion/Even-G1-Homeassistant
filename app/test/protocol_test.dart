@@ -73,9 +73,11 @@ void main() {
   test('builds silent mode packets', () {
     expect(G1Packets.silentMode(true), [0x03, 0x0C, 0x00]);
     expect(G1Packets.silentMode(false), [0x03, 0x0A, 0x00]);
-    expect(G1Packets.brightness(100, auto: false), [0x01, 63, 0x00]);
-    expect(G1Packets.brightness(50, auto: true), [0x01, 31, 0x01]);
-    expect(G1Packets.brightness(150, auto: false), [0x01, 63, 0x00]);
+    expect(G1Packets.brightness(100, auto: false), [0x01, 42, 0x00]);
+    expect(G1Packets.brightness(50, auto: true), [0x01, 21, 0x01]);
+    expect(G1Packets.brightness(150, auto: false), [0x01, 42, 0x00]);
+    expect(G1Packets.brightnessPercent(21), 50);
+    expect(G1Packets.brightnessPercent(99), 100);
     expect(G1Packets.brightnessQuery(), [0x29]);
   });
 
@@ -88,10 +90,15 @@ void main() {
     expect(screenName(0x42), '0x42');
   });
 
-  test('builds glasses setting packets (as MentraOS)', () {
+  test('builds glasses setting packets', () {
     expect(G1Packets.headUpAngle(30), [0x0B, 30, 0x01]);
     expect(G1Packets.headUpAngle(90), [0x0B, 60, 0x01]);
-    expect(G1Packets.dashboardPosition(3, 5, 7), [
+    // Applies the position (as the official app) ...
+    expect(G1Packets.dashboardPosition(7, 3, 0), [
+      0x26, 0x08, 0x00, 0, 0x02, 0x00, 7, 3, //
+    ]);
+    // ... or opens the position preview of the glasses.
+    expect(G1Packets.dashboardPosition(3, 5, 7, preview: true), [
       0x26, 0x08, 0x00, 7, 0x02, 0x01, 3, 5, //
     ]);
     expect(G1Packets.dashboardPosition(20, 0, 0).sublist(6), [8, 1]);

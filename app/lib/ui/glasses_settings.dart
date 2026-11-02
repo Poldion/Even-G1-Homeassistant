@@ -164,7 +164,7 @@ class _DisplaySettingsState extends State<DisplaySettings> {
           label: 'Höhe',
           help:
               'Wie hoch der Text im Sichtfeld steht. Beim Loslassen zeigt '
-              'die Brille kurz einen Beispieltext.',
+              'die Brille die neue Position kurz an und übernimmt sie.',
           value: _height,
           min: 0,
           max: 8,
