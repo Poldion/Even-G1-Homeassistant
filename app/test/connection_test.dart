@@ -12,11 +12,18 @@ void main() {
   late G1Connection g1;
 
   setUp(() {
-    writes = [];
-    blockers = {G1Side.left: null, G1Side.right: null};
+    // Each connection gets its own list, so checks still running from an
+    // earlier test do not end up in this one.
+    final log = <(G1Side, List<int>)>[];
+    final block = <G1Side, Completer<void>?>{
+      G1Side.left: null,
+      G1Side.right: null,
+    };
+    writes = log;
+    blockers = block;
     g1 = G1Connection.fake((side, data) async {
-      writes.add((side, data));
-      await blockers[side]?.future;
+      log.add((side, data));
+      await block[side]?.future;
     });
   });
 
