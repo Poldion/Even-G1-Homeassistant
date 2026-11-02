@@ -247,7 +247,8 @@ class _Battery extends StatelessWidget {
   }
 }
 
-/// Brightness slider and automatic brightness switch.
+/// Brightness slider and automatic brightness switch. With automatic
+/// brightness the slider sets an offset.
 class _Brightness extends StatelessWidget {
   const _Brightness({required this.bridge});
 
@@ -258,10 +259,14 @@ class _Brightness extends StatelessWidget {
     final connected = bridge.g1.connected;
     final auto = bridge.autoBrightness ?? false;
     final percent = bridge.brightness;
+    final offset = bridge.brightnessOffset;
     final applied = bridge.g1.brightnessPercent;
+    String signed(int v) => v > 0 ? '+$v' : '$v';
+    final small = Theme.of(context).textTheme.bodySmall;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -275,7 +280,7 @@ class _Brightness extends StatelessWidget {
               ),
               Text(
                 auto
-                    ? 'Auto${applied == null ? '' : ' · $applied %'}'
+                    ? 'Auto${offset == 0 ? '' : ' ${signed(offset)} %'}'
                     : (percent == null ? '–' : '$percent %'),
               ),
               const SizedBox(width: 8),
@@ -287,19 +292,30 @@ class _Brightness extends StatelessWidget {
           ),
           Row(
             children: [
-              const Icon(Icons.brightness_low, size: 20),
+              Icon(auto ? Icons.remove : Icons.brightness_low, size: 20),
               Expanded(
-                child: Slider(
-                  value: (percent ?? 50).toDouble(),
-                  max: 100,
-                  divisions: 20,
-                  label: '${percent ?? 50} %',
-                  onChanged: connected
-                      ? (v) => bridge.setBrightness(v.round())
-                      : null,
-                ),
+                child: auto
+                    ? Slider(
+                        value: offset.toDouble(),
+                        min: -50,
+                        max: 50,
+                        divisions: 20,
+                        label: '${signed(offset)} %',
+                        onChanged: connected
+                            ? (v) => bridge.setBrightnessOffset(v.round())
+                            : null,
+                      )
+                    : Slider(
+                        value: (percent ?? 50).toDouble(),
+                        max: 100,
+                        divisions: 20,
+                        label: '${percent ?? 50} %',
+                        onChanged: connected
+                            ? (v) => bridge.setBrightness(v.round())
+                            : null,
+                      ),
               ),
-              const Icon(Icons.brightness_high, size: 20),
+              Icon(auto ? Icons.add : Icons.brightness_high, size: 20),
               const SizedBox(width: 8),
             ],
           ),
@@ -307,9 +323,15 @@ class _Brightness extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(right: 8, bottom: 4),
               child: Text(
-                'Die Brille regelt die Helligkeit selbst über ihren '
-                'Lichtsensor. Den Regler bewegen schaltet auf manuell.',
-                style: Theme.of(context).textTheme.bodySmall,
+                offset == 0
+                    ? 'Die Brille regelt die Helligkeit über ihren '
+                          'Lichtsensor. Der Regler verschiebt sie heller oder '
+                          'dunkler.'
+                    : 'Die App misst etwa jede Minute, wenn nichts angezeigt '
+                          'wird, den Wert des Lichtsensors und stellt ihn '
+                          '${signed(offset)} % ein'
+                          '${applied == null ? '' : ' (gerade $applied %)'}.',
+                style: small,
               ),
             ),
         ],

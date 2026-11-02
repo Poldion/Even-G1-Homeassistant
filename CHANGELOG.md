@@ -7,6 +7,15 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-02
+
+### Added
+- Automatische Helligkeit mit Offset: Bei „Auto“ wird der Helligkeitsregler
+  zum Offset (−50 % bis +50 %). Die Firmware kennt keinen Offset (feste
+  Tabelle vom Lichtsensor zur Stufe), daher misst die App etwa jede Minute,
+  wenn nichts angezeigt wird, kurz im Auto-Modus der Brille, liest die Stufe
+  aus (`0x29`) und setzt Stufe + Offset.
+
 ## [0.14.0] - 2026-11-02
 
 ### Added
@@ -144,7 +153,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.14.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.12.0...v0.12.1

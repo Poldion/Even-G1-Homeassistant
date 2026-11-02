@@ -586,6 +586,19 @@ class G1Connection extends ChangeNotifier {
     }
   }
 
+  /// Raw brightness level (0–42) currently used by the glasses. With
+  /// automatic brightness this is the level chosen from the light sensor.
+  Future<int?> readBrightnessLevel() async {
+    try {
+      final r = await request(G1Side.right, G1Packets.brightnessQuery());
+      if (r.data.length < 3 || r.data[1] == G1Status.failure) return null;
+      return r.data[2].clamp(0, G1Packets.maxBrightness);
+    } catch (e) {
+      _debug('brightness: $e');
+      return null;
+    }
+  }
+
   /// Sends a setting to both arms (like MentraOS, with a short pause).
   Future<bool> sendSetting(Uint8List packet) =>
       send([packet], waitAfter: const Duration(milliseconds: 100));

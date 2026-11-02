@@ -70,7 +70,7 @@ App und Integration sollten dieselbe Version haben.
 
 ### In der App
 
-- **Übersicht:** Verbindung, Akku links/rechts und Case, Trage-Zustand, Ruhemodus, Helligkeit (Regler und Automatik), Home Assistant und Assistent, optionale Vorschau der Brillenanzeige.
+- **Übersicht:** Verbindung, Akku links/rechts und Case, Trage-Zustand, Ruhemodus, Helligkeit (Regler, Automatik mit Offset), Home Assistant und Assistent, optionale Vorschau der Brillenanzeige.
 - **Einstellungen:** Home Assistant, Brille koppeln, *Anzeige & Aktivierung* (Aktivierungswinkel, Höhe, Distanz, Even-Dashboard beim Hochschauen), Benachrichtigungen, Diagnose.
 
 ### In Home Assistant

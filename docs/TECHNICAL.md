@@ -60,6 +60,17 @@ Bügel einen Befehl ab, steht das im App-Protokoll (`L/R rejected 0x..`).
 Zuhör-Anzeige (der rechte Bügel zeichnet sie laufend neu). Danach zeigt die
 App „Einen Moment …“, die erkannte Frage und die Antwort auf beiden Bügeln.
 
+## Automatische Helligkeit mit Offset
+
+Die Firmware nähert die Helligkeit im Auto-Modus schrittweise einer festen
+Tabelle an (Lichtsensor im rechten Bügel → Stufe 0–42, g1-reverse
+`compute_lux_brightness_bucket`) und schreibt die Stufe in dasselbe Feld, das
+`0x29` liest. Einen Offset gibt es nicht. Mit Offset schaltet die App daher
+etwa jede Minute, wenn nichts angezeigt wird, kurz den Auto-Modus ein
+(`01 <stufe> 01`), liest `0x29`, bis die Stufe dreimal gleich ist, und setzt
+dann `01 <stufe+offset> 00`. Wird währenddessen etwas angezeigt, bricht sie ab
+und stellt die letzte Stufe wieder her.
+
 ## Aufnahmen
 
 Die App schaltet das Mikrofon des rechten Bügels ein (`0x0E 01`), dekodiert

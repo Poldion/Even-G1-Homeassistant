@@ -195,6 +195,14 @@ class G1Packets {
         auto ? 0x01 : 0x00,
       ]);
 
+  /// Brightness as raw level (0–42).
+  static Uint8List brightnessLevel(int level, {required bool auto}) =>
+      Uint8List.fromList([
+        G1Cmd.brightness,
+        level.clamp(0, maxBrightness),
+        auto ? 0x01 : 0x00,
+      ]);
+
   /// Brightness level of the glasses (0–42) in percent.
   static int brightnessPercent(int level) =>
       (level.clamp(0, maxBrightness) * 100 / maxBrightness).round();

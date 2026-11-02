@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:lc3_codec/lc3_codec.dart';
 
+import 'g1/auto_brightness.dart';
 import 'g1/display.dart';
 import 'g1/g1_connection.dart';
 import 'g1/protocol.dart';
@@ -58,6 +59,11 @@ class HaConfig {
 class Bridge extends ChangeNotifier {
   Bridge(this.settings, {G1Connection? g1}) : g1 = g1 ?? G1Connection() {
     display = G1Display(this.g1)..evenAiAnswers = settings.evenAiAnswers;
+    autoBrightnessOffset = AutoBrightness(
+      this.g1,
+      idle: () => !display.active && !assistRunning,
+      log: _log,
+    );
     recorder = VoiceRecorder(this.g1, settings, _log)
       ..addListener(notifyListeners);
     this.g1.addListener(_onGlassesChanged);
@@ -82,6 +88,7 @@ class Bridge extends ChangeNotifier {
   final G1Connection g1;
   late final G1Display display;
   late final VoiceRecorder recorder;
+  late final AutoBrightness autoBrightnessOffset;
 
   HaClient? _ha;
   int _haGeneration = 0;
@@ -407,6 +414,7 @@ class Bridge extends ChangeNotifier {
     }
     if (settings.brightness != null || settings.autoBrightness != null) {
       // Like MentraOS: the app's setting is sent on every connection.
+      autoBrightnessOffset.sensorLevel = null;
       await _sendBrightness();
     } else {
       // Not set in this app yet: show what the glasses use.
@@ -458,10 +466,36 @@ class Bridge extends ChangeNotifier {
     await _sendBrightness();
   }
 
+  /// Offset of the automatic brightness in percent (-50..50).
+  late int brightnessOffset = settings.brightnessOffset;
+
+  /// Sets the offset of the automatic brightness. With an offset the app
+  /// manages the automatic brightness itself (see [AutoBrightness]).
+  void setBrightnessOffset(int percent) {
+    brightnessOffset = percent.clamp(-50, 50);
+    settings.brightnessOffset = brightnessOffset;
+    notifyListeners();
+    _brightnessTimer?.cancel();
+    _brightnessTimer = Timer(
+      const Duration(milliseconds: 300),
+      () => unawaited(_sendBrightness()),
+    );
+  }
+
   Future<void> _sendBrightness() async {
-    if (!g1.connected) return;
-    final percent = brightness ?? 50;
     final auto = autoBrightness ?? false;
+    if (!auto || brightnessOffset == 0) autoBrightnessOffset.stop();
+    if (!g1.connected) return;
+    if (auto && brightnessOffset != 0) {
+      final levels = (brightnessOffset * G1Packets.maxBrightness / 100).round();
+      _log(
+        'Helligkeit: automatisch, '
+        '${brightnessOffset > 0 ? '+' : ''}$brightnessOffset %',
+      );
+      autoBrightnessOffset.start(levels);
+      return;
+    }
+    final percent = brightness ?? 50;
     _log(auto ? 'Helligkeit: automatisch' : 'Helligkeit: $percent %');
     await g1.sendSetting(G1Packets.brightness(percent, auto: auto));
   }
@@ -819,6 +853,7 @@ class Bridge extends ChangeNotifier {
     _haGeneration++;
     _ha?.close();
     recorder.dispose();
+    autoBrightnessOffset.stop();
     g1.dispose();
     super.dispose();
   }

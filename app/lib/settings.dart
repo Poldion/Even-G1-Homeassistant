@@ -91,6 +91,10 @@ class Settings {
   int? get brightness => _optInt('brightness');
   set brightness(int? v) => _setOptInt('brightness', v);
 
+  /// Offset of the automatic brightness in percent (-50..50, 0 = off).
+  int get brightnessOffset => _prefs.getInt('brightness_offset') ?? 0;
+  set brightnessOffset(int v) => _prefs.setInt('brightness_offset', v);
+
   /// Automatic brightness of the glasses.
   bool? get autoBrightness => switch (_optInt('auto_brightness')) {
     null => null,
