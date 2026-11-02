@@ -26,7 +26,8 @@ void main() {
     final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     final requests = <(String, String?, String)>[];
     server.listen((request) async {
-      final body = await utf8.decoder.bind(request).join();
+      // Binary WAV data: decode byte by byte.
+      final body = await latin1.decoder.bind(request).join();
       requests.add((
         request.uri.path,
         request.headers.value(HttpHeaders.authorizationHeader),
