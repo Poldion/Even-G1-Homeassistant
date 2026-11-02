@@ -370,6 +370,55 @@ async def test_recording_switch(
     assert hass.states.get("switch.even_g1_recording").state == "off"
 
 
+async def test_wear_detection(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """Worn sensor follows the wear state; the switch toggles detection."""
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    await client.receive_json()
+    assert hass.states.get("binary_sensor.even_g1_worn").state == "unknown"
+
+    await client.send_json_auto_id(
+        {
+            "type": "even_g1/update_state",
+            "entry_id": entry.entry_id,
+            "glasses_connected": True,
+            "wear_detection": True,
+            "wear_state": "worn",
+        }
+    )
+    assert (await client.receive_json())["success"]
+    assert hass.states.get("binary_sensor.even_g1_worn").state == "on"
+    assert hass.states.get("switch.even_g1_wear_detection").state == "on"
+
+    await client.send_json_auto_id(
+        {
+            "type": "even_g1/update_state",
+            "entry_id": entry.entry_id,
+            "wear_state": "case_open",
+        }
+    )
+    assert (await client.receive_json())["success"]
+    assert hass.states.get("binary_sensor.even_g1_worn").state == "off"
+
+    await hass.services.async_call(
+        "switch",
+        "turn_off",
+        {"entity_id": "switch.even_g1_wear_detection"},
+        blocking=True,
+    )
+    assert (await client.receive_json())["event"] == {
+        "type": "wear_detection",
+        "enabled": False,
+    }
+    # Without wear detection the state is not known.
+    assert hass.states.get("binary_sensor.even_g1_worn").state == "unknown"
+
+
 async def test_status_sensors(
     hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
 ) -> None:

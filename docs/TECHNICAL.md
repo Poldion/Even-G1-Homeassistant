@@ -45,6 +45,7 @@ ergänzt um Erkenntnisse aus [MentraOS](https://github.com/Mentra-Community/Ment
 | `0x29` | Helligkeit abfragen (rechter Bügel), Antwort `29 65 <h> <a>` |
 | `0x0B` | Aktivierungswinkel (0–60°) |
 | `0x26 08 00 <n> 02 <s> <h> <d>` | Höhe (0–8) und Distanz (1–9) der Anzeige; `s` = `01` Positionsvorschau der Brille, `00` übernehmen |
+| `0x27 <0/1>` / `0x3A` | Trageerkennung an/aus / abfragen (Antwort `3A C9 <0/1>`); nur mit ihr meldet die Brille `F5 06`/`07` |
 | `0x39` | Abfrage, was ein Bügel gerade anzeigt (`0x10` = Textanzeige); die App prüft damit nach jedem Text beide Bügel |
 | `0x4B` / `0x04` | Benachrichtigung / App-Whitelist (linker Bügel) |
 

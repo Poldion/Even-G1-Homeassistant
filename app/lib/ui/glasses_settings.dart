@@ -199,6 +199,16 @@ class _DisplaySettingsState extends State<DisplaySettings> {
           ],
           onChanged: (v) => bridge.setHeadUpMode(v),
         ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Trageerkennung'),
+          subtitle: const Text(
+            'Die Brille meldet, ob sie getragen wird (auch an Home '
+            'Assistant: „Getragen“).',
+          ),
+          value: bridge.wearDetection ?? false,
+          onChanged: bridge.g1.connected ? bridge.setWearDetection : null,
+        ),
       ],
     );
   }

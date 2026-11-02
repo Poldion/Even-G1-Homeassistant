@@ -668,6 +668,18 @@ class G1Connection extends ChangeNotifier {
     }
   }
 
+  /// Wear detection setting of the glasses, null if they do not answer.
+  Future<bool?> readWearDetection() async {
+    try {
+      final r = await request(G1Side.right, G1Packets.wearDetectionQuery());
+      if (r.data.length < 3 || r.data[1] != G1Status.success) return null;
+      return r.data[2] == 0x01;
+    } catch (e) {
+      _debug('wear detection: $e');
+      return null;
+    }
+  }
+
   /// Raw brightness level (0–42) currently used by the glasses. With
   /// automatic brightness this is the level chosen from the light sensor.
   Future<int?> readBrightnessLevel() async {

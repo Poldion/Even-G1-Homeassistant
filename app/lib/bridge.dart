@@ -276,6 +276,8 @@ class Bridge extends ChangeNotifier {
         await setSilentMode(event['enabled'] == true);
       case 'recording':
         await setRecording(event['enabled'] == true);
+      case 'wear_detection':
+        await setWearDetection(event['enabled'] == true);
     }
   }
 
@@ -378,6 +380,7 @@ class Bridge extends ChangeNotifier {
       'case_charging': g1.caseCharging,
       'wear_state': g1.wearState,
       'recording': recorder.recording,
+      'wear_detection': wearDetection,
     };
     if (mapEquals(state, _lastReported)) return;
     _lastReported = state;
@@ -412,6 +415,13 @@ class Bridge extends ChangeNotifier {
     if (settings.displayHeight != null || settings.displayDepth != null) {
       await _sendDisplayPosition();
     }
+    final wear = settings.wearDetection;
+    if (wear != null) {
+      await g1.sendSetting(G1Packets.wearDetection(wear));
+    } else {
+      wearDetection = await g1.readWearDetection();
+    }
+    unawaited(_reportState());
     if (settings.brightness != null || settings.autoBrightness != null) {
       // Like MentraOS: the app's setting is sent on every connection.
       autoBrightnessOffset.sensorLevel = null;
@@ -425,6 +435,25 @@ class Bridge extends ChangeNotifier {
         notifyListeners();
       }
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Wear detection
+  // ---------------------------------------------------------------------------
+
+  /// Wear detection of the glasses (null = unknown). Only while it is on,
+  /// the glasses report whether they are worn.
+  late bool? wearDetection = settings.wearDetection;
+
+  Future<void> setWearDetection(bool enabled) async {
+    wearDetection = enabled;
+    settings.wearDetection = enabled;
+    notifyListeners();
+    if (g1.connected) {
+      _log(enabled ? 'Trageerkennung an' : 'Trageerkennung aus');
+      await g1.sendSetting(G1Packets.wearDetection(enabled));
+    }
+    await _reportState();
   }
 
   // ---------------------------------------------------------------------------

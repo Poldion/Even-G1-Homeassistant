@@ -1,10 +1,11 @@
-"""Switches for the silent mode and recordings of the G1."""
+"""Switches for silent mode, recordings and wear detection of the G1."""
 
 from __future__ import annotations
 
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
@@ -22,6 +23,7 @@ async def async_setup_entry(
         [
             EvenG1SilentModeSwitch(entry.runtime_data),
             EvenG1RecordingSwitch(entry.runtime_data),
+            EvenG1WearDetectionSwitch(entry.runtime_data),
         ]
     )
 
@@ -78,3 +80,31 @@ class EvenG1RecordingSwitch(EvenG1Entity, SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Stop recording and send it to WhisperNotes."""
         self.device.async_set_recording(False)
+
+
+class EvenG1WearDetectionSwitch(EvenG1Entity, SwitchEntity):
+    """Wear detection of the glasses: needed for the worn/not worn state."""
+
+    _attr_entity_category = EntityCategory.CONFIG
+
+    def __init__(self, device: EvenG1Device) -> None:
+        """Initialize."""
+        super().__init__(device, "wear_detection")
+
+    @property
+    def available(self) -> bool:
+        """Only switchable while the app and glasses are connected."""
+        return self.device.app_connected and self.device.state.glasses_connected
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return the wear detection state."""
+        return self.device.state.wear_detection
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Enable wear detection."""
+        self.device.async_set_wear_detection(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Disable wear detection."""
+        self.device.async_set_wear_detection(False)

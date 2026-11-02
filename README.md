@@ -152,6 +152,8 @@ Dashboard. Außerdem gibt es `notify.<name>` für `notify.send_message`.
 | `switch.<name>_aufnahme` | Aufnahme mit dem Brillen-Mikrofon; beim Ausschalten geht sie an WhisperNotes |
 | `sensor.<name>_akku_links` / `_akku_rechts` / `_akku_case` | Akkustand |
 | `binary_sensor.<name>_case_ladt` | Case hängt am Ladekabel |
+| `binary_sensor.<name>_getragen` | Brille wird getragen (braucht die Trageerkennung) |
+| `switch.<name>_trageerkennung` | Trageerkennung der Brille an/aus (auch in der App unter *Anzeige & Aktivierung*) |
 | `sensor.<name>_zustand` | `worn`, `not_worn`, `case_open`, `case_closed` |
 | `binary_sensor.<name>_brille_verbunden` / `_app_verbunden` | Verbindungen |
 | `sensor.<name>_letzte_frage` / `_letzte_antwort` | Letzte Assist-Interaktion |

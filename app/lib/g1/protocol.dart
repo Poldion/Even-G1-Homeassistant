@@ -31,6 +31,8 @@ class G1Uuids {
 class G1Cmd {
   static const brightness = 0x01;
   static const brightnessQuery = 0x29;
+  static const wearDetection = 0x27;
+  static const wearDetectionQuery = 0x3A;
   static const silentMode = 0x03;
   static const whitelist = 0x04;
   static const headUpMode = 0x08;
@@ -210,6 +212,15 @@ class G1Packets {
   /// Reads brightness and auto mode (right arm): [0x29, 0x65, level, auto].
   static Uint8List brightnessQuery() =>
       Uint8List.fromList([G1Cmd.brightnessQuery]);
+
+  /// Wear detection on/off: only while it is on, the glasses report worn /
+  /// not worn (0xF5 0x06/0x07).
+  static Uint8List wearDetection(bool enabled) =>
+      Uint8List.fromList([G1Cmd.wearDetection, enabled ? 0x01 : 0x00]);
+
+  /// Reads the wear detection setting: [0x3A, 0xC9, 0/1].
+  static Uint8List wearDetectionQuery() =>
+      Uint8List.fromList([G1Cmd.wearDetectionQuery]);
 
   /// Silent mode on/off (as in the eveng1 Python SDK and MentraOS).
   static Uint8List silentMode(bool enabled) =>

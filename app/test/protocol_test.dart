@@ -79,6 +79,9 @@ void main() {
     expect(G1Packets.brightnessPercent(21), 50);
     expect(G1Packets.brightnessPercent(99), 100);
     expect(G1Packets.brightnessQuery(), [0x29]);
+    expect(G1Packets.wearDetection(true), [0x27, 0x01]);
+    expect(G1Packets.wearDetection(false), [0x27, 0x00]);
+    expect(G1Packets.wearDetectionQuery(), [0x3A]);
   });
 
   test('builds head up mode and screen state packets', () {

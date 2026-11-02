@@ -24,6 +24,9 @@
       },
       "glasses_connected": {
         "default": "mdi:glasses"
+      },
+      "worn": {
+        "default": "mdi:glasses"
       }
     },
     "event": {
@@ -42,6 +45,12 @@
         "default": "mdi:microphone-outline",
         "state": {
           "on": "mdi:record-rec"
+        }
+      },
+      "wear_detection": {
+        "default": "mdi:account-eye-outline",
+        "state": {
+          "off": "mdi:eye-off-outline"
         }
       }
     },

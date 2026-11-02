@@ -7,6 +7,15 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-11-02
+
+### Added
+- Trageerkennung in Home Assistant: Binärsensor „Getragen“ und Schalter
+  „Trageerkennung“, der die Erkennung der Brille (`0x27`) ein- und
+  ausschaltet. Der Schalter ist auch in der App unter *Anzeige & Aktivierung*.
+  Solange die App die Einstellung nicht geändert hat, liest sie den Wert der
+  Brille aus (`0x3A`).
+
 ## [0.15.1] - 2026-11-02
 
 ### Fixed
@@ -161,7 +170,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.0...HEAD
+[0.16.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.14.0...v0.15.0
 [0.14.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.13.0...v0.14.0

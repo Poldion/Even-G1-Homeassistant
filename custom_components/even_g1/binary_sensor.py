@@ -38,6 +38,15 @@ BINARY_SENSORS: tuple[EvenG1BinarySensorDescription, ...] = (
         value_fn=lambda device: device.state.case_charging,
     ),
     EvenG1BinarySensorDescription(
+        key="worn",
+        # Only known while the wear detection of the glasses is on.
+        value_fn=lambda device: (
+            None
+            if device.state.wear_state is None or device.state.wear_detection is False
+            else device.state.wear_state == "worn"
+        ),
+    ),
+    EvenG1BinarySensorDescription(
         key="glasses_connected",
         device_class=BinarySensorDeviceClass.CONNECTIVITY,
         value_fn=lambda device: device.app_connected and device.state.glasses_connected,

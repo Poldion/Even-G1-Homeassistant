@@ -33,6 +33,7 @@ from .const import (
     CMD_RELOAD,
     CMD_SHOW_TEXT,
     CMD_SILENT_MODE,
+    CMD_WEAR_DETECTION,
     CONF_ASSIST_PIPELINE,
     CONF_AUTO_GAIN,
     CONF_DASHBOARD_CALENDARS,
@@ -80,6 +81,7 @@ class EvenG1State:
     glasses_connected: bool = False
     silent_mode: bool | None = None
     recording: bool | None = None
+    wear_detection: bool | None = None
     battery_case: int | None = None
     case_charging: bool | None = None
     wear_state: str | None = None
@@ -476,6 +478,15 @@ class EvenG1Device:
         self._send({"type": CMD_RECORDING, "enabled": enabled})
         # Optimistic until the app confirms with update_state.
         self.state.recording = enabled
+        self._notify_listeners()
+
+    @callback
+    def async_set_wear_detection(self, enabled: bool) -> None:
+        """Switch the wear detection of the glasses on or off."""
+        self._ensure_connected()
+        self._send({"type": CMD_WEAR_DETECTION, "enabled": enabled})
+        # Optimistic until the app confirms with update_state.
+        self.state.wear_detection = enabled
         self._notify_listeners()
 
     @callback

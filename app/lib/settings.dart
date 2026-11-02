@@ -91,6 +91,14 @@ class Settings {
   int? get brightness => _optInt('brightness');
   set brightness(int? v) => _setOptInt('brightness', v);
 
+  /// Wear detection of the glasses (null = not set by this app).
+  bool? get wearDetection => switch (_optInt('wear_detection')) {
+    null => null,
+    final v => v == 1,
+  };
+  set wearDetection(bool? v) =>
+      _setOptInt('wear_detection', v == null ? null : (v ? 1 : 0));
+
   /// Offset of the automatic brightness in percent (-50..50, 0 = off).
   int get brightnessOffset => _prefs.getInt('brightness_offset') ?? 0;
   set brightnessOffset(int v) => _prefs.setInt('brightness_offset', v);

@@ -99,6 +99,9 @@
       },
       "case_charging": {
         "name": "Case charging"
+      },
+      "worn": {
+        "name": "Worn"
       }
     },
     "event": {
@@ -127,6 +130,9 @@
       },
       "recording": {
         "name": "Recording"
+      },
+      "wear_detection": {
+        "name": "Wear detection"
       }
     },
     "select": {
