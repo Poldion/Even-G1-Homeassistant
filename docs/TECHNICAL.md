@@ -60,6 +60,24 @@ Bügel einen Befehl ab, steht das im App-Protokoll (`L/R rejected 0x..`).
 Zuhör-Anzeige (der rechte Bügel zeichnet sie laufend neu). Danach zeigt die
 App „Einen Moment …“, die erkannte Frage und die Antwort auf beiden Bügeln.
 
+## Aufnahmen
+
+Die App schaltet das Mikrofon des rechten Bügels ein (`0x0E 01`), dekodiert
+das LC3-Audio zu PCM (16 kHz, mono, 16 bit) und schreibt es in eine WAV-Datei
+im Cache der App. Kommt drei Sekunden lang kein Audio (z. B. nach einem
+Verbindungsabbruch), wird das Mikrofon neu eingeschaltet. Assist funktioniert
+während einer Aufnahme weiter; das Mikrofon bleibt dann an.
+
+Beim Stoppen lädt die App die Datei wie das Dashboard von WhisperNotes hoch:
+`POST /api/jobs` (multipart, `file`, `kind=standard`, `recorded_at`), mit
+`Authorization: Bearer <API-Schlüssel>`, falls gesetzt. WhisperNotes legt die
+Zusammenfassung als Notiz vom Typ `meeting` im Standard-Vault von BasaltNotes
+ab; der Titel ist Datum und Dateiname („Brillen-Notiz …“).
+
+Der Punkt auf der Brille ist ein Text mit 74 Leerzeichen und `o` (Glyphenbreiten
+aus MentraOS: Leerzeichen 6 px). Er wird statt des leeren Textes gezeigt,
+wenn die App die Anzeige leert.
+
 ## Integration ↔ App
 
 Websocket-Befehle der Integration:

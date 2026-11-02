@@ -106,7 +106,18 @@ class G1Display {
   /// Returns to the dashboard.
   Future<bool> clear() async {
     _reset();
-    return g1.blankScreen();
+    return showIdle();
+  }
+
+  /// Shown when nothing else is on the display (e.g. the recording dot),
+  /// sent as is without layout so leading spaces are kept.
+  String? idleText;
+
+  /// Shows [idleText] or empties the display.
+  Future<bool> showIdle() {
+    final idle = idleText;
+    screen.value = null;
+    return idle == null ? g1.blankScreen() : g1.sendText(idle);
   }
 
   /// The glasses left the text view on their own (double tap).
@@ -180,7 +191,7 @@ class G1Display {
     _closeTimer = Timer(after, () async {
       if (generation != _generation) return;
       _reset();
-      await g1.blankScreen();
+      await showIdle();
     });
   }
 

@@ -10,6 +10,7 @@ import 'g1/protocol.dart';
 import 'ha/assist_session.dart';
 import 'ha/ha_client.dart';
 import 'notifications/phone_notifications.dart';
+import 'recording/recorder.dart';
 import 'settings.dart';
 
 /// Configuration pushed by the Home Assistant integration.
@@ -57,6 +58,8 @@ class HaConfig {
 class Bridge extends ChangeNotifier {
   Bridge(this.settings, {G1Connection? g1}) : g1 = g1 ?? G1Connection() {
     display = G1Display(this.g1)..evenAiAnswers = settings.evenAiAnswers;
+    recorder = VoiceRecorder(this.g1, settings, _log)
+      ..addListener(notifyListeners);
     this.g1.addListener(_onGlassesChanged);
     this.g1.events.listen(_onGlassesEvent);
     this.g1.log.listen(_log);
@@ -78,6 +81,7 @@ class Bridge extends ChangeNotifier {
   final Settings settings;
   final G1Connection g1;
   late final G1Display display;
+  late final VoiceRecorder recorder;
 
   HaClient? _ha;
   int _haGeneration = 0;
@@ -124,6 +128,7 @@ class Bridge extends ChangeNotifier {
 
   /// Starts both connections with the stored settings.
   Future<void> start() async {
+    unawaited(recorder.sendPending());
     if (settings.glassesConfigured && !g1.connected) {
       unawaited(g1.connect(settings.leftId, settings.rightId));
     }
@@ -262,6 +267,8 @@ class Bridge extends ChangeNotifier {
         if (g1.connected) await display.clear();
       case 'silent_mode':
         await setSilentMode(event['enabled'] == true);
+      case 'recording':
+        await setRecording(event['enabled'] == true);
     }
   }
 
@@ -363,6 +370,7 @@ class Bridge extends ChangeNotifier {
       'battery_case': g1.batteryCase,
       'case_charging': g1.caseCharging,
       'wear_state': g1.wearState,
+      'recording': recorder.recording,
     };
     if (mapEquals(state, _lastReported)) return;
     _lastReported = state;
@@ -380,6 +388,7 @@ class Bridge extends ChangeNotifier {
       _dashboardShown = false;
     } else {
       unawaited(_applyGlassesSettings());
+      if (recorder.recording && !display.active) unawaited(display.showIdle());
     }
     unawaited(_reportState());
     notifyListeners();
@@ -673,7 +682,7 @@ class Bridge extends ChangeNotifier {
     if (session == null) return;
     _recordTimer?.cancel();
     session.finishAudio();
-    unawaited(g1.setMic(false));
+    if (!recorder.recording) unawaited(g1.setMic(false));
     unawaited(display.showAiStatus(thinkingText));
 
     final result = await session.result.timeout(
@@ -718,6 +727,41 @@ class Bridge extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ---------------------------------------------------------------------------
+  // Recording (WhisperNotes)
+  // ---------------------------------------------------------------------------
+
+  /// Dot in the upper right corner (glyph widths from MentraOS: a space is
+  /// 6 px wide, the display about 488 px).
+  static final recordingDotText = '${' ' * 74}o';
+
+  /// Starts or stops a recording with the glasses microphone. Finished
+  /// recordings are sent to WhisperNotes.
+  Future<void> setRecording(bool enabled) async {
+    if (enabled == recorder.recording) return;
+    if (enabled) {
+      if (!g1.connected) _log('Aufnahme: Brille nicht verbunden, Mikrofon folgt');
+      await recorder.start();
+      display.idleText = settings.recordingDot ? recordingDotText : null;
+      if (g1.connected && !display.active) await display.showIdle();
+    } else {
+      display.idleText = null;
+      await recorder.stop(releaseMic: !assistRunning);
+      if (g1.connected && !display.active) await display.showIdle();
+    }
+    notifyListeners();
+    await _reportState();
+  }
+
+  /// Shows or hides the recording dot while recording.
+  Future<void> setRecordingDot(bool enabled) async {
+    settings.recordingDot = enabled;
+    notifyListeners();
+    if (!recorder.recording) return;
+    display.idleText = enabled ? recordingDotText : null;
+    if (g1.connected && !display.active) await display.showIdle();
+  }
+
   /// Switches the silent mode of the glasses.
   Future<void> setSilentMode(bool enabled) async {
     if (!g1.connected) {
@@ -750,7 +794,7 @@ class Bridge extends ChangeNotifier {
     final session = _assist;
     _cleanupAssist();
     await session?.cancel();
-    await g1.setMic(false);
+    if (!recorder.recording) await g1.setMic(false);
   }
 
   void _cleanupAssist() {
@@ -774,6 +818,7 @@ class Bridge extends ChangeNotifier {
   void dispose() {
     _haGeneration++;
     _ha?.close();
+    recorder.dispose();
     g1.dispose();
     super.dispose();
   }

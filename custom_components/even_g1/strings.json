@@ -124,6 +124,9 @@
     "switch": {
       "silent_mode": {
         "name": "Silent mode"
+      },
+      "recording": {
+        "name": "Recording"
       }
     },
     "select": {

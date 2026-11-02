@@ -1,4 +1,4 @@
-"""Switch for the silent mode of the G1."""
+"""Switches for the silent mode and recordings of the G1."""
 
 from __future__ import annotations
 
@@ -18,7 +18,12 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up the switch."""
-    async_add_entities([EvenG1SilentModeSwitch(entry.runtime_data)])
+    async_add_entities(
+        [
+            EvenG1SilentModeSwitch(entry.runtime_data),
+            EvenG1RecordingSwitch(entry.runtime_data),
+        ]
+    )
 
 
 class EvenG1SilentModeSwitch(EvenG1Entity, SwitchEntity):
@@ -46,3 +51,30 @@ class EvenG1SilentModeSwitch(EvenG1Entity, SwitchEntity):
     async def async_turn_off(self, **kwargs: Any) -> None:
         """Disable silent mode."""
         self.device.async_set_silent_mode(False)
+
+
+class EvenG1RecordingSwitch(EvenG1Entity, SwitchEntity):
+    """Recording with the glasses microphone; the app sends it to
+    WhisperNotes when it is switched off."""
+
+    def __init__(self, device: EvenG1Device) -> None:
+        """Initialize."""
+        super().__init__(device, "recording")
+
+    @property
+    def available(self) -> bool:
+        """Switchable while the app is connected."""
+        return self.device.app_connected
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return True while recording."""
+        return self.device.state.recording
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Start recording."""
+        self.device.async_set_recording(True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Stop recording and send it to WhisperNotes."""
+        self.device.async_set_recording(False)

@@ -99,6 +99,18 @@ class Settings {
   set autoBrightness(bool? v) =>
       _setOptInt('auto_brightness', v == null ? null : (v ? 1 : 0));
 
+  /// WhisperNotes server for recordings, e.g. http://192.168.1.10:8000.
+  String get whisperUrl => _prefs.getString('whisper_url') ?? '';
+  set whisperUrl(String v) => _prefs.setString('whisper_url', v.trim());
+
+  /// API key of WhisperNotes (empty if it is open in the home network).
+  String get whisperApiKey => _prefs.getString('whisper_api_key') ?? '';
+  set whisperApiKey(String v) => _prefs.setString('whisper_api_key', v.trim());
+
+  /// Small dot on the glasses while recording.
+  bool get recordingDot => _prefs.getBool('recording_dot') ?? true;
+  set recordingDot(bool v) => _prefs.setBool('recording_dot', v);
+
   /// Experimental: Assist answers in the Even AI mode of the official app.
   bool get evenAiAnswers => _prefs.getBool('even_ai_answers') ?? false;
   set evenAiAnswers(bool v) => _prefs.setBool('even_ai_answers', v);

@@ -37,6 +37,12 @@
         "state": {
           "on": "mdi:bell-off"
         }
+      },
+      "recording": {
+        "default": "mdi:microphone-outline",
+        "state": {
+          "on": "mdi:record-rec"
+        }
       }
     },
     "select": {

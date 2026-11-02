@@ -29,6 +29,7 @@ from .const import (
     CMD_CLEAR,
     CMD_CONFIG,
     CMD_DASHBOARD,
+    CMD_RECORDING,
     CMD_RELOAD,
     CMD_SHOW_TEXT,
     CMD_SILENT_MODE,
@@ -78,6 +79,7 @@ class EvenG1State:
 
     glasses_connected: bool = False
     silent_mode: bool | None = None
+    recording: bool | None = None
     battery_case: int | None = None
     case_charging: bool | None = None
     wear_state: str | None = None
@@ -462,6 +464,18 @@ class EvenG1Device:
         self._send({"type": CMD_SILENT_MODE, "enabled": enabled})
         # Optimistic until the app confirms with update_state.
         self.state.silent_mode = enabled
+        self._notify_listeners()
+
+    @callback
+    def async_set_recording(self, enabled: bool) -> None:
+        """Start or stop a recording with the glasses microphone in the app.
+
+        The app sends the recording to WhisperNotes when it is stopped.
+        """
+        self._ensure_connected()
+        self._send({"type": CMD_RECORDING, "enabled": enabled})
+        # Optimistic until the app confirms with update_state.
+        self.state.recording = enabled
         self._notify_listeners()
 
     @callback

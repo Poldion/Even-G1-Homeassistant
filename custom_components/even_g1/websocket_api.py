@@ -96,6 +96,7 @@ def ws_subscribe(
         vol.Required("entry_id"): str,
         vol.Optional("glasses_connected"): bool,
         vol.Optional("silent_mode"): vol.Any(None, bool),
+        vol.Optional("recording"): vol.Any(None, bool),
         vol.Optional("battery_case"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
         vol.Optional("case_charging"): vol.Any(None, bool),
         vol.Optional("wear_state"): vol.Any(None, vol.In(WEAR_STATES)),

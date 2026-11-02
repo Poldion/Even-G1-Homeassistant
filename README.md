@@ -15,6 +15,7 @@ sprechen und die Brille in Automationen nutzen. Dazu gehören eine
 - **Texte auf der Brille** per Aktion, Notify-Entität oder Automation, z. B. „Waschmaschine fertig“
 - **Assist:** linke Touchbar gedrückt halten, sprechen, loslassen; die Antwort deines Assistenten erscheint auf der Brille
 - **Dashboard für die Brille** mit Uhrzeit, Datum, Entitäten, Terminen und To-dos auf einer Seite, auf Wunsch beim Hochschauen
+- **Aufnahmen** mit dem Brillen-Mikrofon, gestartet in der App oder in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transkribiert und fasst zusammen, die Zusammenfassung landet in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
 - **Handy-Benachrichtigungen** auf der Brille, pro App wählbar
 - **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
 
@@ -109,6 +110,23 @@ Cloud* oder *Whisper*); *Speech-to-Phrase* versteht nur feste Befehle.
 Damit beim Hochschauen nur das Home-Assistant-Dashboard erscheint, in der App
 *Even-Dashboard beim Hochschauen* auf *Ausblenden* stellen.
 
+### Aufnahmen (WhisperNotes → BasaltNotes)
+
+1. In der App unter *Einstellungen → Aufnahmen* die Adresse von WhisperNotes
+   eintragen (z. B. `http://192.168.1.10:8000`), bei Bedarf den API-Schlüssel.
+2. In WhisperNotes unter *Einstellungen → BasaltNotes* die Verbindung und einen
+   **Standard-Vault** einrichten.
+3. Aufnahme starten: auf der Übersicht der App mit *Start* oder in Home
+   Assistant mit `switch.<name>_aufnahme`. Solange aufgenommen wird, zeigt die
+   Brille oben rechts einen kleinen Punkt (`o`), wenn nichts anderes angezeigt
+   wird; abschaltbar in den Einstellungen.
+4. Beim Stoppen schickt die App die Aufnahme an WhisperNotes. Dort wird sie
+   transkribiert und zusammengefasst; die Zusammenfassung kommt als Notiz in
+   den Eingang von BasaltNotes. Ohne Verbindung bleibt die Aufnahme in der App
+   und wird später gesendet.
+
+Bitte nur mit Einverständnis aller Anwesenden aufnehmen.
+
 ## Home-Assistant-Referenz
 
 ### Aktionen
@@ -131,6 +149,7 @@ Dashboard. Außerdem gibt es `notify.<name>` für `notify.send_message`.
 | --- | --- |
 | `select.<name>_assistent` | Assistent der Brille |
 | `switch.<name>_ruhemodus` | Ruhemodus |
+| `switch.<name>_aufnahme` | Aufnahme mit dem Brillen-Mikrofon; beim Ausschalten geht sie an WhisperNotes |
 | `sensor.<name>_akku_links` / `_akku_rechts` / `_akku_case` | Akkustand |
 | `binary_sensor.<name>_case_ladt` | Case hängt am Ladekabel |
 | `sensor.<name>_zustand` | `worn`, `not_worn`, `case_open`, `case_closed` |

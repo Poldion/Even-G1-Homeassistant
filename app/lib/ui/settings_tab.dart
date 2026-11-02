@@ -5,6 +5,7 @@ import 'diagnostics.dart';
 import 'glasses_settings.dart';
 import 'ha_settings.dart';
 import 'notification_settings.dart';
+import 'recording_settings.dart';
 import 'update_settings.dart';
 
 /// All settings, grouped in collapsible sections.
@@ -52,6 +53,14 @@ class SettingsTab extends StatelessWidget {
                 ? 'Handy-Benachrichtigungen werden weitergeleitet'
                 : 'Weiterleitung aus',
             child: NotificationSettings(bridge: bridge),
+          ),
+          _Section(
+            icon: Icons.mic_none,
+            title: 'Aufnahmen',
+            subtitle: s.whisperUrl.isEmpty
+                ? 'WhisperNotes nicht eingerichtet'
+                : 'WhisperNotes: ${s.whisperUrl}',
+            child: RecordingSettings(bridge: bridge),
           ),
           _Section(
             icon: Icons.bug_report_outlined,

@@ -124,6 +124,9 @@
     "switch": {
       "silent_mode": {
         "name": "Ruhemodus"
+      },
+      "recording": {
+        "name": "Aufnahme"
       }
     },
     "select": {

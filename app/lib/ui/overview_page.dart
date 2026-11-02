@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../bridge.dart';
@@ -111,6 +113,8 @@ class OverviewPage extends StatelessWidget {
             ),
             // ---------------------------------------------------- brightness
             Card(child: _Brightness(bridge: bridge)),
+            // ---------------------------------------------------- recording
+            Card(child: _Recording(bridge: bridge)),
             // ---------------------------------------------------- HA + Assist
             Card(
               child: Padding(
@@ -310,6 +314,73 @@ class _Brightness extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Start/stop of a recording for WhisperNotes.
+class _Recording extends StatefulWidget {
+  const _Recording({required this.bridge});
+
+  final Bridge bridge;
+
+  @override
+  State<_Recording> createState() => _RecordingState();
+}
+
+class _RecordingState extends State<_Recording> {
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (widget.bridge.recorder.recording && mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bridge = widget.bridge;
+    final r = bridge.recorder;
+    final theme = Theme.of(context);
+    final String subtitle;
+    if (r.recording) {
+      subtitle = 'Läuft · ${r.elapsedText}';
+    } else if (r.uploading) {
+      subtitle = 'Wird an WhisperNotes gesendet …';
+    } else if (r.pending > 0) {
+      subtitle = '${r.pending} Aufnahme(n) noch nicht gesendet';
+    } else {
+      subtitle = r.lastResult ??
+          (bridge.settings.whisperUrl.isEmpty
+              ? 'WhisperNotes in den Einstellungen eintragen'
+              : 'Brillen-Mikrofon → WhisperNotes → BasaltNotes');
+    }
+    return ListTile(
+      leading: Icon(
+        r.recording ? Icons.fiber_manual_record : Icons.mic_none,
+        color: r.recording ? theme.colorScheme.error : null,
+      ),
+      title: const Text('Aufnahme'),
+      subtitle: Text(subtitle),
+      trailing: r.recording
+          ? FilledButton.tonalIcon(
+              onPressed: () => bridge.setRecording(false),
+              icon: const Icon(Icons.stop),
+              label: const Text('Stopp'),
+            )
+          : FilledButton.icon(
+              onPressed: () => bridge.setRecording(true),
+              icon: const Icon(Icons.fiber_manual_record),
+              label: const Text('Start'),
+            ),
     );
   }
 }

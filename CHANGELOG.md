@@ -7,6 +7,16 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-02
+
+### Added
+- Aufnahmen mit dem Brillen-Mikrofon, gestartet in der App (Übersicht) oder
+  in Home Assistant (`switch.<name>_aufnahme`). Beim Stoppen geht die
+  Aufnahme an WhisperNotes (`POST /api/jobs`), das sie transkribiert,
+  zusammenfasst und in BasaltNotes ablegt. Nicht gesendete Aufnahmen werden
+  später erneut gesendet.
+- Kleiner Punkt oben rechts auf der Brille, solange aufgenommen wird.
+
 ## [0.13.0] - 2026-11-02
 
 ### Fixed
@@ -134,7 +144,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.13.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.14.0...HEAD
+[0.14.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.13.0...v0.14.0
 [0.13.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.12.1...v0.13.0
 [0.12.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.12.0...v0.12.1
 [0.12.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.11.0...v0.12.0

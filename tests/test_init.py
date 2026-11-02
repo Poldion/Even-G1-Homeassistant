@@ -333,6 +333,43 @@ async def test_silent_mode_switch(
     assert hass.states.get("switch.even_g1_silent_mode").state == "off"
 
 
+async def test_recording_switch(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """The recording switch starts and stops a recording in the app."""
+    assert hass.states.get("switch.even_g1_recording").state == "unavailable"
+
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    await client.receive_json()
+    await client.send_json_auto_id(
+        {"type": "even_g1/update_state", "entry_id": entry.entry_id, "recording": False}
+    )
+    assert (await client.receive_json())["success"]
+    assert hass.states.get("switch.even_g1_recording").state == "off"
+
+    await hass.services.async_call(
+        "switch", "turn_on", {"entity_id": "switch.even_g1_recording"}, blocking=True
+    )
+    assert (await client.receive_json())["event"] == {
+        "type": "recording",
+        "enabled": True,
+    }
+    assert hass.states.get("switch.even_g1_recording").state == "on"
+
+    await hass.services.async_call(
+        "switch", "turn_off", {"entity_id": "switch.even_g1_recording"}, blocking=True
+    )
+    assert (await client.receive_json())["event"] == {
+        "type": "recording",
+        "enabled": False,
+    }
+    assert hass.states.get("switch.even_g1_recording").state == "off"
+
+
 async def test_status_sensors(
     hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
 ) -> None:
