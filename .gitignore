@@ -4,3 +4,9 @@ __pycache__/
 .venv/
 venv/
 .DS_Store
+
+# Signing keys and release assets
+*.jks
+*.keystore
+*.apk
+/even_g1-v*.zip

@@ -4,10 +4,10 @@
   "codeowners": ["@poldion"],
   "config_flow": true,
   "dependencies": ["assist_pipeline", "websocket_api"],
-  "documentation": "https://github.com/poldion/even-g1-homeassistant",
+  "documentation": "https://github.com/Poldion/Even-G1-Homeassistant",
   "integration_type": "device",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/poldion/even-g1-homeassistant/issues",
+  "issue_tracker": "https://github.com/Poldion/Even-G1-Homeassistant/issues",
   "requirements": [],
   "version": "0.8.0"
 }

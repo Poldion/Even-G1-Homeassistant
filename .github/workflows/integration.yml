@@ -7,6 +7,9 @@ on:
     paths: ["custom_components/**", "tests/**", "scripts/**", "requirements_test.txt", ".github/workflows/integration.yml", "hacs.json"]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   pytest:
     name: pytest (${{ matrix.name }})
