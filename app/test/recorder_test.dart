@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/recording/recorder.dart';

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:lc3_codec/lc3_codec.dart';
@@ -205,14 +204,15 @@ class VoiceRecorder extends ChangeNotifier {
         '--$boundary\r\n'
         'Content-Disposition: form-data; name="$name"\r\n\r\n'
         '$value\r\n';
-    final head = utf8.encode(
-      field('kind', 'standard') +
-          (recordedAt.isEmpty ? '' : field('recorded_at', recordedAt)) +
-          '--$boundary\r\n'
-              'Content-Disposition: form-data; name="file"; '
-              'filename="${_name(file)}"\r\n'
-              'Content-Type: audio/wav\r\n\r\n',
-    );
+    final fields = [
+      field('kind', 'standard'),
+      if (recordedAt.isNotEmpty) field('recorded_at', recordedAt),
+      '--$boundary\r\n'
+          'Content-Disposition: form-data; name="file"; '
+          'filename="${_name(file)}"\r\n'
+          'Content-Type: audio/wav\r\n\r\n',
+    ];
+    final head = utf8.encode(fields.join());
     final tail = utf8.encode('\r\n--$boundary--\r\n');
 
     final client = HttpClient()
