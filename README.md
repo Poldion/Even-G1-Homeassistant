@@ -46,7 +46,7 @@ Danach: *Einstellungen → Geräte & Dienste → Integration hinzufügen → „
 
 ### 2. App auf dem Smartphone
 
-- **Android:** Die APK wird von GitHub Actions gebaut: *Actions → App → letzter Lauf → Artifact `even-g1-ha-apk`* (bei Tags `v*` hängt sie zusätzlich am Release). Alternativ selbst bauen: `cd app && flutter build apk --release`.
+- **Android:** Die neueste APK direkt herunterladen: **https://github.com/Poldion/Even-G1-Homeassistant/releases/download/app-latest/even-g1-ha.apk** (wird bei jedem Build aktualisiert, siehe Release „app-latest“). Alternativ als ZIP unter *Actions → App → Artifact `even-g1-ha-apk`*, oder selbst bauen: `cd app && flutter build apk --release`.
 - **iOS:** `cd app && flutter build ios` auf einem Mac mit Xcode (eigene Signierung nötig).
 
 **Updates:** Damit eine neue APK als Update über die alte installiert werden kann (und deine Einstellungen erhalten bleiben), müssen alle Builds mit demselben Schlüssel signiert sein. Dafür im Repository unter *Settings → Secrets and variables → Actions* die Secrets `ANDROID_KEYSTORE_BASE64` (Keystore als Base64, Alias `even-g1-ha`) und `ANDROID_KEYSTORE_PASSWORD` anlegen. Ohne diese Secrets signiert der Build mit einem wechselnden Testschlüssel, und Android meldet beim Update „Die App wurde nicht installiert“.
