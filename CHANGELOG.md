@@ -7,6 +7,16 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-11-03
+
+### Fixed
+- Nach einer Assist-Anfrage (oder einem anderen Text) startete das nächste
+  Gedrückthalten Assist nicht mehr, bis der Ruhemodus aus- und wieder
+  eingeschaltet wurde. Seit 0.13.0 blieb die Brille nach dem Leeren der
+  Anzeige auf ihrem Even-AI-Bildschirm. Jetzt leert die App die Anzeige
+  sofort mit einem leeren Text und gibt die Brille eine Sekunde später mit
+  dem Beenden-Befehl `0x18` frei.
+
 ## [0.16.0] - 2026-11-02
 
 ### Added
@@ -170,7 +180,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.1...HEAD
+[0.16.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.14.0...v0.15.0

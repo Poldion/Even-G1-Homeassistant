@@ -151,13 +151,33 @@ void main() {
     display.onDismissed();
   });
 
-  test('clearing sends a blank text instead of the exit command', () async {
+  test('clearing blanks the display, then releases the glasses', () async {
     final display = G1Display(g1)..verifyBothArms = false;
     await display.showText('Hallo');
     writes.clear();
     await display.clear();
+    // Blank text right away ...
     expect(writes.any((w) => w.$2[0] == G1Cmd.exit), isFalse);
     expect(writes.where((w) => w.$2[0] == G1Cmd.text), hasLength(2));
+    // ... and the exit command a moment later, so the next long press
+    // starts Assist again.
+    await Future<void>.delayed(
+      G1Display.releaseDelay + const Duration(milliseconds: 50),
+    );
+    expect(writes.where((w) => w.$2[0] == G1Cmd.exit), hasLength(2));
+  });
+
+  test('a new text cancels the release of the glasses', () async {
+    final display = G1Display(g1)..verifyBothArms = false;
+    await display.showText('Hallo');
+    await display.clear();
+    await display.showText('Neu');
+    writes.clear();
+    await Future<void>.delayed(
+      G1Display.releaseDelay + const Duration(milliseconds: 50),
+    );
+    expect(writes.any((w) => w.$2[0] == G1Cmd.exit), isFalse);
+    display.onDismissed();
   });
 
   test('optional Even AI mode uses 0x31 and pages', () async {

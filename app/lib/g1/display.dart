@@ -113,11 +113,31 @@ class G1Display {
   /// sent as is without layout so leading spaces are kept.
   String? idleText;
 
+  /// Time after emptying the display until the glasses are released with
+  /// the exit command.
+  static const releaseDelay = Duration(seconds: 1);
+  Timer? _releaseTimer;
+
   /// Shows [idleText] or empties the display.
-  Future<bool> showIdle() {
+  ///
+  /// Texts keep the glasses on their Even AI surface. While they stay there,
+  /// the next long press does not start Assist (only silent mode on/off
+  /// helped). So after emptying the display with a blank text (immediately,
+  /// without the firmware's teardown) the glasses are released with the exit
+  /// command 0x18 a moment later.
+  Future<bool> showIdle() async {
     final idle = idleText;
     screen.value = null;
-    return idle == null ? g1.blankScreen() : g1.sendText(idle);
+    _releaseTimer?.cancel();
+    if (idle != null) return g1.sendText(idle);
+    final ok = await g1.blankScreen();
+    final generation = _generation;
+    _releaseTimer = Timer(releaseDelay, () {
+      if (generation == _generation && !_active && idleText == null) {
+        unawaited(g1.exitToDashboard());
+      }
+    });
+    return ok;
   }
 
   /// The glasses left the text view on their own (double tap).
@@ -197,6 +217,7 @@ class G1Display {
 
   void _reset() {
     _generation++;
+    _releaseTimer?.cancel();
     _pageTimer?.cancel();
     _closeTimer?.cancel();
     _pageTimer = null;
