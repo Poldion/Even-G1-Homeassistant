@@ -70,7 +70,7 @@ Die Firmware nähert die Helligkeit im Auto-Modus schrittweise einer festen
 Tabelle an (Lichtsensor im rechten Bügel → Stufe 0–42, g1-reverse
 `compute_lux_brightness_bucket`) und schreibt die Stufe in dasselbe Feld, das
 `0x29` liest. Einen Offset gibt es nicht. Mit Offset schaltet die App daher
-etwa jede Minute, wenn nichts angezeigt wird, kurz den Auto-Modus ein
+etwa alle zwei Minuten, wenn nichts angezeigt wird, kurz den Auto-Modus ein
 (`01 <stufe> 01`), liest `0x29`, bis die Stufe dreimal gleich ist, und setzt
 dann `01 <stufe+offset> 00`. Wird währenddessen etwas angezeigt, bricht sie ab
 und stellt die letzte Stufe wieder her.
@@ -92,6 +92,14 @@ ab; der Titel ist Datum und Dateiname („Brillen-Notiz …“).
 Der Punkt auf der Brille ist ein Text mit 74 Leerzeichen und `o` (Glyphenbreiten
 aus MentraOS: Leerzeichen 6 px). Er wird statt des leeren Textes gezeigt,
 wenn die App die Anzeige leert.
+
+## Akku
+
+- Bluetooth-Verbindung mit Priorität „balanced“ (wie MentraOS); „high“ nur,
+  solange Assist zuhört.
+- Heartbeat alle 8 s wie die offizielle App, Akkuabfrage alle 5 Minuten.
+- Nach jedem Text wird die Anzeige geleert und die Brille mit `0x18`
+  freigegeben, damit das Display ausgeht.
 
 ## Integration ↔ App
 

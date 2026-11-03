@@ -726,7 +726,7 @@ class Bridge extends ChangeNotifier {
       }
     });
     // Nothing is drawn while the touch bar is held (see thinkingText).
-    if (!await g1.setMic(true)) {
+    if (!await g1.setMic(true, fast: true)) {
       _log('Mikrofon konnte nicht aktiviert werden');
     }
 

@@ -7,6 +7,14 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.16.2] - 2026-11-03
+
+### Fixed
+- Akkulaufzeit: Die Bluetooth-Verbindung lief dauerhaft mit hoher Priorität
+  (die Funkchips beider Bügel wachten alle 11–15 ms auf). Jetzt „balanced“
+  wie bei MentraOS; hoch nur, solange Assist zuhört.
+- Automatische Helligkeit mit Offset misst nur noch alle zwei Minuten.
+
 ## [0.16.1] - 2026-11-03
 
 ### Fixed
@@ -180,7 +188,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.2...HEAD
+[0.16.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.1...v0.16.0
 [0.15.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.0...v0.15.1

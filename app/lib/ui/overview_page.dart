@@ -327,7 +327,7 @@ class _Brightness extends StatelessWidget {
                     ? 'Die Brille regelt die Helligkeit über ihren '
                           'Lichtsensor. Der Regler verschiebt sie heller oder '
                           'dunkler.'
-                    : 'Die App misst etwa jede Minute, wenn nichts angezeigt '
+                    : 'Die App misst etwa alle zwei Minuten, wenn nichts angezeigt '
                           'wird, den Wert des Lichtsensors und stellt ihn '
                           '${signed(offset)} % ein'
                           '${applied == null ? '' : ' (gerade $applied %)'}.',

@@ -21,7 +21,7 @@ class AutoBrightness {
   final bool Function() idle;
   final void Function(String) log;
 
-  static const holdTime = Duration(seconds: 60);
+  static const holdTime = Duration(minutes: 2);
   static const retryTime = Duration(seconds: 10);
   Duration readInterval = const Duration(seconds: 1);
   static const maxReads = 45;
