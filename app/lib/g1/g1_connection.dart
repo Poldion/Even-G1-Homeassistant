@@ -241,7 +241,6 @@ class G1Connection extends ChangeNotifier {
       if (state == BluetoothConnectionState.disconnected && arm.ready) {
         _debug('${arm.side.name} arm disconnected');
         arm.ready = false;
-        if (arm.side == G1Side.right) _fast = false;
         _failPending(arm);
         notifyListeners();
         _scheduleReconnect();
@@ -257,11 +256,12 @@ class G1Connection extends ChangeNotifier {
       );
       if (Platform.isAndroid) {
         await arm.device.requestMtu(251);
-        // Balanced like MentraOS (Android default). "High" makes the radios
-        // of both arms wake every 11-15 ms instead of every 30-50 ms and
-        // costs a lot of battery; it is only used while Assist listens.
+        // Balanced like MentraOS, high only during Assist (see
+        // setFastConnection).
         await arm.device.requestConnectionPriority(
-          connectionPriorityRequest: ConnectionPriority.balanced,
+          connectionPriorityRequest: _fast
+              ? ConnectionPriority.high
+              : ConnectionPriority.balanced,
         );
       }
       final services = await arm.device.discoverServices();
@@ -603,33 +603,34 @@ class G1Connection extends ChangeNotifier {
 
   /// Enables or disables the microphone (right arm). Like MentraOS, the next
   /// command waits a moment so the microphone can start.
-  /// Switches the microphone (right arm). With [fast] the connection of the
-  /// right arm uses the high priority while the microphone is on, for a
-  /// quick Assist answer; long recordings stay on balanced.
-  Future<bool> setMic(bool enable, {bool fast = false}) async {
-    await _setFastConnection(enable && fast);
-    return send(
-      [G1Packets.micEnable(enable)],
-      left: false,
-      waitAfter: Duration(milliseconds: enable ? 300 : 0),
-    );
-  }
+  /// Switches the microphone (right arm).
+  Future<bool> setMic(bool enable) => send(
+    [G1Packets.micEnable(enable)],
+    left: false,
+    waitAfter: Duration(milliseconds: enable ? 300 : 0),
+  );
 
   bool _fast = false;
 
-  Future<void> _setFastConnection(bool fast) async {
+  /// Connection priority of both arms: balanced normally (like MentraOS;
+  /// "high" wakes the radios every 11-15 ms instead of 30-50 ms and costs a
+  /// lot of battery), high while Assist listens, works and shows its answer
+  /// so both arms get the texts quickly and at the same time.
+  Future<void> setFastConnection(bool fast) async {
     if (fast == _fast || !Platform.isAndroid) return;
-    final arm = _right;
-    if (arm == null || !arm.ready || arm.writeOverride != null) return;
     _fast = fast;
-    try {
-      await arm.device.requestConnectionPriority(
-        connectionPriorityRequest: fast
-            ? ConnectionPriority.high
-            : ConnectionPriority.balanced,
-      );
-    } catch (e) {
-      _debug('connection priority: $e');
+    _debug(fast ? 'Verbindung: schnell' : 'Verbindung: sparsam');
+    for (final arm in [_right, _left]) {
+      if (arm == null || !arm.ready || arm.writeOverride != null) continue;
+      try {
+        await arm.device.requestConnectionPriority(
+          connectionPriorityRequest: fast
+              ? ConnectionPriority.high
+              : ConnectionPriority.balanced,
+        );
+      } catch (e) {
+        _debug('connection priority ${arm.side.name}: $e');
+      }
     }
   }
 

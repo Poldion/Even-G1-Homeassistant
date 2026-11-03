@@ -726,7 +726,8 @@ class Bridge extends ChangeNotifier {
       }
     });
     // Nothing is drawn while the touch bar is held (see thinkingText).
-    if (!await g1.setMic(true, fast: true)) {
+    _startFastConnection();
+    if (!await g1.setMic(true)) {
       _log('Mikrofon konnte nicht aktiviert werden');
     }
 
@@ -738,6 +739,25 @@ class Bridge extends ChangeNotifier {
       await _abortAssist();
       await display.showAiError('Assist nicht verfügbar:\n$e');
     }
+  }
+
+  Timer? _fastTimer;
+  static const _fastMax = Duration(minutes: 3);
+
+  /// High connection priority while Assist listens, works and shows the
+  /// answer; back to balanced once the answer is closed (at the latest after
+  /// [_fastMax]).
+  void _startFastConnection() {
+    unawaited(g1.setFastConnection(true));
+    final started = DateTime.now();
+    _fastTimer?.cancel();
+    _fastTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      final done = !assistRunning && !display.active;
+      if (done || DateTime.now().difference(started) > _fastMax) {
+        timer.cancel();
+        unawaited(g1.setFastConnection(false));
+      }
+    });
   }
 
   Future<void> _finishAssist() async {
@@ -880,6 +900,7 @@ class Bridge extends ChangeNotifier {
   @override
   void dispose() {
     _haGeneration++;
+    _fastTimer?.cancel();
     _ha?.close();
     recorder.dispose();
     autoBrightnessOffset.stop();

@@ -95,8 +95,9 @@ wenn die App die Anzeige leert.
 
 ## Akku
 
-- Bluetooth-Verbindung mit Priorität „balanced“ (wie MentraOS); „high“ nur,
-  solange Assist zuhört.
+- Bluetooth-Verbindung mit Priorität „balanced“ (wie MentraOS); „high“ für
+  beide Bügel nur während Assist: vom Gedrückthalten bis die Antwort wieder
+  ausgeblendet ist (höchstens 3 Minuten).
 - Heartbeat alle 8 s wie die offizielle App, Akkuabfrage alle 5 Minuten.
 - Nach jedem Text wird die Anzeige geleert und die Brille mit `0x18`
   freigegeben, damit das Display ausgeht.

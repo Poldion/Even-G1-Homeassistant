@@ -7,6 +7,15 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.16.3] - 2026-11-03
+
+### Changed
+- Schnelle Bluetooth-Verbindung („high“) während der ganzen Assist-Anfrage
+  auf beiden Bügeln: vom Gedrückthalten über die Bearbeitung bis die Antwort
+  ausgeblendet ist (höchstens 3 Minuten). Sonst „balanced“. Vorher galt
+  „high“ nur für den rechten Bügel und nur solange das Mikrofon an war, die
+  Antwort kam dadurch links und rechts unterschiedlich schnell an.
+
 ## [0.16.2] - 2026-11-03
 
 ### Fixed
@@ -188,7 +197,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.2...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.3...HEAD
+[0.16.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.2...v0.16.3
 [0.16.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.0...v0.16.1
 [0.16.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.15.1...v0.16.0
