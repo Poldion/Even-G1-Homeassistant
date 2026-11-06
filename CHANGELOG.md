@@ -7,6 +7,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+### Added
+- Experimentell: Unterstützung für die Ersatz-Firmware
+  [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit). Die App spricht
+  deren Protokoll 5. Sie zeichnet Texte mit einer eigenen Schrift auf das
+  640 × 480 große Display und bildet Touchbar, Mikrofon, Akku, Etui, Tragen,
+  Kopfneigung und Helligkeit auf die bisherigen Funktionen ab. Benachrichtigungen
+  erscheinen als Text. Im Ladeetui bleibt die Anzeige aus. Die Firmware wählst
+  du in den Einstellungen unter *Brille*. Die Even-Firmware bleibt Standard und
+  funktioniert unverändert. Die App flasht nichts. Wie man installiert, welche
+  Risiken es gibt und was es nicht gibt, steht in `docs/SCOUTERKIT.md`.
+
 ## [0.16.3] - 2026-11-03
 
 ### Changed

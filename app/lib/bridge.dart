@@ -77,6 +77,10 @@ class Bridge extends ChangeNotifier {
 
   static const notificationAppId = 'io.github.poldion.even_g1_ha';
   static const followUpWindow = Duration(minutes: 5);
+
+  /// How long a notification stays on g1v0 (ScouterKit), which shows
+  /// notifications as texts.
+  static const notificationDuration = Duration(seconds: 8);
   static const maxRecording = Duration(seconds: 30);
 
   // Shown after the touch bar was released. While it is held, the glasses
@@ -299,6 +303,17 @@ class Bridge extends ChangeNotifier {
     required String message,
     String subtitle = '',
   }) async {
+    if (!g1.evenFirmware) {
+      // g1v0 has no notification view: shown as a text.
+      _dashboardShown = false;
+      final head = title == displayName ? title : '$displayName: $title';
+      final body = [subtitle, message].where((s) => s.isNotEmpty).join('\n');
+      await display.showText(
+        body.isEmpty ? head : '$head\n$body',
+        closeAfter: notificationDuration,
+      );
+      return;
+    }
     if (!_whitelistSent) {
       final apps = <String, String>{notificationAppId: 'Home Assistant'};
       settings.notificationApps.forEach((pkg, app) {
@@ -417,7 +432,7 @@ class Bridge extends ChangeNotifier {
     }
     final wear = settings.wearDetection;
     if (wear != null) {
-      await g1.sendSetting(G1Packets.wearDetection(wear));
+      await g1.setWearDetection(wear);
     } else {
       wearDetection = await g1.readWearDetection();
     }
@@ -451,7 +466,7 @@ class Bridge extends ChangeNotifier {
     notifyListeners();
     if (g1.connected) {
       _log(enabled ? 'Trageerkennung an' : 'Trageerkennung aus');
-      await g1.sendSetting(G1Packets.wearDetection(enabled));
+      await g1.setWearDetection(enabled);
     }
     await _reportState();
   }
@@ -515,7 +530,9 @@ class Bridge extends ChangeNotifier {
     final auto = autoBrightness ?? false;
     if (!auto || brightnessOffset == 0) autoBrightnessOffset.stop();
     if (!g1.connected) return;
-    if (auto && brightnessOffset != 0) {
+    // g1v0 measures light only while the panel is on, so the offset mode
+    // (measuring while nothing is shown) does not work there.
+    if (auto && brightnessOffset != 0 && g1.evenFirmware) {
       final levels = (brightnessOffset * G1Packets.maxBrightness / 100).round();
       _log(
         'Helligkeit: automatisch, '
@@ -526,12 +543,12 @@ class Bridge extends ChangeNotifier {
     }
     final percent = brightness ?? 50;
     _log(auto ? 'Helligkeit: automatisch' : 'Helligkeit: $percent %');
-    await g1.sendSetting(G1Packets.brightness(percent, auto: auto));
+    await g1.setBrightness(percent, auto: auto);
   }
 
   Future<void> _sendHeadUpAngle(int angle) async {
     _log('Aktivierungswinkel: $angle°');
-    await g1.sendSetting(G1Packets.headUpAngle(angle));
+    await g1.setHeadUpAngle(angle);
   }
 
   Future<void> _sendHeadUpMode(int mode) async {
@@ -540,7 +557,7 @@ class Bridge extends ChangeNotifier {
           ? 'Hochschauen: Even-Dashboard anzeigen'
           : 'Hochschauen: Even-Dashboard ausblenden',
     );
-    await g1.sendSetting(G1Packets.headUpMode(mode));
+    await g1.setHeadUpMode(mode);
   }
 
   Future<void> _sendDisplayPosition({bool preview = false}) async {
@@ -550,13 +567,11 @@ class Bridge extends ChangeNotifier {
       'Anzeigeposition: Höhe $height, Distanz $depth'
       '${preview ? ' (Vorschau)' : ''}',
     );
-    await g1.sendSetting(
-      G1Packets.dashboardPosition(
-        height,
-        depth,
-        _dashboardCounter++,
-        preview: preview,
-      ),
+    await g1.setDisplayPosition(
+      height,
+      depth,
+      _dashboardCounter++,
+      preview: preview,
     );
   }
 
@@ -856,7 +871,7 @@ class Bridge extends ChangeNotifier {
       _dashboardShown = false;
       if (display.active) await display.clear();
     }
-    await g1.sendSetting(G1Packets.silentMode(enabled));
+    await g1.setSilentMode(enabled);
     silentMode = enabled;
     notifyListeners();
     await _reportState();

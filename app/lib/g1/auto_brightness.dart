@@ -80,9 +80,7 @@ class AutoBrightness {
       return;
     }
     // Auto on, starting from the current level so nothing jumps.
-    await g1.sendSetting(
-      G1Packets.brightnessLevel(appliedLevel ?? 21, auto: true),
-    );
+    await g1.setBrightnessLevel(appliedLevel ?? 21, auto: true);
     int? last;
     var stable = 0;
     for (var i = 0; i < maxReads; i++) {
@@ -92,7 +90,7 @@ class AutoBrightness {
         // Something is shown: back to the last level, try again later.
         final applied = appliedLevel;
         if (applied != null && g1.connected) {
-          await g1.sendSetting(G1Packets.brightnessLevel(applied, auto: false));
+          await g1.setBrightnessLevel(applied, auto: false);
         }
         _schedule(retryTime, generation);
         return;
@@ -116,7 +114,7 @@ class AutoBrightness {
     final level = (sensor + offset).clamp(0, G1Packets.maxBrightness);
     appliedLevel = level;
     if (g1.connected) {
-      await g1.sendSetting(G1Packets.brightnessLevel(level, auto: false));
+      await g1.setBrightnessLevel(level, auto: false);
       log(
         'Auto-Helligkeit: Sensor ${G1Packets.brightnessPercent(sensor)} %, '
         'gesetzt ${G1Packets.brightnessPercent(level)} %',

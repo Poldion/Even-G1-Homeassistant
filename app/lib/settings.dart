@@ -33,6 +33,10 @@ class Settings {
   String get glassesName => _prefs.getString('glasses_name') ?? '';
   set glassesName(String v) => _prefs.setString('glasses_name', v);
 
+  /// Firmware of the paired glasses: "even" or "scouterkit" (g1v0).
+  String get glassesFirmware => _prefs.getString('glasses_firmware') ?? 'even';
+  set glassesFirmware(String v) => _prefs.setString('glasses_firmware', v);
+
   /// Forward phone notifications to the glasses.
   bool get forwardNotifications =>
       _prefs.getBool('forward_notifications') ?? true;

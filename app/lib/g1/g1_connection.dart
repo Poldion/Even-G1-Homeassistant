@@ -6,11 +6,27 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'protocol.dart';
 
+/// Firmware on the arms.
+enum G1Firmware {
+  /// Even Realities' own firmware (the official app works with it).
+  even('even'),
+
+  /// ScouterKit's g1v0 (github.com/mafik/scouter_kit).
+  scouterKit('scouterkit');
+
+  const G1Firmware(this.id);
+  final String id;
+
+  static G1Firmware fromId(String? id) =>
+      values.firstWhere((f) => f.id == id, orElse: () => even);
+}
+
 /// A pair of arms found during a scan.
 class G1Pair {
-  G1Pair(this.channel);
+  G1Pair(this.channel, {this.firmware = G1Firmware.even});
 
   final String channel;
+  final G1Firmware firmware;
   String? leftId;
   String? rightId;
   String? leftName;
@@ -142,6 +158,21 @@ class G1Connection extends ChangeNotifier {
     debugPrint('[G1] $message');
     _log.add(message);
   }
+
+  /// For other firmwares (subclasses): a touch or status event.
+  @protected
+  void emitEvent(G1TouchEvent event) => _events.add(event);
+
+  /// For other firmwares (subclasses): LC3 audio, a multiple of 20 bytes.
+  @protected
+  void emitAudio(Uint8List lc3) => _audio.add(lc3);
+
+  /// True for Even's firmware; false for g1v0 (ScouterKit), which has no
+  /// Even dashboard, notification view or Even AI screen.
+  bool get evenFirmware => true;
+
+  /// Name of the firmware the app talks to, for the app.
+  String get firmwareName => 'Even';
 
   // ---------------------------------------------------------------------------
   // Scanning
@@ -725,6 +756,36 @@ class G1Connection extends ChangeNotifier {
   /// Sends a setting to both arms (like MentraOS, with a short pause).
   Future<bool> sendSetting(Uint8List packet) =>
       send([packet], waitAfter: const Duration(milliseconds: 100));
+
+  // Settings by name, so other firmwares can implement them their own way.
+
+  Future<bool> setBrightness(int percent, {required bool auto}) =>
+      sendSetting(G1Packets.brightness(percent, auto: auto));
+
+  /// Brightness as a raw level (0–42).
+  Future<bool> setBrightnessLevel(int level, {required bool auto}) =>
+      sendSetting(G1Packets.brightnessLevel(level, auto: auto));
+
+  Future<bool> setWearDetection(bool enabled) =>
+      sendSetting(G1Packets.wearDetection(enabled));
+
+  Future<bool> setSilentMode(bool enabled) =>
+      sendSetting(G1Packets.silentMode(enabled));
+
+  Future<bool> setHeadUpAngle(int angle) =>
+      sendSetting(G1Packets.headUpAngle(angle));
+
+  Future<bool> setHeadUpMode(int mode) =>
+      sendSetting(G1Packets.headUpMode(mode));
+
+  Future<bool> setDisplayPosition(
+    int height,
+    int depth,
+    int counter, {
+    bool preview = false,
+  }) => sendSetting(
+    G1Packets.dashboardPosition(height, depth, counter, preview: preview),
+  );
 
   /// Returns the glasses to the dashboard.
   Future<bool> exitToDashboard() => send([G1Packets.exit()]);

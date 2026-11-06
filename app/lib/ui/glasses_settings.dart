@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../bridge.dart';
 import '../g1/g1_connection.dart';
 import '../main.dart';
+import '../scouter/scouter_connection.dart';
 
 /// Pairing with the glasses.
 class GlassesPairing extends StatefulWidget {
@@ -20,6 +21,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
   List<G1Pair> _pairs = [];
   bool _scanning = false;
   String? _error;
+  String? _restartNote;
   StreamSubscription<List<G1Pair>>? _scanSub;
 
   @override
@@ -28,6 +30,9 @@ class _GlassesPairingState extends State<GlassesPairing> {
     super.dispose();
   }
 
+  /// Searches for glasses with Even's firmware or with ScouterKit (g1v0);
+  /// Android runs one scan at a time, so g1v0 arms are looked for in the
+  /// same scan by their names.
   void _scan() {
     _scanSub?.cancel();
     setState(() {
@@ -35,7 +40,9 @@ class _GlassesPairingState extends State<GlassesPairing> {
       _scanning = true;
       _error = null;
     });
-    _scanSub = G1Connection.scan().listen(
+    final scouterKit = !widget.bridge.g1.evenFirmware;
+    final scan = scouterKit ? ScouterConnection.scan() : G1Connection.scan();
+    _scanSub = scan.listen(
       (pairs) => setState(() => _pairs = pairs),
       onError: (Object e) => setState(() => _error = '$e'),
       onDone: () {
@@ -43,6 +50,26 @@ class _GlassesPairingState extends State<GlassesPairing> {
       },
     );
   }
+
+  /// Switches the firmware the app talks to; takes effect after a restart.
+  void _setFirmware(G1Firmware firmware) {
+    final s = widget.bridge.settings;
+    s.glassesFirmware = firmware.id;
+    s.leftId = '';
+    s.rightId = '';
+    s.glassesName = '';
+    setState(() {
+      _pairs = [];
+      _restartNote = firmware.id == _running.id
+          ? null
+          : 'Bitte die App schließen und neu öffnen, dann nach der Brille '
+                'suchen.';
+    });
+    unawaited(widget.bridge.reconnectGlasses());
+  }
+
+  G1Firmware get _running =>
+      widget.bridge.g1.evenFirmware ? G1Firmware.even : G1Firmware.scouterKit;
 
   Future<void> _select(G1Pair pair) async {
     await _scanSub?.cancel();
@@ -53,7 +80,10 @@ class _GlassesPairingState extends State<GlassesPairing> {
     final s = widget.bridge.settings;
     s.leftId = pair.leftId!;
     s.rightId = pair.rightId!;
-    s.glassesName = 'G1 #${pair.channel}';
+    s.glassesFirmware = pair.firmware.id;
+    s.glassesName = pair.firmware == G1Firmware.scouterKit
+        ? 'G1 (g1v0) ${pair.channel}'
+        : 'G1 #${pair.channel}';
     await ensureBackgroundOperation();
     await widget.bridge.reconnectGlasses();
   }
@@ -70,13 +100,37 @@ class _GlassesPairingState extends State<GlassesPairing> {
               : 'Noch keine Brille gekoppelt.',
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Die offizielle Even-App muss geschlossen sein, da sich die '
-          'Brille nur mit einer App gleichzeitig verbindet.',
+        Text(
+          _running == G1Firmware.even
+              ? 'Die offizielle Even-App muss geschlossen sein, da sich die '
+                    'Brille nur mit einer App gleichzeitig verbindet.'
+              : 'ScouterKit (g1v0): Zum ersten Koppeln die Brille ins offene '
+                    'Ladeetui legen. Außerhalb des Etuis gehorcht sie nur '
+                    'gekoppelten Geräten.',
         ),
+        const SizedBox(height: 8),
+        SegmentedButton<G1Firmware>(
+          segments: const [
+            ButtonSegment(value: G1Firmware.even, label: Text('Even')),
+            ButtonSegment(
+              value: G1Firmware.scouterKit,
+              label: Text('ScouterKit'),
+            ),
+          ],
+          selected: {G1Firmware.fromId(s.glassesFirmware)},
+          onSelectionChanged: _scanning ? null : (v) => _setFirmware(v.first),
+        ),
+        if (_restartNote != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              _restartNote!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
-          onPressed: _scanning ? null : _scan,
+          onPressed: _scanning || _restartNote != null ? null : _scan,
           icon: _scanning
               ? const SizedBox.square(
                   dimension: 16,
@@ -93,7 +147,11 @@ class _GlassesPairingState extends State<GlassesPairing> {
         for (final pair in _pairs)
           ListTile(
             leading: const Icon(Icons.visibility),
-            title: Text('G1 #${pair.channel}'),
+            title: Text(
+              pair.firmware == G1Firmware.scouterKit
+                  ? 'G1 (g1v0) ${pair.channel}'
+                  : 'G1 #${pair.channel}',
+            ),
             subtitle: Text(
               'Links: ${pair.leftName ?? '–'}\nRechts: ${pair.rightName ?? '–'}',
             ),

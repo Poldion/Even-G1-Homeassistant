@@ -194,9 +194,11 @@ automation:
 - Teile des Bluetooth-Protokolls stammen aus Community-Projekten und können je nach Firmware abweichen, siehe [docs/TECHNICAL.md](docs/TECHNICAL.md).
 - Die Bluetooth-Bibliothek [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) ist nur für nicht-kommerzielle Nutzung frei.
 - Kein offizielles Produkt von Even Realities.
+- Experimentell: Die App kann auch mit der freien Ersatz-Firmware [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) arbeiten. Das Aufspielen lässt sich nicht rückgängig machen, siehe [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md).
 
 ## Weitere Dokumentation
 
 - [Änderungen](CHANGELOG.md)
 - [Technische Details und Protokoll](docs/TECHNICAL.md)
+- [ScouterKit (g1v0) statt Even-Firmware](docs/SCOUTERKIT.md)
 - [Entwicklung, Tests und Releases](docs/DEVELOPMENT.md)
