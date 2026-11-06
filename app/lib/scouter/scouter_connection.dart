@@ -121,16 +121,25 @@ class ScouterConnection extends G1Connection {
   @override
   String get firmwareName => 'ScouterKit (g1v0)';
 
-  /// Firmware version of the arms, e.g. "0.5.60".
-  String? get firmwareVersion =>
-      _arms[G1Side.right]?.hello?.version ?? _arms[G1Side.left]?.hello?.version;
+  String? _armVersion(G1Side side) => _arms[side]?.hello?.version;
+
+  /// Firmware of the arms, e.g. "ScouterKit g1v0 0.5.60", both when the arms
+  /// differ.
+  @override
+  String? get firmwareVersion {
+    final l = _armVersion(G1Side.left), r = _armVersion(G1Side.right);
+    if (l == null && r == null) return null;
+    if (l == r || r == null) return 'ScouterKit g1v0 $l';
+    if (l == null) return 'ScouterKit g1v0 $r';
+    return 'ScouterKit g1v0 L $l, R $r';
+  }
 
   @override
   bool get connected => _arms.length == 2 && _arms.values.every((a) => a.ready);
 
   @override
   String get status {
-    if (connected) return 'verbunden (g1v0 ${firmwareVersion ?? '?'})';
+    if (connected) return 'verbunden';
     if (!_wanted && !_fake) return 'getrennt';
     final l = _arms[G1Side.left]?.ready ?? false;
     final r = _arms[G1Side.right]?.ready ?? false;

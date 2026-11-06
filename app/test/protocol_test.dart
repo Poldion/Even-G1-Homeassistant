@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/g1/text_layout.dart';
@@ -6,6 +7,19 @@ import 'package:even_g1_ha/ha/ha_client.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('reads the firmware version from the info text', () {
+    final reply = Uint8List.fromList([
+      0x6E,
+      ...'net build time: 2025-10-22 14:21:16, app build time 2025-10-22 '
+              '14:20:59, ver 1.6.6, JBD DeviceId 4010'
+          .codeUnits,
+      0, 0, 0,
+    ]);
+    expect(G1Packets.firmwareVersion(reply), '1.6.6');
+    expect(G1Packets.firmwareVersion(Uint8List.fromList([0x6E, 0x41])), isNull);
+    expect(G1Packets.firmwareVersion(Uint8List.fromList([0x4E])), isNull);
+  });
+
   test('parses glasses names', () {
     final left = G1Name.parse('Even G1_45_L_92333')!;
     expect(left.channel, '45');

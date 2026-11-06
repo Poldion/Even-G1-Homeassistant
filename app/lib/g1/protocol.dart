@@ -47,6 +47,11 @@ class G1Cmd {
   static const text = 0x4E;
   static const micData = 0xF1;
   static const init = 0xF4;
+
+  /// Firmware info: request `23 74`, reply `6E` + ASCII text (both arms,
+  /// even-g1-companion FINDINGS-battery+brightness.md).
+  static const firmwareInfo = 0x23;
+  static const firmwareInfoReply = 0x6E;
   static const event = 0xF5;
 }
 
@@ -183,6 +188,20 @@ class G1Packets {
   static Uint8List initDisplay() => Uint8List.fromList([0x4D, 0xFB]);
 
   static Uint8List battery() => Uint8List.fromList([G1Cmd.battery, 0x01]);
+
+  static Uint8List firmwareInfo() =>
+      Uint8List.fromList([G1Cmd.firmwareInfo, 0x74]);
+
+  /// The version ("1.6.6") from the firmware info text, e.g. "net build
+  /// time: 2025-10-22 14:21:16, app build time 2025-10-22 14:20:59, ver
+  /// 1.6.6, JBD DeviceId 4010".
+  static String? firmwareVersion(Uint8List reply) {
+    if (reply.isEmpty || reply[0] != G1Cmd.firmwareInfoReply) return null;
+    final text = String.fromCharCodes(
+      reply.skip(1).where((b) => b >= 0x20 && b < 0x7f),
+    );
+    return RegExp(r'ver\s*(\d+\.\d+\.\d+)').firstMatch(text)?.group(1);
+  }
 
   /// Highest brightness level (0x2A, confirmed by even-g1-companion on
   /// firmware 1.6.6; MentraOS assumes 63).

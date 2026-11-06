@@ -300,6 +300,7 @@ void main() {
         expect(ops, containsAllInOrder([SkCtrl.hello, SkCtrl.resetSession]));
       }
       expect(g1.batteryLeft, 80);
+      expect(g1.firmwareVersion, 'ScouterKit g1v0 0.5.60');
       expect(g1.wearState, 'worn');
     });
 
