@@ -7,6 +7,13 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.16.5] - 2026-11-06
+
+### Added
+- Die Übersicht zeigt die Firmware-Version der Brille, zum Beispiel
+  „Firmware: Even 1.6.6“, und beide Versionen, wenn die Bügel verschiedene
+  haben. Die App fragt sie beim Verbinden mit `23 74` ab (even-g1-companion).
+
 ## [0.16.4] - 2026-11-06
 
 ### Added
@@ -210,7 +217,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.4...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.5...HEAD
+[0.16.5]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.4...v0.16.5
 [0.16.4]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.3...v0.16.4
 [0.16.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.2...v0.16.3
 [0.16.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.1...v0.16.2

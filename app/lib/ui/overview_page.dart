@@ -82,6 +82,13 @@ class OverviewPage extends StatelessWidget {
                           ),
                         ],
                       ),
+                      if (g1.firmwareVersion != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          'Firmware: ${g1.firmwareVersion}',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                      ],
                       if (g1.wearState != null) ...[
                         const SizedBox(height: 8),
                         Text(

@@ -113,6 +113,20 @@ class G1Connection extends ChangeNotifier {
   int? batteryRight;
   int? batteryCase;
 
+  /// Firmware version of each arm ("1.6.6"), null until it answered.
+  String? firmwareLeft;
+  String? firmwareRight;
+
+  /// Firmware version of the glasses for the app, e.g. "Even 1.6.6", or
+  /// both when the arms differ; null while unknown.
+  String? get firmwareVersion {
+    final l = firmwareLeft, r = firmwareRight;
+    if (l == null && r == null) return null;
+    if (l == r || r == null) return 'Even $l';
+    if (l == null) return 'Even $r';
+    return 'Even L $l, R $r';
+  }
+
   /// Brightness currently applied by the glasses in percent (pushed with
   /// 0xF5 0x12, also while the automatic brightness changes it).
   int? brightnessPercent;
@@ -312,6 +326,7 @@ class G1Connection extends ChangeNotifier {
     // Same start sequence as the official app / MentraOS.
     unawaited(send([G1Packets.init()]));
     unawaited(send([G1Packets.initDisplay()]));
+    unawaited(send([G1Packets.firmwareInfo()]));
     _heartbeat?.cancel();
     _heartbeat = Timer.periodic(
       const Duration(seconds: 8),
@@ -339,6 +354,22 @@ class G1Connection extends ChangeNotifier {
   void _onData(_Arm arm, Uint8List data) {
     if (data.isEmpty) return;
     final cmd = data[0];
+    if (cmd == G1Cmd.firmwareInfoReply) {
+      final version = G1Packets.firmwareVersion(data);
+      if (version != null) {
+        final old = arm.side == G1Side.left ? firmwareLeft : firmwareRight;
+        if (arm.side == G1Side.left) {
+          firmwareLeft = version;
+        } else {
+          firmwareRight = version;
+        }
+        if (old != version) {
+          _debug('${arm.side.code}: Firmware $version');
+          notifyListeners();
+        }
+      }
+      return;
+    }
     if (cmd == G1Cmd.micData) {
       // [0xF1, seq, 200 bytes LC3]
       if (data.length > 2) _audio.add(Uint8List.sublistView(data, 2));
