@@ -29,4 +29,29 @@ void main() {
       isNull,
     );
   });
+
+  test('the ScouterKit channel takes only its pre-releases', () {
+    const prefix = AppUpdater.downloadPrefix;
+    Map<String, dynamic> release(String tag, {required bool pre}) => {
+      'tag_name': tag,
+      'prerelease': pre,
+      'assets': [
+        {'name': 'even-g1-ha-$tag.apk', 'browser_download_url': '$prefix$tag/even-g1-ha-$tag.apk'},
+      ],
+    };
+    final sk = AppUpdater.parseRelease(
+      release('sk-v0.17.0.4', pre: true),
+      channel: UpdateChannel.scouterKit,
+    );
+    expect(sk?.version, '0.17.0.4');
+    expect(sk?.channel, UpdateChannel.scouterKit);
+    expect(AppUpdater.isNewer('0.17.0.5', '0.17.0.4'), isTrue);
+    expect(
+      AppUpdater.parseRelease(release('v0.16.4', pre: false), channel: UpdateChannel.scouterKit),
+      isNull,
+    );
+    // The stable channel never takes a ScouterKit build.
+    expect(AppUpdater.parseRelease(release('sk-v0.17.0.4', pre: true)), isNull);
+    expect(AppUpdater.parseRelease(release('sk-v0.17.0.4', pre: false)), isNull);
+  });
 }

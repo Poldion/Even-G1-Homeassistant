@@ -7,6 +7,19 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.16.4] - 2026-11-06
+
+### Added
+- Update-Kanal unter *Einstellungen → Updates*: „Stabil“ (wie bisher) oder
+  „ScouterKit“. Der ScouterKit-Kanal installiert die experimentelle Version
+  für Brillen mit der Ersatz-Firmware ScouterKit (g1v0). Vor dem Wechsel
+  erscheint eine Warnung: Diese Firmware muss man selbst aufspielen, und das
+  lässt sich nicht rückgängig machen.
+
+### Changed
+- Die Build-Nummer der APK ist jetzt die Bauzeit in Minuten. So nimmt Android
+  jeden neueren Build beider Kanäle als Update an.
+
 ## [0.16.3] - 2026-11-03
 
 ### Changed
@@ -197,7 +210,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.3...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.4...HEAD
+[0.16.4]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.3...v0.16.4
 [0.16.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.2...v0.16.3
 [0.16.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.1...v0.16.2
 [0.16.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.0...v0.16.1
