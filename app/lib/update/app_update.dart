@@ -6,10 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Which builds the app updates to.
 enum UpdateChannel {
-  /// Releases (vX.Y.Z) from the main branch.
+  /// Releases (vX.Y.Z) from the legacy branch (Even's firmware).
   stable('stable'),
 
-  /// Pre-releases (sk-vX.Y.Z.N) from the ScouterKit branch, for glasses with
+  /// Pre-releases (sk-vX.Y.Z.N) from the main branch, for glasses with
   /// the ScouterKit (g1v0) firmware.
   scouterKit('scouterkit');
 

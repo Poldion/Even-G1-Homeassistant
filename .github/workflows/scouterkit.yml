@@ -1,14 +1,14 @@
 name: ScouterKit build
 
 # Builds the experimental app for glasses with the ScouterKit (g1v0)
-# firmware on every push to its branch and publishes it as a pre-release
+# firmware on every push to main and publishes it as a pre-release
 # sk-vX.Y.Z.N (X.Y.Z from pubspec.yaml, N the run number). The app's
 # "ScouterKit" update channel installs these; the stable channel and
 # releases/latest never see them. Signed with the release key, so it
 # installs over the stable app and back.
 on:
   push:
-    branches: ["claude/scouterkit-backend"]
+    branches: ["main"]
     paths: ["app/**", ".github/workflows/scouterkit.yml"]
   workflow_dispatch:
 
