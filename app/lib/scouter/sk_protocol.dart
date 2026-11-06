@@ -78,6 +78,8 @@ class SkProp {
   static const timer = 0x22;
   static const pitchLo = 0x24;
   static const pitchHi = 0x25;
+  static const lightLo = 0x26;
+  static const lightHi = 0x27;
   static const imuRate = 0x28;
   static const gyrX = 0x30;
   static const gyrY = 0x31;
@@ -97,6 +99,7 @@ class SkTrigger {
   static const start = 0;
   static const timer = 1;
   static const tilt = 3;
+  static const light = 4;
   static const battery = 5;
   static const caseState = 6;
   static const wear = 7;

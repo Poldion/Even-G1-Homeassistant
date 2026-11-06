@@ -19,6 +19,33 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   Risiken es gibt und was es nicht gibt, steht in `docs/SCOUTERKIT.md`.
 - Builds dieses Branches erscheinen als Vorabversionen `sk-vX.Y.Z.N` und
   aktualisieren sich über den Update-Kanal „ScouterKit“.
+- ScouterKit: Texte und das Dashboard nutzen das ganze Display (11 Zeilen à
+  42 Zeichen bei Standardhöhe statt 5 à 30). Die App meldet die Größe an Home
+  Assistant, das Agenda und Dashboard daran anpasst.
+- ScouterKit: Benachrichtigungen zeigen das Symbol der App (Pebbles
+  Benachrichtigungssymbole aus ScouterKit, Apache-Lizenz 2.0).
+- ScouterKit: Beide Augen zeigen einen Text im selben Moment. Die App kennt
+  den Uhrenversatz jedes Bügels (`PING`) und lässt beide mit `SLEEP_UNTIL`
+  gleichzeitig zeichnen.
+- ScouterKit: Ein Programm auf den Bügeln zeigt das Dashboard beim
+  Hochschauen selbst, ohne Umweg über das Handy, und schaltet die Anzeige
+  beim Runterschauen wieder ab. Die App schreibt nur neue Dashboard-Zeilen.
+- ScouterKit: Kopfgesten (Nicken, Kopfschütteln) als Gesten für Home
+  Assistant, in den Einstellungen unter *Anzeige & Aktivierung* einschaltbar.
+  Der rechte Bügel erkennt sie selbst aus dem Gyrosensor.
+- ScouterKit: Rechts gedrückt halten ist eine eigene Geste
+  (`long_press_right`, `long_press_right_release`) und startet Assist nicht
+  mehr.
+- ScouterKit: Automatische Helligkeit mit Offset. Der Lichtsensor meldet,
+  wenn sich die Helligkeit deutlich ändert, solange etwas angezeigt wird;
+  die App stellt dann die Stufe der Automatik plus Offset auf beiden Augen
+  ein.
+
+### Changed
+- ScouterKit: Der Aufnahmepunkt `o` entfällt, weil g1v0 selbst ein Quadrat oben
+  rechts im rechten Auge zeigt, solange das Mikrofon an ist. Die Prüfung
+  beider Bügel (`0x39`) und der verzögerte Beenden-Befehl gelten nur noch für
+  die Even-Firmware.
 
 ## [0.16.5] - 2026-11-06
 

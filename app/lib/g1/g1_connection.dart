@@ -205,6 +205,11 @@ class G1Connection extends ChangeNotifier {
     required String text,
   }) async {}
 
+  /// The glasses apply an offset to their automatic brightness themselves
+  /// (ScouterKit: from the light sensor while the panel is on).
+  bool get supportsBrightnessOffset => false;
+  Future<void> setAutoBrightnessOffset(int levels) async {}
+
   /// Nodding and shaking the head as gestures (ScouterKit only).
   bool get supportsHeadGestures => false;
   Future<void> setHeadGestures(bool enabled) async {}

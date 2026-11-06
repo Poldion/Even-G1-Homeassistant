@@ -514,6 +514,10 @@ class ScouterConnection extends G1Connection {
         1 << SkTrigger.wear |
         1 << SkTrigger.battery |
         1 << SkTrigger.caseState;
+    // The light sensor reports changes while the offset mode needs them.
+    if (arm.side == G1Side.right && _offsetLevels != null) {
+      mask |= 1 << SkTrigger.light;
+    }
     // With the resident program the right arm reports the head's moves
     // itself (NOTIFY), and the program owns the tilt range.
     if (arm.side == G1Side.right && !arm.resident) {
@@ -706,6 +710,8 @@ class ScouterConnection extends G1Connection {
       if (arm.side != G1Side.right) return;
       _headUp = b == 1;
       _emit(arm.side, _headUp ? G1Event.headUp : G1Event.headDown);
+      // The program drew the dashboard: the light sensor runs now.
+      if (_headUp) _scheduleLightRead();
     } else if (a == SkResident.notifyGesture) {
       if (b == SkResident.nod) _emit(arm.side, G1Event.nod);
       if (b == SkResident.shake) _emit(arm.side, G1Event.headShake);
@@ -1042,6 +1048,8 @@ class ScouterConnection extends G1Connection {
           if (pct <= 100) batteryCase = pct;
         }
         _applyArmState();
+      case SkTrigger.light when arm.side == G1Side.right:
+        unawaited(_applyLight(value));
       case SkTrigger.tilt when arm.side == G1Side.right:
         final pitch = value.toSigned(32);
         final up = pitch > _headUpAngle;
@@ -1154,6 +1162,7 @@ class ScouterConnection extends G1Connection {
     final shown = await Future.wait(
       arms.map((a) => a.link.run([drawAtCode(a.clock.toArm(at))])),
     );
+    _scheduleLightRead();
     return shown.every((r) => r);
   }
 
@@ -1359,8 +1368,100 @@ class ScouterConnection extends G1Connection {
 
   /// The light sensor is on the right arm; with automatic brightness the
   /// left arm follows the right one over the arm-to-arm link (VM.md §6.7).
+  // ---------------------------------------------------------------------------
+  // Automatic brightness with an offset
+  // ---------------------------------------------------------------------------
+
+  /// Offset in levels while the app runs the automatic brightness itself.
+  int? _offsetLevels;
+  int? _offsetApplied;
+  Timer? _lightTimer;
+
+  @override
+  bool get supportsBrightnessOffset => true;
+
+  /// g1v0's automatic brightness has no offset either, but its light sensor
+  /// (right arm, measuring while the panel is on, VM.md §6.7) reports when
+  /// the light leaves a range: the app then sets stock's level for that light
+  /// plus the offset on both eyes, and a new range around the reading.
+  @override
+  Future<void> setAutoBrightnessOffset(int levels) async {
+    final starting = _offsetLevels == null;
+    _offsetLevels = levels;
+    _offsetApplied = null;
+    final right = _arms[G1Side.right];
+    if (right == null || !right.ready) return;
+    if (starting) {
+      final code = SkCode()
+        ..sysWrite(SkProp.autoBrightness, 0)
+        ..sysWrite(SkProp.lightLo, 0)
+        ..sysWrite(SkProp.lightHi, 0x7fffffff);
+      await _runOn([code.take()]);
+      await _reportEvents(right);
+    }
+    _scheduleLightRead();
+  }
+
+  Future<void> _stopOffset() async {
+    if (_offsetLevels == null) return;
+    _offsetLevels = null;
+    _lightTimer?.cancel();
+    final right = _arms[G1Side.right];
+    if (right != null && right.ready) await _reportEvents(right);
+  }
+
+  /// The sensor converts every 800 ms once the panel is on: read it a
+  /// moment after something was drawn.
+  void _scheduleLightRead() {
+    if (_offsetLevels == null) return;
+    _lightTimer?.cancel();
+    _lightTimer = Timer(const Duration(milliseconds: 1200), () async {
+      final right = _arms[G1Side.right];
+      if (right == null || !right.ready || _offsetLevels == null) return;
+      final v = await _props(right, const [SkProp.light]);
+      if (v != null && v[0] != SkProp.unknown) await _applyLight(v[0]);
+    });
+  }
+
+  /// Stock's level for an ambient light in lux (VM.md §6.7).
+  @visibleForTesting
+  static int stockLevel(int lux) {
+    if (lux < 50) return lux ~/ 5;
+    if (lux < 200) return 10 + (lux - 50) ~/ 10;
+    if (lux < 1000) return 25 + (lux - 200) ~/ 50;
+    if (lux < 2000) return 41;
+    return 42;
+  }
+
+  /// [light] in 0.01 lux.
+  Future<void> _applyLight(int light) async {
+    final offset = _offsetLevels;
+    if (offset == null) return;
+    final level = (stockLevel(light ~/ 100) + offset).clamp(
+      0,
+      SkPanel.maxBrightness,
+    );
+    // A range around the reading: ±25 %, at least ±2 lux.
+    final margin = max(light ~/ 4, 200);
+    final range = SkCode()
+      ..sysWrite(SkProp.lightLo, max(0, light - margin))
+      ..sysWrite(SkProp.lightHi, light + margin);
+    await _arms[G1Side.right]?.link.run([range.take()]);
+    if (level == _offsetApplied) return;
+    _offsetApplied = level;
+    final code = SkCode()..sysWrite(SkProp.brightness, level);
+    await _runOn([code.take()]);
+    brightnessPercent = G1Packets.brightnessPercent(level);
+    _debug(
+      'Auto-Helligkeit: ${light ~/ 100} lx, Stufe ${stockLevel(light ~/ 100)} '
+      '${offset >= 0 ? '+' : ''}$offset → $level',
+    );
+    notifyListeners();
+  }
+
   @override
   Future<bool> setBrightnessLevel(int level, {required bool auto}) async {
+    await _stopOffset();
     final l = level.clamp(0, SkPanel.maxBrightness);
     final code = SkCode();
     if (auto) {
@@ -1551,6 +1652,7 @@ class ScouterConnection extends G1Connection {
     _batteryTimer?.cancel();
     _micTimer?.cancel();
     _clockTimer?.cancel();
+    _lightTimer?.cancel();
     _reconnectTimer?.cancel();
     for (final arm in _arms.values) {
       arm.link.dispose();

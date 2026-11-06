@@ -15,15 +15,19 @@ beiden Firmwares arbeiten: mit Evens eigener Firmware (Standard) oder mit g1v0.
 | --- | --- | --- |
 | Offizielle Even-App | ja | **nein** |
 | Even-Dashboard, Even AI, Übersetzung, Navigation | ja | nein |
-| Benachrichtigungen | eigene Anzeige der Brille | als Text der App |
-| Anzeige | 576 × 136 px, Text der Firmware | 640 × 480 px, Text zeichnet die App |
+| Benachrichtigungen | eigene Anzeige der Brille | als Text der App, mit dem Symbol der App |
+| Anzeige | 576 × 136 px, Text der Firmware, 5 Zeilen à ~30 Zeichen | 640 × 480 px, Text zeichnet die App, 11 Zeilen à 42 Zeichen (Standardhöhe) |
+| Beide Augen gleichzeitig | nicht garantiert (die App prüft und schickt nach) | ja, beide zeichnen im selben Moment |
 | Assist (Touchbar halten), Mikrofon | ja | ja (rechter Bügel, LC3 16 kbit/s wie bisher) |
 | Tippen, Doppeltippen | ja | ja |
+| Rechts gedrückt halten | Firmware (QuickNote) | eigene Geste für Home Assistant |
+| Nicken, Kopfschütteln | nein | ja, einschaltbar (Gyrosensor des rechten Bügels) |
 | Dreifach tippen = Ruhemodus | Firmware | die App merkt sich den Ruhemodus |
-| Kopf heben (Dashboard) | Firmware | aus dem Neigungswinkel des rechten Bügels |
+| Kopf heben (Dashboard) | Firmware | ein Programm auf den Bügeln zeigt das Dashboard selbst |
 | Trageerkennung | an-/abschaltbar | immer an (Schalter hat keine Wirkung) |
 | Helligkeit, automatische Helligkeit | ja | ja (links folgt dem rechten Lichtsensor) |
-| Helligkeits-Offset | ja | nein (g1v0 misst Licht nur bei eingeschalteter Anzeige) |
+| Helligkeits-Offset | ja (Messung alle zwei Minuten) | ja (der Lichtsensor meldet Änderungen, solange etwas angezeigt wird) |
+| Aufnahmepunkt | `o` oben rechts, abschaltbar | Quadrat der Firmware oben rechts im rechten Auge, solange das Mikrofon an ist |
 | Anzeigehöhe | ja | verschiebt den Textblock; die Distanz hat keine Wirkung |
 | Updates | über die Even-App | nur über ScouterKits Werkzeuge |
 
@@ -155,6 +159,29 @@ koppeln.
 - **Das Mikrofon geht nicht:** g1v0 verlangt eine verschlüsselte Verbindung,
   also eine Kopplung, auch im Etui.
 
+## Programm auf den Bügeln
+
+Ist in Home Assistant das Dashboard beim Hochschauen eingestellt (oder sind
+die Kopfgesten an), lädt die App beim Verbinden ein kleines Programm in jeden
+Bügel und startet es (`VM_START`, VM.md §5). Es liegt im Bereich hinter dem
+Bildpuffer (`0x35800`–`0x40000`) und läuft nur im Arbeitsspeicher; nach einem
+Neustart des Bügels ist es weg, und die App lädt es neu.
+
+- **Hochschauen** (`TILT`): Das Programm zeichnet die Dashboard-Zeilen, die die
+  App vorher hineingeschrieben hat, Zeile für Zeile über einen eigenen
+  Streifen und zeigt sie. Beim Runterschauen schaltet es die Anzeige ab. Es
+  zeichnet nichts, solange die App selbst etwas anzeigt (`busy`). Neue Inhalte
+  zeichnet es auf ein `USER0` der App neu, wenn das Dashboard gerade zu sehen
+  ist. Den Kopf meldet der rechte Bügel mit `NOTIFY 1, 1/0`.
+- **Kopfgesten** (rechter Bügel, `TIMER` alle 20 ms): Gyrosensor mit 52 Hz.
+  Ein Schwung zählt ab 90 °/s und wenn er mindestens doppelt so schnell ist
+  wie um die andere Achse; zwei Richtungswechsel um die x-Achse innerhalb von
+  0,4 s sind ein Nicken, drei um die y-Achse ein Kopfschütteln
+  (`NOTIFY 2, 1/2`).
+- Das Programm wurde mit ScouterKits Interpreter (`src/vm`) geprüft: Hoch-
+  und Runterschauen, belegte Anzeige, Nicken, Kopfschütteln, langsame und
+  diagonale Bewegungen.
+
 ## Technik
 
 Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
@@ -176,6 +203,12 @@ Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
   den die App setzt.
 - Mikrofon: `MIC` mit 16 kbit/s. Die Bügel geben es nach 2 s von selbst frei,
   deshalb erneuert die App die Freigabe alle 0,8 s.
+- Beide Augen gleichzeitig: Die App misst den Uhrenversatz jedes Bügels mit
+  `PING` (alle 3 Minuten), bereitet das Bild auf beiden vor und schickt dann
+  jedem `SLEEP_UNTIL T` + `DRAW`, mit `T` in der Uhr des Bügels (VM.md §7).
+- Helligkeit mit Offset: `AUTO_BRIGHTNESS` = 0, das `LIGHT`-Bit in `EVENTS`.
+  Verlässt das Licht den Bereich ±25 % um die letzte Messung, rechnet die App
+  die Stufe mit der Tabelle der Firmware aus und addiert den Offset.
 - Eine neue *Epoche* bedeutet, dass der Bügel neu gestartet ist und sein
   Speicher leer ist. Die App richtet ihn dann neu ein und lädt die Schrift
   erneut.

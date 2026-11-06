@@ -334,10 +334,15 @@ class _Brightness extends StatelessWidget {
                     ? 'Die Brille regelt die Helligkeit über ihren '
                           'Lichtsensor. Der Regler verschiebt sie heller oder '
                           'dunkler.'
-                    : 'Die App misst etwa alle zwei Minuten, wenn nichts angezeigt '
+                    : bridge.g1.evenFirmware
+                    ? 'Die App misst etwa alle zwei Minuten, wenn nichts angezeigt '
                           'wird, den Wert des Lichtsensors und stellt ihn '
                           '${signed(offset)} % ein'
-                          '${applied == null ? '' : ' (gerade $applied %)'}.',
+                          '${applied == null ? '' : ' (gerade $applied %)'}.'
+                    : 'Der Lichtsensor meldet sich, sobald sich die Helligkeit '
+                          'deutlich ändert, solange etwas angezeigt wird; die App '
+                          'stellt dann ${signed(offset)} % gegenüber der Automatik '
+                          'ein${applied == null ? '' : ' (gerade $applied %)'}.',
                 style: small,
               ),
             ),

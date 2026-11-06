@@ -564,9 +564,8 @@ void main() {
       await g1.setDashboard(onHeadUp: true, text: '12:01');
       expect(arms.ops[G1Side.left], contains(SkOp.raise));
       expect(
-        ByteData.sublistView(
-          arms.arenas[G1Side.left]!,
-        ).getUint32(SkResident.count.address, Endian.little),
+        ByteData.sublistView(arms.arenas[G1Side.left]!)
+            .getUint32(SkResident.count.address, Endian.little),
         1,
       );
       // Off again: the program stops.
@@ -594,6 +593,34 @@ void main() {
         arms.ctrl[G1Side.left]!.where((c) => c[0] == SkCtrl.vmStart),
         isEmpty,
       );
+    });
+
+    test('brightness offset from the light sensor', () async {
+      g1.fakeReady(epoch: arms.epoch);
+      expect(ScouterConnection.stockLevel(10), 2);
+      expect(ScouterConnection.stockLevel(120), 17);
+      expect(ScouterConnection.stockLevel(500), 31);
+      expect(ScouterConnection.stockLevel(5000), 42);
+      await g1.setAutoBrightnessOffset(8);
+      // The right arm now reports the light (EVENTS bit 4).
+      final events = arms.ctrl[G1Side.right]!.lastWhere(
+        (c) => c[0] == SkCtrl.events,
+      );
+      expect(events[2] & (1 << SkTrigger.light), isNot(0));
+      for (final side in G1Side.values) {
+        arms.ops[side]!.clear();
+      }
+      // 120 lx: stock's level 17, +8.
+      g1.receive(G1Side.right, input(arms.epoch, SkTrigger.light, 12000));
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      expect(g1.brightnessPercent, G1Packets.brightnessPercent(25));
+      expect(arms.ops[G1Side.left], contains(SkOp.sysWrite));
+      // Manual brightness ends the offset mode.
+      await g1.setBrightnessLevel(10, auto: false);
+      final after = arms.ctrl[G1Side.right]!.lastWhere(
+        (c) => c[0] == SkCtrl.events,
+      );
+      expect(after[2] & (1 << SkTrigger.light), 0);
     });
 
     test('head up and down from the pitch', () async {

@@ -157,7 +157,7 @@ Dashboard. Außerdem gibt es `notify.<name>` für `notify.send_message`.
 | `sensor.<name>_zustand` | `worn`, `not_worn`, `case_open`, `case_closed` |
 | `binary_sensor.<name>_brille_verbunden` / `_app_verbunden` | Verbindungen |
 | `sensor.<name>_letzte_frage` / `_letzte_antwort` | Letzte Assist-Interaktion |
-| `event.<name>_geste` | `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `long_press`, `long_press_release`, `other` |
+| `event.<name>_geste` | `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `long_press`, `long_press_release`, `other`; mit ScouterKit zusätzlich `long_press_right`, `long_press_right_release`, `nod`, `head_shake` |
 
 Events: `even_g1_gesture` (`device_id`, `gesture`, `side`, `code`) und
 `even_g1_assist` (`device_id`, `query`, `response`).

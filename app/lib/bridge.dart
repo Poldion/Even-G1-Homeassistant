@@ -541,15 +541,19 @@ class Bridge extends ChangeNotifier {
     final auto = autoBrightness ?? false;
     if (!auto || brightnessOffset == 0) autoBrightnessOffset.stop();
     if (!g1.connected) return;
-    // g1v0 measures light only while the panel is on, so the offset mode
-    // (measuring while nothing is shown) does not work there.
-    if (auto && brightnessOffset != 0 && g1.evenFirmware) {
+    if (auto && brightnessOffset != 0) {
       final levels = (brightnessOffset * G1Packets.maxBrightness / 100).round();
       _log(
         'Helligkeit: automatisch, '
         '${brightnessOffset > 0 ? '+' : ''}$brightnessOffset %',
       );
-      autoBrightnessOffset.start(levels);
+      if (g1.supportsBrightnessOffset) {
+        // ScouterKit: from the light sensor while something is shown.
+        autoBrightnessOffset.stop();
+        await g1.setAutoBrightnessOffset(levels);
+      } else {
+        autoBrightnessOffset.start(levels);
+      }
       return;
     }
     final percent = brightness ?? 50;
