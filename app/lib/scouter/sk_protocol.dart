@@ -27,6 +27,7 @@ class SkUuids {
 class SkOp {
   static const write = 0x01;
   static const writeRle = 0x02;
+  static const sleepUntil = 0x40;
   static const sysWrite = 0x45;
   static const fill = 0x50;
   static const blit = 0x51;
@@ -38,6 +39,7 @@ class SkOp {
 /// Control requests (VM.md §6.4).
 class SkCtrl {
   static const hello = 0x01;
+  static const ping = 0x02;
   static const status = 0x03;
   static const resetSession = 0x04;
   static const link = 0x05;
@@ -206,6 +208,9 @@ class SkCode {
       _u16(w);
     }
   }
+
+  /// `SLEEP_UNTIL`: wait until the arm's device time [t] (at most 2 s).
+  void sleepUntil(int t) => op(SkOp.sleepUntil, [t]);
 
   void sysWrite(int property, int value) =>
       op(SkOp.sysWrite, [property, value]);

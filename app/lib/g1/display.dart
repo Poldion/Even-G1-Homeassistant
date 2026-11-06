@@ -59,7 +59,9 @@ class G1Display {
 
     final ok = await _showPage(generation);
     if (generation != _generation) return ok;
-    if (!evenAi && verifyBothArms) {
+    // Even's firmware sometimes drops a text on one arm; g1v0 confirms every
+    // packet and draws both eyes at the same moment.
+    if (!evenAi && verifyBothArms && g1.evenFirmware) {
       unawaited(_verifyBothArms(generation, _page));
     }
 
@@ -138,6 +140,9 @@ class G1Display {
     _releaseTimer?.cancel();
     if (idle != null) return g1.sendText(idle);
     final ok = await g1.blankScreen();
+    // Only Even's firmware stays on its Even AI surface after a blank text;
+    // g1v0 switches the panel off.
+    if (!g1.evenFirmware) return ok;
     final generation = _generation;
     _releaseTimer = Timer(releaseDelay, () {
       if (generation == _generation && !_active && idleText == null) {

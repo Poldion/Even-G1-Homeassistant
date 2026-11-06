@@ -8,6 +8,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../g1/g1_connection.dart';
 import '../g1/protocol.dart';
+import 'sk_clock.dart';
 import 'sk_font.dart';
 import 'sk_icons.dart';
 import 'sk_link.dart';
@@ -42,6 +43,9 @@ class _SkArm {
 
   /// Replaces the BLE writes in tests: channel 0 = CMD, 1 = CTRL.
   Future<void> Function(int channel, Uint8List data)? writeOverride;
+
+  /// Offset of the arm's clock, for drawing both eyes at once.
+  final SkClock clock = SkClock();
 
   /// Icons in the arena of the current session.
   final Set<String> icons = {};
@@ -106,6 +110,7 @@ class ScouterConnection extends G1Connection {
   Timer? _probeTimer;
   Timer? _batteryTimer;
   Timer? _micTimer;
+  Timer? _clockTimer;
   bool _micOn = false;
   bool _fast = false;
   bool _silent = false;
@@ -286,6 +291,7 @@ class ScouterConnection extends G1Connection {
     _probeTimer?.cancel();
     _batteryTimer?.cancel();
     _micTimer?.cancel();
+    _clockTimer?.cancel();
     _micOn = false;
     for (final arm in _arms.values) {
       await arm.stateSub?.cancel();
@@ -428,6 +434,7 @@ class ScouterConnection extends G1Connection {
         arm.epoch = reset.epoch;
         arm.fontLoaded = false;
         arm.icons.clear();
+        arm.clock.reset();
         arm.link.reset();
         arm.link.start(h.rxNext, h.execNext, h.credits, maxPacket);
         final font = _loadedFont ??= await _fontLoader();
@@ -589,6 +596,47 @@ class ScouterConnection extends G1Connection {
       const Duration(minutes: 5),
       (_) => refreshBattery(),
     );
+    // The arms' clocks drift by up to ~130 ppm (VM.md §7).
+    unawaited(_syncClocks());
+    _clockTimer?.cancel();
+    _clockTimer = Timer.periodic(
+      const Duration(minutes: 3),
+      (_) => _syncClocks(rounds: 4),
+    );
+  }
+
+  /// `PING` rounds on both arms for the clock model.
+  Future<void> _syncClocks({int rounds = 8}) async {
+    for (final arm in _arms.values) {
+      for (var i = 0; i < rounds && arm.ready; i++) {
+        final sent = SkClock.hostNow();
+        final r = await _ctrl(
+          arm,
+          SkCtrl.ping,
+          [sent & 0xff, sent >> 8 & 0xff, sent >> 16 & 0xff, sent >> 24 & 0xff],
+          tries: 1,
+          timeout: const Duration(milliseconds: 500),
+        );
+        final received = SkClock.hostNow();
+        if (r == null || r.status != 0 || r.body.length < 12) continue;
+        final d = ByteData.sublistView(r.body);
+        if (d.getUint32(0, Endian.little) != sent) continue;
+        arm.clock.add(
+          sent: sent,
+          armRx: d.getUint32(4, Endian.little),
+          armTx: d.getUint32(8, Endian.little),
+          received: received,
+        );
+      }
+    }
+  }
+
+  /// When both arms should draw: two connection intervals, the clocks'
+  /// error and 15 ms for the arm (VM.md §7), at least 40 ms.
+  int _drawLeadUs(Iterable<_SkArm> arms) {
+    final interval = (_fast || _micOn) ? 15000 : 50000;
+    final error = arms.map((a) => a.clock.errorUs).fold(0, max);
+    return max(40000, 2 * interval + error + 15000);
   }
 
   /// Packets wait but no ACK came for a while: the last one may be lost, so
@@ -876,15 +924,42 @@ class ScouterConnection extends G1Connection {
       final data = await SkIcons.load(name);
       await Future.wait(arms.map((a) => _uploadIcon(a, name, data)));
     }
+    final iconAt = name == null ? null : SkIcons.slot(name, SkArena.icons);
+    final synced = arms.length == 2 && arms.every((a) => a.clock.known);
     final codes = textCode(
       font,
       text,
       top: textTop,
       maxCode: maxCode,
-      icon: name == null ? null : SkIcons.slot(name, SkArena.icons),
+      icon: iconAt,
+      draw: !synced,
     );
     final results = await Future.wait(arms.map((a) => a.link.run(codes)));
-    return results.every((r) => r);
+    if (!synced || !results.every((r) => r)) return results.every((r) => r);
+    // Both frames are ready: both eyes show them at the same moment.
+    final at = SkClock.hostNow() + _drawLeadUs(arms);
+    final shown = await Future.wait(
+      arms.map((a) => a.link.run([drawAtCode(a.clock.toArm(at))])),
+    );
+    return shown.every((r) => r);
+  }
+
+  /// Host code that waits until [armTime] and shows the frame.
+  @visibleForTesting
+  static Uint8List drawAtCode(int armTime) {
+    final code = SkCode()
+      ..sleepUntil(armTime)
+      ..draw(
+        SkArena.frame,
+        SkPanel.stride,
+        0,
+        0,
+        0,
+        0,
+        SkPanel.width,
+        SkPanel.height,
+      );
+    return code.take();
   }
 
   static String _iconName(String icon) =>
@@ -909,6 +984,7 @@ class ScouterConnection extends G1Connection {
     int top = 140,
     required int maxCode,
     int? icon,
+    bool draw = true,
   }) {
     final left = icon == null ? textLeft : iconTextLeft;
     final lines = wrap(font, text, SkPanel.width - textLeft - left);
@@ -968,18 +1044,20 @@ class ScouterConnection extends G1Connection {
       );
       textAt += chunk;
     }
-    room(skOpSize(8));
-    code.draw(
-      SkArena.frame,
-      SkPanel.stride,
-      0,
-      0,
-      0,
-      0,
-      SkPanel.width,
-      SkPanel.height,
-    );
-    packets.add(code.take());
+    if (draw) {
+      room(skOpSize(8));
+      code.draw(
+        SkArena.frame,
+        SkPanel.stride,
+        0,
+        0,
+        0,
+        0,
+        SkPanel.width,
+        SkPanel.height,
+      );
+    }
+    if (code.length > 0) packets.add(code.take());
     return packets;
   }
 
@@ -1226,6 +1304,10 @@ class ScouterConnection extends G1Connection {
     notifyListeners();
   }
 
+  /// Takes the PING rounds of the clock model (tests).
+  @visibleForTesting
+  Future<void> fakeSyncClocks() => _syncClocks();
+
   /// Runs the setup of both fake arms (tests).
   @visibleForTesting
   Future<void> fakeSetup() => Future.wait(_arms.values.map((a) => _setup(a)));
@@ -1243,6 +1325,7 @@ class ScouterConnection extends G1Connection {
     _probeTimer?.cancel();
     _batteryTimer?.cancel();
     _micTimer?.cancel();
+    _clockTimer?.cancel();
     _reconnectTimer?.cancel();
     for (final arm in _arms.values) {
       arm.link.dispose();

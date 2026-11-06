@@ -843,8 +843,9 @@ class Bridge extends ChangeNotifier {
   Future<void> setRecording(bool enabled) async {
     if (enabled == recorder.recording) return;
     if (enabled) {
-      if (!g1.connected)
+      if (!g1.connected) {
         _log('Aufnahme: Brille nicht verbunden, Mikrofon folgt');
+      }
       await recorder.start();
       display.idleText = _recordingDot ? recordingDotText : null;
       if (g1.connected && !display.active) await display.showIdle();

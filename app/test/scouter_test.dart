@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
+import 'package:even_g1_ha/scouter/sk_clock.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
 import 'package:even_g1_ha/scouter/sk_icons.dart';
 import 'package:even_g1_ha/scouter/sk_link.dart';
@@ -71,8 +72,14 @@ List<int> helloBody({
 ];
 
 /// Runs the WRITE and WRITE_RLE instructions of host code on [arena];
-/// other instructions are collected in [ops].
-void execute(Uint8List code, Uint8List arena, List<int> ops) {
+/// other instructions are collected in [ops], the times of `SLEEP_UNTIL` in
+/// [sleeps].
+void execute(
+  Uint8List code,
+  Uint8List arena,
+  List<int> ops, [
+  List<int>? sleeps,
+]) {
   var i = 0;
   int u24(int at) => code[at] | code[at + 1] << 8 | code[at + 2] << 16;
   while (i < code.length) {
@@ -91,7 +98,15 @@ void execute(Uint8List code, Uint8List arena, List<int> ops) {
       arena.setRange(addr, addr + len, data);
       i += 7 + n;
     } else {
+      if (op == SkOp.sleepUntil) {
+        // One escaped operand: the word that holds the time.
+        final word = code[i + 2] | code[i + 3] << 8;
+        sleeps?.add(
+          ByteData.sublistView(arena).getUint32(word * 4, Endian.little),
+        );
+      }
       final k = switch (op) {
+        SkOp.sleepUntil => 1,
         SkOp.sysWrite => 2,
         SkOp.fill => 7,
         SkOp.blit => 12,
@@ -115,13 +130,23 @@ class FakeArms {
   final ops = {for (final s in G1Side.values) s: <int>[]};
   final ctrl = {for (final s in G1Side.values) s: <Uint8List>[]};
   final props = <int, int>{};
+  final sleeps = {for (final s in G1Side.values) s: <int>[]};
+
+  /// Each arm's clock runs this far ahead of the host's (µs).
+  final clockOffset = {G1Side.left: 5000000, G1Side.right: 123456789};
+  bool answerPing = true;
   int micStatus = 0;
   bool acks = true;
 
   Future<void> write(G1Side side, int channel, Uint8List data) async {
     if (channel == 0) {
       final seq = data[0] | data[1] << 8;
-      execute(Uint8List.sublistView(data, 2), arenas[side]!, ops[side]!);
+      execute(
+        Uint8List.sublistView(data, 2),
+        arenas[side]!,
+        ops[side]!,
+        sleeps[side],
+      );
       if (acks) {
         scheduleMicrotask(
           () => connection.receive(side, ack(epoch, seq + 1, seq + 1)),
@@ -141,8 +166,14 @@ class FakeArms {
         for (final id in data.sublist(2)) ..._u32(props[id] ?? SkProp.unknown),
       ],
       SkCtrl.mic => [data[2], 20, 5, ..._u16(16000), 10, ..._u16(2000)],
+      SkCtrl.ping => [
+        ...data.sublist(2, 6),
+        ..._u32(SkClock.hostNow() + clockOffset[side]!),
+        ..._u32(SkClock.hostNow() + clockOffset[side]!),
+      ],
       _ => <int>[],
     };
+    if (op == SkCtrl.ping && !answerPing) return;
     final status = op == SkCtrl.mic ? micStatus : 0;
     scheduleMicrotask(
       () => connection.receive(side, reply(epoch, op, tag, status, body)),
@@ -374,6 +405,43 @@ void main() {
         narrow.first.split('\n').length,
         greaterThan(wide.first.split('\n').length),
       );
+    });
+
+    test('clock model: offset and error from PING rounds', () {
+      final clock = SkClock();
+      expect(clock.known, isFalse);
+      // Sent at 1000, 200 µs each way, the arm 50 000 µs ahead.
+      clock.add(sent: 1000, armRx: 51200, armTx: 51300, received: 1500);
+      expect(clock.toArm(2000), 52000);
+      expect(clock.errorUs, 200);
+      // Across the wrap of the u32 clocks: the same time on both sides.
+      clock.reset();
+      clock.add(sent: 0xfffffff0, armRx: 0x10, armTx: 0x10, received: 0x30);
+      expect(clock.toArm(0x100), 0x100);
+      expect(clock.errorUs, 32);
+    });
+
+    test('both eyes draw a text at the same moment', () async {
+      g1.fakeReady(epoch: arms.epoch);
+      await g1.fakeSyncClocks();
+      expect(await g1.sendText('Hallo'), isTrue);
+      for (final side in G1Side.values) {
+        expect(arms.ops[side]!.last, SkOp.draw);
+        expect(arms.ops[side]!.reversed.skip(1).first, SkOp.sleepUntil);
+      }
+      // The same host moment in each arm's clock.
+      final l = arms.sleeps[G1Side.left]!.last;
+      final r = arms.sleeps[G1Side.right]!.last;
+      final diff =
+          arms.clockOffset[G1Side.right]! - arms.clockOffset[G1Side.left]!;
+      expect(((r - l) & 0xffffffff) - diff, inInclusiveRange(-3000, 3000));
+    });
+
+    test('without a clock the text is drawn at once', () async {
+      arms.answerPing = false;
+      g1.fakeReady(epoch: arms.epoch);
+      expect(await g1.sendText('Hallo'), isTrue);
+      expect(arms.ops[G1Side.left], isNot(contains(SkOp.sleepUntil)));
     });
 
     test('nothing is drawn while an arm lies in the case', () async {
