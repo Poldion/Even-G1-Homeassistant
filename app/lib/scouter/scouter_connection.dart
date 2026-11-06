@@ -9,6 +9,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../g1/g1_connection.dart';
 import '../g1/protocol.dart';
 import 'sk_font.dart';
+import 'sk_icons.dart';
 import 'sk_link.dart';
 import 'sk_protocol.dart';
 
@@ -41,6 +42,9 @@ class _SkArm {
 
   /// Replaces the BLE writes in tests: channel 0 = CMD, 1 = CTRL.
   Future<void> Function(int channel, Uint8List data)? writeOverride;
+
+  /// Icons in the arena of the current session.
+  final Set<String> icons = {};
 
   int? battery;
   int? inCase;
@@ -134,10 +138,16 @@ class ScouterConnection extends G1Connection {
   @override
   int get displayColumns => (SkPanel.width - 2 * textLeft) ~/ _advance;
 
+  /// Left edge of the text beside a notification icon.
+  static const iconTextLeft = textLeft + SkIcons.size + 12;
+
+  static int _textWidth(String? icon) =>
+      SkPanel.width - textLeft - (icon == null ? textLeft : iconTextLeft);
+
   @override
-  Future<List<String>> layoutPages(String text) async {
+  Future<List<String>> layoutPages(String text, {String? icon}) async {
     final font = _loadedFont ??= await _fontLoader();
-    final lines = wrap(font, text, SkPanel.width - 2 * textLeft);
+    final lines = wrap(font, text, _textWidth(icon));
     if (lines.isEmpty) return [''];
     final n = displayLines;
     return [
@@ -417,6 +427,7 @@ class ScouterConnection extends G1Connection {
         final h = SkHello(Uint8List.sublistView(reset.body, 2));
         arm.epoch = reset.epoch;
         arm.fontLoaded = false;
+        arm.icons.clear();
         arm.link.reset();
         arm.link.start(h.rxNext, h.execNext, h.credits, maxPacket);
         final font = _loadedFont ??= await _fontLoader();
@@ -847,6 +858,7 @@ class ScouterConnection extends G1Connection {
     int pages = 1,
     bool left = true,
     bool right = true,
+    String? icon,
   }) async {
     final font = _loadedFont ??= await _fontLoader();
     final arms = _targets(left: left, right: right).where((a) {
@@ -859,9 +871,32 @@ class ScouterConnection extends G1Connection {
     }).toList();
     if (arms.isEmpty) return _targets(left: left, right: right).isNotEmpty;
     final maxCode = arms.map((a) => a.link.maxPacket).reduce(min) - 2;
-    final codes = textCode(font, text, top: textTop, maxCode: maxCode);
+    final name = icon == null ? null : _iconName(icon);
+    if (name != null) {
+      final data = await SkIcons.load(name);
+      await Future.wait(arms.map((a) => _uploadIcon(a, name, data)));
+    }
+    final codes = textCode(
+      font,
+      text,
+      top: textTop,
+      maxCode: maxCode,
+      icon: name == null ? null : SkIcons.slot(name, SkArena.icons),
+    );
     final results = await Future.wait(arms.map((a) => a.link.run(codes)));
     return results.every((r) => r);
+  }
+
+  static String _iconName(String icon) =>
+      SkIcons.names.contains(icon) ? icon : SkIcons.generic;
+
+  /// Uploads an icon into its slot once per session.
+  Future<void> _uploadIcon(_SkArm arm, String name, Uint8List data) async {
+    if (arm.icons.contains(name)) return;
+    final ok = await arm.link.run(
+      skUpload(SkIcons.slot(name, SkArena.icons), data, arm.link.maxPacket - 2),
+    );
+    if (ok) arm.icons.add(name);
   }
 
   /// Host code that draws [text] (lines split at '\n', wrapped to the panel)
@@ -873,8 +908,10 @@ class ScouterConnection extends G1Connection {
     String text, {
     int top = 140,
     required int maxCode,
+    int? icon,
   }) {
-    final lines = wrap(font, text, SkPanel.width - 2 * textLeft);
+    final left = icon == null ? textLeft : iconTextLeft;
+    final lines = wrap(font, text, SkPanel.width - textLeft - left);
     final maxLines = max(1, (SkPanel.height - top) ~/ font.lineSpacing);
     final packets = <Uint8List>[];
     var code = SkCode();
@@ -895,6 +932,20 @@ class ScouterConnection extends G1Connection {
       SkPanel.height,
       0,
     );
+    if (icon != null) {
+      // The app's icon beside the text, its top at the first line's top.
+      room(skOpSize(12));
+      code.blit(
+        icon,
+        SkIcons.stride,
+        SkArena.frame,
+        SkPanel.stride,
+        textLeft,
+        top,
+        SkIcons.size,
+        SkIcons.size,
+      );
+    }
     var textAt = SkArena.text;
     for (var i = 0; i < min(lines.length, maxLines); i++) {
       final glyphs = font.encode(lines[i]);
@@ -909,7 +960,7 @@ class ScouterConnection extends G1Connection {
         SkArena.font,
         SkArena.frame,
         SkPanel.stride,
-        textLeft,
+        left,
         baseline,
         textLevel,
         textAt,

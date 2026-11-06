@@ -44,9 +44,8 @@ void main() {
     final dir = await Directory.systemTemp.createTemp('rec');
     final wav = File('${dir.path}/Brillen-Notiz 2026-11-02 14-35-00.wav');
     await wav.writeAsBytes(VoiceRecorder.wavHeader(0));
-    await File('${wav.path}.json').writeAsString(
-      jsonEncode({'recorded_at': '2026-11-02T14:35:00'}),
-    );
+    await File('${wav.path}.json')
+        .writeAsString(jsonEncode({'recorded_at': '2026-11-02T14:35:00'}));
 
     final recorder = VoiceRecorder(
       G1Connection.fake((side, data) async {}),

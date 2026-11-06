@@ -195,8 +195,9 @@ class G1Connection extends ChangeNotifier {
   /// Characters that safely fit on a line (Even: about 30).
   int get displayColumns => 30;
 
-  /// Splits [text] into the pages this display shows one at a time.
-  Future<List<String>> layoutPages(String text) async =>
+  /// Splits [text] into the pages this display shows one at a time; with
+  /// [icon] (a notification's app icon, ScouterKit only) beside the text.
+  Future<List<String>> layoutPages(String text, {String? icon}) async =>
       G1TextLayout.screens(G1TextLayout.lines(text));
 
   // ---------------------------------------------------------------------------
@@ -715,6 +716,7 @@ class G1Connection extends ChangeNotifier {
     int pages = 1,
     bool left = true,
     bool right = true,
+    String? icon,
   }) {
     return send(
       G1Packets.text(

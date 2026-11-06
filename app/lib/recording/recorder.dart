@@ -30,9 +30,8 @@ class VoiceRecorder extends ChangeNotifier {
 
   bool get recording => _file != null;
   DateTime? startedAt;
-  Duration get elapsed => startedAt == null
-      ? Duration.zero
-      : DateTime.now().difference(startedAt!);
+  Duration get elapsed =>
+      startedAt == null ? Duration.zero : DateTime.now().difference(startedAt!);
 
   /// Recordings waiting to be sent.
   int pending = 0;
@@ -75,9 +74,8 @@ class VoiceRecorder extends ChangeNotifier {
     _path = path;
     _dataBytes = 0;
     startedAt = now;
-    await File('${path.path}.json').writeAsString(
-      jsonEncode({'recorded_at': now.toIso8601String()}),
-    );
+    await File('${path.path}.json')
+        .writeAsString(jsonEncode({'recorded_at': now.toIso8601String()}));
 
     final decoder = Lc3Decoder();
     _decoder = decoder;

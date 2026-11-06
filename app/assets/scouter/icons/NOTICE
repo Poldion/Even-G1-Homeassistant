@@ -1,0 +1,17 @@
+Notification icons
+
+The 4-bpp bitmaps here (50 x 50, 16 grey levels) are taken unchanged from
+ScouterKit (https://github.com/mafik/scouter_kit, go/examples/g1/icons/), which
+converts them from Pebble's notification icons:
+
+- Pebble_50x50_*.svg from PebbleOS (https://github.com/coredevices/PebbleOS),
+  created by Pebble Technology Corp and released by Google LLC (2024), under the
+  Apache License, Version 2.0 (LICENSE).
+- *_50px.svg (Discord, Element, Signal, Steam, Teams, Zoom) from
+  pebble-dev/iconography, contributed by the Rebble community, under the same
+  Apache License, Version 2.0 (LICENSE.iconography).
+
+ScouterKit renders them at 50 x 50 and inverts them for the see-through display
+(the ink lit, the background off). The brand icons show names and logos that are
+trademarks of their owners; they are used only to show which app a
+notification comes from.

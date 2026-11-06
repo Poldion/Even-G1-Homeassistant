@@ -29,6 +29,7 @@ class SkOp {
   static const writeRle = 0x02;
   static const sysWrite = 0x45;
   static const fill = 0x50;
+  static const blit = 0x51;
   static const glyphs = 0x52;
   static const draw = 0x53;
   static const end = 0x33;
@@ -137,7 +138,12 @@ class SkArena {
 
   /// The font blob.
   static const font = 0x1000;
-  static const fontMax = 0x10000 - font;
+  static const fontMax = icons - font;
+
+  /// Notification icons (50 × 50, 4 bpp, 1250 bytes each), uploaded when
+  /// first used.
+  static const icons = 0x8000;
+  static const iconsEnd = frame;
 
   /// The 4-bpp frame (640 × 480 = 153 600 bytes).
   static const frame = 0x10000;
@@ -218,6 +224,31 @@ class SkCode {
     int text,
     int n,
   ) => op(SkOp.glyphs, [font, dst, stride, x, baseline, 2, level, text, n]);
+
+  /// `BLIT` of a 4-bpp source with the `COPY` mode.
+  void blit(
+    int src,
+    int srcStride,
+    int dst,
+    int dstStride,
+    int dstX,
+    int dstY,
+    int w,
+    int h,
+  ) => op(SkOp.blit, [
+    src,
+    srcStride,
+    0,
+    0,
+    dst,
+    dstStride,
+    dstX,
+    dstY,
+    w,
+    h,
+    0,
+    15,
+  ]);
 
   void draw(
     int src,

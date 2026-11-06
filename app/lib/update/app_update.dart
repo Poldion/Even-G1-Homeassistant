@@ -149,7 +149,9 @@ class AppUpdater {
       request.headers
         ..set(HttpHeaders.acceptHeader, 'application/vnd.github+json')
         ..set(HttpHeaders.userAgentHeader, 'EvenG1HA');
-      final response = await request.close().timeout(const Duration(seconds: 15));
+      final response = await request.close().timeout(
+        const Duration(seconds: 15),
+      );
       final body = await response.transform(utf8.decoder).join();
       if (response.statusCode != 200) {
         throw HttpException('HTTP ${response.statusCode}');

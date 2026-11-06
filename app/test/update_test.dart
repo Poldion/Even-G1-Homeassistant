@@ -16,16 +16,29 @@ void main() {
       'tag_name': 'v0.10.0',
       'body': '### Added\n- Neu\n\n---\n**Installation:** …',
       'assets': [
-        {'name': 'even_g1-v0.10.0.zip', 'browser_download_url': '${prefix}v0.10.0/even_g1-v0.10.0.zip'},
-        {'name': 'evil.apk', 'browser_download_url': 'https://example.com/evil.apk'},
-        {'name': 'even-g1-ha-v0.10.0.apk', 'browser_download_url': '${prefix}v0.10.0/even-g1-ha-v0.10.0.apk'},
+        {
+          'name': 'even_g1-v0.10.0.zip',
+          'browser_download_url': '${prefix}v0.10.0/even_g1-v0.10.0.zip',
+        },
+        {
+          'name': 'evil.apk',
+          'browser_download_url': 'https://example.com/evil.apk',
+        },
+        {
+          'name': 'even-g1-ha-v0.10.0.apk',
+          'browser_download_url': '${prefix}v0.10.0/even-g1-ha-v0.10.0.apk',
+        },
       ],
     });
     expect(update?.version, '0.10.0');
     expect(update?.apkUrl, endsWith('even-g1-ha-v0.10.0.apk'));
     expect(update?.notes, '### Added\n- Neu');
     expect(
-      AppUpdater.parseRelease({'tag_name': 'v1.0.0', 'prerelease': true, 'assets': []}),
+      AppUpdater.parseRelease({
+        'tag_name': 'v1.0.0',
+        'prerelease': true,
+        'assets': [],
+      }),
       isNull,
     );
   });
@@ -36,7 +49,10 @@ void main() {
       'tag_name': tag,
       'prerelease': pre,
       'assets': [
-        {'name': 'even-g1-ha-$tag.apk', 'browser_download_url': '$prefix$tag/even-g1-ha-$tag.apk'},
+        {
+          'name': 'even-g1-ha-$tag.apk',
+          'browser_download_url': '$prefix$tag/even-g1-ha-$tag.apk',
+        },
       ],
     };
     final sk = AppUpdater.parseRelease(
@@ -45,14 +61,23 @@ void main() {
     );
     expect(sk?.version, '0.17.0.4');
     expect(sk?.channel, UpdateChannel.scouterKit);
-    expect(sk?.switchesChannel, AppUpdater.buildChannel != UpdateChannel.scouterKit);
+    expect(
+      sk?.switchesChannel,
+      AppUpdater.buildChannel != UpdateChannel.scouterKit,
+    );
     expect(AppUpdater.isNewer('0.17.0.5', '0.17.0.4'), isTrue);
     expect(
-      AppUpdater.parseRelease(release('v0.16.4', pre: false), channel: UpdateChannel.scouterKit),
+      AppUpdater.parseRelease(
+        release('v0.16.4', pre: false),
+        channel: UpdateChannel.scouterKit,
+      ),
       isNull,
     );
     // The stable channel never takes a ScouterKit build.
     expect(AppUpdater.parseRelease(release('sk-v0.17.0.4', pre: true)), isNull);
-    expect(AppUpdater.parseRelease(release('sk-v0.17.0.4', pre: false)), isNull);
+    expect(
+      AppUpdater.parseRelease(release('sk-v0.17.0.4', pre: false)),
+      isNull,
+    );
   });
 }

@@ -387,7 +387,8 @@ class _RecordingState extends State<_Recording> {
     } else if (r.pending > 0) {
       subtitle = '${r.pending} Aufnahme(n) noch nicht gesendet';
     } else {
-      subtitle = r.lastResult ??
+      subtitle =
+          r.lastResult ??
           (bridge.settings.whisperUrl.isEmpty
               ? 'WhisperNotes in den Einstellungen eintragen'
               : 'Brillen-Mikrofon → WhisperNotes → BasaltNotes');

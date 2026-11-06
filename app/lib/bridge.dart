@@ -11,6 +11,7 @@ import 'g1/protocol.dart';
 import 'ha/assist_session.dart';
 import 'ha/ha_client.dart';
 import 'notifications/phone_notifications.dart';
+import 'scouter/sk_icons.dart';
 import 'recording/recorder.dart';
 import 'settings.dart';
 
@@ -311,6 +312,7 @@ class Bridge extends ChangeNotifier {
       await display.showText(
         body.isEmpty ? head : '$head\n$body',
         closeAfter: notificationDuration,
+        icon: SkIcons.forApp(appIdentifier, displayName),
       );
       return;
     }
@@ -841,9 +843,10 @@ class Bridge extends ChangeNotifier {
   Future<void> setRecording(bool enabled) async {
     if (enabled == recorder.recording) return;
     if (enabled) {
-      if (!g1.connected) _log('Aufnahme: Brille nicht verbunden, Mikrofon folgt');
+      if (!g1.connected)
+        _log('Aufnahme: Brille nicht verbunden, Mikrofon folgt');
       await recorder.start();
-      display.idleText = settings.recordingDot ? recordingDotText : null;
+      display.idleText = _recordingDot ? recordingDotText : null;
       if (g1.connected && !display.active) await display.showIdle();
     } else {
       display.idleText = null;
@@ -854,12 +857,17 @@ class Bridge extends ChangeNotifier {
     await _reportState();
   }
 
+  /// The "o" in the corner, with Even's firmware only: g1v0 itself draws a
+  /// block in the right eye's top corner whenever the microphone is on
+  /// (VM.md §6.5), which a recording keeps on.
+  bool get _recordingDot => settings.recordingDot && g1.evenFirmware;
+
   /// Shows or hides the recording dot while recording.
   Future<void> setRecordingDot(bool enabled) async {
     settings.recordingDot = enabled;
     notifyListeners();
     if (!recorder.recording) return;
-    display.idleText = enabled ? recordingDotText : null;
+    display.idleText = _recordingDot ? recordingDotText : null;
     if (g1.connected && !display.active) await display.showIdle();
   }
 

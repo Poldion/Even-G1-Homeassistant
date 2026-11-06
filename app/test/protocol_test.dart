@@ -13,7 +13,9 @@ void main() {
       ...'net build time: 2025-10-22 14:21:16, app build time 2025-10-22 '
               '14:20:59, ver 1.6.6, JBD DeviceId 4010'
           .codeUnits,
-      0, 0, 0,
+      0,
+      0,
+      0,
     ]);
     expect(G1Packets.firmwareVersion(reply), '1.6.6');
     expect(G1Packets.firmwareVersion(Uint8List.fromList([0x6E, 0x41])), isNull);

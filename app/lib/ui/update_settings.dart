@@ -7,7 +7,10 @@ import '../update/app_update.dart';
 ///
 /// With [manual] false (on start) nothing is shown unless there is an update
 /// and errors are ignored.
-Future<void> checkForAppUpdate(BuildContext context, {bool manual = false}) async {
+Future<void> checkForAppUpdate(
+  BuildContext context, {
+  bool manual = false,
+}) async {
   if (!AppUpdater.supported) return;
   final messenger = ScaffoldMessenger.maybeOf(context);
   if (!manual && (!kReleaseMode || !await AppUpdater.dailyCheckDue())) return;
@@ -150,7 +153,9 @@ class _UpdateSettingsState extends State<UpdateSettings> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          _version.isEmpty ? 'Installierte Version unbekannt' : 'Installiert: $_version',
+          _version.isEmpty
+              ? 'Installierte Version unbekannt'
+              : 'Installiert: $_version',
         ),
         const SizedBox(height: 4),
         Text(

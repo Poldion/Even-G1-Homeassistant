@@ -42,16 +42,18 @@ class G1Display {
     String text, {
     Duration? closeAfter,
     bool evenAi = false,
+    String? icon,
   }) async {
     _reset();
     _active = true;
+    _icon = icon;
     _evenAi = evenAi;
     _closeAfter = (closeAfter == null || closeAfter == Duration.zero)
         ? null
         : closeAfter;
     final generation = _generation;
     // Pages as large as this display allows (5 lines with Even's firmware).
-    final screens = await g1.layoutPages(text);
+    final screens = await g1.layoutPages(text, icon: icon);
     if (generation != _generation) return false;
     _screens = screens;
 
@@ -100,6 +102,9 @@ class G1Display {
   /// itself in that mode.
   bool evenAiAnswers = false;
   bool _evenAi = false;
+
+  /// App icon of the notification on the display (ScouterKit).
+  String? _icon;
 
   /// Error message that closes itself after a few seconds.
   Future<bool> showAiError(String text) =>
@@ -161,7 +166,7 @@ class G1Display {
   Future<bool> _showPage(int generation, {bool last = false}) async {
     if (generation != _generation || !g1.connected) return false;
     screen.value = _screens[_page];
-    if (!_evenAi) return g1.sendText(_screens[_page]);
+    if (!_evenAi) return g1.sendText(_screens[_page], icon: _icon);
     final isLast =
         last || (_screens.length > 1 && _page == _screens.length - 1);
     final status = _manual

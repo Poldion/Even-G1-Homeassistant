@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
+import 'package:even_g1_ha/scouter/sk_icons.dart';
 import 'package:even_g1_ha/scouter/sk_link.dart';
 import 'package:even_g1_ha/scouter/sk_protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -93,6 +94,7 @@ void execute(Uint8List code, Uint8List arena, List<int> ops) {
       final k = switch (op) {
         SkOp.sysWrite => 2,
         SkOp.fill => 7,
+        SkOp.blit => 12,
         SkOp.glyphs => 9,
         SkOp.draw => 8,
         _ => throw StateError('op 0x${op.toRadixString(16)}'),
@@ -331,6 +333,47 @@ void main() {
       // A higher text block leaves room for more lines.
       await g1.setDisplayPosition(0, 5, 0);
       expect(g1.displayLines, 14);
+    });
+
+    test('a notification shows its app icon beside the text', () async {
+      g1.fakeReady(epoch: arms.epoch);
+      expect(
+        SkIcons.forApp('org.telegram.messenger', 'Telegram'),
+        'Telegram_app',
+      );
+      expect(
+        SkIcons.forApp('com.google.android.gm', 'Gmail'),
+        'Generic_e-mail',
+      );
+      expect(SkIcons.forApp('io.github.poldion.even_g1_ha'), SkIcons.generic);
+      expect(
+        await g1.sendText('Telegram: Anna\nHallo!', icon: 'Telegram_app'),
+        isTrue,
+      );
+      final icon = File('assets/scouter/icons/Telegram_app.4bpp')
+          .readAsBytesSync();
+      final at = SkIcons.slot('Telegram_app', SkArena.icons);
+      for (final side in G1Side.values) {
+        expect(
+          arms.ops[side],
+          containsAllInOrder([SkOp.fill, SkOp.blit, SkOp.draw]),
+        );
+        expect(arms.arenas[side]!.sublist(at, at + icon.length), icon);
+      }
+      // Uploaded once per session.
+      final writes = arms.ops[G1Side.left]!.length;
+      await g1.sendText('Telegram: Bob\nNa?', icon: 'Telegram_app');
+      expect(
+        arms.ops[G1Side.left]!.length - writes,
+        5,
+      ); // fill, blit, 2× glyphs, draw
+      // Pages are laid out narrower beside the icon.
+      final wide = await g1.layoutPages('x ' * 40);
+      final narrow = await g1.layoutPages('x ' * 40, icon: 'Telegram_app');
+      expect(
+        narrow.first.split('\n').length,
+        greaterThan(wide.first.split('\n').length),
+      );
     });
 
     test('nothing is drawn while an arm lies in the case', () async {
