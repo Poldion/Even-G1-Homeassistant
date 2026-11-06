@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 
 import 'g1_connection.dart';
 import 'protocol.dart';
-import 'text_layout.dart';
 
 /// Shows (multi page) texts on the glasses with automatic and manual paging.
 ///
@@ -50,8 +49,11 @@ class G1Display {
     _closeAfter = (closeAfter == null || closeAfter == Duration.zero)
         ? null
         : closeAfter;
-    _screens = G1TextLayout.screens(G1TextLayout.lines(text));
     final generation = _generation;
+    // Pages as large as this display allows (5 lines with Even's firmware).
+    final screens = await g1.layoutPages(text);
+    if (generation != _generation) return false;
+    _screens = screens;
 
     final ok = await _showPage(generation);
     if (generation != _generation) return ok;

@@ -320,6 +320,19 @@ void main() {
       }
     });
 
+    test('pages use the whole panel, not Even\'s 5 lines', () async {
+      expect(g1.displayLines, 11);
+      expect(g1.displayColumns, 42);
+      final text = List.generate(25, (i) => 'Zeile ${i + 1}').join('\n');
+      final pages = await g1.layoutPages(text);
+      expect(pages, hasLength(3));
+      expect(pages.first.split('\n'), hasLength(11));
+      expect(pages.last.split('\n'), ['Zeile 23', 'Zeile 24', 'Zeile 25']);
+      // A higher text block leaves room for more lines.
+      await g1.setDisplayPosition(0, 5, 0);
+      expect(g1.displayLines, 14);
+    });
+
     test('nothing is drawn while an arm lies in the case', () async {
       g1.fakeReady(epoch: arms.epoch);
       g1.receive(G1Side.left, input(arms.epoch, SkTrigger.caseState, 0xff01));

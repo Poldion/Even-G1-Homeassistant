@@ -98,6 +98,8 @@ def ws_subscribe(
         vol.Optional("silent_mode"): vol.Any(None, bool),
         vol.Optional("recording"): vol.Any(None, bool),
         vol.Optional("wear_detection"): vol.Any(None, bool),
+        vol.Optional("display_lines"): vol.Any(None, vol.All(int, vol.Range(1, 40))),
+        vol.Optional("display_columns"): vol.Any(None, vol.All(int, vol.Range(8, 120))),
         vol.Optional("battery_case"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
         vol.Optional("case_charging"): vol.Any(None, bool),
         vol.Optional("wear_state"): vol.Any(None, vol.In(WEAR_STATES)),

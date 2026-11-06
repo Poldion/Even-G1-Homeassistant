@@ -115,6 +115,37 @@ class ScouterConnection extends G1Connection {
   static const textLeft = 24;
   static const textLevel = 15;
 
+  /// Free rows kept below the text block.
+  static const textBottom = 16;
+
+  /// Pixel sizes of the bundled font (Departure Mono drawn ×2).
+  static const _lineSpacing = 28;
+  static const _advance = 14;
+
+  int get _lineHeight => _loadedFont?.lineSpacing ?? _lineSpacing;
+
+  /// Lines from [textTop] down to the panel's bottom (11 at the default
+  /// height, instead of Even's 5).
+  @override
+  int get displayLines =>
+      max(1, (SkPanel.height - textBottom - textTop) ~/ _lineHeight);
+
+  /// The font is monospaced: 42 characters on the 640 px line.
+  @override
+  int get displayColumns => (SkPanel.width - 2 * textLeft) ~/ _advance;
+
+  @override
+  Future<List<String>> layoutPages(String text) async {
+    final font = _loadedFont ??= await _fontLoader();
+    final lines = wrap(font, text, SkPanel.width - 2 * textLeft);
+    if (lines.isEmpty) return [''];
+    final n = displayLines;
+    return [
+      for (var i = 0; i < lines.length; i += n)
+        lines.sublist(i, min(i + n, lines.length)).join('\n'),
+    ];
+  }
+
   @override
   bool get evenFirmware => false;
 
@@ -1058,6 +1089,8 @@ class ScouterConnection extends G1Connection {
     bool preview = false,
   }) async {
     textTop = 60 + height.clamp(0, 8) * 20;
+    // Fewer or more lines fit now (Home Assistant's dashboard follows).
+    notifyListeners();
     return true;
   }
 

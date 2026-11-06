@@ -419,6 +419,28 @@ async def test_wear_detection(
     assert hass.states.get("binary_sensor.even_g1_worn").state == "unknown"
 
 
+async def test_display_size(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """The dashboard uses the lines the app reports for its display."""
+    device = entry.runtime_data
+    assert device.page_lines == 5
+    assert device.line_width == 30
+
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {
+            "type": "even_g1/update_state",
+            "entry_id": entry.entry_id,
+            "display_lines": 11,
+            "display_columns": 42,
+        }
+    )
+    assert (await client.receive_json())["success"]
+    assert device.page_lines == 11
+    assert device.line_width == 42
+
+
 async def test_status_sensors(
     hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
 ) -> None:

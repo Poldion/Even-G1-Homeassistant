@@ -66,8 +66,10 @@ _ENTITY_LINE = (
     "{{ state_attr('ENTITY', 'unit_of_measurement') }}{% endif %}"
 )
 
-# The display shows 5 lines per page: header plus 4 lines.
+# Even's text view shows 5 lines of about 30 characters per page; the app
+# reports the size of its display (ScouterKit: more lines and characters).
 _PAGE_LINES = 5
+_LINE_WIDTH = 30
 _AGENDA_REFRESH = timedelta(minutes=5)
 
 
@@ -81,6 +83,8 @@ class EvenG1State:
     glasses_connected: bool = False
     silent_mode: bool | None = None
     recording: bool | None = None
+    display_lines: int | None = None
+    display_columns: int | None = None
     wear_detection: bool | None = None
     battery_case: int | None = None
     case_charging: bool | None = None
@@ -230,13 +234,29 @@ class EvenG1Device:
             return "\n".join([*lines, template])
         return "\n".join(["{{ kopfzeile }}", *lines, "{{ agenda }}"])
 
+    @property
+    def page_lines(self) -> int:
+        """Lines per page of the glasses' display."""
+        return max(self.state.display_lines or _PAGE_LINES, 2)
+
+    @property
+    def line_width(self) -> int:
+        """Characters that fit on a line of the glasses' display."""
+        return max(self.state.display_columns or _LINE_WIDTH, 16)
+
     def dashboard_variables(self, now: datetime | None = None) -> dict[str, Any]:
         """Return the variables of the dashboard template."""
         now = now or dt_util.now()
-        slots = _PAGE_LINES - 1
+        slots = self.page_lines - 1
         if self._custom_template is None:
             slots -= len(self.options.get(CONF_DASHBOARD_ENTITIES, []))
-        lines, more = agenda.agenda(self._agenda_events, self._agenda_todos, now, slots)
+        lines, more = agenda.agenda(
+            self._agenda_events,
+            self._agenda_todos,
+            now,
+            slots,
+            self.line_width,
+        )
         return {
             "kopfzeile": agenda.header(now, more),
             "agenda": "\n".join(lines),
@@ -521,11 +541,15 @@ class EvenG1Device:
     @callback
     def async_update_state(self, **kwargs: Any) -> None:
         """Update state reported by the app."""
+        size = (self.state.display_lines, self.state.display_columns)
         for key, value in kwargs.items():
             if hasattr(self.state, key) and key != "extra":
                 setattr(self.state, key, value)
             else:
                 self.state.extra[key] = value
+        if size != (self.state.display_lines, self.state.display_columns):
+            # Another display (or height): lay the dashboard out again.
+            self._async_refresh_dashboard()
         self._notify_listeners()
 
     @callback

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'protocol.dart';
+import 'text_layout.dart';
 
 /// Firmware on the arms.
 enum G1Firmware {
@@ -187,6 +188,16 @@ class G1Connection extends ChangeNotifier {
 
   /// Name of the firmware the app talks to, for the app.
   String get firmwareName => 'Even';
+
+  /// Lines per page of the display (Even's text view: 5).
+  int get displayLines => G1TextLayout.linesPerScreen;
+
+  /// Characters that safely fit on a line (Even: about 30).
+  int get displayColumns => 30;
+
+  /// Splits [text] into the pages this display shows one at a time.
+  Future<List<String>> layoutPages(String text) async =>
+      G1TextLayout.screens(G1TextLayout.lines(text));
 
   // ---------------------------------------------------------------------------
   // Scanning

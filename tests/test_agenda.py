@@ -86,3 +86,10 @@ def test_lines_fit_the_display() -> None:
     """No line is longer than 30 characters."""
     lines, _ = agenda(EVENTS, TODOS, NOW, 20)
     assert all(len(line) <= 30 for line in lines)
+
+
+def test_wider_display() -> None:
+    """With a wider display (ScouterKit) titles are cut later."""
+    lines, _ = agenda(EVENTS, [], NOW, 10, width=44)
+    assert "» 23:00  Spät-Call mit dem Team aus Hamburg" in lines
+    assert all(len(line) <= 44 for line in lines)

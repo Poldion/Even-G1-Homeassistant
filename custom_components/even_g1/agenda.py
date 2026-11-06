@@ -18,7 +18,8 @@ from homeassistant.util import dt as dt_util
 
 _LOGGER = logging.getLogger(__name__)
 
-# Characters per display line that safely fit without wrapping.
+# Characters per display line that safely fit without wrapping with Even's
+# firmware; the app reports the real width (ScouterKit: 42).
 LINE_WIDTH = 30
 WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 MONTHS = [
@@ -134,9 +135,9 @@ async def async_fetch(
         return None
 
 
-def _line(prefix: str, text: str, suffix: str = "") -> str:
+def _line(prefix: str, text: str, suffix: str = "", width: int = LINE_WIDTH) -> str:
     """Return one display line; the text is shortened, never the labels."""
-    room = LINE_WIDTH - len(prefix) - len(suffix)
+    room = width - len(prefix) - len(suffix)
     text = " ".join(text.split())
     if len(text) > room:
         text = text[: max(room - 2, 1)].rstrip() + ".."
@@ -155,7 +156,9 @@ def _day_label(day: date, today: date) -> str:
     return day.strftime("%d.%m.")
 
 
-def event_lines(events: list[AgendaEvent], now: datetime) -> list[str]:
+def event_lines(
+    events: list[AgendaEvent], now: datetime, width: int = LINE_WIDTH
+) -> list[str]:
     """Return the lines for today's remaining and tomorrow's events."""
     today = now.date()
     tomorrow = today + timedelta(days=1)
@@ -183,11 +186,13 @@ def event_lines(events: list[AgendaEvent], now: datetime) -> list[str]:
                 label = f"{start:%H:%M}"
             else:
                 label = f"morgen {start:%H:%M}"
-        lines.append(_line(f"» {label}  ", event.summary))
+        lines.append(_line(f"» {label}  ", event.summary, width=width))
     return lines
 
 
-def todo_lines(todos: list[AgendaTodo], now: datetime) -> list[str]:
+def todo_lines(
+    todos: list[AgendaTodo], now: datetime, width: int = LINE_WIDTH
+) -> list[str]:
     """Return the lines for to-dos, the most urgent first."""
     today = now.date()
 
@@ -207,18 +212,26 @@ def todo_lines(todos: list[AgendaTodo], now: datetime) -> list[str]:
         else:
             overdue = todo.due < today
             label = _day_label(todo.due, today)
-        lines.append(_line("[!] " if overdue else "[ ] ", todo.summary, f" · {label}"))
+        lines.append(
+            _line("[!] " if overdue else "[ ] ", todo.summary, f" · {label}", width)
+        )
     return lines
 
 
 def agenda(
-    events: list[AgendaEvent], todos: list[AgendaTodo], now: datetime, slots: int
+    events: list[AgendaEvent],
+    todos: list[AgendaTodo],
+    now: datetime,
+    slots: int,
+    width: int = LINE_WIDTH,
 ) -> tuple[list[str], int]:
-    """Return up to ``slots`` lines and the number of entries left out.
+    """Return up to ``slots`` lines of at most ``width`` characters and the
+    number of entries left out.
 
     Events come first, but one slot is kept for to-dos if there are any.
     """
-    ev_lines, todo_lines_ = event_lines(events, now), todo_lines(todos, now)
+    ev_lines = event_lines(events, now, width)
+    todo_lines_ = todo_lines(todos, now, width)
     slots = max(slots, 0)
     n_events = max(min(len(ev_lines), slots - min(len(todo_lines_), 1)), 0)
     n_todos = min(len(todo_lines_), slots - n_events)

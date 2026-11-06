@@ -396,6 +396,9 @@ class Bridge extends ChangeNotifier {
       'wear_state': g1.wearState,
       'recording': recorder.recording,
       'wear_detection': wearDetection,
+      // Home Assistant lays the dashboard out for this display.
+      'display_lines': g1.displayLines,
+      'display_columns': g1.displayColumns,
     };
     if (mapEquals(state, _lastReported)) return;
     _lastReported = state;
