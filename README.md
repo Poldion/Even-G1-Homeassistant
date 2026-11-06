@@ -10,6 +10,11 @@ sprechen und die Brille in Automationen nutzen. Dazu gehören eine
 **Android-App**, die die Brille per Bluetooth verbindet, und eine
 **Home-Assistant-Integration**.
 
+Die App arbeitet mit Evens eigener Firmware oder – experimentell – mit der
+freien Ersatz-Firmware **[ScouterKit (g1v0)](https://github.com/mafik/scouter_kit)**,
+die das ganze Display und alle Sensoren der Brille freigibt (siehe
+[Firmware](#firmware-even-oder-scouterkit)).
+
 ## Funktionen
 
 - **Texte auf der Brille** per Aktion, Notify-Entität oder Automation, z. B. „Waschmaschine fertig“
@@ -18,6 +23,33 @@ sprechen und die Brille in Automationen nutzen. Dazu gehören eine
 - **Aufnahmen** mit dem Brillen-Mikrofon, gestartet in der App oder in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transkribiert und fasst zusammen, die Zusammenfassung landet in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
 - **Handy-Benachrichtigungen** auf der Brille, pro App wählbar
 - **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
+- **Mit ScouterKit zusätzlich:** Texte auf dem ganzen Display (11 statt 5 Zeilen), beide Augen exakt gleichzeitig, App-Symbole bei Benachrichtigungen, Dashboard beim Hochschauen direkt von der Brille (ohne Handy), Nicken und Kopfschütteln als Gesten, Helligkeits-Offset zur Automatik
+
+## Firmware: Even oder ScouterKit
+
+| | Even-Firmware | [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) |
+| --- | --- | --- |
+| Status | Werksfirmware, stabil | experimentell, sehr junges Projekt |
+| Offizielle Even-App und ihre Funktionen | ja | nein |
+| Anzeige | 576 × 136 px, 5 Zeilen à ~30 Zeichen | 640 × 480 px, 11 Zeilen à 42 Zeichen |
+| Beide Augen gleichzeitig | nicht garantiert | ja |
+| Dashboard beim Hochschauen | über das Handy | ein Programm auf der Brille zeigt es selbst |
+| Gesten | Touchbar, Kopf heben | zusätzlich rechts gedrückt halten, Nicken, Kopfschütteln |
+| Branch / Releases | [`legacy`](https://github.com/Poldion/Even-G1-Homeassistant/tree/legacy), Releases `vX.Y.Z` | [`main`](https://github.com/Poldion/Even-G1-Homeassistant/tree/main), Vorabversionen `sk-vX.Y.Z.N` |
+
+**ScouterKit** ist eine freie Ersatz-Firmware von
+[mafik/scouter_kit](https://github.com/mafik/scouter_kit) (MIT-Lizenz). Sie
+ersetzt Evens Firmware auf beiden Bügeln und macht jeden Bügel zu einer kleinen
+programmierbaren Maschine; die App spricht deren Protokoll 5. Die App selbst
+spielt keine Firmware auf: Das geschieht mit den Werkzeugen von ScouterKit an
+einem Linux-Rechner, Schritt für Schritt nach deren
+[Anleitung](https://github.com/mafik/scouter_kit/tree/main/g1_firmware).
+
+> **Achtung:** Das Aufspielen lässt sich nicht ungeschehen machen (zurück geht
+> nur zu Evens öffentlicher 1.6.6), ein Fehler kann einen Bügel unbrauchbar
+> machen, und die Garantie erlischt vermutlich. Lies vorher
+> [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md) und die Anleitung von ScouterKit
+> ganz.
 
 ## Installation
 
@@ -47,6 +79,12 @@ Einstellungen bleiben erhalten.
 
 App und Integration sollten dieselbe Version haben.
 
+**Für ScouterKit:** In der App unter *Einstellungen → App-Update* den
+Update-Kanal **ScouterKit** wählen; er installiert die Vorabversionen
+`even-g1-ha-sk-v….apk` aus diesem Branch. Danach unter *Einstellungen → Brille*
+**ScouterKit** wählen und die Brille im offenen Ladeetui koppeln
+(Details in [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md)).
+
 ## Einrichtung
 
 1. In Home Assistant ein Token erstellen: *Profil → Sicherheit → Langlebige Zugriffstoken*.
@@ -67,6 +105,8 @@ App und Integration sollten dieselbe Version haben.
 | Doppeltippen | Anzeige schließen, Assist abbrechen |
 | Dreifachtippen | Ruhemodus an/aus |
 | Hochschauen | Home-Assistant-Dashboard (wenn als Dashboard-Geste gewählt) |
+| Rechte Touchbar gedrückt halten | nur ScouterKit: Geste `long_press_right` für eigene Automationen |
+| Nicken / Kopfschütteln | nur ScouterKit, unter *Anzeige & Aktivierung → Kopfgesten*: Gesten `nod` / `head_shake` |
 
 ### In der App
 
@@ -194,11 +234,18 @@ automation:
 - Teile des Bluetooth-Protokolls stammen aus Community-Projekten und können je nach Firmware abweichen, siehe [docs/TECHNICAL.md](docs/TECHNICAL.md).
 - Die Bluetooth-Bibliothek [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) ist nur für nicht-kommerzielle Nutzung frei.
 - Kein offizielles Produkt von Even Realities.
-- Experimentell: Die App kann auch mit der freien Ersatz-Firmware [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) arbeiten. Das Aufspielen lässt sich nicht rückgängig machen, siehe [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md).
+- ScouterKit ist ein Projekt von Dritten ([mafik/scouter_kit](https://github.com/mafik/scouter_kit)) und nicht Teil dieses Repositorys. Fragen zur Firmware selbst gehören dorthin.
+
+## Danksagung und Lizenzen Dritter
+
+- [ScouterKit](https://github.com/mafik/scouter_kit) (MIT): Firmware g1v0, Protokoll 5 und VM, deren Interpreter die Programme dieser App lokal geprüft hat.
+- Benachrichtigungssymbole: Pebbles Symbole aus [PebbleOS](https://github.com/coredevices/PebbleOS) und [pebble-dev/iconography](https://github.com/pebble-dev/iconography), wie ScouterKit sie umwandelt (Apache License 2.0, siehe `app/assets/scouter/icons/NOTICE`).
+- Schrift [Departure Mono](https://departuremono.com/) von Helena Zhang (SIL Open Font License 1.1, `app/assets/scouter/DepartureMono-LICENSE.txt`).
+- Protokollwissen zur Even-Firmware aus [MentraOS](https://github.com/Mentra-Community/MentraOS), [even-g1-companion](https://github.com/Cheddies1/even-g1-companion), [g1-reverse](https://github.com/FreedomCoder-dev/g1-reverse) und dem [EvenDemoApp-Wiki](https://github.com/JohnRThomas/EvenDemoApp/wiki/Even-Realities-G1-BLE-Protocol).
 
 ## Weitere Dokumentation
 
 - [Änderungen](CHANGELOG.md)
 - [Technische Details und Protokoll](docs/TECHNICAL.md)
-- [ScouterKit (g1v0) statt Even-Firmware](docs/SCOUTERKIT.md)
+- [ScouterKit (g1v0) statt Even-Firmware](docs/SCOUTERKIT.md) · [Firmware-Repository](https://github.com/mafik/scouter_kit)
 - [Entwicklung, Tests und Releases](docs/DEVELOPMENT.md)
