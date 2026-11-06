@@ -267,6 +267,18 @@ class _DisplaySettingsState extends State<DisplaySettings> {
           value: bridge.wearDetection ?? false,
           onChanged: bridge.g1.connected ? bridge.setWearDetection : null,
         ),
+        if (bridge.g1.supportsHeadGestures)
+          SwitchListTile(
+            contentPadding: EdgeInsets.zero,
+            title: const Text('Kopfgesten'),
+            subtitle: const Text(
+              'Nicken und Kopfschütteln als Gesten für Home Assistant. Der '
+              'Gyrosensor des rechten Bügels läuft dann ständig und braucht '
+              'etwas mehr Akku.',
+            ),
+            value: bridge.settings.headGestures,
+            onChanged: bridge.setHeadGestures,
+          ),
       ],
     );
   }

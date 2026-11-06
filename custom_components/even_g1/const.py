@@ -40,6 +40,12 @@ GESTURE_HEAD_UP: Final = "head_up"
 GESTURE_HEAD_DOWN: Final = "head_down"
 GESTURE_LONG_PRESS: Final = "long_press"
 GESTURE_LONG_PRESS_RELEASE: Final = "long_press_release"
+# Only with ScouterKit (g1v0): the right long press, and nodding and shaking
+# the head (recognised by a program on the right arm, if switched on).
+GESTURE_LONG_PRESS_RIGHT: Final = "long_press_right"
+GESTURE_LONG_PRESS_RIGHT_RELEASE: Final = "long_press_right_release"
+GESTURE_NOD: Final = "nod"
+GESTURE_HEAD_SHAKE: Final = "head_shake"
 GESTURE_OTHER: Final = "other"
 
 GESTURES: Final = [
@@ -51,6 +57,10 @@ GESTURES: Final = [
     GESTURE_HEAD_DOWN,
     GESTURE_LONG_PRESS,
     GESTURE_LONG_PRESS_RELEASE,
+    GESTURE_LONG_PRESS_RIGHT,
+    GESTURE_LONG_PRESS_RIGHT_RELEASE,
+    GESTURE_NOD,
+    GESTURE_HEAD_SHAKE,
     GESTURE_OTHER,
 ]
 

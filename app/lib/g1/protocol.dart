@@ -90,6 +90,13 @@ class G1Event {
   static const evenAiStart = 0x17;
   static const evenAiStop = 0x18;
 
+  // Not Even's: gestures only ScouterKit (g1v0) reports, numbered by this
+  // app.
+  static const rightHoldStart = 0x70;
+  static const rightHoldStop = 0x71;
+  static const nod = 0x72;
+  static const headShake = 0x73;
+
   // Status pushes (even-g1-companion HCI captures, firmware 1.6.6). They
   // repeat every few seconds and are not gestures.
   static const worn = 0x06;
@@ -156,6 +163,14 @@ String? gestureName(int code, G1Side side) {
       return 'long_press';
     case G1Event.evenAiStop:
       return 'long_press_release';
+    case G1Event.rightHoldStart:
+      return 'long_press_right';
+    case G1Event.rightHoldStop:
+      return 'long_press_right_release';
+    case G1Event.nod:
+      return 'nod';
+    case G1Event.headShake:
+      return 'head_shake';
     default:
       return 'other';
   }

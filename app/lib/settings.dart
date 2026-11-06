@@ -125,6 +125,12 @@ class Settings {
 
   /// Small dot on the glasses while recording.
   bool get recordingDot => _prefs.getBool('recording_dot') ?? true;
+
+  /// Nodding and shaking the head as gestures (ScouterKit; the gyroscope
+  /// then runs all the time, which costs battery).
+  bool get headGestures => _prefs.getBool('head_gestures') ?? false;
+  set headGestures(bool v) => _prefs.setBool('head_gestures', v);
+
   set recordingDot(bool v) => _prefs.setBool('recording_dot', v);
 
   /// Experimental: Assist answers in the Even AI mode of the official app.

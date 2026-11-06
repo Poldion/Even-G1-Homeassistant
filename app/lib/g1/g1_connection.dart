@@ -195,6 +195,20 @@ class G1Connection extends ChangeNotifier {
   /// Characters that safely fit on a line (Even: about 30).
   int get displayColumns => 30;
 
+  /// The glasses show the Home Assistant dashboard on head up themselves
+  /// (ScouterKit's resident program), so the app does not draw it.
+  bool get showsDashboardItself => false;
+
+  /// The dashboard to show on head up (ScouterKit: kept in the arms).
+  Future<void> setDashboard({
+    required bool onHeadUp,
+    required String text,
+  }) async {}
+
+  /// Nodding and shaking the head as gestures (ScouterKit only).
+  bool get supportsHeadGestures => false;
+  Future<void> setHeadGestures(bool enabled) async {}
+
   /// Splits [text] into the pages this display shows one at a time; with
   /// [icon] (a notification's app icon, ScouterKit only) beside the text.
   Future<List<String>> layoutPages(String text, {String? icon}) async =>

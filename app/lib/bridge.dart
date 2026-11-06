@@ -246,8 +246,10 @@ class Bridge extends ChangeNotifier {
         }
         notifyListeners();
         unawaited(_applyGlassesSettings());
+        unawaited(_syncDashboard());
       case 'dashboard':
         _dashboardText = (event['text'] as String? ?? '').trim();
+        unawaited(_syncDashboard());
         // Refresh only while it is on the display; otherwise the glasses
         // are not woken up for updates.
         if (_dashboardShown && display.active && g1.connected) {
@@ -428,6 +430,10 @@ class Bridge extends ChangeNotifier {
   Future<void> _applyGlassesSettings() async {
     if (!g1.connected || _glassesSettingsApplied) return;
     _glassesSettingsApplied = true;
+    if (g1.supportsHeadGestures) {
+      await g1.setHeadGestures(settings.headGestures);
+    }
+    await _syncDashboard();
     final angle = settings.headUpAngle;
     if (angle != null) await _sendHeadUpAngle(angle);
     final mode = settings.headUpMode;
@@ -640,7 +646,27 @@ class Bridge extends ChangeNotifier {
   }
 
   /// Head raised: cover the Even dashboard with the Home Assistant one.
+  /// Hands the dashboard to glasses that show it on head up themselves
+  /// (ScouterKit's resident program); not in silent mode.
+  Future<void> _syncDashboard() async {
+    if (!g1.connected) return;
+    await g1.setDashboard(
+      onHeadUp: haConfig.dashboardOnHeadUp && silentMode != true,
+      text: _dashboardText,
+    );
+  }
+
+  /// Nodding and shaking the head as gestures (ScouterKit).
+  Future<void> setHeadGestures(bool enabled) async {
+    settings.headGestures = enabled;
+    _log(enabled ? 'Kopfgesten an' : 'Kopfgesten aus');
+    notifyListeners();
+    if (g1.connected) await g1.setHeadGestures(enabled);
+  }
+
   Future<void> _onHeadUp() async {
+    // The glasses draw it themselves, without a round trip to the phone.
+    if (g1.showsDashboardItself) return;
     if (!haConfig.dashboardOnHeadUp || assistRunning) return;
     if (silentMode == true) return;
     // Do not cover a text or answer that is currently shown.
@@ -686,6 +712,7 @@ class Bridge extends ChangeNotifier {
         silentMode = event.code == G1Event.silentModeOn;
         _log(silentMode! ? 'Ruhemodus an (Brille)' : 'Ruhemodus aus (Brille)');
         notifyListeners();
+        unawaited(_syncDashboard());
         unawaited(_reportState());
     }
 
@@ -886,6 +913,7 @@ class Bridge extends ChangeNotifier {
     await g1.setSilentMode(enabled);
     silentMode = enabled;
     notifyListeners();
+    await _syncDashboard();
     await _reportState();
   }
 

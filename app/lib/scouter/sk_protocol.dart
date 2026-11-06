@@ -28,6 +28,7 @@ class SkOp {
   static const write = 0x01;
   static const writeRle = 0x02;
   static const sleepUntil = 0x40;
+  static const raise = 0x42;
   static const sysWrite = 0x45;
   static const fill = 0x50;
   static const blit = 0x51;
@@ -44,6 +45,9 @@ class SkCtrl {
   static const resetSession = 0x04;
   static const link = 0x05;
   static const props = 0x0A;
+  static const vmStart = 0x10;
+  static const vmStop = 0x11;
+  static const vmStatus = 0x12;
   static const mic = 0x13;
   static const events = 0x14;
 }
@@ -62,15 +66,22 @@ class SkEvt {
 
 /// Properties (VM.md §2.5).
 class SkProp {
+  static const timeUs = 0x00;
   static const battPct = 0x11;
   static const charge = 0x12;
   static const inCase = 0x13;
   static const worn = 0x14;
   static const pitch = 0x1B;
+  static const light = 0x1C;
   static const brightness = 0x20;
   static const panel = 0x21;
+  static const timer = 0x22;
   static const pitchLo = 0x24;
   static const pitchHi = 0x25;
+  static const imuRate = 0x28;
+  static const gyrX = 0x30;
+  static const gyrY = 0x31;
+  static const gyroRate = 0x33;
   static const caseLid = 0x35;
   static const caseCharging = 0x36;
   static const caseBattPct = 0x37;
@@ -83,11 +94,14 @@ class SkProp {
 
 /// Triggers (VM.md §5.2), also the `INPUT` event's trigger IDs.
 class SkTrigger {
+  static const start = 0;
+  static const timer = 1;
   static const tilt = 3;
   static const battery = 5;
   static const caseState = 6;
   static const wear = 7;
   static const touch = 8;
+  static const user0 = 12;
 }
 
 /// `TOUCH_GESTURE` values (VM.md §2.5).
@@ -208,6 +222,9 @@ class SkCode {
       _u16(w);
     }
   }
+
+  /// `RAISE`: sets trigger [t] pending (hands work to the program).
+  void raise(int t) => op(SkOp.raise, [t]);
 
   /// `SLEEP_UNTIL`: wait until the arm's device time [t] (at most 2 s).
   void sleepUntil(int t) => op(SkOp.sleepUntil, [t]);

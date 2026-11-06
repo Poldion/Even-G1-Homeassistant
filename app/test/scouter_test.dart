@@ -9,6 +9,7 @@ import 'package:even_g1_ha/scouter/sk_clock.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
 import 'package:even_g1_ha/scouter/sk_icons.dart';
 import 'package:even_g1_ha/scouter/sk_link.dart';
+import 'package:even_g1_ha/scouter/sk_program.dart';
 import 'package:even_g1_ha/scouter/sk_protocol.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -107,6 +108,7 @@ void execute(
       }
       final k = switch (op) {
         SkOp.sleepUntil => 1,
+        SkOp.raise => 1,
         SkOp.sysWrite => 2,
         SkOp.fill => 7,
         SkOp.blit => 12,
@@ -474,15 +476,124 @@ void main() {
         g1.receive(G1Side.right, input(arms.epoch, SkTrigger.touch, g));
       }
       await Future<void>.delayed(Duration.zero);
+      // The left long press is Assist, the right one a gesture of its own.
+      g1.receive(
+        G1Side.left,
+        input(arms.epoch, SkTrigger.touch, SkGesture.longStart),
+      );
+      g1.receive(
+        G1Side.left,
+        input(arms.epoch, SkTrigger.touch, SkGesture.longEnd),
+      );
+      await Future<void>.delayed(Duration.zero);
       expect(events, [
-        G1Event.evenAiStart,
-        G1Event.evenAiStop,
+        G1Event.rightHoldStart,
+        G1Event.rightHoldStop,
         G1Event.singleTap,
         G1Event.doubleTap,
         G1Event.silentModeOn,
         G1Event.silentModeOff,
+        G1Event.evenAiStart,
+        G1Event.evenAiStop,
       ]);
+      expect(
+        gestureName(G1Event.rightHoldStart, G1Side.right),
+        'long_press_right',
+      );
       await sub.cancel();
+    });
+
+    test('the resident program is loaded and reports the head', () async {
+      g1.fakeReady(epoch: arms.epoch);
+      final events = <int>[];
+      final sub = g1.events.listen((e) => events.add(e.code));
+      await g1.setDashboard(onHeadUp: true, text: '12:00\nWohnzimmer: 21 °C');
+      for (final side in G1Side.values) {
+        final arena = arms.arenas[side]!;
+        final p = SkResident.build(gestures: false);
+        expect(
+          arena.sublist(SkResident.code, SkResident.code + p.code.length),
+          p.code,
+        );
+        final d = ByteData.sublistView(arena);
+        expect(d.getUint32(SkResident.count.address, Endian.little), 2);
+        expect(d.getUint32(SkResident.angle.address, Endian.little), 30);
+        expect(
+          arms.ctrl[side]!.where((c) => c[0] == SkCtrl.vmStart),
+          hasLength(1),
+        );
+      }
+      expect(g1.showsDashboardItself, isTrue);
+      // The right arm's program reports the head (NOTIFY 1, 1).
+      g1.receive(
+        G1Side.right,
+        event(SkEvt.notify, arms.epoch, [
+          ..._u16(1),
+          0x03,
+          ..._u32(SkResident.notifyHead),
+          ..._u32(1),
+        ]),
+      );
+      // A nod (with head gestures on).
+      g1.receive(
+        G1Side.right,
+        event(SkEvt.notify, arms.epoch, [
+          ..._u16(2),
+          0x01,
+          ..._u32(SkResident.notifyGesture),
+          ..._u32(SkResident.nod),
+        ]),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(events, [G1Event.headUp, G1Event.nod]);
+      // A text marks the display busy for the program.
+      await g1.sendText('Hallo');
+      expect(
+        ByteData.sublistView(arms.arenas[G1Side.left]!)
+            .getUint32(SkResident.busy.address, Endian.little),
+        1,
+      );
+      await g1.blankScreen();
+      expect(
+        ByteData.sublistView(arms.arenas[G1Side.left]!)
+            .getUint32(SkResident.busy.address, Endian.little),
+        0,
+      );
+      // New content while it runs: written and redrawn (USER0).
+      arms.ops[G1Side.left]!.clear();
+      await g1.setDashboard(onHeadUp: true, text: '12:01');
+      expect(arms.ops[G1Side.left], contains(SkOp.raise));
+      expect(
+        ByteData.sublistView(
+          arms.arenas[G1Side.left]!,
+        ).getUint32(SkResident.count.address, Endian.little),
+        1,
+      );
+      // Off again: the program stops.
+      await g1.setDashboard(onHeadUp: false, text: '');
+      expect(g1.showsDashboardItself, isFalse);
+      expect(
+        arms.ctrl[G1Side.left]!.where((c) => c[0] == SkCtrl.vmStop),
+        hasLength(1),
+      );
+      await sub.cancel();
+    });
+
+    test('head gestures load the detector on the right arm only', () async {
+      g1.fakeReady(epoch: arms.epoch);
+      await g1.setHeadGestures(true);
+      final right = SkResident.build(gestures: true).code;
+      expect(
+        arms.arenas[G1Side.right]!.sublist(
+          SkResident.code,
+          SkResident.code + right.length,
+        ),
+        right,
+      );
+      expect(
+        arms.ctrl[G1Side.left]!.where((c) => c[0] == SkCtrl.vmStart),
+        isEmpty,
+      );
     });
 
     test('head up and down from the pitch', () async {

@@ -118,6 +118,10 @@
               "head_down": "Kopf gesenkt",
               "long_press": "Langes Drücken (Assistent-Start)",
               "long_press_release": "Langes Drücken beendet",
+              "long_press_right": "Rechts gedrückt halten",
+              "long_press_right_release": "Rechts losgelassen",
+              "nod": "Nicken",
+              "head_shake": "Kopfschütteln",
               "other": "Andere"
             }
           }

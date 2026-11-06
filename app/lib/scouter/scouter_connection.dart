@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -8,10 +9,12 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../g1/g1_connection.dart';
 import '../g1/protocol.dart';
+import 'sk_asm.dart';
 import 'sk_clock.dart';
 import 'sk_font.dart';
 import 'sk_icons.dart';
 import 'sk_link.dart';
+import 'sk_program.dart';
 import 'sk_protocol.dart';
 
 /// One arm running g1v0.
@@ -46,6 +49,10 @@ class _SkArm {
 
   /// Offset of the arm's clock, for drawing both eyes at once.
   final SkClock clock = SkClock();
+
+  /// The resident program runs (this session), with the gesture detector.
+  bool resident = false;
+  bool residentGestures = false;
 
   /// Icons in the arena of the current session.
   final Set<String> icons = {};
@@ -435,6 +442,7 @@ class ScouterConnection extends G1Connection {
         arm.fontLoaded = false;
         arm.icons.clear();
         arm.clock.reset();
+        arm.resident = false;
         arm.link.reset();
         arm.link.start(h.rxNext, h.execNext, h.credits, maxPacket);
         final font = _loadedFont ??= await _fontLoader();
@@ -452,6 +460,7 @@ class ScouterConnection extends G1Connection {
       await _reportEvents(arm);
       await _readState(arm);
       arm.ready = true;
+      await _updateResident(arm);
       _debug(
         '${arm.side.name} arm ready (g1v0 ${hello.version}'
         '${hello.encrypted ? ', verschlüsselt' : ''})',
@@ -505,7 +514,11 @@ class ScouterConnection extends G1Connection {
         1 << SkTrigger.wear |
         1 << SkTrigger.battery |
         1 << SkTrigger.caseState;
-    if (arm.side == G1Side.right) mask |= 1 << SkTrigger.tilt;
+    // With the resident program the right arm reports the head's moves
+    // itself (NOTIFY), and the program owns the tilt range.
+    if (arm.side == G1Side.right && !arm.resident) {
+      mask |= 1 << SkTrigger.tilt;
+    }
     return mask;
   }
 
@@ -515,9 +528,187 @@ class ScouterConnection extends G1Connection {
     if (r == null || r.status != 0) {
       _debug('${arm.side.code}: EVENTS abgelehnt');
     }
-    if (arm.side == G1Side.right) {
+    if (arm.side == G1Side.right && !arm.resident) {
       _headUp = false;
       await _setTiltRange(arm);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Resident program (SkResident): dashboard on head up, head gestures
+  // ---------------------------------------------------------------------------
+
+  bool _dashboardOnHeadUp = false;
+  String _dashboardText = '';
+  bool _headGestures = false;
+
+  @override
+  bool get showsDashboardItself =>
+      _dashboardOnHeadUp &&
+      _arms.length == 2 &&
+      _arms.values.every((a) => a.ready && a.resident);
+
+  @override
+  bool get supportsHeadGestures => true;
+
+  bool _wantsResident(_SkArm arm) =>
+      _dashboardOnHeadUp || (_headGestures && arm.side == G1Side.right);
+
+  @override
+  Future<void> setDashboard({
+    required bool onHeadUp,
+    required String text,
+  }) async {
+    final changed = onHeadUp != _dashboardOnHeadUp || text != _dashboardText;
+    _dashboardOnHeadUp = onHeadUp;
+    _dashboardText = text;
+    if (!changed) return;
+    for (final arm in _arms.values.where((a) => a.ready)) {
+      if (arm.resident == _wantsResident(arm)) {
+        if (arm.resident) await _writeDashboard(arm, redraw: true);
+      } else {
+        await _updateResident(arm);
+      }
+    }
+    notifyListeners();
+  }
+
+  @override
+  Future<void> setHeadGestures(bool enabled) async {
+    if (enabled == _headGestures) return;
+    _headGestures = enabled;
+    final arm = _arms[G1Side.right];
+    if (arm != null && arm.ready) await _updateResident(arm);
+  }
+
+  /// Starts, restarts (other variant) or stops the resident program.
+  Future<void> _updateResident(_SkArm arm) async {
+    final want = _wantsResident(arm);
+    final gestures = _headGestures && arm.side == G1Side.right;
+    if (!want) {
+      if (arm.resident) {
+        await _ctrl(arm, SkCtrl.vmStop, const []);
+        arm.resident = false;
+        _debug('${arm.side.code}: Programm beendet');
+        await _reportEvents(arm);
+      }
+      return;
+    }
+    if (arm.resident && arm.residentGestures == gestures) {
+      await _writeDashboard(arm, redraw: true);
+      return;
+    }
+    final font = _loadedFont ??= await _fontLoader();
+    final p = SkResident.build(gestures: gestures);
+    final maxCode = arm.link.maxPacket - 2;
+    final ok = await arm.link.run([
+      ...skUpload(SkResident.pool, p.pool, maxCode),
+      ...skUpload(SkResident.code, p.code, maxCode),
+      ...skUpload(SkResident.table, p.table, maxCode),
+      _residentState(font),
+    ]);
+    if (!ok || !await _writeDashboard(arm)) {
+      _debug('${arm.side.code}: Programm nicht geladen');
+      return;
+    }
+    final t = SkResident.table;
+    final r = await _ctrl(arm, SkCtrl.vmStart, [
+      t & 0xff,
+      t >> 8 & 0xff,
+      t >> 16 & 0xff,
+      t >> 24 & 0xff,
+    ]);
+    if (r == null || r.status != 0) {
+      _debug('${arm.side.code}: VM_START abgelehnt');
+      return;
+    }
+    arm.resident = true;
+    arm.residentGestures = gestures;
+    _debug(
+      '${arm.side.code}: Programm läuft (${p.code.length} B'
+      '${gestures ? ', Kopfgesten' : ''})',
+    );
+    await _reportEvents(arm);
+    notifyListeners();
+  }
+
+  /// Host code for the program's settings words.
+  Uint8List _residentState(SkFont font) {
+    final d = ByteData(40);
+    void w(SkW word, int v) =>
+        d.setUint32(word.address - SkResident.state, v, Endian.little);
+    w(SkResident.angle, _headUpAngle);
+    w(
+      SkResident.flags,
+      (_dashboardOnHeadUp ? SkResident.flagDashboard : 0) |
+          (_headGestures ? SkResident.flagGestures : 0),
+    );
+    w(SkResident.left, textLeft);
+    w(SkResident.ascent, font.ascent);
+    w(SkResident.rows, min(displayLines, SkResident.maxLines));
+    w(SkResident.lineHeight, font.lineSpacing);
+    // busy, shown, count, up stay as they are (bytes 0–15 not written).
+    final code = SkCode()
+      ..write(SkResident.angle.address, d.buffer.asUint8List(16, 24));
+    return code.take();
+  }
+
+  /// Writes the dashboard's lines into the program's area; with [redraw]
+  /// the program draws them again if they are shown (USER0).
+  Future<bool> _writeDashboard(_SkArm arm, {bool redraw = false}) async {
+    final font = _loadedFont ??= await _fontLoader();
+    final maxCode = arm.link.maxPacket - 2;
+    final rows = min(displayLines, SkResident.maxLines);
+    final lines = wrap(
+      font,
+      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+      SkPanel.width - 2 * textLeft,
+    ).take(rows).toList();
+    final text = BytesBuilder();
+    final table = ByteData(12 * lines.length);
+    var count = 0;
+    for (final line in lines) {
+      final glyphs = font.encode(line);
+      final at = SkResident.text + text.length;
+      if (at + glyphs.length > SkResident.textEnd) break;
+      text.add(glyphs);
+      table
+        ..setUint32(
+          12 * count,
+          textTop + count * font.lineSpacing,
+          Endian.little,
+        )
+        ..setUint32(12 * count + 4, at, Endian.little)
+        ..setUint32(12 * count + 8, glyphs.length, Endian.little);
+      count++;
+    }
+    List<int> u32(int v) => [v & 0xff, v >> 8 & 0xff, v >> 16 & 0xff, v >> 24];
+    final codes = <Uint8List>[
+      // No lines while they change, so the program never draws half of them.
+      (SkCode()..write(SkResident.count.address, u32(0))).take(),
+      ...skUpload(SkResident.text, text.toBytes(), maxCode),
+      ...skUpload(
+        SkResident.lines,
+        table.buffer.asUint8List(0, 12 * count),
+        maxCode,
+      ),
+      _residentState(font),
+    ];
+    final last = SkCode()..write(SkResident.count.address, u32(count));
+    if (redraw) last.raise(SkTrigger.user0);
+    codes.add(last.take());
+    return arm.link.run(codes);
+  }
+
+  void _onNotify(_SkArm arm, int a, int b) {
+    if (a == SkResident.notifyHead) {
+      // Both arms see the head move; the right one reports it.
+      if (arm.side != G1Side.right) return;
+      _headUp = b == 1;
+      _emit(arm.side, _headUp ? G1Event.headUp : G1Event.headDown);
+    } else if (a == SkResident.notifyGesture) {
+      if (b == SkResident.nod) _emit(arm.side, G1Event.nod);
+      if (b == SkResident.shake) _emit(arm.side, G1Event.headShake);
     }
   }
 
@@ -773,6 +964,16 @@ class ScouterConnection extends G1Connection {
         if (arm.side == G1Side.right && data.length > 12) {
           emitAudio(Uint8List.sublistView(data, 12));
         }
+      case SkEvt.notify when data.length >= 20:
+        _onNotify(arm, e.u32(12), e.u32(16));
+      case SkEvt.halt when data.length >= 20:
+        _debug(
+          '${arm.side.code}: Programm angehalten: ${skErrorName(e.u8(15))} '
+          '(0x${e.u32(10).toRadixString(16)}, op 0x${e.u8(14).toRadixString(16)})',
+        );
+        arm.resident = false;
+        unawaited(_reportEvents(arm));
+        notifyListeners();
       case SkEvt.input when data.length >= 16:
         _onInput(arm, e.u8(11), e.u32(12));
     }
@@ -809,10 +1010,22 @@ class ScouterConnection extends G1Connection {
               arm.side,
               _silent ? G1Event.silentModeOn : G1Event.silentModeOff,
             );
+          // Left long press: Assist, as with Even's firmware; the right one
+          // is a gesture of its own (Even's firmware keeps it for QuickNote).
           case SkGesture.longStart:
-            _emit(arm.side, G1Event.evenAiStart);
+            _emit(
+              arm.side,
+              arm.side == G1Side.left
+                  ? G1Event.evenAiStart
+                  : G1Event.rightHoldStart,
+            );
           case SkGesture.longEnd:
-            _emit(arm.side, G1Event.evenAiStop);
+            _emit(
+              arm.side,
+              arm.side == G1Side.left
+                  ? G1Event.evenAiStop
+                  : G1Event.rightHoldStop,
+            );
         }
       case SkTrigger.wear:
         arm.worn = value > 1 ? null : value;
@@ -998,6 +1211,9 @@ class ScouterConnection extends G1Connection {
       }
     }
 
+    // The app shows something: the resident program draws nothing now
+    // (busy = 1, shown = 0).
+    code.write(SkResident.busy.address, const [1, 0, 0, 0, 0, 0, 0, 0]);
     room(skOpSize(7));
     code.fill(
       SkArena.frame,
@@ -1107,7 +1323,9 @@ class ScouterConnection extends G1Connection {
   /// (VM.md §6.6). The next text powers them on again (≈ 71 ms).
   @override
   Future<bool> blankScreen() {
-    final code = SkCode()..sysWrite(SkProp.panel, 0);
+    final code = SkCode()
+      ..write(SkResident.busy.address, const [0, 0, 0, 0])
+      ..sysWrite(SkProp.panel, 0);
     return _runOn([code.take()]);
   }
 
@@ -1199,8 +1417,12 @@ class ScouterConnection extends G1Connection {
   @override
   Future<bool> setHeadUpAngle(int angle) async {
     _headUpAngle = angle.clamp(0, 60);
+    final font = _loadedFont ??= await _fontLoader();
+    for (final arm in _arms.values.where((a) => a.ready && a.resident)) {
+      await arm.link.run([_residentState(font)]);
+    }
     final arm = _arms[G1Side.right];
-    if (arm == null || !arm.ready) return true;
+    if (arm == null || !arm.ready || arm.resident) return true;
     return _setTiltRange(arm);
   }
 
@@ -1220,6 +1442,9 @@ class ScouterConnection extends G1Connection {
     textTop = 60 + height.clamp(0, 8) * 20;
     // Fewer or more lines fit now (Home Assistant's dashboard follows).
     notifyListeners();
+    for (final arm in _arms.values.where((a) => a.ready && a.resident)) {
+      await _writeDashboard(arm);
+    }
     return true;
   }
 
