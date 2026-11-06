@@ -60,8 +60,11 @@ bestätigen, (3) dasselbe auf dem rechten.
 1. **Firmware-Stand notieren.** In der Even-App unter Einstellungen → Über die
    Brille. Ist sie neuer als 1.6.6, ist sie nach dem Wechsel endgültig weg.
 2. Beide Bügel und das Etui **voll laden**.
-3. Die App auf diesem Branch bauen und installieren. Mit Even-Firmware
-   verhält sie sich wie bisher.
+3. Die ScouterKit-Version der App installieren: In der App (ab 0.16.4) unter
+   *Einstellungen → Updates* den Kanal **ScouterKit** wählen. Die
+   Vorabversionen `sk-v…` baut der Workflow `scouterkit.yml` bei jedem Push
+   auf diesen Branch. Mit Even-Firmware und der Einstellung „Even“ verhält
+   sich diese Version wie bisher.
 
 ## Was du brauchst
 
