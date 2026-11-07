@@ -98,8 +98,15 @@ class G1Display {
   Future<bool> showAiStatus(String text) => showText(
     text,
     evenAi: evenAiAnswers,
-    style: g1.supportsDesigns ? G1TextStyle.badge : G1TextStyle.plain,
+    style: !g1.supportsDesigns
+        ? G1TextStyle.plain
+        : labDesign
+        ? G1TextStyle.labBadge
+        : G1TextStyle.badge,
   );
+
+  /// The lab design set for the Assist status (set by Home Assistant).
+  bool labDesign = false;
 
   /// Assist answer with automatic paging.
   Future<bool> showAiAnswer(String text, {Duration? closeAfter}) =>

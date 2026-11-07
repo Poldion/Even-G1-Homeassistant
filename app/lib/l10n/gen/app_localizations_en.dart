@@ -615,6 +615,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skAnimWakeTitle => 'I\'m back';
 
   @override
+  String get skLabSleepSubtitle => 'silent mode on';
+
+  @override
+  String get skLabSleepTitle => 'ENTERING STANDBY';
+
+  @override
+  String get skLabWakeSubtitle => 'silent mode off';
+
+  @override
+  String get skLabWakeTitle => 'SYSTEM ONLINE';
+
+  @override
   String get skLogAnimationOff => 'Animation: silent mode off';
 
   @override

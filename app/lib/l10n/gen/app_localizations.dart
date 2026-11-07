@@ -1112,6 +1112,30 @@ abstract class AppLocalizations {
   /// **'I\'m back'**
   String get skAnimWakeTitle;
 
+  /// No description provided for @skLabSleepSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'silent mode on'**
+  String get skLabSleepSubtitle;
+
+  /// No description provided for @skLabSleepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'ENTERING STANDBY'**
+  String get skLabSleepTitle;
+
+  /// No description provided for @skLabWakeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'silent mode off'**
+  String get skLabWakeSubtitle;
+
+  /// No description provided for @skLabWakeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'SYSTEM ONLINE'**
+  String get skLabWakeTitle;
+
   /// No description provided for @skLogAnimationOff.
   ///
   /// In en, this message translates to:

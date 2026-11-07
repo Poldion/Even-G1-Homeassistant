@@ -13,7 +13,8 @@ die App bei jeder Änderung auf die Brille legt. Du stellst es unter
 | Option | Wirkung |
 | --- | --- |
 | Dashboard-Geste | Wann es erscheint: beim Hochschauen, beim Tippen links oder rechts, oder nie (dann nur per Aktion `even_g1.show_dashboard`) |
-| Design des Dashboards | Nur ScouterKit: schlicht, Rahmen, Karte oder Titelzeile (Bilder im [README](../README.de.md#so-sieht-es-aus)) |
+| Design des Dashboards | Nur ScouterKit: schlicht, Rahmen, Karte, Titelzeile oder Labor (Bilder im [README](../README.de.md#so-sieht-es-aus)) |
+| Design-Set | Nur ScouterKit: klassisches oder Labor-Aussehen für Assist-Status und Ruhemodus-Animation |
 | Dashboard-Entitäten | Je Entität eine Zeile „Name: Zustand Einheit“, ganz oben |
 | Kalender / To-do-Listen | Termine von heute und morgen, fällige To-dos |
 | Eigenes Dashboard-Template | Ersetzt das Standard-Layout unter den Entitäten-Zeilen |
@@ -44,7 +45,9 @@ Tippen auf mehreren Seiten; das Dashboard beim Hochschauen zeigt nur die erste.
 Leerzeilen bleiben erhalten und eignen sich als Abstand.
 
 Mit den Designs *Karte* und *Titelzeile* wird die **erste Zeile** zentriert als
-Titel gesetzt, mit einer Linie darunter. Die Kopfzeile passt dafür gut.
+Titel gesetzt, mit einer Linie darunter. Die Kopfzeile passt dafür gut. Bei
+*Labor* steht die erste Zeile dunkel auf einer hellen Leiste mit Warnstreifen,
+eingefasst von Eckklammern.
 
 ### Tipps zum Schreiben
 

@@ -99,14 +99,56 @@ class SkTextLine {
 
 /// Where the lines, the frame and the rule of a styled text go.
 class SkLayout {
-  SkLayout(this.lines, {this.box, this.rule});
+  SkLayout(this.lines, {this.box, this.rule, this.fills = const []});
 
   final List<SkTextLine> lines;
   final SkBox? box;
   final SkRect? rule;
 
-  /// Frame and rule as rectangles.
-  List<SkRect> get decor => [...?box?.rects(), ?rule];
+  /// Further shapes, drawn in order after the box (lab design).
+  final List<SkRect> fills;
+
+  /// Frame, rule and shapes as rectangles.
+  List<SkRect> get decor => [...?box?.rects(), ?rule, ...fills];
+
+  /// Rule and shapes: what [SkLib.rects] draws after [SkLib.box].
+  List<SkRect> get extra => [?rule, ...fills];
+
+  // Lab design set.
+  static const barLevel = 12;
+  static const bracketLevel = 13;
+  static const bracketArm = 28;
+  static const bracketThickness = 3;
+
+  /// Corner brackets (L shapes) of the rectangle x, y, w, h.
+  static List<SkRect> brackets(
+    int x,
+    int y,
+    int w,
+    int h, {
+    int arm = bracketArm,
+    int t = bracketThickness,
+    int level = bracketLevel,
+  }) => [
+    SkRect(x, y, arm, t, level),
+    SkRect(x, y, t, arm, level),
+    SkRect(x + w - arm, y, arm, t, level),
+    SkRect(x + w - t, y, t, arm, level),
+    SkRect(x, y + h - t, arm, t, level),
+    SkRect(x, y + h - arm, t, arm, level),
+    SkRect(x + w - arm, y + h - t, arm, t, level),
+    SkRect(x + w - t, y + h - arm, t, arm, level),
+  ];
+
+  /// A bar of level [barLevel] with a dark square at its left and, if
+  /// [stripes], five dark slots at its right (hazard stripes).
+  static List<SkRect> bar(int x, int y, int w, int h, {bool stripes = true}) =>
+      [
+        SkRect(x, y, w, h, barLevel),
+        SkRect(x + 6, y + (h - 8) ~/ 2, 8, 8, 0),
+        if (stripes)
+          for (var i = 0; i < 5; i++) SkRect(x + w - 10 - 9 * i, y, 4, h, 0),
+      ];
 
   // Frame and rule around the text column (textLeft 24 … 616).
   static const frameX = 8;
@@ -128,6 +170,16 @@ class SkLayout {
     final lh = font.lineSpacing;
     final centre = SkPanel.width ~/ 2;
     int centred(String s) => max(0, centre - font.width(s) ~/ 2);
+    if (style == G1TextStyle.lab || style == G1TextStyle.labBadge) {
+      return _lab(
+        font,
+        lines,
+        style,
+        top: top,
+        left: left,
+        bottomLimit: bottomLimit,
+      );
+    }
     final titled = style == G1TextStyle.card || style == G1TextStyle.title;
     final out = <SkTextLine>[];
     var y = top;
@@ -170,5 +222,48 @@ class SkLayout {
           : SkRect(left, ry, SkPanel.width - 2 * left, 2, ruleLevel);
     }
     return SkLayout(out, box: box, rule: rule);
+  }
+
+  /// Lab design set: the first line dark on a bar, the rest below it,
+  /// corner brackets around all (badge: centred and fitted to the text).
+  static SkLayout _lab(
+    SkFont font,
+    List<String> lines,
+    G1TextStyle style, {
+    required int top,
+    required int left,
+    required int bottomLimit,
+  }) {
+    final lh = font.lineSpacing;
+    final badge = style == G1TextStyle.labBadge;
+    final centre = SkPanel.width ~/ 2;
+    final widest = lines.isEmpty ? 0 : lines.map(font.width).reduce(max);
+    final w = badge
+        ? min(SkPanel.width - 2 * frameX, widest + 4 * pad + 24)
+        : SkPanel.width - 2 * frameX;
+    final x0 = badge ? centre - w ~/ 2 : frameX;
+    final out = <SkTextLine>[];
+    var y = top;
+    for (var i = 0; i < lines.length; i++) {
+      if (y + lh > bottomLimit + 1) break;
+      final line = lines[i];
+      final x = badge
+          ? centre - font.width(line) ~/ 2 + (i == 0 ? 8 : 0)
+          : (i == 0 ? left + 16 : left);
+      out.add(SkTextLine(x, y, line, level: i == 0 ? 0 : 15));
+      y += lh;
+      if (i == 0) y += ruleGap;
+    }
+    if (out.isEmpty) return SkLayout(out);
+    final end = min(y + 8, bottomLimit + 1);
+    final boxTop = max(0, top - pad);
+    final inset = badge ? 8 : 10;
+    return SkLayout(
+      out,
+      fills: [
+        ...bar(x0 + inset, top - 1, w - 2 * inset, lh + 2, stripes: !badge),
+        ...brackets(x0, boxTop, w, end - boxTop),
+      ],
+    );
   }
 }

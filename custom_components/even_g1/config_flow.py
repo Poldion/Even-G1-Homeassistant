@@ -35,6 +35,7 @@ from .const import (
     CONF_DASHBOARD_STYLE,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DASHBOARD_TODOS,
+    CONF_DESIGN_SET,
     CONF_DISPLAY_DURATION,
     CONF_LISTENING_TEMPLATE,
     CONF_NOISE_SUPPRESSION,
@@ -46,6 +47,8 @@ from .const import (
     DEFAULT_AUTO_GAIN,
     DEFAULT_DISPLAY_DURATION,
     DEFAULT_NOISE_SUPPRESSION,
+    DESIGN_SET_CLASSIC,
+    DESIGN_SETS,
     DOMAIN,
     LEGACY_DASHBOARD_TEMPLATE,
     PIPELINE_PREFERRED,
@@ -56,6 +59,7 @@ DEFAULT_OPTIONS: dict[str, Any] = {
     CONF_DISPLAY_DURATION: DEFAULT_DISPLAY_DURATION,
     CONF_DASHBOARD_GESTURE: DASHBOARD_GESTURE_NONE,
     CONF_DASHBOARD_STYLE: DASHBOARD_STYLE_PLAIN,
+    CONF_DESIGN_SET: DESIGN_SET_CLASSIC,
     CONF_SHOW_TRANSCRIPT: True,
     CONF_AUTO_GAIN: DEFAULT_AUTO_GAIN,
     CONF_NOISE_SUPPRESSION: DEFAULT_NOISE_SUPPRESSION,
@@ -183,6 +187,15 @@ class EvenG1OptionsFlow(OptionsFlow):
                         options=DASHBOARD_STYLES,
                         mode=SelectSelectorMode.DROPDOWN,
                         translation_key=CONF_DASHBOARD_STYLE,
+                    )
+                ),
+                vol.Required(
+                    CONF_DESIGN_SET, default=options[CONF_DESIGN_SET]
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=DESIGN_SETS,
+                        mode=SelectSelectorMode.DROPDOWN,
+                        translation_key=CONF_DESIGN_SET,
                     )
                 ),
                 vol.Required(

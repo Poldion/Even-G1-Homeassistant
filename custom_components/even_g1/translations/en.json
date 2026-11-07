@@ -29,7 +29,8 @@
           "dashboard_todos": "To-do lists",
           "dashboard_template": "Own dashboard template (optional)",
           "listening_template": "Text while listening (template, optional)",
-          "dashboard_style": "Dashboard design"
+          "dashboard_style": "Dashboard design",
+          "design_set": "Design set"
         },
         "data_description": {
           "assist_pipeline": "Answers when you hold the left touch bar. Also selectable with the \"Assistant\" entity of the device.",
@@ -41,7 +42,8 @@
           "dashboard_todos": "Open to-dos with a due date appear on the dashboard, the most urgent first.",
           "dashboard_template": "Empty = default layout: time and date, entities, appointments and to-dos on one page. A template replaces the layout below the entities and can use the variables header, agenda and agenda_more (German names kopfzeile, agenda_mehr also work).",
           "listening_template": "Shown in a frame while you hold the left touch bar (ScouterKit only). Empty = \"{{ assistant }} is listening …\"; the variable assistant (or assistent) is the assistant's name.",
-          "dashboard_style": "Only the ScouterKit firmware draws the frame and title; with Even's firmware the dashboard stays plain."
+          "dashboard_style": "Only the ScouterKit firmware draws the frame and title; with Even's firmware the dashboard stays plain.",
+          "design_set": "ScouterKit only: look of the Assist status and the silent mode animation. Classic: bevelled frames. Lab: corner brackets, a striped bar, typed text and a scan line, inspired by retro lab terminals."
         }
       }
     }
@@ -71,7 +73,14 @@
         "plain": "Plain",
         "frame": "Frame",
         "card": "Card (frame with title)",
-        "title": "Title"
+        "title": "Title",
+        "lab": "Lab (brackets, inverted title bar)"
+      }
+    },
+    "design_set": {
+      "options": {
+        "classic": "Classic",
+        "lab": "Lab"
       }
     }
   },

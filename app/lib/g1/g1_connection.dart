@@ -24,7 +24,15 @@ enum G1TextStyle {
   title('title'),
 
   /// Centred lines in a frame that fits them (Assist status).
-  badge('badge');
+  badge('badge'),
+
+  /// Lab design set: corner brackets, the first line inverted on a bar
+  /// with hazard stripes.
+  lab('lab'),
+
+  /// Lab design set for the Assist status: centred, the first line on a
+  /// bar, corner brackets.
+  labBadge('lab_badge');
 
   const G1TextStyle(this.id);
   final String id;
@@ -236,8 +244,9 @@ class G1Connection extends ChangeNotifier {
   /// (ScouterKit).
   bool get supportsDesigns => false;
 
-  /// Plays the animation of silent mode switching [on] or off.
-  Future<void> playSilentModeAnimation(bool on) async {}
+  /// Plays the animation of silent mode switching [on] or off, with [lab]
+  /// in the lab design set.
+  Future<void> playSilentModeAnimation(bool on, {bool lab = false}) async {}
 
   /// The glasses apply an offset to their automatic brightness themselves
   /// (ScouterKit: from the light sensor while the panel is on).

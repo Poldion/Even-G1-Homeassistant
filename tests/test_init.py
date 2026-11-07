@@ -645,6 +645,7 @@ async def test_listening_text_and_style(
     config = (await client.receive_json())["event"]
     assert config["listening_text"] == "Home Assistant\nis listening …"
     assert config["dashboard_style"] == "plain"
+    assert config["design_set"] == "classic"
 
     hass.config_entries.async_update_entry(
         entry,
@@ -652,10 +653,12 @@ async def test_listening_text_and_style(
             **entry.options,
             "listening_template": "{{ 'Ich höre' }}",
             "dashboard_style": "card",
+            "design_set": "lab",
         },
     )
     await hass.async_block_till_done()
     config = (await client.receive_json())["event"]
     assert config["dashboard_style"] == "card"
+    assert config["design_set"] == "lab"
     listening = (await client.receive_json())["event"]
     assert listening == {"type": "listening", "text": "Ich höre"}

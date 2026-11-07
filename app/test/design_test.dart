@@ -68,7 +68,11 @@ void main() {
   });
 
   test('the bands of the arm program draw exactly the whole design', () {
-    for (final style in [G1TextStyle.card, G1TextStyle.frame]) {
+    for (final style in [
+      G1TextStyle.card,
+      G1TextStyle.frame,
+      G1TextStyle.lab,
+    ]) {
       final bands = ScouterConnection.dashboardBands(
         font,
         text,
@@ -92,7 +96,11 @@ void main() {
         drawn.addAll(_paint(b.rects, dy: b.y));
       }
       drawn.removeWhere((_, level) => level == 0);
-      expect(drawn, _paint(layout.decor), reason: style.id);
+      expect(
+        drawn,
+        _paint(layout.decor)..removeWhere((_, level) => level == 0),
+        reason: style.id,
+      );
       // Texts come last, in reading order.
       expect(
         bands.where((b) => b.text != null).map((b) => b.text),
@@ -122,7 +130,8 @@ void main() {
       expect(code.length, lessThanOrEqualTo(242));
       execute(code, arena, ops);
     }
-    expect(ops.where((o) => o == SkOp.call), hasLength(1));
+    // The frame (box) and the rule (rects).
+    expect(ops.where((o) => o == SkOp.call), hasLength(2));
     final box = ByteData.sublistView(
       arena,
       SkLib.boxWords,
@@ -137,6 +146,37 @@ void main() {
     expect(ops, isNot(contains(SkOp.call)));
   });
 
+  test('lab: title dark on a bar, brackets, the same in the arm program', () {
+    final layout = SkLayout.of(
+      font,
+      text.split('\n'),
+      G1TextStyle.lab,
+      top: 140,
+      left: 24,
+    );
+    expect(layout.box, isNull);
+    expect(layout.lines.first.level, 0);
+    expect(layout.lines[1].level, 15);
+    // The bar holds the title: level 12 under its line.
+    final bar = layout.fills.first;
+    expect(bar.level, SkLayout.barLevel);
+    expect(bar.y, lessThanOrEqualTo(140));
+    expect(bar.bottom, greaterThanOrEqualTo(140 + font.lineSpacing));
+    // Eight bracket arms at the corners.
+    expect(
+      layout.fills.where((r) => r.level == SkLayout.bracketLevel),
+      hasLength(8),
+    );
+    final bands = ScouterConnection.dashboardBands(
+      font,
+      text,
+      G1TextStyle.lab,
+      top: 140,
+      rows: 11,
+    );
+    expect(bands.firstWhere((b) => b.text == text.split('\n').first).level, 0);
+  });
+
   test('the library fits its area', () {
     final lib = SkLib.build();
     expect(SkLib.code + lib.code.length, lessThanOrEqualTo(SkLib.codeEnd));
@@ -149,6 +189,8 @@ void main() {
     for (final anim in [
       SkAnimation.sleep(font, cx: 320, cy: 196),
       SkAnimation.wake(font, cx: 320, cy: 196),
+      SkAnimation.labSleep(font, cx: 320, cy: 196),
+      SkAnimation.labWake(font, cx: 320, cy: 196),
     ]) {
       final ops = <int>[], sleeps = <int>[];
       final arena = Uint8List(SkArena.size);
@@ -164,10 +206,11 @@ void main() {
       );
       // Wait words hold the frame offsets (start + offset by ADD).
       expect(ops.last, SkOp.sysWrite);
-      expect(anim.durationUs, lessThan(3000000));
+      expect(anim.durationUs, lessThan(4000000));
       // The region holds every box.
       for (final f in anim.frames) {
         final b = f.box;
+        if (b.w == 0) continue; // lab frames draw no box
         expect(b.x >= anim.region.x && b.bottom <= anim.region.bottom, isTrue);
         expect(b.c * 2, lessThanOrEqualTo(b.w));
         expect(b.c * 2, lessThanOrEqualTo(b.h));

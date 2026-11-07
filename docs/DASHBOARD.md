@@ -13,7 +13,8 @@ app puts on the glasses whenever it changes. You set it up under
 | Option | Effect |
 | --- | --- |
 | Dashboard gesture | When it appears: when you look up, on a tap left or right, or never (then only via the action `even_g1.show_dashboard`) |
-| Dashboard design | ScouterKit only: plain, frame, card or title (images in the [README](../README.md#what-it-looks-like)) |
+| Dashboard design | ScouterKit only: plain, frame, card, title or lab (images in the [README](../README.md#what-it-looks-like)) |
+| Design set | ScouterKit only: classic or lab look for the Assist status and the silent mode animation |
 | Dashboard entities | One line "Name: state unit" per entity, at the top |
 | Calendars / to-do lists | Appointments of today and tomorrow, to-dos that are due |
 | Own dashboard template | Replaces the built-in layout below the entity lines |
@@ -45,7 +46,8 @@ when you tap; the dashboard on head up shows only the first one. Empty lines
 are kept and work well as spacing.
 
 With the designs *Card* and *Title* the **first line** is centred as a title,
-with a rule below it. The header fits that well.
+with a rule below it. The header fits that well. With *Lab* the first line
+stands dark on a light bar with hazard stripes, framed by corner brackets.
 
 ### Tips for writing
 

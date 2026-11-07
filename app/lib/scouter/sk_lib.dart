@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'sk_asm.dart';
@@ -5,8 +6,8 @@ import 'sk_protocol.dart';
 import 'sk_style.dart';
 
 /// Stored code that host packets `CALL` (VM.md §6.2), uploaded with the
-/// font: [box] draws an [SkBox] into the frame, [scene] one frame of an
-/// animation.
+/// font: [boxAt] draws an [SkBox] into the frame, [rectsAt] a list of
+/// rectangles, [sceneAt] one frame of an animation.
 ///
 /// It keeps its values in words of its own, not in the registers, which
 /// the resident program uses (a packet may run while one of its tasks
@@ -31,10 +32,23 @@ class SkLib {
   static const start = 0x3F180;
   static const at = 0x3F184;
 
+  /// Rectangle lists (5 words each: x, y, w, h, level). [rects] draws
+  /// [listCount] rectangles from the address in [listAt]; the scene draws
+  /// [staticCount] of [staticList] before its box and [dynamicCount] of
+  /// [dynamicList] after its texts.
+  static const listAt = 0x3F188;
+  static const listCount = 0x3F18C;
+  static const staticCount = 0x3F190;
+  static const dynamicCount = 0x3F194;
+  static const staticList = 0x3F400;
+  static const staticMax = 51;
+  static const dynamicList = 0x3F800;
+  static const dynamicMax = 12;
+
   static const _temps = 0x3F1C0;
 
   /// Glyph indices of the scene's texts.
-  static const text = 0x3F200;
+  static const text = 0x3F280;
   static const textEnd = 0x3F400;
 
   static ({Uint8List code, Uint8List pool})? _built;
@@ -102,11 +116,34 @@ class SkLib {
     a.label('ret');
     a.ret();
 
-    // scene: clear the region, the box, up to two texts, show the region.
+    // rects: the listCount rectangles at listAt.
+    final i = temp(), k = temp(), rx0 = temp(), ry0 = temp(), rw0 = temp();
+    final rh0 = temp(), rl0 = temp();
+    final lw = word(listAt), n = word(listCount);
+    a.label('rects');
+    a.mov(i, c0);
+    a.label('rect');
+    a.bgeu(i, n, 'rectsDone');
+    a.mul(k, i, a.c(5));
+    for (final d in [rx0, ry0, rw0, rh0, rl0]) {
+      a.ld32(d, lw, k);
+      a.add(k, k, one);
+    }
+    a.fill(frame, stride, rx0, ry0, rw0, rh0, rl0);
+    a.add(i, i, one);
+    a.jmp('rect');
+    a.label('rectsDone');
+    a.ret();
+
+    // scene: clear the region, static rectangles, the box, up to two
+    // texts, dynamic rectangles, show the region.
     final rx = word(region), ry = word(region + 4);
     final rw = word(region + 8), rh = word(region + 12);
     a.label('scene');
     a.fill(frame, stride, rx, ry, rw, rh, c0);
+    a.mov(lw, a.c(staticList));
+    a.mov(n, word(staticCount));
+    a.call('rects');
     a.call('box');
     for (var i = 0; i < 2; i++) {
       final level = word(levels + 4 * i);
@@ -125,17 +162,23 @@ class SkLib {
       );
       a.label('text$i');
     }
+    a.mov(lw, a.c(dynamicList));
+    a.mov(n, word(dynamicCount));
+    a.call('rects');
     a.draw(frame, stride, rx, ry, rx, ry, rw, rh);
     a.ret();
 
+    if (next > text) throw StateError('library temps overlap its text');
     final bytes = a.build();
     if (code + bytes.length > codeEnd) throw StateError('library too long');
     boxAt = a.addressOf('box');
+    rectsAt = a.addressOf('rects');
     sceneAt = a.addressOf('scene');
     return (code: bytes, pool: a.pool());
   }
 
   static int boxAt = code;
+  static int rectsAt = code;
   static int sceneAt = code;
 
   /// Host code that draws [box] into the frame (needs the library).
@@ -145,6 +188,30 @@ class SkLib {
       ..write(boxWords, _u32s(box.words))
       ..call(boxAt);
   }
+
+  /// Host code that draws [rects] into the frame (needs the library), in
+  /// writes of at most 10 rectangles, each followed by its `CALL`.
+  /// [code] returns the packet being built, which [room] may start anew.
+  static void drawRects(
+    SkCode Function() code,
+    List<SkRect> rects,
+    void Function(int) room,
+  ) {
+    build();
+    for (var o = 0; o < rects.length; o += 10) {
+      final part = rects.sublist(o, min(rects.length, o + 10));
+      room(5 + 20 * part.length + 5 + 8 + 4);
+      code()
+        ..write(staticList, rectWords(part))
+        ..write(listAt, _u32s([staticList, part.length]))
+        ..call(rectsAt);
+    }
+  }
+
+  /// The words of a rectangle list.
+  static List<int> rectWords(List<SkRect> rects) => _u32s([
+    for (final r in rects) ...[r.x, r.y, r.w, r.h, r.level],
+  ]);
 
   static List<int> _u32s(List<int> values) {
     final d = ByteData(values.length * 4);

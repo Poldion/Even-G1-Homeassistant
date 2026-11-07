@@ -29,7 +29,8 @@
           "dashboard_todos": "To-do-Listen",
           "dashboard_template": "Eigenes Dashboard-Template (optional)",
           "listening_template": "Text beim Zuhören (Template, optional)",
-          "dashboard_style": "Design des Dashboards"
+          "dashboard_style": "Design des Dashboards",
+          "design_set": "Design-Set"
         },
         "data_description": {
           "assist_pipeline": "Antwortet, wenn du die linke Touchbar gedrückt hältst. Auch über die Entität „Assistent“ des Geräts umschaltbar.",
@@ -41,7 +42,8 @@
           "dashboard_todos": "Offene To-dos mit Fälligkeitsdatum erscheinen auf dem Dashboard, die dringendsten zuerst.",
           "dashboard_template": "Leer = Standard-Layout: Uhrzeit und Datum, Entitäten, Termine und To-dos auf einer Seite. Ein Template ersetzt das Layout unter den Entitäten und kann die Variablen kopfzeile, agenda und agenda_mehr nutzen (auch englisch: header, agenda_more).",
           "listening_template": "Erscheint im Rahmen, solange du die linke Touchbar gedrückt hältst (nur ScouterKit). Leer = „{{ assistant }} hört zu …“; die Variable assistent (oder assistant) ist der Name des Assistenten.",
-          "dashboard_style": "Rahmen und Titelzeile zeichnet nur die ScouterKit-Firmware; mit Evens Firmware bleibt das Dashboard schlicht."
+          "dashboard_style": "Rahmen und Titelzeile zeichnet nur die ScouterKit-Firmware; mit Evens Firmware bleibt das Dashboard schlicht.",
+          "design_set": "Nur ScouterKit: Aussehen des Assist-Status und der Ruhemodus-Animation. Klassisch: Rahmen mit abgeschrägten Ecken. Labor: Eckklammern, gestreifte Leiste, getippter Text und eine Scanline, angelehnt an Retro-Labor-Terminals."
         }
       }
     }
@@ -71,7 +73,14 @@
         "plain": "Schlicht",
         "frame": "Rahmen",
         "card": "Karte (Rahmen mit Titelzeile)",
-        "title": "Titelzeile"
+        "title": "Titelzeile",
+        "lab": "Labor (Eckklammern, invertierte Titelleiste)"
+      }
+    },
+    "design_set": {
+      "options": {
+        "classic": "Klassisch",
+        "lab": "Labor"
       }
     }
   },

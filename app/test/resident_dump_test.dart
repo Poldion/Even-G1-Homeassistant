@@ -40,11 +40,12 @@ void main() {
       for (var i = 0; i < words.length; i++) {
         final g = font.encode(words[i]);
         arena.setRange(at, at + g.length, g);
-        final e = SkResident.lines + 24 * i;
+        final e = SkResident.lines + 4 * SkResident.entryWords * i;
         w(e, 24);
         w(e + 4, 140 + i * font.lineSpacing);
         w(e + 8, at);
         w(e + 12, g.length);
+        w(e + 24, 15);
         at += g.length;
       }
       w(SkResident.count.address, words.length);
@@ -123,18 +124,23 @@ void dumpDesigns() {
           'readme_${lang}_${style.id}',
           ScouterConnection.textCode(
             font,
-            style == G1TextStyle.badge ? tr.coreListening('Jarvis') : example,
+            style == G1TextStyle.badge || style == G1TextStyle.labBadge
+                ? tr.coreListening('Jarvis')
+                : example,
             maxCode: 242,
             style: style,
           ),
         );
       }
-      for (final on in [true, false]) {
-        final anim = on
-            ? SkAnimation.sleep(font, cx: 320, cy: 196)
-            : SkAnimation.wake(font, cx: 320, cy: 196);
+      final anims = {
+        'sleep': SkAnimation.sleep(font, cx: 320, cy: 196),
+        'wake': SkAnimation.wake(font, cx: 320, cy: 196),
+        'lab_sleep': SkAnimation.labSleep(font, cx: 320, cy: 196),
+        'lab_wake': SkAnimation.labWake(font, cx: 320, cy: 196),
+      };
+      for (final MapEntry(key: name, value: anim) in anims.entries) {
         save(
-          'readme_${lang}_${on ? 'sleep' : 'wake'}',
+          'readme_${lang}_$name',
           anim.code(font, maxCode: 242, start: 1200000),
         );
       }
@@ -148,7 +154,11 @@ void dumpDesigns() {
     image.setRange(SkResident.code, SkResident.code + p.code.length, p.code);
     image.setRange(SkResident.pool, SkResident.pool + p.pool.length, p.pool);
     image.setRange(SkResident.table, SkResident.table + 64, p.table);
-    for (final style in [G1TextStyle.card, G1TextStyle.frame]) {
+    for (final style in [
+      G1TextStyle.card,
+      G1TextStyle.frame,
+      G1TextStyle.lab,
+    ]) {
       final bands = ScouterConnection.dashboardBands(
         font,
         dashboard,
@@ -161,13 +171,14 @@ void dumpDesigns() {
         final band = bands[i];
         final g = band.text == null ? <int>[] : font.encode(band.text!);
         image.setRange(at, at + g.length, g);
-        final e = SkResident.lines + 24 * i;
+        final e = SkResident.lines + 4 * SkResident.entryWords * i;
         w(e, band.x);
         w(e + 4, band.y);
         w(e + 8, g.isEmpty ? 0 : at);
         w(e + 12, g.length);
         w(e + 16, ri);
         w(e + 20, band.rects.length);
+        w(e + 24, band.level);
         for (final r in band.rects) {
           final ra = SkResident.rects + 20 * ri++;
           w(ra, r.x);

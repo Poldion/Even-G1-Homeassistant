@@ -43,6 +43,7 @@ from .const import (
     CONF_DASHBOARD_STYLE,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DASHBOARD_TODOS,
+    CONF_DESIGN_SET,
     CONF_DISPLAY_DURATION,
     CONF_LISTENING_TEMPLATE,
     CONF_NOISE_SUPPRESSION,
@@ -52,6 +53,7 @@ from .const import (
     DEFAULT_AUTO_GAIN,
     DEFAULT_DISPLAY_DURATION,
     DEFAULT_NOISE_SUPPRESSION,
+    DESIGN_SET_CLASSIC,
     EVENT_ASSIST,
     EVENT_GESTURE,
     GESTURE_HEAD_UP,
@@ -198,6 +200,7 @@ class EvenG1Device:
             "dashboard_style": self.options.get(
                 CONF_DASHBOARD_STYLE, DASHBOARD_STYLE_PLAIN
             ),
+            "design_set": self.options.get(CONF_DESIGN_SET, DESIGN_SET_CLASSIC),
             # Later changes come as CMD_LISTENING.
             "listening_text": self.listening_text,
         }

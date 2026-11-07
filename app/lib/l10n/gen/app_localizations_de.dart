@@ -619,6 +619,18 @@ class AppLocalizationsDe extends AppLocalizations {
   String get skAnimWakeTitle => 'Bin wieder da';
 
   @override
+  String get skLabSleepSubtitle => 'Ruhemodus an';
+
+  @override
+  String get skLabSleepTitle => 'STANDBY-MODUS';
+
+  @override
+  String get skLabWakeSubtitle => 'Ruhemodus aus';
+
+  @override
+  String get skLabWakeTitle => 'SYSTEM BEREIT';
+
+  @override
   String get skLogAnimationOff => 'Animation: Ruhemodus aus';
 
   @override

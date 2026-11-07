@@ -34,7 +34,13 @@ DASHBOARD_GESTURE_NONE: Final = "none"
 
 # Designs of the dashboard (drawn by ScouterKit; Even's firmware shows text).
 DASHBOARD_STYLE_PLAIN: Final = "plain"
-DASHBOARD_STYLES: Final = [DASHBOARD_STYLE_PLAIN, "frame", "card", "title"]
+DASHBOARD_STYLES: Final = [DASHBOARD_STYLE_PLAIN, "frame", "card", "title", "lab"]
+
+# Design set of the Assist status and the silent mode animation (ScouterKit):
+# classic frames, or the lab set (brackets, typed text, scan line).
+CONF_DESIGN_SET: Final = "design_set"
+DESIGN_SET_CLASSIC: Final = "classic"
+DESIGN_SETS: Final = [DESIGN_SET_CLASSIC, "lab"]
 
 # The default text while the touch bar is held (ScouterKit) is in lang.py.
 

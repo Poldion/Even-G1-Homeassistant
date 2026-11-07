@@ -199,6 +199,13 @@ Mit der Schrift lädt die App eine kleine Bibliothek in jeden Bügel
   `SLEEP_UNTIL` auf ihre Zeit in der Uhr des jeweiligen Bügels warten. So
   laufen beide Augen mit 30 Bildern pro Sekunde gleichzeitig, unabhängig von
   der Funkverbindung (VM.md §7). Ein Bild kostet rund 70 Byte.
+- `rects` zeichnet eine Liste von Rechtecken. Die Szene zeichnet eine feste
+  Liste (Klammern und Leiste des Labor-Sets) vor ihrem Rahmen und eine
+  wechselnde (Cursor, Scanline, eine dunkle Maske) nach ihren Texten; ein
+  Bild kann auch nur die ersten Bytes eines Textes zeigen (Tippen). Der
+  dunkle Titel des Labor-Dashboards ist Text der Stufe 0 auf einer hellen
+  Leiste (`GLYPHS` im Modus `MASK`), in der App wie im Programm auf den
+  Bügeln.
 
 ## Technik
 

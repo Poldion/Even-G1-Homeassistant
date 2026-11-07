@@ -9,20 +9,48 @@ import 'sk_protocol.dart';
 import 'sk_style.dart';
 
 /// One frame: the box and the levels of the two texts, [atUs] after the
-/// start.
+/// start; optionally how many glyph bytes of each text show ([n1], [n2],
+/// typing), how many static rectangles ([statics]) and rectangles drawn
+/// over everything ([rects]).
 class SkAnimFrame {
-  const SkAnimFrame(this.atUs, this.box, [this.level1 = 0, this.level2 = 0]);
+  const SkAnimFrame(this.atUs, this.box, [this.level1 = 0, this.level2 = 0])
+    : n1 = null,
+      n2 = null,
+      statics = null,
+      rects = const [];
+
+  const SkAnimFrame.lab(
+    this.atUs, {
+    this.level1 = 15,
+    this.level2 = 8,
+    this.n1,
+    this.n2,
+    this.statics,
+    this.rects = const [],
+  }) : box = const SkBox(0, 0, 0, 0, border: 0);
 
   final int atUs;
   final SkBox box;
   final int level1, level2;
+  final int? n1, n2, statics;
+  final List<SkRect> rects;
 }
 
 /// A short animation that the arms play by themselves: the app sends all
 /// frames ahead as packets that wait for their time (`SLEEP_UNTIL`) and
 /// draw a region with [SkLib.scene], so both eyes play it at exact times.
 class SkAnimation {
-  SkAnimation(this.region, this.texts, this.frames, {this.endUs});
+  SkAnimation(
+    this.region,
+    this.texts,
+    this.frames, {
+    this.endUs,
+    this.staticRects = const [],
+  });
+
+  /// Rectangles drawn under the texts in every frame (frames choose how
+  /// many with [SkAnimFrame.statics]).
+  final List<SkRect> staticRects;
 
   /// Panel region redrawn each frame.
   final SkRect region;
@@ -238,6 +266,14 @@ class SkAnimation {
     }
     room(5 + 4 * words.length);
     code.write(SkLib.region, SkLib.u32s(words));
+    if (staticRects.length > SkLib.staticMax) throw StateError('rects');
+    for (var o = 0; o < staticRects.length; o += 10) {
+      final part = staticRects.sublist(o, min(staticRects.length, o + 10));
+      room(5 + 20 * part.length);
+      code.write(SkLib.staticList + 20 * o, SkLib.rectWords(part));
+    }
+    room(5 + 8);
+    code.write(SkLib.staticCount, SkLib.u32s([staticRects.length, 0]));
     room(2 * skOpSize(2));
     code.sysWrite(SkProp.panel, 1);
     final startWord = SkLib.start ~/ 4, atWord = SkLib.at ~/ 4;
@@ -259,12 +295,34 @@ class SkAnimation {
     }
 
     const waitSize = 9 + 9 + 4;
+    var dynamicCount = 0;
     for (final frame in frames) {
-      room(5 + 36 + waitSize + 4);
+      // A frame's writes may go into earlier packets: packets run in order.
+      room(5 + 36);
       code.write(
         SkLib.boxWords,
         SkLib.u32s([...frame.box.words, frame.level1, frame.level2]),
       );
+      for (final (i, n) in [(0, frame.n1), (1, frame.n2)]) {
+        if (n == null) continue;
+        room(9);
+        code.write(SkLib.texts + 16 * i + 12, SkLib.u32s([n]));
+      }
+      if (frame.statics != null) {
+        room(9);
+        code.write(SkLib.staticCount, SkLib.u32s([frame.statics!]));
+      }
+      if (frame.rects.length > SkLib.dynamicMax) throw StateError('rects');
+      if (frame.rects.isNotEmpty) {
+        room(5 + 20 * frame.rects.length);
+        code.write(SkLib.dynamicList, SkLib.rectWords(frame.rects));
+      }
+      if (frame.rects.length != dynamicCount) {
+        dynamicCount = frame.rects.length;
+        room(9);
+        code.write(SkLib.dynamicCount, SkLib.u32s([dynamicCount]));
+      }
+      room(waitSize + 4);
       waitFor(frame.atUs);
       code.call(SkLib.sceneAt);
     }
@@ -275,5 +333,224 @@ class SkAnimation {
       ..sysWrite(SkProp.panel, 0);
     packets.add(code.take());
     return packets;
+  }
+
+  // Lab design set: corner brackets and a striped bar, typed texts with a
+  // block cursor, a scan line that wipes the card away or reveals it.
+  static const labW = 300, labH = 96;
+
+  static ({SkRect region, List<SkRect> statics, int left, int top1, int top2})
+  _labCard(SkFont font, int cx, int cy) {
+    final x0 = cx - labW ~/ 2, y0 = cy - labH ~/ 2;
+    return (
+      region: _region(cx, cy),
+      statics: [
+        ...SkLayout.brackets(x0, y0, labW, labH),
+        ...SkLayout.bar(x0 + 12, y0 + 9, labW - 24, 8),
+      ],
+      left: x0 + 22,
+      top1: y0 + 26,
+      top2: y0 + 26 + font.lineSpacing,
+    );
+  }
+
+  /// Frames that type [text] (line [line], 1 or 2) one character per frame
+  /// from [t], with the cursor after it; returns the time after.
+  static int _type(
+    List<SkAnimFrame> f,
+    SkFont font,
+    String text,
+    int line,
+    int t, {
+    required int left,
+    required int top,
+    required String title,
+  }) {
+    final cursorH = font.ascent - 2;
+    for (var k = 1; k <= text.length; k++) {
+      final prefix = text.substring(0, k);
+      final n = font.encode(prefix).length;
+      final cursor = SkRect(
+        left + font.width(prefix) + 2,
+        top + 3,
+        11,
+        cursorH,
+        15,
+      );
+      f.add(
+        SkAnimFrame.lab(
+          t,
+          n1: line == 1 ? n : font.encode(title).length,
+          n2: line == 1 ? 0 : n,
+          rects: [cursor],
+        ),
+      );
+      t += frameUs;
+    }
+    return t;
+  }
+
+  /// Blinks the cursor after [text] (line 2) [times] times from [t].
+  static int _blink(
+    List<SkAnimFrame> f,
+    SkFont font,
+    String text,
+    int t,
+    int times, {
+    required int left,
+    required int top,
+  }) {
+    final cursor = SkRect(
+      left + font.width(text) + 2,
+      top + 3,
+      11,
+      font.ascent - 2,
+      15,
+    );
+    for (var i = 0; i < times; i++) {
+      f.add(SkAnimFrame.lab(t, rects: const []));
+      t += 8 * frameUs;
+      f.add(SkAnimFrame.lab(t, rects: [cursor]));
+      t += 8 * frameUs;
+    }
+    return t;
+  }
+
+  /// A scan line from the region's top to its bottom over [frames] frames;
+  /// [wipe]: everything above it dark, else everything below it.
+  static int _scan(
+    List<SkAnimFrame> f,
+    SkRect r,
+    int t,
+    int frames, {
+    required bool wipe,
+    int? statics,
+    int level1 = 15,
+    int level2 = 8,
+  }) {
+    for (var i = 1; i <= frames; i++) {
+      final y = r.y + ((r.h - 2) * _easeIn(i / frames)).round();
+      f.add(
+        SkAnimFrame.lab(
+          t,
+          statics: statics,
+          level1: level1,
+          level2: level2,
+          rects: [
+            if (wipe)
+              SkRect(r.x, r.y, r.w, y - r.y, 0)
+            else
+              SkRect(r.x, y + 2, r.w, r.bottom - y - 2, 0),
+            SkRect(r.x, y, r.w, 2, 15),
+          ],
+        ),
+      );
+      t += frameUs;
+    }
+    return t;
+  }
+
+  static SkAnimation labSleep(SkFont font, {required int cx, required int cy}) {
+    final card = _labCard(font, cx, cy);
+    final title = tr.skLabSleepTitle, subtitle = tr.skLabSleepSubtitle;
+    final f = <SkAnimFrame>[];
+    var t = 0;
+    // Brackets slide in from outside.
+    final x0 = cx - labW ~/ 2, y0 = cy - labH ~/ 2;
+    for (var i = 1; i <= 6; i++) {
+      final d = (14 * (1 - _easeOut(i / 6))).round();
+      f.add(
+        SkAnimFrame.lab(
+          t,
+          statics: 0,
+          n1: 0,
+          n2: 0,
+          rects: SkLayout.brackets(
+            x0 - d,
+            y0 - d,
+            labW + 2 * d,
+            labH + 2 * d,
+            level: _lerp(4, SkLayout.bracketLevel, i / 6),
+          ),
+        ),
+      );
+      t += frameUs;
+    }
+    f.add(SkAnimFrame.lab(t, statics: card.statics.length, n1: 0, n2: 0));
+    t += 4 * frameUs;
+    t = _type(
+      f,
+      font,
+      title,
+      1,
+      t,
+      left: card.left,
+      top: card.top1,
+      title: title,
+    );
+    t = _type(
+      f,
+      font,
+      subtitle,
+      2,
+      t,
+      left: card.left,
+      top: card.top2,
+      title: title,
+    );
+    t = _blink(f, font, subtitle, t, 3, left: card.left, top: card.top2);
+    t = _scan(f, card.region, t, 12, wipe: true);
+    return SkAnimation(
+      card.region,
+      [
+        SkTextLine(card.left, card.top1 + font.ascent, title),
+        SkTextLine(card.left, card.top2 + font.ascent, subtitle),
+      ],
+      f,
+      staticRects: card.statics,
+      endUs: t,
+    );
+  }
+
+  static SkAnimation labWake(SkFont font, {required int cx, required int cy}) {
+    final card = _labCard(font, cx, cy);
+    final title = tr.skLabWakeTitle, subtitle = tr.skLabWakeSubtitle;
+    final f = <SkAnimFrame>[
+      SkAnimFrame.lab(0, statics: card.statics.length, n1: 0, n2: 0),
+    ];
+    var t = _scan(f, card.region, 0, 12, wipe: false);
+    t = _type(
+      f,
+      font,
+      title,
+      1,
+      t,
+      left: card.left,
+      top: card.top1,
+      title: title,
+    );
+    t = _type(
+      f,
+      font,
+      subtitle,
+      2,
+      t,
+      left: card.left,
+      top: card.top2,
+      title: title,
+    );
+    t = _blink(f, font, subtitle, t, 2, left: card.left, top: card.top2);
+    t += 500000;
+    t = _scan(f, card.region, t, 12, wipe: true);
+    return SkAnimation(
+      card.region,
+      [
+        SkTextLine(card.left, card.top1 + font.ascent, title),
+        SkTextLine(card.left, card.top2 + font.ascent, subtitle),
+      ],
+      f,
+      staticRects: card.statics,
+      endUs: t,
+    );
   }
 }

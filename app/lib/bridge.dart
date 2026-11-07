@@ -30,7 +30,8 @@ class HaConfig {
           ((json['dashboard_on_head_up'] as bool? ?? false)
               ? 'head_up'
               : 'none'),
-      dashboardStyle = G1TextStyle.fromId(json['dashboard_style'] as String?);
+      dashboardStyle = G1TextStyle.fromId(json['dashboard_style'] as String?),
+      labDesign = json['design_set'] == 'lab';
 
   HaConfig.defaults()
     : name = '',
@@ -40,7 +41,8 @@ class HaConfig {
       assistName = null,
       showTranscript = true,
       dashboardGesture = 'none',
-      dashboardStyle = G1TextStyle.plain;
+      dashboardStyle = G1TextStyle.plain,
+      labDesign = false;
 
   final String name;
   final String? deviceId;
@@ -57,6 +59,9 @@ class HaConfig {
 
   /// Design of the dashboard (ScouterKit draws it; Even shows it plain).
   final G1TextStyle dashboardStyle;
+
+  /// Design set "lab" for the Assist status and the animations.
+  final bool labDesign;
 
   /// Show the Home Assistant dashboard when the head is raised.
   bool get dashboardOnHeadUp => dashboardGesture == 'head_up';
@@ -253,6 +258,7 @@ class Bridge extends ChangeNotifier {
     switch (event['type']) {
       case 'config':
         haConfig = HaConfig.fromJson(event);
+        display.labDesign = haConfig.labDesign;
         final listening = (event['listening_text'] as String? ?? '').trim();
         if (event.containsKey('listening_text')) {
           _listeningText = listening.isEmpty ? null : listening;
@@ -959,7 +965,7 @@ class Bridge extends ChangeNotifier {
     // The animation draws only its region: the rest of the panel dark.
     _dashboardShown = false;
     await display.clear();
-    await g1.playSilentModeAnimation(on);
+    await g1.playSilentModeAnimation(on, lab: haConfig.labDesign);
   }
 
   /// Asks both arms which screen they show and writes it to the log.

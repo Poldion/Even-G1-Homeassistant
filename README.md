@@ -51,6 +51,19 @@ animation:
 | --- | --- | --- |
 | ![Assist is listening](docs/images/en/assist-listening.png) | ![Silent mode on animation](docs/images/en/silent-sleep.gif) | ![Silent mode off animation](docs/images/en/silent-wake.gif) |
 
+### Lab design set
+
+Option *Design set → Lab* plus *Dashboard design → Lab*: corner brackets
+instead of frames, the title inverted on a bar with hazard stripes, typed text
+with a block cursor and a scan line that wipes the card away. Inspired by retro
+lab terminals; no names or logos of existing games are used.
+
+| Dashboard | Assist is listening |
+| --- | --- |
+| ![Lab dashboard](docs/images/en/dashboard-lab.png) | ![Assist is listening, lab](docs/images/en/assist-listening-lab.png) |
+| **Silent mode on** | **Silent mode off** |
+| ![Lab silent mode on](docs/images/en/silent-sleep-lab.gif) | ![Lab silent mode off](docs/images/en/silent-wake-lab.gif) |
+
 The images were rendered by ScouterKit's own interpreter (`src/vm`) from
 exactly the commands the app sends to the glasses. With Even's firmware all
 texts appear plain.
@@ -159,7 +172,8 @@ Options under *Integration → Configure*:
 | Automatic gain / noise suppression | Helps with quiet speech or noisy surroundings |
 | Default display duration | Seconds until hidden (0 = until double tap) |
 | Dashboard gesture | Head up, tap left or right |
-| Dashboard design | ScouterKit only: plain, frame, card (frame with title) or title |
+| Dashboard design | ScouterKit only: plain, frame, card (frame with title), title or lab |
+| Design set | ScouterKit only: look of the Assist status and the silent mode animation, classic or lab |
 | Dashboard entities | Lines "Name: state unit" on the glasses dashboard |
 | Calendars | Appointments of today (not yet over) and tomorrow |
 | To-do lists | Open to-dos with a due date, the most urgent first |

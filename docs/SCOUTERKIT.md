@@ -195,6 +195,12 @@ Together with the font the app loads a small library into each arm
   the respective arm with `SLEEP_UNTIL`. That way both eyes run at 30 frames
   per second at the same time, independent of the radio link (VM.md §7). One
   frame costs about 70 bytes.
+- `rects` draws a list of rectangles. The scene draws a static list (the
+  lab set's brackets and bar) before its box and a dynamic one (cursor, scan
+  line, a dark mask) after its texts; a frame can also show only the first
+  bytes of a text (typing). The lab dashboard's dark title is text of level
+  0 on a light bar (`GLYPHS` in `MASK` mode), in the app and in the program on
+  the arms alike.
 
 ## Technical details
 

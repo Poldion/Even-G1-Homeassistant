@@ -9,6 +9,24 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-11-07
+
+### Added
+- ScouterKit: a **lab design set**, inspired by retro lab terminals (no names
+  or logos of existing games):
+  - Dashboard design *Lab*: corner brackets, the first line dark on a light
+    bar with hazard stripes.
+  - Option *Design set → Lab* for the Assist status (brackets, the first line
+    on a bar) and the silent mode animation: brackets slide in, the text is
+    typed with a block cursor, a scan line wipes the card away; waking up, the
+    scan line reveals it again.
+  - The program on the arms draws the lab dashboard on head up, pixel for
+    pixel like the app.
+
+### Fixed
+- ScouterKit: the library's working words overlapped the texts of the
+  silent mode animation (found with the renderer before any release).
+
 ## [0.19.0] - 2026-11-07
 
 ### Added
@@ -304,7 +322,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.5...v0.17.0

@@ -9,6 +9,24 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-11-07
+
+### Added
+- ScouterKit: ein **Design-Set „Labor“**, angelehnt an Retro-Labor-Terminals
+  (ohne Namen oder Logos bestehender Spiele):
+  - Dashboard-Design *Labor*: Eckklammern, die erste Zeile dunkel auf einer
+    hellen Leiste mit Warnstreifen.
+  - Option *Design-Set → Labor* für den Assist-Status (Klammern, erste Zeile
+    auf einer Leiste) und die Ruhemodus-Animation: Klammern fahren ein, der
+    Text wird mit Block-Cursor getippt, eine Scanline wischt die Karte weg;
+    beim Aufwachen deckt sie sie wieder auf.
+  - Das Programm auf den Bügeln zeichnet das Labor-Dashboard beim
+    Hochschauen, pixelgleich zur App.
+
+### Fixed
+- ScouterKit: Die Arbeitswörter der Bibliothek überlappten die Texte der
+  Ruhemodus-Animation (mit dem Renderer vor dem Release gefunden).
+
 ## [0.19.0] - 2026-11-07
 
 ### Added
@@ -313,7 +331,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...HEAD
+[0.20.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.5...v0.17.0

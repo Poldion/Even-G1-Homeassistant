@@ -16,9 +16,10 @@ import 'sk_protocol.dart';
 /// app shows a text the program draws nothing. The dashboard is drawn band
 /// by band through a buffer of its own, so the app's frame stays untouched.
 /// Each band ([entryWords] words at [lines]): x and y, the glyphs of its
-/// text (address, count; 0 for none) and its rectangles (first index and
+/// text (address, count; 0 for none), its rectangles (first index and
 /// count in [rects], 5 words each: x, y within the band, w, h, level), the
-/// frame and rule of a styled dashboard cut to the band.
+/// frame and rule of a styled dashboard cut to the band, and the text's
+/// level.
 class SkResident {
   // Arena layout, behind the app's frame (0x10000–0x35800).
   static const table = 0x35800;
@@ -26,8 +27,8 @@ class SkResident {
   static const poolWords = 112;
   static const state = 0x35A00;
   static const lines = 0x35B00;
-  static const entryWords = 6;
-  static const maxEntries = 21;
+  static const entryWords = 7;
+  static const maxEntries = 18;
   static const maxLines = 16;
   static const rects = 0x35D00;
   static const maxRects = 89;
@@ -85,7 +86,7 @@ class SkResident {
     const r0 = SkW.r(0), r1 = SkW.r(1), r2 = SkW.r(2), r3 = SkW.r(3);
     const r4 = SkW.r(4), r5 = SkW.r(5), r6 = SkW.r(6), r7 = SkW.r(7);
     const r8 = SkW.r(8), r9 = SkW.r(9), r10 = SkW.r(10), r11 = SkW.r(11);
-    const r12 = SkW.r(12), r13 = SkW.r(13);
+    const r12 = SkW.r(12), r13 = SkW.r(13), r14 = SkW.r(14);
     final c0 = a.c(0), c1 = a.c(1);
 
     // START: sensors, then the head's state as at a tilt.
@@ -161,6 +162,7 @@ class SkResident {
     next(r8); // glyphs
     next(r10); // first rectangle
     next(r11); // rectangles
+    next(r14); // text level
     final bandW = a.c(SkPanel.width), stride = a.c(SkPanel.stride);
     final bandAt = a.c(band);
     a.fill(bandAt, stride, c0, c0, bandW, lineHeight, c0);
@@ -185,7 +187,7 @@ class SkResident {
       r9,
       ascent,
       a.c(2), // MASK
-      a.c(15),
+      r14,
       r7,
       r8,
     );

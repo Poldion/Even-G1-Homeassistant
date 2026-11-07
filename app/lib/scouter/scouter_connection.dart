@@ -562,14 +562,17 @@ class ScouterConnection extends G1Connection {
   /// Plays the silent mode animation on both eyes at the same moment
   /// (SkAnimation); the panels are off again at its end.
   @override
-  Future<void> playSilentModeAnimation(bool on) async {
+  Future<void> playSilentModeAnimation(bool on, {bool lab = false}) async {
     final font = _loadedFont ??= await _fontLoader();
     final arms = _targets().where((a) => a.inCase != 1).toList();
     if (arms.isEmpty) return;
     final cx = SkPanel.width ~/ 2, cy = textTop + 2 * _lineHeight;
-    final anim = on
-        ? SkAnimation.sleep(font, cx: cx, cy: cy)
-        : SkAnimation.wake(font, cx: cx, cy: cy);
+    final anim = switch ((on, lab)) {
+      (true, false) => SkAnimation.sleep(font, cx: cx, cy: cy),
+      (false, false) => SkAnimation.wake(font, cx: cx, cy: cy),
+      (true, true) => SkAnimation.labSleep(font, cx: cx, cy: cy),
+      (false, true) => SkAnimation.labWake(font, cx: cx, cy: cy),
+    };
     final synced = arms.length == 2 && arms.every((a) => a.clock.known);
     // Time for the first packets to arrive before the first frame.
     final at = SkClock.hostNow() + _drawLeadUs(arms) + 150000;
@@ -717,7 +720,10 @@ class ScouterConnection extends G1Connection {
       final at = SkResident.text + text.length;
       if (at + glyphs.length > SkResident.textEnd) break;
       if (rects.length + band.rects.length > SkResident.maxRects) break;
-      if (table.length ~/ 24 >= SkResident.maxEntries) break;
+      if (table.length ~/ (4 * SkResident.entryWords) >=
+          SkResident.maxEntries) {
+        break;
+      }
       text.add(glyphs);
       table.add(
         SkLib.u32s([
@@ -727,11 +733,12 @@ class ScouterConnection extends G1Connection {
           glyphs.length,
           rects.length,
           band.rects.length,
+          band.level,
         ]),
       );
       rects.addAll(band.rects);
     }
-    _residentRows = table.length ~/ 24;
+    _residentRows = table.length ~/ (4 * SkResident.entryWords);
     List<int> u32(int v) => [v & 0xff, v >> 8 & 0xff, v >> 16 & 0xff, v >> 24];
     final codes = <Uint8List>[
       // No lines while they change, so the program never draws half of them.
@@ -759,7 +766,7 @@ class ScouterConnection extends G1Connection {
   /// height, each with its text and the frame cut to it. Bands without
   /// text come first, so the text bands drawn after them are not covered.
   @visibleForTesting
-  static List<({int x, int y, String? text, List<SkRect> rects})>
+  static List<({int x, int y, String? text, List<SkRect> rects, int level})>
   dashboardBands(
     SkFont font,
     String text,
@@ -777,27 +784,34 @@ class ScouterConnection extends G1Connection {
     );
     final decor = layout.decor;
     List<SkRect> cut(int y) => [for (final r in decor) ?r.clip(y, lh)];
-    final bands = <({int x, int y, String? text, List<SkRect> rects})>[];
+    final bands =
+        <({int x, int y, String? text, List<SkRect> rects, int level})>[];
     // Rows below the text that held lines before (cleared).
     final lines = layout.lines;
     var y = lines.isEmpty ? top : lines.last.y + lh;
     for (var i = lines.length; i < rows; i++, y += lh) {
       if (y + lh > SkPanel.height) break;
-      bands.add((x: 0, y: y, text: null, rects: cut(y)));
+      bands.add((x: 0, y: y, text: null, rects: cut(y), level: 0));
     }
-    // Frame and rule outside the text bands.
-    final box = layout.box;
+    // Frame, rule and brackets outside the text bands.
     final extra = <int>{
-      if (box != null) box.y,
-      if (box != null) box.bottom - lh,
-      if (layout.rule != null) lines.first.y + lh,
+      if (decor.isNotEmpty) decor.map((r) => r.y).reduce(min),
+      if (decor.isNotEmpty) decor.map((r) => r.bottom).reduce(max) - lh,
+      // The gap below a title (card, title, lab).
+      if (lines.length > 1 && lines[1].y > lines[0].y + lh) lines.first.y + lh,
     };
     for (final e in extra) {
       if (e < 0 || lines.any((l) => l.y == e)) continue;
-      bands.add((x: 0, y: e, text: null, rects: cut(e)));
+      bands.add((x: 0, y: e, text: null, rects: cut(e), level: 0));
     }
     for (final line in lines) {
-      bands.add((x: line.x, y: line.y, text: line.text, rects: cut(line.y)));
+      bands.add((
+        x: line.x,
+        y: line.y,
+        text: line.text,
+        rects: cut(line.y),
+        level: line.level,
+      ));
     }
     return bands;
   }
@@ -1361,22 +1375,14 @@ class ScouterConnection extends G1Connection {
         SkIcons.size,
       );
     }
-    final box = layout.box, rule = layout.rule;
+    final box = layout.box;
     if (box != null) {
       room(5 + 28 + 4);
       SkLib.drawBox(code, box);
     }
-    if (rule != null) {
-      room(skOpSize(7));
-      code.fill(
-        SkArena.frame,
-        SkPanel.stride,
-        rule.x,
-        rule.y,
-        rule.w,
-        rule.h,
-        rule.level,
-      );
+    if (layout.extra.isNotEmpty) {
+      // Rule, bars and brackets (lab design) with the library.
+      SkLib.drawRects(() => code, layout.extra, room);
     }
     var textAt = SkArena.text;
     for (final line in layout.lines) {
