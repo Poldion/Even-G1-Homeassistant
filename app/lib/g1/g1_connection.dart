@@ -8,6 +8,19 @@ import '../l10n/l10n.dart';
 import 'protocol.dart';
 import 'text_layout.dart';
 
+/// Placeholder for the time in the dashboard (Home Assistant sends it when
+/// the app keeps the clock itself): the glasses' program or the app fill in
+/// "HH:MM".
+const clockToken = '\ue000';
+
+/// [text] with the time [now] (default: the current one) for [clockToken].
+String withClock(String text, [DateTime? now]) {
+  if (!text.contains(clockToken)) return text;
+  final t = now ?? DateTime.now();
+  String two(int v) => v.toString().padLeft(2, '0');
+  return text.replaceAll(clockToken, '${two(t.hour)}:${two(t.minute)}');
+}
+
 /// How a text is set on the display. Only ScouterKit draws the designs;
 /// Even's firmware shows every text plain.
 enum G1TextStyle {

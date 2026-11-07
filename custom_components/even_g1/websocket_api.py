@@ -105,6 +105,10 @@ def ws_subscribe(
         vol.Optional("wear_state"): vol.Any(None, vol.In(WEAR_STATES)),
         vol.Optional("battery_left"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
         vol.Optional("battery_right"): vol.Any(None, vol.All(int, vol.Range(0, 100))),
+        # The app fills in the dashboard's clock itself.
+        vol.Optional("local_clock"): bool,
+        # Fields of newer apps are kept, not refused.
+        vol.Extra: object,
     }
 )
 @callback

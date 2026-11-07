@@ -29,9 +29,21 @@ und kann zusätzlich diese Variablen nutzen:
 | `kopfzeile` | `09:41  ·  Sa, 7. Nov`, mit `  ·  +N`, wenn Termine nicht mehr passen |
 | `agenda` | Termine und To-dos, eine Zeile pro Eintrag, schon auf die Seite gekürzt |
 | `agenda_mehr` | Anzahl der Einträge, die nicht mehr auf die Seite passten |
+| `uhr` | Die Uhrzeit `HH:MM`, von der Brille selbst geführt (siehe unten) |
 
 Jede Variable gibt es auch mit englischem Namen: `header` statt `kopfzeile`,
-`agenda_more` statt `agenda_mehr` (`agenda` heißt in beiden Sprachen so).
+`agenda_more` statt `agenda_mehr`, `clock` statt `uhr` (`agenda` heißt in
+beiden Sprachen so).
+
+**Die Uhr läuft auf der Brille.** `uhr` (und die Uhrzeit in `kopfzeile`)
+ist ein Platzhalter, den die App füllt. Mit ScouterKit zählt das Programm
+auf den Bügeln die Minuten selbst und zeichnet genau zur vollen Minute neu,
+auf beiden Augen und auch ohne Verbindung zum Handy; die App stellt die Zeit
+nur alle paar Minuten nach. Home Assistant schickt das Dashboard deshalb
+nicht mehr jede Minute, sondern nur, wenn sich der Inhalt ändert. Mit Evens
+Firmware setzt die App die Uhrzeit ein. Schreib `{{ uhr }}` statt
+`{{ now().strftime('%H:%M') }}`; die Brille führt eine Uhr pro Dashboard (die
+erste).
 
 ### Platz auf dem Display
 
@@ -55,8 +67,9 @@ eingefasst von Eckklammern.
   `{%-` und `-%}` entfernst du die Umbrüche um Steuerbefehle herum, sodass
   ausgeblendete Zeilen keine Leerzeilen hinterlassen.
 - Das Dashboard rendert neu, sobald sich eine verwendete Entität ändert, und
-  jede volle Minute. Die Uhrzeit bleibt so aktuell, ohne dass die Brille
-  dauernd neu zeichnet: Die App schickt nur, was sich geändert hat.
+  jede volle Minute; die App schickt nur, was sich geändert hat. Mit `uhr`
+  statt `now()` ändert sich zur neuen Minute nichts, also wird nichts
+  geschickt.
 - Templates testest du unter *Entwicklerwerkzeuge → Template*. Die Variablen
   `kopfzeile` und `agenda` gibt es dort nicht; ersetze sie zum Testen durch
   einen festen Text.

@@ -205,7 +205,9 @@ Erste Zeile Uhrzeit und Datum, `+2` heißt: zwei weitere Einträge passen
 nicht mehr drauf. Termine (`»`) kommen zuerst, mindestens eine Zeile bleibt
 für To-dos (`[ ]`, überfällig `[!]`). Ohne Einträge steht dort nur Uhrzeit und
 Datum. In eigenen Templates stehen die Variablen `kopfzeile`, `agenda` und
-`agenda_mehr` zur Verfügung (englisch: `header`, `agenda`, `agenda_more`).
+`agenda_mehr` und `uhr` zur Verfügung (englisch: `header`, `agenda`,
+`agenda_more`, `clock`). Die Uhrzeit läuft auf der Brille selbst
+([Details](docs/DASHBOARD.de.md#die-bausteine)).
 
 Die Assist-Pipeline braucht eine Spracherkennung (z. B. *Home Assistant
 Cloud* oder *Whisper*); *Speech-to-Phrase* versteht nur feste Befehle.

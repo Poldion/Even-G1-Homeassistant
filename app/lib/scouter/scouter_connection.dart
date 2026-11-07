@@ -60,6 +60,10 @@ class _SkArm {
   bool residentGestures = false;
   int residentPeer = 0;
 
+  /// Address of the dashboard clock's digits in the program's text (0: the
+  /// app filled in the time).
+  int clockAt = 0;
+
   /// Icons in the arena of the current session.
   final Set<String> icons = {};
 
@@ -727,9 +731,15 @@ class ScouterConnection extends G1Connection {
   Future<bool> _writeDashboard(_SkArm arm, {bool redraw = false}) async {
     final font = _loadedFont ??= await _fontLoader();
     final maxCode = arm.link.maxPacket - 2;
+    // The program keeps the clock if this arm's time is known; "00:00"
+    // holds the place of its digits.
+    final raw = _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText;
+    final ownClock = raw.contains(clockToken) && arm.clock.known;
     final bands = dashboardBands(
       font,
-      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+      ownClock
+          ? withClock(raw.replaceFirst(clockToken, '00:00'))
+          : withClock(raw),
       _dashboardStyle,
       top: textTop,
       rows: min(displayLines, SkResident.maxLines),
@@ -763,6 +773,22 @@ class ScouterConnection extends G1Connection {
       rects.addAll(band.rects);
     }
     _residentRows = table.length ~/ (4 * SkResident.entryWords);
+    // The clock's digits: the first "00:00" in the bands' texts.
+    var clockAt = 0;
+    if (ownClock) {
+      var at = SkResident.text;
+      for (final band in bands) {
+        final t = band.text;
+        if (t == null) continue;
+        final i = t.indexOf('00:00');
+        if (i >= 0) {
+          clockAt = at + font.encode(t.substring(0, i)).length;
+          break;
+        }
+        at += font.encode(t).length;
+      }
+    }
+    arm.clockAt = clockAt;
     List<int> u32(int v) => [v & 0xff, v >> 8 & 0xff, v >> 16 & 0xff, v >> 24];
     final codes = <Uint8List>[
       // No lines while they change, so the program never draws half of them.
@@ -779,11 +805,47 @@ class ScouterConnection extends G1Connection {
         maxCode,
       ),
       _residentState(font),
+      _clockCode(arm),
     ];
     final last = SkCode()..write(SkResident.count.address, u32(_residentRows));
     if (redraw) last.raise(SkTrigger.user0);
     codes.add(last.take());
     return arm.link.run(codes);
+  }
+
+  /// Host code that sets the program's clock: where its digits are, when
+  /// the current minute began in [arm]'s time and which minute of the day
+  /// it is; USER1 lets the program arm its timer for the next minute.
+  Uint8List _clockCode(_SkArm arm) {
+    final code = SkCode();
+    if (arm.clockAt == 0 || !arm.clock.known) {
+      code.write(SkResident.clockAt.address, SkLib.u32s([0]));
+      return code.take();
+    }
+    final now = DateTime.now();
+    final intoMinute =
+        now.second * 1000000 + now.millisecond * 1000 + now.microsecond;
+    final minuteStart = arm.clock.toArm(SkClock.hostNow() - intoMinute);
+    code
+      ..write(
+        SkResident.clockAt.address,
+        SkLib.u32s([arm.clockAt, minuteStart, now.hour * 60 + now.minute]),
+      )
+      ..raise(SkTrigger.user1);
+    return code.take();
+  }
+
+  /// Sets the clocks again after a clock sync (drift, a new time zone), or
+  /// writes the dashboard anew once the arm's time became known.
+  Future<void> _refreshClocks() async {
+    if (!_dashboardText.contains(clockToken)) return;
+    for (final arm in _arms.values.where((a) => a.ready && a.resident)) {
+      if (arm.clockAt == 0) {
+        await _writeDashboard(arm, redraw: true);
+      } else {
+        await arm.link.run([_clockCode(arm)]);
+      }
+    }
   }
 
   /// The dashboard as the resident program draws it: bands of one line's
@@ -962,6 +1024,7 @@ class ScouterConnection extends G1Connection {
         );
       }
     }
+    await _refreshClocks();
   }
 
   /// When both arms should draw: two connection intervals, the clocks'

@@ -9,6 +9,21 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-11-07
+
+### Added
+- The dashboard's clock runs on the glasses. With ScouterKit the program on
+  the arms counts the minutes itself and redraws exactly at the full minute,
+  on both eyes and also without a connection to the phone. With Even's
+  firmware the app fills in the time. Template variable `clock` (German
+  `uhr`); the default header uses it.
+
+### Changed
+- Home Assistant no longer sends the dashboard every minute for the clock,
+  only when its content changes (less Bluetooth traffic).
+- The integration accepts state fields of newer apps instead of refusing the
+  whole update.
+
 ## [0.21.1] - 2026-11-07
 
 ### Fixed
@@ -342,7 +357,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...v0.20.0

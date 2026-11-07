@@ -9,6 +9,21 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-11-07
+
+### Added
+- Die Uhr des Dashboards läuft auf der Brille. Mit ScouterKit zählt das
+  Programm auf den Bügeln die Minuten selbst und zeichnet genau zur vollen
+  Minute neu, auf beiden Augen und auch ohne Verbindung zum Handy. Mit Evens
+  Firmware setzt die App die Uhrzeit ein. Template-Variable `uhr` (englisch
+  `clock`); die Standard-Kopfzeile nutzt sie.
+
+### Changed
+- Home Assistant schickt das Dashboard nicht mehr jede Minute wegen der Uhr,
+  sondern nur, wenn sich der Inhalt ändert (weniger Bluetooth-Verkehr).
+- Die Integration nimmt Statusfelder neuerer Apps an, statt das ganze Update
+  abzulehnen.
+
 ## [0.21.1] - 2026-11-07
 
 ### Fixed
@@ -353,7 +368,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...HEAD
+[0.22.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...v0.20.0

@@ -6,6 +6,7 @@ import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_anim.dart';
+import 'package:even_g1_ha/scouter/sk_asm.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
 import 'package:even_g1_ha/scouter/sk_lib.dart';
 import 'package:even_g1_ha/scouter/sk_program.dart';
@@ -236,6 +237,41 @@ void main() {
     final alone = SkResident.build(gestures: false);
     expect(entry(alone.table, SkTrigger.tilt), isNot(0));
     expect(entry(alone.table, SkTrigger.peer), 0);
+  });
+
+  test('the clock placeholder becomes the time', () {
+    final t = DateTime(2026, 11, 7, 9, 5);
+    expect(withClock('$clockToken  ·  Sat', t), '09:05  ·  Sat');
+    expect(withClock('no clock', t), 'no clock');
+  });
+
+  test('the arm program keeps the dashboard clock', () async {
+    final arms = FakeArms();
+    final g1 = ScouterConnection.fake(arms.write, font: loadTestFont());
+    arms.connection = g1;
+    g1.fakeReady(epoch: arms.epoch);
+    await g1.fakeSyncClocks();
+    await g1.setDashboard(
+      onHeadUp: true,
+      text: '$clockToken  ·  Sat, Nov 7\nLiving room',
+    );
+    final now = DateTime.now();
+    for (final side in G1Side.values) {
+      final arena = arms.arenas[side]!;
+      final d = ByteData.sublistView(arena);
+      int word(SkW w) => d.getUint32(w.address, Endian.little);
+      final at = word(SkResident.clockAt);
+      expect(at, SkResident.text);
+      // "00:00" in place of the digits: glyph 0, ':' and glyph 0.
+      expect(arena.sublist(at, at + 5), [0, 0, font.encode(':').first, 0, 0]);
+      final minute = word(SkResident.clockMinute);
+      expect(
+        (minute - (now.hour * 60 + now.minute)).abs(),
+        lessThanOrEqualTo(1),
+      );
+      expect(arms.ops[side], contains(SkOp.raise)); // USER1: arm the timer
+    }
+    g1.dispose();
   });
 
   test('the library fits its area', () {

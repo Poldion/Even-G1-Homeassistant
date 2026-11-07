@@ -26,6 +26,7 @@ from homeassistant.util import dt as dt_util
 
 from . import agenda
 from .const import (
+    CLOCK_TOKEN,
     CMD_CLEAR,
     CMD_CONFIG,
     CMD_DASHBOARD,
@@ -98,6 +99,7 @@ class EvenG1State:
     wear_state: str | None = None
     battery_left: int | None = None
     battery_right: int | None = None
+    local_clock: bool = False
     last_query: str | None = None
     last_response: str | None = None
     extra: dict[str, Any] = field(default_factory=dict)
@@ -201,6 +203,8 @@ class EvenG1Device:
                 CONF_DASHBOARD_STYLE, DASHBOARD_STYLE_PLAIN
             ),
             "design_set": self.options.get(CONF_DESIGN_SET, DESIGN_SET_CLASSIC),
+            # This integration can leave the clock to the app.
+            "local_clock": True,
             # Later changes come as CMD_LISTENING.
             "listening_text": self.listening_text,
         }
@@ -275,12 +279,17 @@ class EvenG1Device:
             self.line_width,
             words,
         )
-        head = agenda.header(now, more, words)
+        # The app keeps the clock: a placeholder, so the text changes only
+        # when the content does (not every minute).
+        clock = CLOCK_TOKEN if self.state.local_clock else f"{now:%H:%M}"
+        head = agenda.header(now, more, words, clock=clock)
         text = "\n".join(lines)
         # English and German names of the same values.
         return {
             "header": head,
             "kopfzeile": head,
+            "clock": clock,
+            "uhr": clock,
             "agenda": text,
             "agenda_more": more,
             "agenda_mehr": more,
@@ -608,14 +617,25 @@ class EvenG1Device:
     @callback
     def async_update_state(self, **kwargs: Any) -> None:
         """Update state reported by the app."""
-        size = (self.state.display_lines, self.state.display_columns)
+        layout = (
+            self.state.display_lines,
+            self.state.display_columns,
+            self.state.local_clock,
+        )
         for key, value in kwargs.items():
             if hasattr(self.state, key) and key != "extra":
+                if key == "local_clock":
+                    value = bool(value)
                 setattr(self.state, key, value)
             else:
                 self.state.extra[key] = value
-        if size != (self.state.display_lines, self.state.display_columns):
-            # Another display (or height): lay the dashboard out again.
+        if layout != (
+            self.state.display_lines,
+            self.state.display_columns,
+            self.state.local_clock,
+        ):
+            # Another display (or height) or clock: lay the dashboard out
+            # again.
             self._async_refresh_dashboard()
         self._notify_listeners()
 

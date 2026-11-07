@@ -173,6 +173,12 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   zeichnet nichts, solange die App selbst etwas anzeigt (`busy`). Neue Inhalte
   zeichnet es auf ein `USER0` der App neu, wenn das Dashboard gerade zu sehen
   ist. Den Kopf meldet der rechte Bügel mit `NOTIFY 1, 1/0`.
+- **Uhr** (`TIMER`, `USER1`): Die App schreibt, wo die Ziffern `HH:MM` des
+  Dashboards stehen, die Bügelzeit, zu der die aktuelle Minute begann, und
+  welche Minute des Tages es ist. Das Programm zählt zu jeder vollen Minute
+  weiter (auch ohne Handy), schreibt die Ziffern (Glyphen 0–9) und zeichnet
+  neu, wenn das Dashboard zu sehen ist. Die App stellt die Zeit nach jedem
+  Uhrenabgleich (alle 3 Minuten) neu.
 - **Beide Augen zusammen** (Funkverbindung der Bügel, VM.md §6.9): Nur der
   rechte Bügel folgt der Neigung. Bei einem Wechsel schickt er dem linken
   `PEER_SEND` 1 (hoch) oder 2 (runter) und schaltet 150 ms später; der

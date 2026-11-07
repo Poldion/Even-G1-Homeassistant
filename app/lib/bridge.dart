@@ -31,7 +31,8 @@ class HaConfig {
               ? 'head_up'
               : 'none'),
       dashboardStyle = G1TextStyle.fromId(json['dashboard_style'] as String?),
-      labDesign = json['design_set'] == 'lab';
+      labDesign = json['design_set'] == 'lab',
+      localClock = json['local_clock'] == true;
 
   HaConfig.defaults()
     : name = '',
@@ -42,7 +43,8 @@ class HaConfig {
       showTranscript = true,
       dashboardGesture = 'none',
       dashboardStyle = G1TextStyle.plain,
-      labDesign = false;
+      labDesign = false,
+      localClock = false;
 
   final String name;
   final String? deviceId;
@@ -62,6 +64,9 @@ class HaConfig {
 
   /// Design set "lab" for the Assist status and the animations.
   final bool labDesign;
+
+  /// The integration leaves the dashboard's clock to the app.
+  final bool localClock;
 
   /// Show the Home Assistant dashboard when the head is raised.
   bool get dashboardOnHeadUp => dashboardGesture == 'head_up';
@@ -134,6 +139,33 @@ class Bridge extends ChangeNotifier {
 
   /// Rendered dashboard template, pushed by Home Assistant on changes.
   String _dashboardText = '';
+
+  /// The dashboard as the app shows it, with the current time.
+  String get _dashboardNow =>
+      withClock(_dashboardText.isEmpty ? 'Home Assistant' : _dashboardText);
+
+  Timer? _clockTimer;
+
+  /// A dashboard with a clock that the app shows while the head is up gets
+  /// the new time at each full minute.
+  void _scheduleClock() {
+    _clockTimer?.cancel();
+    final now = DateTime.now();
+    final next = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      now.hour,
+      now.minute,
+    ).add(const Duration(minutes: 1));
+    _clockTimer = Timer(next.difference(now), () {
+      if (!_dashboardShown || !display.active || !g1.connected) return;
+      unawaited(
+        display.showText(_dashboardNow, style: haConfig.dashboardStyle),
+      );
+      _scheduleClock();
+    });
+  }
 
   /// Rendered listening template: shown while the touch bar is held
   /// (ScouterKit; Even's firmware shows its own screen then).
@@ -259,6 +291,8 @@ class Bridge extends ChangeNotifier {
       case 'config':
         haConfig = HaConfig.fromJson(event);
         display.labDesign = haConfig.labDesign;
+        // Tells an integration that offers it that the app keeps the clock.
+        unawaited(_reportState());
         final listening = (event['listening_text'] as String? ?? '').trim();
         if (event.containsKey('listening_text')) {
           _listeningText = listening.isEmpty ? null : listening;
@@ -277,17 +311,14 @@ class Bridge extends ChangeNotifier {
         // Refresh only while it is on the display; otherwise the glasses
         // are not woken up for updates.
         if (_dashboardShown && display.active && g1.connected) {
-          await display.showText(
-            _dashboardText,
-            style: haConfig.dashboardStyle,
-          );
+          await display.showText(_dashboardNow, style: haConfig.dashboardStyle);
         }
       case 'listening':
         final text = (event['text'] as String? ?? '').trim();
         _listeningText = text.isEmpty ? null : text;
       case 'show_text':
-        final title = (event['title'] as String? ?? '').trim();
-        final message = (event['message'] as String? ?? '').trim();
+        final title = withClock((event['title'] as String? ?? '').trim());
+        final message = withClock((event['message'] as String? ?? '').trim());
         final duration = (event['duration'] as num?)?.toInt() ?? 0;
         _log(tr.coreLogShowText(title.isEmpty ? message : title));
         if (silentMode == true) {
@@ -430,6 +461,9 @@ class Bridge extends ChangeNotifier {
       'wear_state': g1.wearState,
       'recording': recorder.recording,
       'wear_detection': wearDetection,
+      // The app fills in the dashboard's time (only if the integration
+      // offers it: older ones refuse unknown fields).
+      if (haConfig.localClock) 'local_clock': true,
       // Home Assistant lays the dashboard out for this display.
       'display_lines': g1.displayLines,
       'display_columns': g1.displayColumns,
@@ -671,7 +705,7 @@ class Bridge extends ChangeNotifier {
     _dashboardShown = true;
     final seconds = haConfig.displayDuration;
     await display.showText(
-      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+      _dashboardNow,
       closeAfter: seconds > 0 ? Duration(seconds: seconds) : null,
       style: haConfig.dashboardStyle,
     );
@@ -706,13 +740,13 @@ class Bridge extends ChangeNotifier {
     // Do not cover a text or answer that is currently shown.
     if (display.active && !_dashboardShown) return;
     _dashboardShown = true;
-    await display.showText(
-      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
-      style: haConfig.dashboardStyle,
-    );
+    await display.showText(_dashboardNow, style: haConfig.dashboardStyle);
+    // The time moves on while the head stays up.
+    if (_dashboardText.contains(clockToken)) _scheduleClock();
   }
 
   Future<void> _onHeadDown() async {
+    _clockTimer?.cancel();
     if (!_dashboardShown) return;
     _dashboardShown = false;
     if (display.active) await display.clear();
@@ -1015,6 +1049,7 @@ class Bridge extends ChangeNotifier {
   void dispose() {
     _haGeneration++;
     _fastTimer?.cancel();
+    _clockTimer?.cancel();
     _ha?.close();
     recorder.dispose();
     autoBrightnessOffset.stop();

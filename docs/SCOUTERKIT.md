@@ -170,6 +170,12 @@ gone, and the app loads it again.
   while the app itself shows something (`busy`). It redraws new content on a
   `USER0` from the app if the dashboard is visible. The right arm reports the
   head with `NOTIFY 1, 1/0`.
+- **Clock** (`TIMER`, `USER1`): the app writes where the dashboard's
+  `HH:MM` digits are, the arm time when the current minute began and which
+  minute of the day it is. The program counts on at each full minute (also
+  without the phone), writes the digits (glyphs 0–9) and redraws if the
+  dashboard is shown. The app sets the time again after each clock sync
+  (every 3 minutes).
 - **Both eyes together** (arm-to-arm link, VM.md §6.9): only the right arm
   follows the tilt. On a change it sends `PEER_SEND` 1 (up) or 2 (down) to
   the left arm and switches 150 ms later; the left arm's `PEER` handler

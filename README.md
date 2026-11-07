@@ -200,8 +200,9 @@ The built-in dashboard fits on one page of the glasses (5 lines):
 The first line shows time and date, `+2` means: two more entries do not fit.
 Appointments (`»`) come first, at least one line is kept for to-dos (`[ ]`,
 overdue `[!]`). Without entries only time and date are shown. Own templates
-can use the variables `header`, `agenda` and `agenda_more` (German:
-`kopfzeile`, `agenda`, `agenda_mehr`).
+can use the variables `header`, `agenda`, `agenda_more` and `clock` (German:
+`kopfzeile`, `agenda`, `agenda_mehr`, `uhr`). The time runs on the glasses
+themselves ([details](docs/DASHBOARD.md#the-building-blocks)).
 
 The Assist pipeline needs speech recognition (e.g. *Home Assistant Cloud* or
 *Whisper*); *Speech-to-Phrase* only understands fixed commands.

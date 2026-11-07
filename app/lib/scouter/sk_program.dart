@@ -50,6 +50,14 @@ class SkResident {
   static final ascent = SkW.at(state + 28); // baseline in the band
   static final rows = SkW.at(state + 32); // bands to draw
   static final lineHeight = SkW.at(state + 36); // band height on the panel
+  // The clock (written per arm by the app): the address of the "HH:MM"
+  // glyphs in the dashboard's text (0: none), the arm time when the current
+  // minute began and that minute of the day. The program counts on by
+  // itself, also without the phone, and draws the digits.
+  static final clockAt = SkW.at(state + 40);
+  static final clockRef = SkW.at(state + 44);
+  static final clockMinute = SkW.at(state + 48);
+  static const minuteUs = 60000000;
   // Gesture state (program).
   static final _tick = SkW.at(state + 64);
   static final _cool = SkW.at(state + 68);
@@ -113,6 +121,7 @@ class SkResident {
     }
     a.mov(up, c0);
     a.mov(shown, c0);
+    a.call('armTimer');
     if (peer == peerFollower) a.end();
 
     // TILT: the pitch left its range.
@@ -157,12 +166,59 @@ class SkResident {
     a.label('done');
     a.end();
 
+    // USER1: the app set the clock anew.
+    a.label('user1');
+    a.call('armTimer');
+    a.end();
+
+    // armTimer: without the gesture detector the timer fires when the next
+    // minute begins (the detector's timer ticks every 20 ms anyway).
+    a.label('armTimer');
+    if (!gestures) {
+      a.beq(clockAt, c0, 'ret');
+      a.add(r0, clockRef, a.c(minuteUs));
+      a.sysWrite(a.c(SkProp.timer), r0);
+    }
+    a.ret();
+
+    // tick: a new minute: count on, redraw if the dashboard is shown.
+    a.label('tick');
+    a.beq(clockAt, c0, 'ret');
+    a.sysRead(r9, a.c(SkProp.timeUs));
+    a.sub(r10, r9, clockRef);
+    a.bltu(r10, a.c(minuteUs), 'ret');
+    a.add(clockRef, clockRef, a.c(minuteUs));
+    a.add(clockMinute, clockMinute, c1);
+    a.bltu(clockMinute, a.c(1440), 'tickShow');
+    a.sub(clockMinute, clockMinute, a.c(1440));
+    a.label('tickShow');
+    a.beq(shown, c0, 'ret');
+    a.call('show');
+    a.ret();
+
+    // digits: "HH:MM" of clockMinute into the text (glyph i is digit i).
+    a.label('digits');
+    a.beq(clockAt, c0, 'ret');
+    final ten = a.c(10);
+    a.divu(r9, clockMinute, a.c(60));
+    a.modu(r10, clockMinute, a.c(60));
+    a.divu(r11, r9, ten);
+    a.st8(clockAt, c0, r11);
+    a.modu(r11, r9, ten);
+    a.st8(clockAt, c1, r11);
+    a.divu(r11, r10, ten);
+    a.st8(clockAt, a.c(3), r11);
+    a.modu(r11, r10, ten);
+    a.st8(clockAt, a.c(4), r11);
+    a.ret();
+
     // show: draws the dashboard, band by band.
     a.label('show');
     a.and(r0, flags, a.c(flagDashboard));
     a.beq(r0, c0, 'ret');
     a.bne(busy, c0, 'ret');
     a.beq(count, c0, 'ret');
+    a.call('digits');
     a.mov(r3, c0); // band i
     a.label('line');
     a.mul(r4, r3, a.c(entryWords));
@@ -230,6 +286,7 @@ class SkResident {
       a.sysRead(r0, a.c(SkProp.timeUs));
       a.add(r0, r0, a.c(periodUs));
       a.sysWrite(a.c(SkProp.timer), r0);
+      a.call('tick');
       a.add(_tick, _tick, c1);
       a.beq(_cool, c0, 'sample');
       a.sub(_cool, _cool, c1);
@@ -284,6 +341,14 @@ class SkResident {
       a.end();
     }
 
+    if (!gestures) {
+      // TIMER: a new minute (the clock).
+      a.label('timer');
+      a.call('tick');
+      a.call('armTimer');
+      a.end();
+    }
+
     if (peer == peerFollower) {
       // PEER: the right arm decided; switch at the same moment.
       a.label('peer');
@@ -317,7 +382,8 @@ class SkResident {
     if (peer != peerFollower) entry(SkTrigger.tilt, 'tilt');
     if (peer == peerFollower) entry(SkTrigger.peer, 'peer');
     entry(SkTrigger.user0, 'user0');
-    if (gestures) entry(SkTrigger.timer, 'timer');
+    entry(SkTrigger.timer, 'timer');
+    entry(SkTrigger.user1, 'user1');
     return (code: bytes, pool: a.pool(), table: t.buffer.asUint8List());
   }
 

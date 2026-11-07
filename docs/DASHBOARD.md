@@ -29,10 +29,20 @@ and can also use these variables:
 | `header` | `09:41  ·  Sat, Nov 7`, with `  ·  +N` if appointments no longer fit |
 | `agenda` | Appointments and to-dos, one line per entry, already cut to the page |
 | `agenda_more` | Number of entries that did not fit on the page |
+| `clock` | The time `HH:MM`, kept by the glasses themselves (see below) |
 
 Every variable also has a German name: `kopfzeile` instead of `header`,
-`agenda_mehr` instead of `agenda_more` (`agenda` is the same in both
-languages).
+`agenda_mehr` instead of `agenda_more`, `uhr` instead of `clock` (`agenda`
+is the same in both languages).
+
+**The clock runs on the glasses.** `clock` (and the time in `header`) is a
+placeholder that the app fills in. With ScouterKit the program on the arms
+counts the minutes itself and redraws exactly at the full minute, on both
+eyes and even without a connection to the phone; the app only sets the time
+every few minutes. So Home Assistant no longer sends the dashboard every
+minute, only when its content changes. With Even's firmware the app fills
+in the time. Write `{{ clock }}` instead of `{{ now().strftime('%H:%M') }}`;
+the glasses keep one clock per dashboard (the first one).
 
 ### Space on the display
 
@@ -55,8 +65,8 @@ stands dark on a light bar with hazard stripes, framed by corner brackets.
   and `-%}` you remove the line breaks around statements, so hidden lines do
   not leave empty lines behind.
 - The dashboard renders again as soon as an entity it uses changes, and
-  every full minute. That keeps the time current without the glasses
-  redrawing all the time: the app only sends what changed.
+  every full minute; the app only sends what changed. With `clock` instead
+  of `now()` nothing changes at a new minute, so nothing is sent.
 - Test templates under *Developer tools → Template*. The variables `header`
   and `agenda` do not exist there; replace them with a fixed text for
   testing.

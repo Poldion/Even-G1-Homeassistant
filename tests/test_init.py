@@ -662,3 +662,40 @@ async def test_listening_text_and_style(
     assert config["design_set"] == "lab"
     listening = (await client.receive_json())["event"]
     assert listening == {"type": "listening", "text": "Ich höre"}
+
+
+async def test_local_clock(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """An app that keeps the clock gets a placeholder instead of the time."""
+    hass.config_entries.async_update_entry(
+        entry, options={**entry.options, CONF_DASHBOARD_GESTURE: "head_up"}
+    )
+    await hass.async_block_till_done()
+    device = entry.runtime_data
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    config = (await client.receive_json())["event"]
+    assert config["local_clock"] is True
+    assert "" not in device.dashboard_text
+
+    await client.send_json_auto_id(
+        {
+            "type": "even_g1/update_state",
+            "entry_id": entry.entry_id,
+            "local_clock": True,
+            "some_future_field": 1,
+        }
+    )
+    while True:
+        msg = await client.receive_json()
+        if msg.get("type") == "result":
+            assert msg["success"]
+            break
+    await hass.async_block_till_done()
+    assert device.dashboard_text.startswith("  ·  ")
+    assert device.dashboard_variables()["clock"] == ""
+    assert device.dashboard_variables()["uhr"] == ""

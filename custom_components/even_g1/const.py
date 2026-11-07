@@ -42,6 +42,11 @@ CONF_DESIGN_SET: Final = "design_set"
 DESIGN_SET_CLASSIC: Final = "classic"
 DESIGN_SETS: Final = [DESIGN_SET_CLASSIC, "lab"]
 
+# Placeholder for the time in the dashboard when the app keeps the clock
+# itself (it reports local_clock); the glasses or the app fill in HH:MM.
+# A private-use character, never typed by anyone.
+CLOCK_TOKEN: Final = "\ue000"
+
 # The default text while the touch bar is held (ScouterKit) is in lang.py.
 
 # Gestures reported by the app. These map to the 0xF5 sub commands of the

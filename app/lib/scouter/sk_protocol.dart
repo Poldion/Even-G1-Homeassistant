@@ -112,6 +112,7 @@ class SkTrigger {
   static const touch = 8;
   static const peer = 9;
   static const user0 = 12;
+  static const user1 = 13;
 }
 
 /// `TOUCH_GESTURE` values (VM.md §2.5).

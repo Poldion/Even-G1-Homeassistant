@@ -244,8 +244,14 @@ def agenda(
     return shown, len(ev_lines) + len(todo_lines_) - len(shown)
 
 
-def header(now: datetime, more: int = 0, w: Words = EN) -> str:
-    """Return "14:35  ·  Mon, Nov 2" (plus "  ·  +N" if entries were left out)."""
+def header(
+    now: datetime, more: int = 0, w: Words = EN, clock: str | None = None
+) -> str:
+    """Return "14:35  ·  Mon, Nov 2" (plus "  ·  +N" if entries were left out).
+
+    ``clock`` replaces the time (a placeholder the app fills in).
+    """
     day = w.date.format(day=now.day, month=w.months[now.month - 1])
-    text = f"{now:%H:%M}  ·  {w.weekdays[now.weekday()]}, {day}"
+    time = clock if clock is not None else f"{now:%H:%M}"
+    text = f"{time}  ·  {w.weekdays[now.weekday()]}, {day}"
     return f"{text}  ·  +{more}" if more else text

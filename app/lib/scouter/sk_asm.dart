@@ -128,12 +128,17 @@ class SkAsm {
   void sub(SkW d, SkW a, SkW b) => _op(SkAsmOp.sub, [d, a, b]);
   void mul(SkW d, SkW a, SkW b) => _op(SkAsmOp.mul, [d, a, b]);
   void divs(SkW d, SkW a, SkW b) => _op(SkAsmOp.divs, [d, a, b]);
+  void divu(SkW d, SkW a, SkW b) => _op(SkAsmOp.divu, [d, a, b]);
+  void modu(SkW d, SkW a, SkW b) => _op(SkAsmOp.modu, [d, a, b]);
   void and(SkW d, SkW a, SkW b) => _op(SkAsmOp.and, [d, a, b]);
   void or(SkW d, SkW a, SkW b) => _op(SkAsmOp.or, [d, a, b]);
 
   /// d = the u32 element i of base (address base + 4i).
   void ld32(SkW d, SkW base, SkW i) => _op(SkAsmOp.ld32, [d, base, i]);
   void st32(SkW base, SkW i, SkW a) => _op(SkAsmOp.st32, [base, i, a]);
+
+  /// The byte i of base = a.
+  void st8(SkW base, SkW i, SkW a) => _op(SkAsmOp.st8, [base, i, a]);
 
   void jmp(String target) => _op(SkAsmOp.jmp, const [], target: target);
   void call(String target) => _op(SkAsmOp.call, const [], target: target);

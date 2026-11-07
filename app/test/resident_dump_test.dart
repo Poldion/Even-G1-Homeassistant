@@ -220,5 +220,48 @@ void dumpDesigns() {
       w(SkResident.count.address, bands.length);
       save('resident_${style.id}', [], Uint8List.fromList(image));
     }
+    // The clock: 14:59 at arm time 1.2 s, the digits in the first line.
+    {
+      final bands = ScouterConnection.dashboardBands(
+        font,
+        '00:00  ·  Sat, Nov 7\nLiving room: 21.5 °C',
+        G1TextStyle.card,
+        top: 140,
+        rows: 4,
+      );
+      var at = SkResident.text, ri = 0, clockAt = 0;
+      for (var i = 0; i < bands.length; i++) {
+        final band = bands[i];
+        final g = band.text == null ? <int>[] : font.encode(band.text!);
+        if (band.text != null && clockAt == 0 && band.text!.contains('00:00')) {
+          clockAt = at + font.encode(band.text!.split('00:00').first).length;
+        }
+        image.setRange(at, at + g.length, g);
+        final e = SkResident.lines + 4 * SkResident.entryWords * i;
+        w(e, band.x);
+        w(e + 4, band.y);
+        w(e + 8, g.isEmpty ? 0 : at);
+        w(e + 12, g.length);
+        w(e + 16, ri);
+        w(e + 20, band.rects.length);
+        w(e + 24, band.level);
+        for (final r in band.rects) {
+          final ra = SkResident.rects + 20 * ri++;
+          w(ra, r.x);
+          w(ra + 4, r.y);
+          w(ra + 8, r.w);
+          w(ra + 12, r.h);
+          w(ra + 16, r.level);
+        }
+        at += g.length;
+      }
+      w(SkResident.rows.address, bands.length);
+      w(SkResident.count.address, bands.length);
+      w(SkResident.clockAt.address, clockAt);
+      w(SkResident.clockRef.address, 1200000);
+      w(SkResident.clockMinute.address, 14 * 60 + 59);
+      save('resident_clock', [], Uint8List.fromList(image));
+      if (dir != null) File('$dir/clock_at.txt').writeAsStringSync('$clockAt');
+    }
   });
 }
