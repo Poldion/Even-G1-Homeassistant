@@ -9,6 +9,16 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.21.1] - 2026-11-07
+
+### Fixed
+- ScouterKit: Beim Runterschauen blieb das Dashboard manchmal auf einem Auge
+  an. Jeder Bügel entschied mit seinem eigenen Neigungssensor, und nahe der
+  Schwelle waren sich die beiden uneinig. Jetzt entscheidet allein der rechte
+  Bügel und sagt es dem linken über die eigene Funkverbindung der Bügel;
+  beide Augen schalten 150 ms später im selben Moment. Firmware ohne diese
+  Verbindung verhält sich wie bisher.
+
 ## [0.21.0] - 2026-11-07
 
 ### Added
@@ -343,7 +353,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...HEAD
+[0.21.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...v0.19.0

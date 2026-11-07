@@ -77,10 +77,23 @@ class SkResident {
   static const nodSwings = 2; // down and up
   static const shakeSwings = 3; // left, right, left
 
+  /// Head state over the arm-to-arm link (VM.md §6.9): the right arm
+  /// ([peerLeader]) alone follows the tilt and tells the left arm
+  /// ([peerFollower]); both show or hide the dashboard [peerLeadUs] after
+  /// the decision, so both eyes switch together. [peerNone]: each arm
+  /// decides itself (firmware without the link).
+  static const peerNone = 0;
+  static const peerLeader = 1;
+  static const peerFollower = 2;
+  static const peerUp = 1;
+  static const peerDown = 2;
+  static const peerLeadUs = 150000;
+
   /// The program's code and constant pool; [gestures] adds the detector
   /// (right arm: the gyroscope runs only then).
   static ({Uint8List code, Uint8List pool, Uint8List table}) build({
     required bool gestures,
+    int peer = peerNone,
   }) {
     final a = SkAsm(codeAt: code, poolAt: pool, poolWords: poolWords);
     const r0 = SkW.r(0), r1 = SkW.r(1), r2 = SkW.r(2), r3 = SkW.r(3);
@@ -100,6 +113,7 @@ class SkResident {
     }
     a.mov(up, c0);
     a.mov(shown, c0);
+    if (peer == peerFollower) a.end();
 
     // TILT: the pitch left its range.
     a.label('tilt');
@@ -112,6 +126,7 @@ class SkResident {
     a.label('goUp');
     a.mov(up, c1);
     a.notify(a.c(notifyHead), c1);
+    if (peer == peerLeader) _tell(a, peerUp);
     a.call('show');
     a.jmp('range');
     a.label('isUp');
@@ -121,6 +136,7 @@ class SkResident {
     a.label('goDown');
     a.mov(up, c0);
     a.notify(a.c(notifyHead), c0);
+    if (peer == peerLeader) _tell(a, peerDown);
     a.call('hide');
     // A new range around the state, 10° hysteresis.
     a.label('range');
@@ -268,16 +284,51 @@ class SkResident {
       a.end();
     }
 
+    if (peer == peerFollower) {
+      // PEER: the right arm decided; switch at the same moment.
+      a.label('peer');
+      a.sysRead(r0, a.c(SkProp.peerMsg));
+      a.sysRead(r1, a.c(SkProp.peerTUs));
+      a.add(r1, r1, a.c(peerLeadUs));
+      a.beq(r0, a.c(peerUp), 'peerUp');
+      a.beq(r0, a.c(peerDown), 'peerDown');
+      a.end();
+      a.label('peerUp');
+      a.bne(up, c0, 'peerDone');
+      a.mov(up, c1);
+      a.sleepUntil(r1);
+      a.call('show');
+      a.end();
+      a.label('peerDown');
+      a.beq(up, c0, 'peerDone');
+      a.mov(up, c0);
+      a.sleepUntil(r1);
+      a.call('hide');
+      a.label('peerDone');
+      a.end();
+    }
+
     final bytes = a.build();
     if (code + bytes.length > codeEnd) throw StateError('program too long');
     final t = ByteData(64);
     void entry(int trigger, String label) =>
         t.setUint32(trigger * 4, a.addressOf(label), Endian.little);
     entry(SkTrigger.start, 'start');
-    entry(SkTrigger.tilt, 'tilt');
+    if (peer != peerFollower) entry(SkTrigger.tilt, 'tilt');
+    if (peer == peerFollower) entry(SkTrigger.peer, 'peer');
     entry(SkTrigger.user0, 'user0');
     if (gestures) entry(SkTrigger.timer, 'timer');
     return (code: bytes, pool: a.pool(), table: t.buffer.asUint8List());
+  }
+
+  /// Sends [value] to the left arm and waits [peerLeadUs] from now, the
+  /// moment the left arm switches too.
+  static void _tell(SkAsm a, int value) {
+    const r9 = SkW.r(9);
+    a.sysRead(r9, a.c(SkProp.timeUs));
+    a.sysWrite(a.c(SkProp.peerSend), a.c(value));
+    a.add(r9, r9, a.c(peerLeadUs));
+    a.sleepUntil(r9);
   }
 
   /// One axis of the detector: a swing is a rate above [rateMdps] that is

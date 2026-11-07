@@ -170,6 +170,12 @@ gone, and the app loads it again.
   while the app itself shows something (`busy`). It redraws new content on a
   `USER0` from the app if the dashboard is visible. The right arm reports the
   head with `NOTIFY 1, 1/0`.
+- **Both eyes together** (arm-to-arm link, VM.md §6.9): only the right arm
+  follows the tilt. On a change it sends `PEER_SEND` 1 (up) or 2 (down) to
+  the left arm and switches 150 ms later; the left arm's `PEER` handler
+  switches at the sender's time plus the same 150 ms (`PEER_T_US`). Two arms
+  with their own sensors no longer disagree near the threshold. Firmware
+  without the link (`HELLO` triggers bit 9 clear): each arm decides itself.
 - **Head gestures** (right arm, `TIMER` every 20 ms): gyroscope at 52 Hz. A
   swing counts from 90 °/s and if it is at least twice as fast as around the
   other axis; two changes of direction around the x axis within 0.4 s are a

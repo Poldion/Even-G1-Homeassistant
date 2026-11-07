@@ -92,6 +92,9 @@ class SkProp {
   static const caseBattPct = 0x37;
   static const autoBrightness = 0x38;
   static const peerLink = 0x39;
+  static const peerSend = 0x3A;
+  static const peerMsg = 0x3B;
+  static const peerTUs = 0x3C;
 
   /// Read for a value the arm does not have.
   static const unknown = 0x80000000;
@@ -107,6 +110,7 @@ class SkTrigger {
   static const caseState = 6;
   static const wear = 7;
   static const touch = 8;
+  static const peer = 9;
   static const user0 = 12;
 }
 

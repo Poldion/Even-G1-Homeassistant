@@ -217,6 +217,27 @@ void main() {
     g1.dispose();
   });
 
+  test('arm-to-arm link: the right arm decides, the left one follows', () {
+    int entry(Uint8List table, int trigger) =>
+        ByteData.sublistView(table).getUint32(4 * trigger, Endian.little);
+    final leader = SkResident.build(
+      gestures: true,
+      peer: SkResident.peerLeader,
+    );
+    final follower = SkResident.build(
+      gestures: false,
+      peer: SkResident.peerFollower,
+    );
+    expect(entry(leader.table, SkTrigger.tilt), isNot(0));
+    expect(entry(leader.table, SkTrigger.peer), 0);
+    expect(entry(follower.table, SkTrigger.tilt), 0);
+    expect(entry(follower.table, SkTrigger.peer), isNot(0));
+    // Without the link each arm follows the tilt itself.
+    final alone = SkResident.build(gestures: false);
+    expect(entry(alone.table, SkTrigger.tilt), isNot(0));
+    expect(entry(alone.table, SkTrigger.peer), 0);
+  });
+
   test('the library fits its area', () {
     final lib = SkLib.build();
     expect(SkLib.code + lib.code.length, lessThanOrEqualTo(SkLib.codeEnd));

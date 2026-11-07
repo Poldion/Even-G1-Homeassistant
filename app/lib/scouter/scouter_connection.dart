@@ -54,9 +54,11 @@ class _SkArm {
   /// Offset of the arm's clock, for drawing both eyes at once.
   final SkClock clock = SkClock();
 
-  /// The resident program runs (this session), with the gesture detector.
+  /// The resident program runs (this session), with the gesture detector
+  /// and its role on the arm-to-arm link (SkResident.peer*).
   bool resident = false;
   bool residentGestures = false;
+  int residentPeer = 0;
 
   /// Icons in the arena of the current session.
   final Set<String> icons = {};
@@ -638,18 +640,25 @@ class ScouterConnection extends G1Connection {
       }
       return;
     }
-    if (arm.resident && arm.residentGestures == gestures) {
+    final peer = _peerRole(arm);
+    if (arm.resident &&
+        arm.residentGestures == gestures &&
+        arm.residentPeer == peer) {
       await _writeDashboard(arm, redraw: true);
       return;
     }
     final font = _loadedFont ??= await _fontLoader();
-    final p = SkResident.build(gestures: gestures);
+    final p = SkResident.build(gestures: gestures, peer: peer);
     final maxCode = arm.link.maxPacket - 2;
     final ok = await arm.link.run([
       ...skUpload(SkResident.pool, p.pool, maxCode),
       ...skUpload(SkResident.code, p.code, maxCode),
       ...skUpload(SkResident.table, p.table, maxCode),
       _residentState(font),
+      // The arms agree on the head over their own link (kept across
+      // VM_START).
+      if (peer != SkResident.peerNone)
+        (SkCode()..sysWrite(SkProp.peerLink, 1)).take(),
     ]);
     if (!ok || !await _writeDashboard(arm)) {
       _debug(tr.skLogProgramNotLoaded(arm.side.code));
@@ -668,6 +677,7 @@ class ScouterConnection extends G1Connection {
     }
     arm.resident = true;
     arm.residentGestures = gestures;
+    arm.residentPeer = peer;
     _debug(
       gestures
           ? tr.skLogProgramRunningGestures(arm.side.code, p.code.length)
@@ -675,6 +685,20 @@ class ScouterConnection extends G1Connection {
     );
     await _reportEvents(arm);
     notifyListeners();
+  }
+
+  /// Both arms' firmware has the arm-to-arm message link (HELLO triggers
+  /// bit 9): the right arm decides the head state for both.
+  int _peerRole(_SkArm arm) {
+    bool linked(_SkArm? a) =>
+        a?.hello == null || (a!.hello!.triggers >> SkTrigger.peer) & 1 == 1;
+    final other = _arms[arm.side == G1Side.left ? G1Side.right : G1Side.left];
+    if (arm.hello == null || !linked(arm) || !linked(other)) {
+      return SkResident.peerNone;
+    }
+    return arm.side == G1Side.right
+        ? SkResident.peerLeader
+        : SkResident.peerFollower;
   }
 
   /// Host code for the program's settings words.

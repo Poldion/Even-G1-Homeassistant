@@ -173,6 +173,13 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   zeichnet nichts, solange die App selbst etwas anzeigt (`busy`). Neue Inhalte
   zeichnet es auf ein `USER0` der App neu, wenn das Dashboard gerade zu sehen
   ist. Den Kopf meldet der rechte Bügel mit `NOTIFY 1, 1/0`.
+- **Beide Augen zusammen** (Funkverbindung der Bügel, VM.md §6.9): Nur der
+  rechte Bügel folgt der Neigung. Bei einem Wechsel schickt er dem linken
+  `PEER_SEND` 1 (hoch) oder 2 (runter) und schaltet 150 ms später; der
+  `PEER`-Handler des linken schaltet zur Sendezeit plus denselben 150 ms
+  (`PEER_T_US`). Zwei Bügel mit eigenen Sensoren sind sich so an der
+  Schwelle nicht mehr uneinig. Firmware ohne die Verbindung (`HELLO`
+  Trigger-Bit 9 nicht gesetzt): Jeder Bügel entscheidet selbst.
 - **Kopfgesten** (rechter Bügel, `TIMER` alle 20 ms): Gyrosensor mit 52 Hz.
   Ein Schwung zählt ab 90 °/s und wenn er mindestens doppelt so schnell ist
   wie um die andere Achse; zwei Richtungswechsel um die x-Achse innerhalb von

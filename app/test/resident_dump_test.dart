@@ -20,8 +20,13 @@ void main() {
     final font = SkFont.parse(
       File(ScouterConnection.fontAsset).readAsBytesSync(),
     ).scaled(2, keep: SkFont.textCodepoint);
-    for (final gestures in [false, true]) {
-      final p = SkResident.build(gestures: gestures);
+    for (final (name, gestures, peer) in [
+      ('left', false, SkResident.peerNone),
+      ('right', true, SkResident.peerNone),
+      ('peer_left', false, SkResident.peerFollower),
+      ('peer_right', true, SkResident.peerLeader),
+    ]) {
+      final p = SkResident.build(gestures: gestures, peer: peer);
       final arena = Uint8List(SkArena.size);
       final d = ByteData.sublistView(arena);
       arena.setRange(SkArena.font, SkArena.font + font.blob.length, font.blob);
@@ -50,8 +55,7 @@ void main() {
       }
       w(SkResident.count.address, words.length);
       if (dir != null) {
-        File('$dir/arena_${gestures ? 'right' : 'left'}.bin')
-            .writeAsBytesSync(arena);
+        File('$dir/arena_$name.bin').writeAsBytesSync(arena);
       }
       expect(p.code.length, lessThan(SkResident.codeEnd - SkResident.code));
     }

@@ -9,6 +9,15 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.21.1] - 2026-11-07
+
+### Fixed
+- ScouterKit: looking down sometimes left the dashboard on in one eye. Each
+  arm decided on its own from its own tilt sensor, and near the threshold
+  the two disagreed. Now the right arm alone decides and tells the left arm
+  over the glasses' own arm-to-arm link; both eyes switch 150 ms later at the
+  same moment. Firmware without that link keeps the old behaviour.
+
 ## [0.21.0] - 2026-11-07
 
 ### Added
@@ -333,7 +342,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...HEAD
+[0.21.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...v0.19.0

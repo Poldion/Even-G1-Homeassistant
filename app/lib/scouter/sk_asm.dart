@@ -49,6 +49,7 @@ class SkAsmOp {
   static const bgeu = 0x38;
   static const blts = 0x39;
   static const bges = 0x3A;
+  static const sleepUntil = 0x40;
   static const raise = 0x42;
   static const notify = 0x43;
   static const sysRead = 0x44;
@@ -148,6 +149,7 @@ class SkAsm {
   void bges(SkW a, SkW b, String t) => _op(SkAsmOp.bges, [a, b], target: t);
 
   void raise(SkW t) => _op(SkAsmOp.raise, [t]);
+  void sleepUntil(SkW t) => _op(SkAsmOp.sleepUntil, [t]);
   void notify(SkW a, SkW b) => _op(SkAsmOp.notify, [a, b]);
   void sysRead(SkW d, SkW p) => _op(SkAsmOp.sysRead, [d, p]);
   void sysWrite(SkW p, SkW a) => _op(SkAsmOp.sysWrite, [p, a]);
