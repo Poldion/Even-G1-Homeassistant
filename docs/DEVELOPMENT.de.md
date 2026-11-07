@@ -28,6 +28,17 @@ HA_URL=http://localhost:8123 HA_TOKEN=... HA_STT_ENGINE=stt.dein_stt flutter tes
 Die Integration wird in CI gegen die älteste unterstützte und die neueste
 Home-Assistant-Version getestet (`.github/workflows/integration.yml`).
 
+## Texte in zwei Sprachen
+
+Englisch ist die Hauptsprache, Deutsch die zweite (siehe `CLAUDE.md`).
+App-Texte stehen in `app/lib/l10n/app_en.arb` (Vorlage) und `app_de.arb`;
+Widgets und anderer Code lesen sie über `tr` (`app/lib/l10n/l10n.dart`). Nach
+Änderungen in `app/` `mkdir -p build && flutter gen-l10n` ausführen und
+`lib/l10n/gen` committen; CI bricht bei fehlenden Übersetzungen ab. Die Texte
+der Integration stehen in `translations/en.json` und `de.json`, die Texte, die
+sie für die Brille erzeugt, in `lang.py`. Die Doku gibt es als `NAME.md` und
+`NAME.de.md`, Bilder unter `docs/images/en/` und `docs/images/de/`.
+
 ## Was ein Push auslöst
 
 | Geändert | Workflow | Ergebnis |

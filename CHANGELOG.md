@@ -9,6 +9,25 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-11-07
+
+### Added
+- English and German everywhere. English is the main language.
+  - App: all screens, messages, the log and the texts on the glasses (Assist
+    status, listening text, silent mode animation). *Settings → Language*:
+    system language (default, English unless the phone is German), English
+    or Deutsch.
+  - Integration: options and entities follow Home Assistant's language, and
+    so do the texts it renders for the glasses (header, appointments,
+    to-dos, the default listening text).
+  - Template variables with English names: `header`, `agenda`,
+    `agenda_more`, `assistant` (the German ones still work).
+  - Docs: README, changelog and every guide in English and German
+    (`*.de.md`), example images in both languages.
+
+### Changed
+- The app starts in English unless the phone is set to German.
+
 ## [0.18.0] - 2026-11-07
 
 ### Added
@@ -285,7 +304,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.5...v0.17.0
 [0.16.5]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.4...v0.16.5

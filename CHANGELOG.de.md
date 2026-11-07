@@ -9,6 +9,25 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-11-07
+
+### Added
+- Englisch und Deutsch überall. Englisch ist die Hauptsprache.
+  - App: alle Bildschirme, Meldungen, das Protokoll und die Texte auf der
+    Brille (Assist-Status, Text beim Zuhören, Ruhemodus-Animation).
+    *Einstellungen → Sprache*: Systemsprache (Standard, Englisch, außer das
+    Handy ist auf Deutsch), English oder Deutsch.
+  - Integration: Optionen und Entitäten folgen der Sprache von Home
+    Assistant, ebenso die Texte für die Brille (Kopfzeile, Termine, To-dos,
+    der Standard-Text beim Zuhören).
+  - Template-Variablen mit englischen Namen: `header`, `agenda`,
+    `agenda_more`, `assistant` (die deutschen funktionieren weiter).
+  - Doku: README, Changelog und alle Anleitungen auf Englisch und Deutsch
+    (`*.de.md`), Beispielbilder in beiden Sprachen.
+
+### Changed
+- Die App startet auf Englisch, außer das Handy ist auf Deutsch eingestellt.
+
 ## [0.18.0] - 2026-11-07
 
 ### Added
@@ -294,7 +313,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...HEAD
+[0.19.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.17.0...v0.18.0
 [0.17.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.5...v0.17.0
 [0.16.5]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.16.4...v0.16.5

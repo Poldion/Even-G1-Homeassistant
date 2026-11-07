@@ -28,6 +28,17 @@ HA_URL=http://localhost:8123 HA_TOKEN=... HA_STT_ENGINE=stt.your_stt flutter tes
 CI tests the integration against the oldest supported and the newest Home
 Assistant version (`.github/workflows/integration.yml`).
 
+## Texts in two languages
+
+English is the main language, German the second (see `CLAUDE.md`). App texts
+live in `app/lib/l10n/app_en.arb` (template) and `app_de.arb`; widgets and
+other code read them through `tr` (`app/lib/l10n/l10n.dart`). After changing
+them run `mkdir -p build && flutter gen-l10n` in `app/` and commit
+`lib/l10n/gen`; CI fails on untranslated messages. The integration's texts
+are in `translations/en.json` and `de.json`, the texts it renders for the
+glasses in `lang.py`. Docs exist as `NAME.md` and `NAME.de.md`, images under
+`docs/images/en/` and `docs/images/de/`.
+
 ## What a push triggers
 
 | Changed | Workflow | Result |
