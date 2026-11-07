@@ -1,6 +1,284 @@
 {
   "@@locale": "en",
   "appTitle": "Even G1 for Home Assistant",
+  "coreAssistNoAnswer": "No answer",
+  "coreAssistUnavailable": "Assist not available:\n{error}",
+  "@coreAssistUnavailable": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreCancelled": "Cancelled",
+  "coreChannelDescription": "Keeps the connection to the glasses in the background",
+  "coreChannelName": "Even G1 connection",
+  "coreDisplayCheck": "Display left: {left}, right: {right}",
+  "@coreDisplayCheck": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "right": {
+        "type": "String"
+      }
+    }
+  },
+  "coreDisplayCheckDiffers": "{text} – DIFFERENT",
+  "@coreDisplayCheckDiffers": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreDone": "Done.",
+  "coreGlassesNotConnected": "Glasses not connected",
+  "coreHaConnected": "connected (HA {version})",
+  "@coreHaConnected": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "coreHaConnecting": "connecting…",
+  "coreHaConnectionLost": "Connection to Home Assistant lost",
+  "coreHaDisconnected": "disconnected",
+  "coreHaNotSetUp": "not set up",
+  "coreHaRetry": "disconnected, retrying in {seconds}s",
+  "@coreHaRetry": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "coreHaTokenInvalid": "Token invalid",
+  "coreListening": "{assistant}\nis listening …",
+  "@coreListening": {
+    "placeholders": {
+      "assistant": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogAnswer": "Answer: {text}",
+  "@coreLogAnswer": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogAssistError": "Assist error: {error}",
+  "@coreLogAssistError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogAssistStartFailed": "Assist start failed: {error}",
+  "@coreLogAssistStartFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogAssistStarted": "Assist started",
+  "coreLogAudio": "Audio: {error}",
+  "@coreLogAudio": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogBrightness": "Brightness: {percent} %",
+  "@coreLogBrightness": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "coreLogBrightnessAuto": "Brightness: automatic",
+  "coreLogBrightnessOffset": "Brightness: automatic, {offset} %",
+  "@coreLogBrightnessOffset": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogConfig": "Configuration received ({name})",
+  "@coreLogConfig": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogDashboardTap": "Dashboard (tap)",
+  "coreLogEvenAiOff": "Answers in text mode",
+  "coreLogEvenAiOn": "Answers in Even AI mode",
+  "coreLogHeadGesturesOff": "Head gestures off",
+  "coreLogHeadGesturesOn": "Head gestures on",
+  "coreLogHeadUpAngle": "Activation angle: {angle}°",
+  "@coreLogHeadUpAngle": {
+    "placeholders": {
+      "angle": {
+        "type": "int"
+      }
+    }
+  },
+  "coreLogHeadUpHide": "Head up: hide Even dashboard",
+  "coreLogHeadUpShow": "Head up: show Even dashboard",
+  "coreLogIntegrationReloaded": "Integration reloaded, reconnecting",
+  "coreLogMicFailed": "Microphone could not be switched on",
+  "coreLogNotification": "Notification: {app} – {title}",
+  "@coreLogNotification": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogNotificationsError": "Notifications: {error}",
+  "@coreLogNotificationsError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogPosition": "Display position: height {height}, distance {depth}",
+  "@coreLogPosition": {
+    "placeholders": {
+      "height": {
+        "type": "int"
+      },
+      "depth": {
+        "type": "int"
+      }
+    }
+  },
+  "coreLogPositionPreview": "Display position: height {height}, distance {depth} (preview)",
+  "@coreLogPositionPreview": {
+    "placeholders": {
+      "height": {
+        "type": "int"
+      },
+      "depth": {
+        "type": "int"
+      }
+    }
+  },
+  "coreLogRecognized": "Recognized: {text}",
+  "@coreLogRecognized": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingError": "Recording: {error}",
+  "@coreLogRecordingError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingMicRestarted": "Recording: microphone restarted",
+  "coreLogRecordingNoGlasses": "Recording: glasses not connected, microphone follows",
+  "coreLogRecordingNotSent": "Recording not sent: {error}",
+  "@coreLogRecordingNotSent": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingSent": "Recording sent: {name}",
+  "@coreLogRecordingSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingStarted": "Recording started",
+  "coreLogRecordingStopped": "Recording stopped: {length} (duration {duration})",
+  "@coreLogRecordingStopped": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingTooShort": "Recording discarded (too short)",
+  "coreLogShowText": "Display: {text}",
+  "@coreLogShowText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogSilentDashboardSkipped": "Silent mode – dashboard not shown",
+  "coreLogSilentNoGlasses": "Silent mode: glasses not connected",
+  "coreLogSilentOff": "Silent mode off",
+  "coreLogSilentOffGlasses": "Silent mode off (glasses)",
+  "coreLogSilentOn": "Silent mode on",
+  "coreLogSilentOnGlasses": "Silent mode on (glasses)",
+  "coreLogSilentTextSkipped": "Silent mode – text not shown",
+  "coreLogTextDropped": "Glasses not connected – text dropped",
+  "coreLogWearOff": "Wear detection off",
+  "coreLogWearOn": "Wear detection on",
+  "coreNoAnswer": "no answer",
+  "coreNoHaConnection": "No connection to Home Assistant",
+  "coreRecordingFileName": "Glasses note",
+  "coreServiceText": "Connection active",
+  "coreSttFailed": "Speech recognition failed.",
+  "coreSttMissing": "No speech recognition configured in the Assist pipeline.",
+  "coreSttNothing": "I didn't catch that.",
+  "coreThinking": "Home Assistant\nOne moment …",
+  "coreTimeout": "Timeout",
+  "coreTranscript": "» {text} «\nOne moment …",
+  "@coreTranscript": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreUnknownError": "Unknown error",
+  "coreWhisperFailed": "Sending failed: {error}",
+  "@coreWhisperFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreWhisperNotSetUp": "WhisperNotes is not set up",
+  "coreWhisperSent": "Sent to WhisperNotes (job {job})",
+  "@coreWhisperSent": {
+    "placeholders": {
+      "job": {
+        "type": "String"
+      }
+    }
+  },
   "glasses": "Glasses",
   "languageEnglish": "English",
   "languageGerman": "Deutsch",

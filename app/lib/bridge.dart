@@ -78,7 +78,7 @@ class Bridge extends ChangeNotifier {
     this.g1.log.listen(_log);
     PhoneNotifications.stream.listen(
       _onPhoneNotification,
-      onError: (Object e) => _log('Benachrichtigungen: $e'),
+      onError: (Object e) => _log(tr.coreLogNotificationsError('$e')),
     );
   }
 
@@ -93,7 +93,7 @@ class Bridge extends ChangeNotifier {
   // Shown after the touch bar was released. While it is held, the glasses
   // firmware shows its own Even AI listening screen: the right (master) arm
   // redraws it continuously, so drawing over it only reached the left arm.
-  static const thinkingText = 'Home Assistant\nEinen Moment …';
+  static String get thinkingText => tr.coreThinking;
 
   final Settings settings;
   final G1Connection g1;
@@ -104,7 +104,7 @@ class Bridge extends ChangeNotifier {
   HaClient? _ha;
   int _haGeneration = 0;
   bool haConnected = false;
-  String haStatus = 'getrennt';
+  String haStatus = tr.coreHaDisconnected;
   HaConfig haConfig = HaConfig.defaults();
 
   final List<String> logLines = [];
@@ -135,7 +135,8 @@ class Bridge extends ChangeNotifier {
   String? _listeningText;
 
   String get listeningText =>
-      _listeningText ?? '${haConfig.assistName ?? 'Home Assistant'}\nhört zu …';
+      _listeningText ??
+      tr.coreListening(haConfig.assistName ?? 'Home Assistant');
   bool _dashboardShown = false;
   bool _glassesSettingsApplied = false;
   int _dashboardCounter = 0;
@@ -169,7 +170,7 @@ class Bridge extends ChangeNotifier {
     if (settings.haConfigured) {
       unawaited(_runHomeAssistant());
     } else {
-      _setHaStatus('nicht eingerichtet');
+      _setHaStatus(tr.coreHaNotSetUp);
     }
   }
 
@@ -195,7 +196,7 @@ class Bridge extends ChangeNotifier {
       _ha = client;
       Timer? ping;
       try {
-        _setHaStatus('verbinde…');
+        _setHaStatus(tr.coreHaConnecting);
         await client.connect();
         final sub = await client.subscribe({
           'type': 'even_g1/subscribe',
@@ -204,7 +205,7 @@ class Bridge extends ChangeNotifier {
         if (!wanted()) return;
         haConnected = true;
         backoff = 2;
-        _setHaStatus('verbunden (HA ${client.haVersion ?? '?'})');
+        _setHaStatus(tr.coreHaConnected(client.haVersion ?? '?'));
         _lastReported = null;
         unawaited(_reportState());
         ping = Timer.periodic(const Duration(seconds: 30), (_) async {
@@ -216,7 +217,7 @@ class Bridge extends ChangeNotifier {
         });
         await for (final event in sub.events) {
           if (event['type'] == 'reload') {
-            _log('Integration neu geladen, verbinde neu');
+            _log(tr.coreLogIntegrationReloaded);
             await client.close();
             break;
           }
@@ -225,7 +226,7 @@ class Bridge extends ChangeNotifier {
       } on HaException catch (e) {
         _log('$e');
         if (e.code == 'auth_invalid') {
-          _setHaStatus('Token ungültig');
+          _setHaStatus(tr.coreHaTokenInvalid);
           return;
         }
       } catch (e) {
@@ -237,7 +238,7 @@ class Bridge extends ChangeNotifier {
         if (wanted()) notifyListeners();
       }
       if (!wanted()) return;
-      _setHaStatus('getrennt, neuer Versuch in ${backoff}s');
+      _setHaStatus(tr.coreHaRetry(backoff));
       await Future<void>.delayed(Duration(seconds: backoff));
       backoff = min(backoff * 2, 60);
     }
@@ -256,7 +257,7 @@ class Bridge extends ChangeNotifier {
         if (event.containsKey('listening_text')) {
           _listeningText = listening.isEmpty ? null : listening;
         }
-        _log('Konfiguration erhalten (${haConfig.name})');
+        _log(tr.coreLogConfig(haConfig.name));
         if (haConfig.dashboardGesture == 'none' && _dashboardShown) {
           _dashboardShown = false;
           if (g1.connected) await display.clear();
@@ -282,14 +283,14 @@ class Bridge extends ChangeNotifier {
         final title = (event['title'] as String? ?? '').trim();
         final message = (event['message'] as String? ?? '').trim();
         final duration = (event['duration'] as num?)?.toInt() ?? 0;
-        _log('Anzeige: ${title.isEmpty ? message : title}');
+        _log(tr.coreLogShowText(title.isEmpty ? message : title));
         if (silentMode == true) {
-          _log('Ruhemodus – Text nicht angezeigt');
+          _log(tr.coreLogSilentTextSkipped);
           return;
         }
         _dashboardShown = false;
         if (!g1.connected) {
-          _log('Brille nicht verbunden – Text verworfen');
+          _log(tr.coreLogTextDropped);
           return;
         }
         if (event['mode'] == 'notification') {
@@ -379,7 +380,7 @@ class Bridge extends ChangeNotifier {
     }
     if (!settings.forwardNotifications || !(app?.enabled ?? true)) return;
     if (!g1.connected || silentMode == true) return;
-    _log('Benachrichtigung: ${n.appName} – ${n.title}');
+    _log(tr.coreLogNotification(n.appName, n.title));
     await _sendGlassesNotification(
       appIdentifier: n.packageName,
       displayName: n.appName,
@@ -499,7 +500,7 @@ class Bridge extends ChangeNotifier {
     settings.wearDetection = enabled;
     notifyListeners();
     if (g1.connected) {
-      _log(enabled ? 'Trageerkennung an' : 'Trageerkennung aus');
+      _log(enabled ? tr.coreLogWearOn : tr.coreLogWearOff);
       await g1.setWearDetection(enabled);
     }
     await _reportState();
@@ -567,8 +568,9 @@ class Bridge extends ChangeNotifier {
     if (auto && brightnessOffset != 0) {
       final levels = (brightnessOffset * G1Packets.maxBrightness / 100).round();
       _log(
-        'Helligkeit: automatisch, '
-        '${brightnessOffset > 0 ? '+' : ''}$brightnessOffset %',
+        tr.coreLogBrightnessOffset(
+          '${brightnessOffset > 0 ? '+' : ''}$brightnessOffset',
+        ),
       );
       if (g1.supportsBrightnessOffset) {
         // ScouterKit: from the light sensor while something is shown.
@@ -580,21 +582,17 @@ class Bridge extends ChangeNotifier {
       return;
     }
     final percent = brightness ?? 50;
-    _log(auto ? 'Helligkeit: automatisch' : 'Helligkeit: $percent %');
+    _log(auto ? tr.coreLogBrightnessAuto : tr.coreLogBrightness(percent));
     await g1.setBrightness(percent, auto: auto);
   }
 
   Future<void> _sendHeadUpAngle(int angle) async {
-    _log('Aktivierungswinkel: $angle°');
+    _log(tr.coreLogHeadUpAngle(angle));
     await g1.setHeadUpAngle(angle);
   }
 
   Future<void> _sendHeadUpMode(int mode) async {
-    _log(
-      mode == 0
-          ? 'Hochschauen: Even-Dashboard anzeigen'
-          : 'Hochschauen: Even-Dashboard ausblenden',
-    );
+    _log(mode == 0 ? tr.coreLogHeadUpShow : tr.coreLogHeadUpHide);
     await g1.setHeadUpMode(mode);
   }
 
@@ -602,8 +600,9 @@ class Bridge extends ChangeNotifier {
     final height = settings.displayHeight ?? defaultDisplayHeight;
     final depth = settings.displayDepth ?? defaultDisplayDepth;
     _log(
-      'Anzeigeposition: Höhe $height, Distanz $depth'
-      '${preview ? ' (Vorschau)' : ''}',
+      preview
+          ? tr.coreLogPositionPreview(height, depth)
+          : tr.coreLogPosition(height, depth),
     );
     await g1.setDisplayPosition(
       height,
@@ -659,10 +658,10 @@ class Bridge extends ChangeNotifier {
     }
     if (display.active) return false;
     if (silentMode == true) {
-      _log('Ruhemodus – Dashboard nicht angezeigt');
+      _log(tr.coreLogSilentDashboardSkipped);
       return true;
     }
-    _log('Dashboard (Tippen)');
+    _log(tr.coreLogDashboardTap);
     _dashboardShown = true;
     final seconds = haConfig.displayDuration;
     await display.showText(
@@ -688,7 +687,7 @@ class Bridge extends ChangeNotifier {
   /// Nodding and shaking the head as gestures (ScouterKit).
   Future<void> setHeadGestures(bool enabled) async {
     settings.headGestures = enabled;
-    _log(enabled ? 'Kopfgesten an' : 'Kopfgesten aus');
+    _log(enabled ? tr.coreLogHeadGesturesOn : tr.coreLogHeadGesturesOff);
     notifyListeners();
     if (g1.connected) await g1.setHeadGestures(enabled);
   }
@@ -740,7 +739,9 @@ class Bridge extends ChangeNotifier {
       case G1Event.silentModeOff:
         // Triple tap: the glasses switched silent mode themselves.
         silentMode = event.code == G1Event.silentModeOn;
-        _log(silentMode! ? 'Ruhemodus an (Brille)' : 'Ruhemodus aus (Brille)');
+        _log(
+          silentMode! ? tr.coreLogSilentOnGlasses : tr.coreLogSilentOffGlasses,
+        );
         notifyListeners();
         unawaited(_silentModeFeedback(silentMode!));
         unawaited(_syncDashboard());
@@ -765,13 +766,13 @@ class Bridge extends ChangeNotifier {
     if (assistRunning) return;
     final client = _ha;
     if (client == null || !haConnected) {
-      await display.showAiError('Keine Verbindung zu Home Assistant');
+      await display.showAiError(tr.coreNoHaConnection);
       return;
     }
     assistRunning = true;
     _dashboardShown = false;
     notifyListeners();
-    _log('Assist gestartet');
+    _log(tr.coreLogAssistStarted);
 
     final followUp =
         _conversationTime != null &&
@@ -785,11 +786,11 @@ class Bridge extends ChangeNotifier {
       entryId: settings.entryId,
       conversationId: followUp ? _conversationId : null,
       onTranscript: (text) {
-        _log('Erkannt: $text');
+        _log(tr.coreLogRecognized(text));
         lastQuery = text;
         notifyListeners();
         if (haConfig.showTranscript && text.isNotEmpty) {
-          display.showAiStatus('» $text «\nEinen Moment …');
+          display.showAiStatus(tr.coreTranscript(text));
         }
       },
     );
@@ -800,7 +801,7 @@ class Bridge extends ChangeNotifier {
       try {
         session.addAudio(decoder.decode(lc3));
       } catch (e) {
-        _log('Audio: $e');
+        _log(tr.coreLogAudio('$e'));
       }
     });
     // With Even's firmware nothing is drawn while the touch bar is held (see
@@ -808,16 +809,16 @@ class Bridge extends ChangeNotifier {
     _startFastConnection();
     if (g1.supportsDesigns) unawaited(display.showAiStatus(listeningText));
     if (!await g1.setMic(true)) {
-      _log('Mikrofon konnte nicht aktiviert werden');
+      _log(tr.coreLogMicFailed);
     }
 
     _recordTimer = Timer(maxRecording, _finishAssist);
     try {
       await session.start();
     } catch (e) {
-      _log('Assist-Start fehlgeschlagen: $e');
+      _log(tr.coreLogAssistStartFailed('$e'));
       await _abortAssist();
-      await display.showAiError('Assist nicht verfügbar:\n$e');
+      await display.showAiError(tr.coreAssistUnavailable('$e'));
     }
   }
 
@@ -853,14 +854,14 @@ class Bridge extends ChangeNotifier {
       onTimeout: () => AssistResult(
         query: lastQuery ?? '',
         response: '',
-        error: 'Zeitüberschreitung',
+        error: tr.coreTimeout,
       ),
     );
     if (_assist != session) return; // aborted meanwhile
     _cleanupAssist();
 
     if (result.error != null) {
-      _log('Assist-Fehler: ${result.error}');
+      _log(tr.coreLogAssistError(result.error!));
       await display.showAiError(result.error!);
       return;
     }
@@ -869,13 +870,13 @@ class Bridge extends ChangeNotifier {
     lastResponse = result.response;
     _conversationId = result.conversationId;
     _conversationTime = DateTime.now();
-    _log('Antwort: ${result.response}');
+    _log(tr.coreLogAnswer(result.response));
     notifyListeners();
 
     final duration = haConfig.displayDuration;
     // The integration records question and answer in Home Assistant.
     await display.showAiAnswer(
-      result.response.isEmpty ? 'Erledigt.' : result.response,
+      result.response.isEmpty ? tr.coreDone : result.response,
       closeAfter: duration > 0 ? Duration(seconds: max(duration, 8)) : null,
     );
     // Logs what each arm shows, to spot left/right differences.
@@ -886,7 +887,7 @@ class Bridge extends ChangeNotifier {
   void setEvenAiAnswers(bool enabled) {
     settings.evenAiAnswers = enabled;
     display.evenAiAnswers = enabled;
-    _log(enabled ? 'Antworten im Even-AI-Modus' : 'Antworten im Textmodus');
+    _log(enabled ? tr.coreLogEvenAiOn : tr.coreLogEvenAiOff);
     notifyListeners();
   }
 
@@ -904,7 +905,7 @@ class Bridge extends ChangeNotifier {
     if (enabled == recorder.recording) return;
     if (enabled) {
       if (!g1.connected) {
-        _log('Aufnahme: Brille nicht verbunden, Mikrofon folgt');
+        _log(tr.coreLogRecordingNoGlasses);
       }
       await recorder.start();
       display.idleText = _recordingDot ? recordingDotText : null;
@@ -935,10 +936,10 @@ class Bridge extends ChangeNotifier {
   /// Switches the silent mode of the glasses.
   Future<void> setSilentMode(bool enabled) async {
     if (!g1.connected) {
-      _log('Ruhemodus: Brille nicht verbunden');
+      _log(tr.coreLogSilentNoGlasses);
       return;
     }
-    _log(enabled ? 'Ruhemodus an' : 'Ruhemodus aus');
+    _log(enabled ? tr.coreLogSilentOn : tr.coreLogSilentOff);
     if (enabled) {
       _dashboardShown = false;
       if (display.active) await display.clear();
@@ -963,12 +964,12 @@ class Bridge extends ChangeNotifier {
 
   /// Asks both arms which screen they show and writes it to the log.
   Future<String> checkDisplay() async {
-    if (!g1.connected) return 'Brille nicht verbunden';
+    if (!g1.connected) return tr.coreGlassesNotConnected;
     final left = await g1.readScreenState(G1Side.left);
     final right = await g1.readScreenState(G1Side.right);
-    String name(int? id) => id == null ? 'keine Antwort' : screenName(id);
-    final text = 'Anzeige links: ${name(left)}, rechts: ${name(right)}';
-    _log(left == right ? text : '$text – UNTERSCHIEDLICH');
+    String name(int? id) => id == null ? tr.coreNoAnswer : screenName(id);
+    final text = tr.coreDisplayCheck(name(left), name(right));
+    _log(left == right ? text : tr.coreDisplayCheckDiffers(text));
     return text;
   }
 

@@ -38,8 +38,8 @@ Future<void> ensureBackgroundOperation() async {
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: 'even_g1_bridge',
-        channelName: 'Even G1 Verbindung',
-        channelDescription: 'Hält die Verbindung zur Brille im Hintergrund',
+        channelName: tr.coreChannelName,
+        channelDescription: tr.coreChannelDescription,
       ),
       iosNotificationOptions: const IOSNotificationOptions(),
       foregroundTaskOptions: ForegroundTaskOptions(
@@ -53,7 +53,7 @@ Future<void> ensureBackgroundOperation() async {
         serviceId: 4711,
         serviceTypes: [ForegroundServiceTypes.connectedDevice],
         notificationTitle: 'Even G1 ↔ Home Assistant',
-        notificationText: 'Verbindung aktiv',
+        notificationText: tr.coreServiceText,
       );
       if (result is ServiceRequestFailure) {
         debugPrint('Foreground service not started: ${result.error}');

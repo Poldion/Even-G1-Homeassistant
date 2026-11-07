@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:even_g1_ha/bridge.dart';
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
+import 'package:even_g1_ha/l10n/l10n.dart';
 import 'package:even_g1_ha/main.dart';
 import 'package:even_g1_ha/settings.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,9 @@ void main() {
   setUpAll(_loadFonts);
 
   testWidgets('overview and settings tabs build', (tester) async {
+    // The texts below are the German ones.
+    L10n.apply('de');
+    addTearDown(() => L10n.apply('en'));
     tester.view.physicalSize = const Size(412, 900);
     tester.view.devicePixelRatio = 1;
     SharedPreferences.setMockInitialValues({
