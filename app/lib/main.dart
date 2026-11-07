@@ -5,6 +5,7 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 import 'bridge.dart';
 import 'g1/g1_connection.dart';
+import 'l10n/l10n.dart';
 import 'scouter/scouter_connection.dart';
 import 'settings.dart';
 import 'ui/app_shell.dart';
@@ -13,6 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   FlutterForegroundTask.initCommunicationPort();
   final settings = await Settings.load();
+  L10n.apply(settings.language);
   final firmware = G1Firmware.fromId(settings.glassesFirmware);
   final bridge = Bridge(
     settings,
@@ -60,17 +62,48 @@ Future<void> ensureBackgroundOperation() async {
   }
 }
 
-class EvenG1App extends StatelessWidget {
+class EvenG1App extends StatefulWidget {
   const EvenG1App({super.key, required this.bridge});
 
   final Bridge bridge;
 
   @override
-  Widget build(BuildContext context) {
+  State<EvenG1App> createState() => _EvenG1AppState();
+}
+
+class _EvenG1AppState extends State<EvenG1App> with WidgetsBindingObserver {
+  Bridge get bridge => widget.bridge;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// The phone's language changed: follow it with the "system" setting.
+  @override
+  void didChangeLocales(List<Locale>? locales) => L10n.apply(L10n.setting);
+
+  @override
+  Widget build(BuildContext context) =>
+      ValueListenableBuilder(valueListenable: L10n.locale, builder: _build);
+
+  Widget _build(BuildContext context, Locale locale, Widget? _) {
     final scheme = ColorScheme.fromSeed(seedColor: const Color(0xFF18BCF2));
     return WithForegroundTask(
+      // A new language rebuilds every screen (texts come from `tr`).
       child: MaterialApp(
-        title: 'Even G1 für Home Assistant',
+        key: ValueKey(locale),
+        title: tr.appTitle,
+        locale: locale,
+        supportedLocales: L10n.supported,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
         theme: ThemeData(colorScheme: scheme, useMaterial3: true),
         darkTheme: ThemeData(
           colorScheme: ColorScheme.fromSeed(

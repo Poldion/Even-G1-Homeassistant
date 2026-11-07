@@ -1,0 +1,9 @@
+# App texts: English (template) and German. See CLAUDE.md: every key exists
+# in both files; CI fails on untranslated messages.
+arb-dir: lib/l10n
+template-arb-file: app_en.arb
+output-dir: lib/l10n/gen
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+nullable-getter: false
+untranslated-messages-file: build/untranslated_messages.json

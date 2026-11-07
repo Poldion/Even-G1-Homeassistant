@@ -39,8 +39,8 @@
           "dashboard_entities": "Shown as \"Name: state\" lines on the glasses dashboard, in this order.",
           "dashboard_calendars": "Appointments of today (not yet over) and tomorrow appear on the dashboard.",
           "dashboard_todos": "Open to-dos with a due date appear on the dashboard, the most urgent first.",
-          "dashboard_template": "Empty = built-in layout: time and date, entities, appointments and to-dos on one page. A template replaces the layout below the entities and can use the variables kopfzeile, agenda and agenda_mehr.",
-          "listening_template": "Shown in a frame while you hold the left touch bar (ScouterKit only). Empty = \"{{ assistent }} hört zu …\"; the variable assistent is the assistant's name.",
+          "dashboard_template": "Empty = default layout: time and date, entities, appointments and to-dos on one page. A template replaces the layout below the entities and can use the variables header, agenda and agenda_more (German names kopfzeile, agenda_mehr also work).",
+          "listening_template": "Shown in a frame while you hold the left touch bar (ScouterKit only). Empty = \"{{ assistant }} is listening …\"; the variable assistant (or assistent) is the assistant's name.",
           "dashboard_style": "Only the ScouterKit firmware draws the frame and title; with Even's firmware the dashboard stays plain."
         }
       }

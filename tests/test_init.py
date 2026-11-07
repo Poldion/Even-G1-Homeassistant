@@ -550,6 +550,7 @@ async def test_dashboard_agenda(
     hass.services.async_register(
         "todo", "get_items", get_items, supports_response=SupportsResponse.ONLY
     )
+    hass.config.language = "de"
     hass.states.async_set("calendar.familie", "off")
     hass.states.async_set("todo.haushalt", "2")
     hass.config_entries.async_update_entry(
@@ -642,7 +643,7 @@ async def test_listening_text_and_style(
     )
     await client.receive_json()
     config = (await client.receive_json())["event"]
-    assert config["listening_text"].endswith("hört zu …")
+    assert config["listening_text"] == "Home Assistant\nis listening …"
     assert config["dashboard_style"] == "plain"
 
     hass.config_entries.async_update_entry(

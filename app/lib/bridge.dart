@@ -12,6 +12,7 @@ import 'ha/assist_session.dart';
 import 'ha/ha_client.dart';
 import 'notifications/phone_notifications.dart';
 import 'scouter/sk_icons.dart';
+import 'l10n/l10n.dart';
 import 'recording/recorder.dart';
 import 'settings.dart';
 
@@ -986,6 +987,13 @@ class Bridge extends ChangeNotifier {
     _decoder = null;
     _assist = null;
     assistRunning = false;
+    notifyListeners();
+  }
+
+  /// App language: "system", "en" or "de" (also for texts on the glasses).
+  void setLanguage(String language) {
+    settings.language = language;
+    L10n.apply(language);
     notifyListeners();
   }
 

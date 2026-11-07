@@ -6,7 +6,10 @@ import re
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.template import Template
 
-DOC = Path(__file__).parent.parent / "docs" / "DASHBOARD.md"
+DOCS = [
+    Path(__file__).parent.parent / "docs" / name
+    for name in ("DASHBOARD.md", "DASHBOARD.de.md")
+]
 
 STATES = {
     "weather.zuhause": ("cloudy", {"temperature": 8.2}),
@@ -27,10 +30,14 @@ STATES = {
     "sensor.auto_reichweite": ("310", {}),
 }
 
+# The integration provides English and German names (device.py).
 VARIABLES = {
+    "header": "09:41  ·  Sat, Nov 7",
     "kopfzeile": "09:41  ·  Sa, 7. Nov",
-    "agenda": "» heute 18:00  Beispieltermin",
+    "agenda": "» today 18:00  Example appointment",
+    "agenda_more": 2,
     "agenda_mehr": 2,
+    "assistant": "Jarvis",
     "assistent": "Jarvis",
 }
 
@@ -39,8 +46,15 @@ async def test_doc_templates_render(hass: HomeAssistant) -> None:
     """Every jinja block of the guide renders and fits a ScouterKit line."""
     for entity_id, (state, attributes) in STATES.items():
         hass.states.async_set(entity_id, state, attributes)
-    blocks = re.findall(r"```jinja\n(.*?)```", DOC.read_text(), re.S)
-    assert len(blocks) >= 8
+    for doc in DOCS:
+        if not doc.exists():
+            continue
+        blocks = re.findall(r"```jinja\n(.*?)```", doc.read_text(), re.S)
+        assert len(blocks) >= 8, doc
+        _render_all(hass, blocks)
+
+
+def _render_all(hass: HomeAssistant, blocks: list[str]) -> None:
     for block in blocks:
         text = Template(block, hass).async_render(VARIABLES, parse_result=False)
         assert text.strip(), block
