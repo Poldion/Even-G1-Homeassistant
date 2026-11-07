@@ -7,6 +7,31 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'protocol.dart';
 import 'text_layout.dart';
 
+/// How a text is set on the display. Only ScouterKit draws the designs;
+/// Even's firmware shows every text plain.
+enum G1TextStyle {
+  /// Lines as they are.
+  plain('plain'),
+
+  /// A frame with bevelled corners around the lines.
+  frame('frame'),
+
+  /// Framed, the first line a centred title with a rule below it.
+  card('card'),
+
+  /// The first line a centred title with a rule below it, no frame.
+  title('title'),
+
+  /// Centred lines in a frame that fits them (Assist status).
+  badge('badge');
+
+  const G1TextStyle(this.id);
+  final String id;
+
+  static G1TextStyle fromId(String? id) =>
+      values.firstWhere((s) => s.id == id, orElse: () => plain);
+}
+
 /// Firmware on the arms.
 enum G1Firmware {
   /// Even Realities' own firmware (the official app works with it).
@@ -203,7 +228,15 @@ class G1Connection extends ChangeNotifier {
   Future<void> setDashboard({
     required bool onHeadUp,
     required String text,
+    G1TextStyle style = G1TextStyle.plain,
   }) async {}
+
+  /// The glasses draw [G1TextStyle] designs and play animations
+  /// (ScouterKit).
+  bool get supportsDesigns => false;
+
+  /// Plays the animation of silent mode switching [on] or off.
+  Future<void> playSilentModeAnimation(bool on) async {}
 
   /// The glasses apply an offset to their automatic brightness themselves
   /// (ScouterKit: from the light sensor while the panel is on).
@@ -736,6 +769,7 @@ class G1Connection extends ChangeNotifier {
     bool left = true,
     bool right = true,
     String? icon,
+    G1TextStyle style = G1TextStyle.plain,
   }) {
     return send(
       G1Packets.text(

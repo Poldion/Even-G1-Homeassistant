@@ -28,7 +28,8 @@ class HaConfig {
           json['dashboard_gesture'] as String? ??
           ((json['dashboard_on_head_up'] as bool? ?? false)
               ? 'head_up'
-              : 'none');
+              : 'none'),
+      dashboardStyle = G1TextStyle.fromId(json['dashboard_style'] as String?);
 
   HaConfig.defaults()
     : name = '',
@@ -37,7 +38,8 @@ class HaConfig {
       assistPipeline = null,
       assistName = null,
       showTranscript = true,
-      dashboardGesture = 'none';
+      dashboardGesture = 'none',
+      dashboardStyle = G1TextStyle.plain;
 
   final String name;
   final String? deviceId;
@@ -51,6 +53,9 @@ class HaConfig {
   /// Gesture that shows the Home Assistant dashboard: "head_up",
   /// "single_tap_left", "single_tap_right" or "none".
   final String dashboardGesture;
+
+  /// Design of the dashboard (ScouterKit draws it; Even shows it plain).
+  final G1TextStyle dashboardStyle;
 
   /// Show the Home Assistant dashboard when the head is raised.
   bool get dashboardOnHeadUp => dashboardGesture == 'head_up';
@@ -123,6 +128,13 @@ class Bridge extends ChangeNotifier {
 
   /// Rendered dashboard template, pushed by Home Assistant on changes.
   String _dashboardText = '';
+
+  /// Rendered listening template: shown while the touch bar is held
+  /// (ScouterKit; Even's firmware shows its own screen then).
+  String? _listeningText;
+
+  String get listeningText =>
+      _listeningText ?? '${haConfig.assistName ?? 'Home Assistant'}\nhört zu …';
   bool _dashboardShown = false;
   bool _glassesSettingsApplied = false;
   int _dashboardCounter = 0;
@@ -239,6 +251,10 @@ class Bridge extends ChangeNotifier {
     switch (event['type']) {
       case 'config':
         haConfig = HaConfig.fromJson(event);
+        final listening = (event['listening_text'] as String? ?? '').trim();
+        if (event.containsKey('listening_text')) {
+          _listeningText = listening.isEmpty ? null : listening;
+        }
         _log('Konfiguration erhalten (${haConfig.name})');
         if (haConfig.dashboardGesture == 'none' && _dashboardShown) {
           _dashboardShown = false;
@@ -253,8 +269,14 @@ class Bridge extends ChangeNotifier {
         // Refresh only while it is on the display; otherwise the glasses
         // are not woken up for updates.
         if (_dashboardShown && display.active && g1.connected) {
-          await display.showText(_dashboardText);
+          await display.showText(
+            _dashboardText,
+            style: haConfig.dashboardStyle,
+          );
         }
+      case 'listening':
+        final text = (event['text'] as String? ?? '').trim();
+        _listeningText = text.isEmpty ? null : text;
       case 'show_text':
         final title = (event['title'] as String? ?? '').trim();
         final message = (event['message'] as String? ?? '').trim();
@@ -645,6 +667,7 @@ class Bridge extends ChangeNotifier {
     await display.showText(
       _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
       closeAfter: seconds > 0 ? Duration(seconds: seconds) : null,
+      style: haConfig.dashboardStyle,
     );
     return true;
   }
@@ -657,6 +680,7 @@ class Bridge extends ChangeNotifier {
     await g1.setDashboard(
       onHeadUp: haConfig.dashboardOnHeadUp && silentMode != true,
       text: _dashboardText,
+      style: haConfig.dashboardStyle,
     );
   }
 
@@ -678,6 +702,7 @@ class Bridge extends ChangeNotifier {
     _dashboardShown = true;
     await display.showText(
       _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+      style: haConfig.dashboardStyle,
     );
   }
 
@@ -716,6 +741,7 @@ class Bridge extends ChangeNotifier {
         silentMode = event.code == G1Event.silentModeOn;
         _log(silentMode! ? 'Ruhemodus an (Brille)' : 'Ruhemodus aus (Brille)');
         notifyListeners();
+        unawaited(_silentModeFeedback(silentMode!));
         unawaited(_syncDashboard());
         unawaited(_reportState());
     }
@@ -776,8 +802,10 @@ class Bridge extends ChangeNotifier {
         _log('Audio: $e');
       }
     });
-    // Nothing is drawn while the touch bar is held (see thinkingText).
+    // With Even's firmware nothing is drawn while the touch bar is held (see
+    // thinkingText); ScouterKit shows the listening template.
     _startFastConnection();
+    if (g1.supportsDesigns) unawaited(display.showAiStatus(listeningText));
     if (!await g1.setMic(true)) {
       _log('Mikrofon konnte nicht aktiviert werden');
     }
@@ -915,10 +943,21 @@ class Bridge extends ChangeNotifier {
       if (display.active) await display.clear();
     }
     await g1.setSilentMode(enabled);
+    final changed = silentMode != enabled;
     silentMode = enabled;
     notifyListeners();
+    if (changed) unawaited(_silentModeFeedback(enabled));
     await _syncDashboard();
     await _reportState();
+  }
+
+  /// Animation on the glasses when silent mode changes (ScouterKit).
+  Future<void> _silentModeFeedback(bool on) async {
+    if (!g1.connected || !g1.supportsDesigns || assistRunning) return;
+    // The animation draws only its region: the rest of the panel dark.
+    _dashboardShown = false;
+    await display.clear();
+    await g1.playSilentModeAnimation(on);
   }
 
   /// Asks both arms which screen they show and writes it to the log.

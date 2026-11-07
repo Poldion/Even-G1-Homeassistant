@@ -43,10 +43,12 @@ class G1Display {
     Duration? closeAfter,
     bool evenAi = false,
     String? icon,
+    G1TextStyle style = G1TextStyle.plain,
   }) async {
     _reset();
     _active = true;
     _icon = icon;
+    _style = style;
     _evenAi = evenAi;
     _closeAfter = (closeAfter == null || closeAfter == Duration.zero)
         ? null
@@ -90,9 +92,13 @@ class G1Display {
     return ok;
   }
 
-  /// Short status line during Assist (e.g. "Ich höre zu …").
-  Future<bool> showAiStatus(String text) =>
-      showText(text, evenAi: evenAiAnswers);
+  /// Short status line during Assist (e.g. "Ich höre zu …"), in a frame
+  /// where the glasses draw designs.
+  Future<bool> showAiStatus(String text) => showText(
+    text,
+    evenAi: evenAiAnswers,
+    style: g1.supportsDesigns ? G1TextStyle.badge : G1TextStyle.plain,
+  );
 
   /// Assist answer with automatic paging.
   Future<bool> showAiAnswer(String text, {Duration? closeAfter}) =>
@@ -107,6 +113,7 @@ class G1Display {
 
   /// App icon of the notification on the display (ScouterKit).
   String? _icon;
+  G1TextStyle _style = G1TextStyle.plain;
 
   /// Error message that closes itself after a few seconds.
   Future<bool> showAiError(String text) =>
@@ -171,7 +178,9 @@ class G1Display {
   Future<bool> _showPage(int generation, {bool last = false}) async {
     if (generation != _generation || !g1.connected) return false;
     screen.value = _screens[_page];
-    if (!_evenAi) return g1.sendText(_screens[_page], icon: _icon);
+    if (!_evenAi) {
+      return g1.sendText(_screens[_page], icon: _icon, style: _style);
+    }
     final isLast =
         last || (_screens.length > 1 && _page == _screens.length - 1);
     final status = _manual
@@ -239,6 +248,7 @@ class G1Display {
     _active = false;
     _closeAfter = null;
     _evenAi = false;
+    _style = G1TextStyle.plain;
     screen.value = null;
   }
 }

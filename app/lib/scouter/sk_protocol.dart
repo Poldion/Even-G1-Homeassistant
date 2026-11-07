@@ -27,8 +27,11 @@ class SkUuids {
 class SkOp {
   static const write = 0x01;
   static const writeRle = 0x02;
+  static const add = 0x11;
+  static const call = 0x31;
   static const sleepUntil = 0x40;
   static const raise = 0x42;
+  static const sysRead = 0x44;
   static const sysWrite = 0x45;
   static const fill = 0x50;
   static const blit = 0x51;
@@ -224,6 +227,13 @@ class SkCode {
     for (final w in wordIndices) {
       _u16(w);
     }
+  }
+
+  /// `CALL`: runs the stored code at [target] as part of this packet
+  /// (VM.md §6.2).
+  void call(int target) {
+    _b.addByte(SkOp.call);
+    _u24(target);
   }
 
   /// `RAISE`: sets trigger [t] pending (hands work to the program).

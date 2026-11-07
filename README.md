@@ -23,7 +23,7 @@ die das ganze Display und alle Sensoren der Brille freigibt (siehe
 - **Aufnahmen** mit dem Brillen-Mikrofon, gestartet in der App oder in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transkribiert und fasst zusammen, die Zusammenfassung landet in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
 - **Handy-Benachrichtigungen** auf der Brille, pro App wählbar
 - **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
-- **Mit ScouterKit zusätzlich:** Texte auf dem ganzen Display (11 statt 5 Zeilen), beide Augen exakt gleichzeitig, App-Symbole bei Benachrichtigungen, Dashboard beim Hochschauen direkt von der Brille (ohne Handy), Nicken und Kopfschütteln als Gesten, Helligkeits-Offset zur Automatik
+- **Mit ScouterKit zusätzlich:** Texte auf dem ganzen Display (11 statt 5 Zeilen), beide Augen exakt gleichzeitig, App-Symbole bei Benachrichtigungen, Dashboard beim Hochschauen direkt von der Brille (ohne Handy), Nicken und Kopfschütteln als Gesten, Helligkeits-Offset zur Automatik, Dashboard-Designs mit Rahmen und Titelzeile, ein eigener Text beim Zuhören von Assist und eine Animation beim Ruhemodus
 
 ## Firmware: Even oder ScouterKit
 
@@ -128,9 +128,11 @@ Optionen unter *Integration → Konfigurieren*:
 | --- | --- |
 | Assistent | Welche Assist-Pipeline antwortet (auch über die Entität „Assistent“) |
 | Erkannte Frage anzeigen | Zeigt nach dem Loslassen die erkannte Frage |
+| Text beim Zuhören | Nur ScouterKit: Template, das im Rahmen erscheint, solange du die Touchbar hältst (Standard `{{ assistent }}` + „hört zu …“) |
 | Automatische Verstärkung / Rauschunterdrückung | Hilft bei leiser Sprache bzw. lauter Umgebung |
 | Standard-Anzeigedauer | Sekunden bis zum Ausblenden (0 = bis Doppeltippen) |
 | Dashboard-Geste | Kopf gehoben, Tippen links oder rechts |
+| Design des Dashboards | Nur ScouterKit: schlicht, Rahmen, Karte (Rahmen mit Titelzeile) oder Titelzeile |
 | Dashboard-Entitäten | Zeilen „Name: Zustand Einheit“ auf dem Brillen-Dashboard |
 | Kalender | Termine von heute (noch nicht vorbei) und morgen |
 | To-do-Listen | Offene To-dos mit Fälligkeitsdatum, die dringendsten zuerst |

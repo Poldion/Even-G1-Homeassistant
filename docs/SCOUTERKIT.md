@@ -180,6 +180,24 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   und Runterschauen, belegte Anzeige, Nicken, Kopfschütteln, langsame und
   diagonale Bewegungen.
 
+## Designs und Animationen
+
+Mit der Schrift lädt die App eine kleine Bibliothek in jeden Bügel
+(`app/lib/scouter/sk_lib.dart`, `0x3E000`–`0x3F400`). Pakete rufen sie mit
+`CALL` auf:
+
+- `box` zeichnet einen Rahmen mit abgeschrägten Ecken (zwei Pixel breit) in
+  den Bildpuffer. Daraus entstehen die Dashboard-Designs, der Text beim
+  Zuhören und die Statusmeldungen von Assist. Das Programm auf den Bügeln
+  zeichnet dieselben Rahmen streifenweise aus Rechtecken; beide Wege ergeben
+  im Interpreter dasselbe Bild.
+- `scene` zeichnet ein Einzelbild einer Animation: einen Bereich löschen,
+  den Rahmen, bis zu zwei Textzeilen, dann nur diesen Bereich zeigen
+  (`DRAW`, etwa 10 ms). Die App schickt alle Bilder vorab als Pakete, die mit
+  `SLEEP_UNTIL` auf ihre Zeit in der Uhr des jeweiligen Bügels warten. So
+  laufen beide Augen mit 30 Bildern pro Sekunde gleichzeitig, unabhängig von
+  der Funkverbindung (VM.md §7). Ein Bild kostet rund 70 Byte.
+
 ## Technik
 
 Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):

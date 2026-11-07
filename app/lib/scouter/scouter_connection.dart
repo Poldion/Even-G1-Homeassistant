@@ -9,13 +9,16 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../g1/g1_connection.dart';
 import '../g1/protocol.dart';
+import 'sk_anim.dart';
 import 'sk_asm.dart';
 import 'sk_clock.dart';
 import 'sk_font.dart';
 import 'sk_icons.dart';
+import 'sk_lib.dart';
 import 'sk_link.dart';
 import 'sk_program.dart';
 import 'sk_protocol.dart';
+import 'sk_style.dart';
 
 /// One arm running g1v0.
 class _SkArm {
@@ -447,9 +450,13 @@ class ScouterConnection extends G1Connection {
         arm.link.start(h.rxNext, h.execNext, h.credits, maxPacket);
         final font = _loadedFont ??= await _fontLoader();
         final t0 = DateTime.now();
-        final ok = await arm.link.run(
-          skUpload(SkArena.font, font.blob, maxPacket - 2),
-        );
+        final lib = SkLib.build();
+        final ok = await arm.link.run([
+          ...skUpload(SkArena.font, font.blob, maxPacket - 2),
+          // Frames and animations (SkLib), called by later packets.
+          ...skUpload(SkLib.pool, lib.pool, maxPacket - 2),
+          ...skUpload(SkLib.code, lib.code, maxPacket - 2),
+        ]);
         if (!ok) throw StateError('font upload failed');
         arm.fontLoaded = true;
         _debug(
@@ -544,7 +551,11 @@ class ScouterConnection extends G1Connection {
 
   bool _dashboardOnHeadUp = false;
   String _dashboardText = '';
+  G1TextStyle _dashboardStyle = G1TextStyle.plain;
   bool _headGestures = false;
+
+  /// Bands of the dashboard as last written (SkResident.rows).
+  int _residentRows = 0;
 
   @override
   bool get showsDashboardItself =>
@@ -555,6 +566,37 @@ class ScouterConnection extends G1Connection {
   @override
   bool get supportsHeadGestures => true;
 
+  @override
+  bool get supportsDesigns => true;
+
+  /// Plays the silent mode animation on both eyes at the same moment
+  /// (SkAnimation); the panels are off again at its end.
+  @override
+  Future<void> playSilentModeAnimation(bool on) async {
+    final font = _loadedFont ??= await _fontLoader();
+    final arms = _targets().where((a) => a.inCase != 1).toList();
+    if (arms.isEmpty) return;
+    final cx = SkPanel.width ~/ 2, cy = textTop + 2 * _lineHeight;
+    final anim = on
+        ? SkAnimation.sleep(font, cx: cx, cy: cy)
+        : SkAnimation.wake(font, cx: cx, cy: cy);
+    final synced = arms.length == 2 && arms.every((a) => a.clock.known);
+    // Time for the first packets to arrive before the first frame.
+    final at = SkClock.hostNow() + _drawLeadUs(arms) + 150000;
+    _debug(on ? 'Animation: Ruhemodus an' : 'Animation: Ruhemodus aus');
+    await Future.wait(
+      arms.map(
+        (a) => a.link.run(
+          anim.code(
+            font,
+            maxCode: a.link.maxPacket - 2,
+            start: synced ? a.clock.toArm(at) : null,
+          ),
+        ),
+      ),
+    );
+  }
+
   bool _wantsResident(_SkArm arm) =>
       _dashboardOnHeadUp || (_headGestures && arm.side == G1Side.right);
 
@@ -562,10 +604,15 @@ class ScouterConnection extends G1Connection {
   Future<void> setDashboard({
     required bool onHeadUp,
     required String text,
+    G1TextStyle style = G1TextStyle.plain,
   }) async {
-    final changed = onHeadUp != _dashboardOnHeadUp || text != _dashboardText;
+    final changed =
+        onHeadUp != _dashboardOnHeadUp ||
+        text != _dashboardText ||
+        style != _dashboardStyle;
     _dashboardOnHeadUp = onHeadUp;
     _dashboardText = text;
+    _dashboardStyle = style;
     if (!changed) return;
     for (final arm in _arms.values.where((a) => a.ready)) {
       if (arm.resident == _wantsResident(arm)) {
@@ -649,7 +696,7 @@ class ScouterConnection extends G1Connection {
     );
     w(SkResident.left, textLeft);
     w(SkResident.ascent, font.ascent);
-    w(SkResident.rows, min(displayLines, SkResident.maxLines));
+    w(SkResident.rows, _residentRows);
     w(SkResident.lineHeight, font.lineSpacing);
     // busy, shown, count, up stay as they are (bytes 0–15 not written).
     final code = SkCode()
@@ -662,46 +709,106 @@ class ScouterConnection extends G1Connection {
   Future<bool> _writeDashboard(_SkArm arm, {bool redraw = false}) async {
     final font = _loadedFont ??= await _fontLoader();
     final maxCode = arm.link.maxPacket - 2;
-    final rows = min(displayLines, SkResident.maxLines);
-    final lines = wrap(
+    final bands = dashboardBands(
       font,
       _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
-      SkPanel.width - 2 * textLeft,
-    ).take(rows).toList();
+      _dashboardStyle,
+      top: textTop,
+      rows: min(displayLines, SkResident.maxLines),
+    );
     final text = BytesBuilder();
-    final table = ByteData(12 * lines.length);
-    var count = 0;
-    for (final line in lines) {
-      final glyphs = font.encode(line);
+    final rects = <SkRect>[];
+    final table = BytesBuilder();
+    for (final band in bands) {
+      final glyphs = band.text == null
+          ? const <int>[]
+          : font.encode(band.text!);
       final at = SkResident.text + text.length;
       if (at + glyphs.length > SkResident.textEnd) break;
+      if (rects.length + band.rects.length > SkResident.maxRects) break;
+      if (table.length ~/ 24 >= SkResident.maxEntries) break;
       text.add(glyphs);
-      table
-        ..setUint32(
-          12 * count,
-          textTop + count * font.lineSpacing,
-          Endian.little,
-        )
-        ..setUint32(12 * count + 4, at, Endian.little)
-        ..setUint32(12 * count + 8, glyphs.length, Endian.little);
-      count++;
+      table.add(
+        SkLib.u32s([
+          band.x,
+          band.y,
+          glyphs.isEmpty ? 0 : at,
+          glyphs.length,
+          rects.length,
+          band.rects.length,
+        ]),
+      );
+      rects.addAll(band.rects);
     }
+    _residentRows = table.length ~/ 24;
     List<int> u32(int v) => [v & 0xff, v >> 8 & 0xff, v >> 16 & 0xff, v >> 24];
     final codes = <Uint8List>[
       // No lines while they change, so the program never draws half of them.
       (SkCode()..write(SkResident.count.address, u32(0))).take(),
       ...skUpload(SkResident.text, text.toBytes(), maxCode),
+      ...skUpload(SkResident.lines, table.toBytes(), maxCode),
       ...skUpload(
-        SkResident.lines,
-        table.buffer.asUint8List(0, 12 * count),
+        SkResident.rects,
+        Uint8List.fromList(
+          SkLib.u32s([
+            for (final r in rects) ...[r.x, r.y, r.w, r.h, r.level],
+          ]),
+        ),
         maxCode,
       ),
       _residentState(font),
     ];
-    final last = SkCode()..write(SkResident.count.address, u32(count));
+    final last = SkCode()..write(SkResident.count.address, u32(_residentRows));
     if (redraw) last.raise(SkTrigger.user0);
     codes.add(last.take());
     return arm.link.run(codes);
+  }
+
+  /// The dashboard as the resident program draws it: bands of one line's
+  /// height, each with its text and the frame cut to it. Bands without
+  /// text come first, so the text bands drawn after them are not covered.
+  @visibleForTesting
+  static List<({int x, int y, String? text, List<SkRect> rects})>
+  dashboardBands(
+    SkFont font,
+    String text,
+    G1TextStyle style, {
+    required int top,
+    required int rows,
+  }) {
+    final lh = font.lineSpacing;
+    final layout = SkLayout.of(
+      font,
+      wrap(font, text, SkPanel.width - 2 * textLeft).take(rows).toList(),
+      style,
+      top: top,
+      left: textLeft,
+    );
+    final decor = layout.decor;
+    List<SkRect> cut(int y) => [for (final r in decor) ?r.clip(y, lh)];
+    final bands = <({int x, int y, String? text, List<SkRect> rects})>[];
+    // Rows below the text that held lines before (cleared).
+    final lines = layout.lines;
+    var y = lines.isEmpty ? top : lines.last.y + lh;
+    for (var i = lines.length; i < rows; i++, y += lh) {
+      if (y + lh > SkPanel.height) break;
+      bands.add((x: 0, y: y, text: null, rects: cut(y)));
+    }
+    // Frame and rule outside the text bands.
+    final box = layout.box;
+    final extra = <int>{
+      if (box != null) box.y,
+      if (box != null) box.bottom - lh,
+      if (layout.rule != null) lines.first.y + lh,
+    };
+    for (final e in extra) {
+      if (e < 0 || lines.any((l) => l.y == e)) continue;
+      bands.add((x: 0, y: e, text: null, rects: cut(e)));
+    }
+    for (final line in lines) {
+      bands.add((x: line.x, y: line.y, text: line.text, rects: cut(line.y)));
+    }
+    return bands;
   }
 
   void _onNotify(_SkArm arm, int a, int b) {
@@ -1128,6 +1235,7 @@ class ScouterConnection extends G1Connection {
     bool left = true,
     bool right = true,
     String? icon,
+    G1TextStyle style = G1TextStyle.plain,
   }) async {
     final font = _loadedFont ??= await _fontLoader();
     final arms = _targets(left: left, right: right).where((a) {
@@ -1154,6 +1262,7 @@ class ScouterConnection extends G1Connection {
       maxCode: maxCode,
       icon: iconAt,
       draw: !synced,
+      style: style,
     );
     final results = await Future.wait(arms.map((a) => a.link.run(codes)));
     if (!synced || !results.every((r) => r)) return results.every((r) => r);
@@ -1198,7 +1307,7 @@ class ScouterConnection extends G1Connection {
 
   /// Host code that draws [text] (lines split at '\n', wrapped to the panel)
   /// into the arena's frame and shows it, in packets of at most [maxCode]
-  /// bytes.
+  /// bytes. A [style] other than plain draws its frame with [SkLib].
   @visibleForTesting
   static List<Uint8List> textCode(
     SkFont font,
@@ -1207,10 +1316,16 @@ class ScouterConnection extends G1Connection {
     required int maxCode,
     int? icon,
     bool draw = true,
+    G1TextStyle style = G1TextStyle.plain,
   }) {
     final left = icon == null ? textLeft : iconTextLeft;
-    final lines = wrap(font, text, SkPanel.width - textLeft - left);
-    final maxLines = max(1, (SkPanel.height - top) ~/ font.lineSpacing);
+    final layout = SkLayout.of(
+      font,
+      wrap(font, text, SkPanel.width - textLeft - left),
+      icon == null ? style : G1TextStyle.plain,
+      top: top,
+      left: left,
+    );
     final packets = <Uint8List>[];
     var code = SkCode();
     void room(int bytes) {
@@ -1247,12 +1362,28 @@ class ScouterConnection extends G1Connection {
         SkIcons.size,
       );
     }
+    final box = layout.box, rule = layout.rule;
+    if (box != null) {
+      room(5 + 28 + 4);
+      SkLib.drawBox(code, box);
+    }
+    if (rule != null) {
+      room(skOpSize(7));
+      code.fill(
+        SkArena.frame,
+        SkPanel.stride,
+        rule.x,
+        rule.y,
+        rule.w,
+        rule.h,
+        rule.level,
+      );
+    }
     var textAt = SkArena.text;
-    for (var i = 0; i < min(lines.length, maxLines); i++) {
-      final glyphs = font.encode(lines[i]);
+    for (final line in layout.lines) {
+      final glyphs = font.encode(line.text);
       if (glyphs.isEmpty) continue;
       if (textAt + glyphs.length > SkArena.text + SkArena.textSize) break;
-      final baseline = top + font.ascent + i * font.lineSpacing;
       // The glyph indices and the GLYPHS that draws them, in one packet.
       final chunk = min(glyphs.length, maxCode - skOpSize(9) - 5);
       room(5 + chunk + skOpSize(9));
@@ -1261,9 +1392,9 @@ class ScouterConnection extends G1Connection {
         SkArena.font,
         SkArena.frame,
         SkPanel.stride,
-        left,
-        baseline,
-        textLevel,
+        line.x,
+        line.y + font.ascent,
+        line.level,
         textAt,
         chunk,
       );

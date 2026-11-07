@@ -98,6 +98,9 @@ void execute(
       expect(data.length, len);
       arena.setRange(addr, addr + len, data);
       i += 7 + n;
+    } else if (op == SkOp.call) {
+      ops.add(op);
+      i += 4;
     } else {
       if (op == SkOp.sleepUntil) {
         // One escaped operand: the word that holds the time.
@@ -109,6 +112,8 @@ void execute(
       final k = switch (op) {
         SkOp.sleepUntil => 1,
         SkOp.raise => 1,
+        SkOp.add => 3,
+        SkOp.sysRead => 2,
         SkOp.sysWrite => 2,
         SkOp.fill => 7,
         SkOp.blit => 12,
@@ -516,7 +521,19 @@ void main() {
           p.code,
         );
         final d = ByteData.sublistView(arena);
-        expect(d.getUint32(SkResident.count.address, Endian.little), 2);
+        // 11 bands: the 9 empty lines below first, then the 2 texts.
+        final bands = d.getUint32(SkResident.count.address, Endian.little);
+        expect(bands, 11);
+        expect(d.getUint32(SkResident.rows.address, Endian.little), bands);
+        int entry(int i, int word) => d.getUint32(
+          SkResident.lines + 4 * (SkResident.entryWords * i + word),
+          Endian.little,
+        );
+        expect(
+          [for (var i = 0; i < bands; i++) entry(i, 3) > 0],
+          [...List.filled(9, false), true, true],
+        );
+        expect(entry(9, 1), 140); // y of the first line
         expect(d.getUint32(SkResident.angle.address, Endian.little), 30);
         expect(
           arms.ctrl[side]!.where((c) => c[0] == SkCtrl.vmStart),
@@ -566,7 +583,7 @@ void main() {
       expect(
         ByteData.sublistView(arms.arenas[G1Side.left]!)
             .getUint32(SkResident.count.address, Endian.little),
-        1,
+        11, // one text band, ten empty ones
       );
       // Off again: the program stops.
       await g1.setDashboard(onHeadUp: false, text: '');

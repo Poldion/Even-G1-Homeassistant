@@ -9,6 +9,8 @@ CONF_DASHBOARD_ENTITIES: Final = "dashboard_entities"
 CONF_DASHBOARD_GESTURE: Final = "dashboard_gesture"
 CONF_DASHBOARD_CALENDARS: Final = "dashboard_calendars"
 CONF_DASHBOARD_TODOS: Final = "dashboard_todos"
+CONF_DASHBOARD_STYLE: Final = "dashboard_style"
+CONF_LISTENING_TEMPLATE: Final = "listening_template"
 CONF_DISPLAY_DURATION: Final = "display_duration"
 CONF_ASSIST_PIPELINE: Final = "assist_pipeline"
 CONF_SHOW_TRANSCRIPT: Final = "show_transcript"
@@ -29,6 +31,14 @@ DEFAULT_AUTO_GAIN: Final = 0
 DEFAULT_NOISE_SUPPRESSION: Final = 0
 
 DASHBOARD_GESTURE_NONE: Final = "none"
+
+# Designs of the dashboard (drawn by ScouterKit; Even's firmware shows text).
+DASHBOARD_STYLE_PLAIN: Final = "plain"
+DASHBOARD_STYLES: Final = [DASHBOARD_STYLE_PLAIN, "frame", "card", "title"]
+
+# Shown on the glasses while the touch bar is held (ScouterKit). Variable:
+# assistent, the name of the Assist pipeline.
+DEFAULT_LISTENING_TEMPLATE: Final = "{{ assistent }}\nhört zu …"
 
 # Gestures reported by the app. These map to the 0xF5 sub commands of the
 # G1 BLE protocol (see app/lib/g1/protocol.dart).
@@ -96,6 +106,7 @@ CMD_WEAR_DETECTION: Final = "wear_detection"
 CMD_CONFIG: Final = "config"
 CMD_RELOAD: Final = "reload"
 CMD_DASHBOARD: Final = "dashboard"
+CMD_LISTENING: Final = "listening"
 
 # Where the glasses are (status pushes 0x06/0x07/0x08/0x0B).
 WEAR_STATES: Final = ["worn", "not_worn", "case_open", "case_closed"]

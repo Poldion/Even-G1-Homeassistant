@@ -27,7 +27,9 @@
           "dashboard_entities": "Dashboard entities",
           "dashboard_calendars": "Calendars",
           "dashboard_todos": "To-do lists",
-          "dashboard_template": "Own dashboard template (optional)"
+          "dashboard_template": "Own dashboard template (optional)",
+          "listening_template": "Text while listening (template, optional)",
+          "dashboard_style": "Dashboard design"
         },
         "data_description": {
           "assist_pipeline": "Answers when you hold the left touch bar. Also selectable with the \"Assistant\" entity of the device.",
@@ -37,7 +39,9 @@
           "dashboard_entities": "Shown as \"Name: state\" lines on the glasses dashboard, in this order.",
           "dashboard_calendars": "Appointments of today (not yet over) and tomorrow appear on the dashboard.",
           "dashboard_todos": "Open to-dos with a due date appear on the dashboard, the most urgent first.",
-          "dashboard_template": "Empty = built-in layout: time and date, entities, appointments and to-dos on one page. A template replaces the layout below the entities and can use the variables kopfzeile, agenda and agenda_mehr."
+          "dashboard_template": "Empty = built-in layout: time and date, entities, appointments and to-dos on one page. A template replaces the layout below the entities and can use the variables kopfzeile, agenda and agenda_mehr.",
+          "listening_template": "Shown in a frame while you hold the left touch bar (ScouterKit only). Empty = \"{{ assistent }} hört zu …\"; the variable assistent is the assistant's name.",
+          "dashboard_style": "Only the ScouterKit firmware draws the frame and title; with Even's firmware the dashboard stays plain."
         }
       }
     }
@@ -60,6 +64,14 @@
       "options": {
         "screen": "Full screen text",
         "notification": "Notification"
+      }
+    },
+    "dashboard_style": {
+      "options": {
+        "plain": "Plain",
+        "frame": "Frame",
+        "card": "Card (frame with title)",
+        "title": "Title"
       }
     }
   },

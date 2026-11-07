@@ -146,6 +146,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: EvenG1ConfigEntry) -> bo
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     entry.runtime_data.async_start_agenda()
     entry.runtime_data.async_update_dashboard_tracking()
+    entry.runtime_data.async_update_listening_tracking()
     return True
 
 

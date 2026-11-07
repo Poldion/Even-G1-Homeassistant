@@ -7,6 +7,29 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-11-07
+
+### Added
+- ScouterKit: Während du die linke Touchbar hältst, zeigt die Brille einen
+  Text im Rahmen, zum Beispiel „Claude hört zu …“. Den Text legst du in den
+  Optionen der Integration als Template fest („Text beim Zuhören“, Variable
+  `assistent`). Auch „Einen Moment …“ und die erkannte Frage erscheinen im
+  Rahmen.
+- ScouterKit: Designs für das Dashboard (Option „Design des Dashboards“):
+  schlicht, Rahmen, Karte (Rahmen mit Titelzeile) und Titelzeile. Das
+  Programm auf den Bügeln zeichnet beim Hochschauen dasselbe Design.
+- ScouterKit: Animation beim Ruhemodus. Beim Einschalten erscheint eine
+  Karte „Ruhemodus“, faltet sich zu einer Linie und verlischt als Punkt.
+  Beim Ausschalten öffnet sie sich wieder („Bin wieder da“). Sie läuft mit
+  30 Bildern pro Sekunde auf beiden Augen gleichzeitig, egal ob du den
+  Ruhemodus an der Brille, in der App oder in Home Assistant schaltest.
+
+### Technik
+- Eine kleine Bibliothek im Speicher jedes Bügels (`SkLib`) zeichnet Rahmen
+  mit abgeschrägten Ecken und die Einzelbilder der Animation. Die App schickt
+  die Bilder vorab als Pakete, die auf ihre Zeit warten (`SLEEP_UNTIL`).
+  Geprüft mit ScouterKits Interpreter, Bild für Bild.
+
 ## [0.17.0] - 2026-11-07
 
 Ab dieser Version kommen die stabilen Versionen aus `main` und unterstützen

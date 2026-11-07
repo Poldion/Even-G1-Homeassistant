@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'sk_asm.dart';
+import 'sk_lib.dart';
 import 'sk_protocol.dart';
 
 /// The program this app leaves running on each arm (VM.md §5): it shows the
@@ -12,8 +13,12 @@ import 'sk_protocol.dart';
 /// [SkResident.shake]).
 ///
 /// The app shares the display with it through [SkResident.busy]: while the
-/// app shows a text the program draws nothing. The dashboard is drawn line
-/// by line through a band of its own, so the app's frame stays untouched.
+/// app shows a text the program draws nothing. The dashboard is drawn band
+/// by band through a buffer of its own, so the app's frame stays untouched.
+/// Each band ([entryWords] words at [lines]): x and y, the glyphs of its
+/// text (address, count; 0 for none) and its rectangles (first index and
+/// count in [rects], 5 words each: x, y within the band, w, h, level), the
+/// frame and rule of a styled dashboard cut to the band.
 class SkResident {
   // Arena layout, behind the app's frame (0x10000–0x35800).
   static const table = 0x35800;
@@ -21,13 +26,17 @@ class SkResident {
   static const poolWords = 112;
   static const state = 0x35A00;
   static const lines = 0x35B00;
-  static const maxLines = 20;
-  static const text = 0x35C00;
+  static const entryWords = 6;
+  static const maxEntries = 21;
+  static const maxLines = 16;
+  static const rects = 0x35D00;
+  static const maxRects = 89;
+  static const text = 0x36400;
   static const textEnd = band;
   static const band = 0x37000;
   static const bandRows = 32;
   static const code = 0x39800;
-  static const codeEnd = SkArena.size;
+  static const codeEnd = SkLib.code;
 
   // State words (written by the app unless noted).
   static final busy = SkW.at(state); // 1 while the app shows something
@@ -38,7 +47,7 @@ class SkResident {
   static final flags = SkW.at(state + 20); // bit 0 dashboard, bit 1 gestures
   static final left = SkW.at(state + 24); // x of the text
   static final ascent = SkW.at(state + 28); // baseline in the band
-  static final rows = SkW.at(state + 32); // lines to draw (blank ones too)
+  static final rows = SkW.at(state + 32); // bands to draw
   static final lineHeight = SkW.at(state + 36); // band height on the panel
   // Gesture state (program).
   static final _tick = SkW.at(state + 64);
@@ -75,7 +84,8 @@ class SkResident {
     final a = SkAsm(codeAt: code, poolAt: pool, poolWords: poolWords);
     const r0 = SkW.r(0), r1 = SkW.r(1), r2 = SkW.r(2), r3 = SkW.r(3);
     const r4 = SkW.r(4), r5 = SkW.r(5), r6 = SkW.r(6), r7 = SkW.r(7);
-    const r8 = SkW.r(8);
+    const r8 = SkW.r(8), r9 = SkW.r(9), r10 = SkW.r(10), r11 = SkW.r(11);
+    const r12 = SkW.r(12), r13 = SkW.r(13);
     final c0 = a.c(0), c1 = a.c(1);
 
     // START: sensors, then the head's state as at a tilt.
@@ -130,28 +140,49 @@ class SkResident {
     a.label('done');
     a.end();
 
-    // show: draws the dashboard, line by line through the band.
+    // show: draws the dashboard, band by band.
     a.label('show');
     a.and(r0, flags, a.c(flagDashboard));
     a.beq(r0, c0, 'ret');
     a.bne(busy, c0, 'ret');
     a.beq(count, c0, 'ret');
-    a.mov(r3, c0); // line i
+    a.mov(r3, c0); // band i
     a.label('line');
-    a.mul(r4, r3, a.c(3));
-    a.ld32(r5, a.c(lines), r4); // y
-    a.add(r6, r4, c1);
-    a.ld32(r7, a.c(lines), r6); // text address
-    a.add(r6, r4, a.c(2));
-    a.ld32(r8, a.c(lines), r6); // glyphs
+    a.mul(r4, r3, a.c(entryWords));
+    final table = a.c(lines);
+    void next(SkW d) {
+      a.ld32(d, table, r4);
+      a.add(r4, r4, c1);
+    }
+
+    next(r9); // x
+    next(r5); // y
+    next(r7); // text address
+    next(r8); // glyphs
+    next(r10); // first rectangle
+    next(r11); // rectangles
     final bandW = a.c(SkPanel.width), stride = a.c(SkPanel.stride);
-    a.fill(a.c(band), stride, c0, c0, bandW, lineHeight, c0);
-    a.bgeu(r3, count, 'blank'); // below the last line: empty
+    final bandAt = a.c(band);
+    a.fill(bandAt, stride, c0, c0, bandW, lineHeight, c0);
+    a.label('rect');
+    a.beq(r11, c0, 'text');
+    a.mul(r12, r10, a.c(5));
+    final rectTable = a.c(rects);
+    for (final d in [r0, r1, r2, r6, r13]) {
+      a.ld32(d, rectTable, r12);
+      a.add(r12, r12, c1);
+    }
+    a.fill(bandAt, stride, r0, r1, r2, r6, r13);
+    a.add(r10, r10, c1);
+    a.sub(r11, r11, c1);
+    a.jmp('rect');
+    a.label('text');
+    a.beq(r8, c0, 'blank');
     a.glyphs(
       a.c(SkArena.font),
-      a.c(band),
+      bandAt,
       stride,
-      left,
+      r9,
       ascent,
       a.c(2), // MASK
       a.c(15),
@@ -159,7 +190,7 @@ class SkResident {
       r8,
     );
     a.label('blank');
-    a.draw(a.c(band), stride, c0, c0, c0, r5, bandW, lineHeight);
+    a.draw(bandAt, stride, c0, c0, c0, r5, bandW, lineHeight);
     a.add(r3, r3, c1);
     a.bltu(r3, rows, 'line');
     a.mov(shown, c1);

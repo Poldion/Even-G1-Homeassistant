@@ -630,3 +630,31 @@ async def test_assistant_select(
     config = (await client.receive_json())["event"]
     assert config["assist_pipeline"] == pipeline_id
     assert config["assist_pipeline_name"] == "Jarvis"
+
+
+async def test_listening_text_and_style(
+    hass: HomeAssistant, entry: MockConfigEntry, hass_ws_client
+) -> None:
+    """The app gets the listening text and the dashboard design."""
+    client = await hass_ws_client(hass)
+    await client.send_json_auto_id(
+        {"type": "even_g1/subscribe", "entry_id": entry.entry_id}
+    )
+    await client.receive_json()
+    config = (await client.receive_json())["event"]
+    assert config["listening_text"].endswith("hört zu …")
+    assert config["dashboard_style"] == "plain"
+
+    hass.config_entries.async_update_entry(
+        entry,
+        options={
+            **entry.options,
+            "listening_template": "{{ 'Ich höre' }}",
+            "dashboard_style": "card",
+        },
+    )
+    await hass.async_block_till_done()
+    config = (await client.receive_json())["event"]
+    assert config["dashboard_style"] == "card"
+    listening = (await client.receive_json())["event"]
+    assert listening == {"type": "listening", "text": "Ich höre"}

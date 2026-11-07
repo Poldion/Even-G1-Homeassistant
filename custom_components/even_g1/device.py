@@ -29,6 +29,7 @@ from .const import (
     CMD_CLEAR,
     CMD_CONFIG,
     CMD_DASHBOARD,
+    CMD_LISTENING,
     CMD_RECORDING,
     CMD_RELOAD,
     CMD_SHOW_TEXT,
@@ -39,14 +40,18 @@ from .const import (
     CONF_DASHBOARD_CALENDARS,
     CONF_DASHBOARD_ENTITIES,
     CONF_DASHBOARD_GESTURE,
+    CONF_DASHBOARD_STYLE,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DASHBOARD_TODOS,
     CONF_DISPLAY_DURATION,
+    CONF_LISTENING_TEMPLATE,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
+    DASHBOARD_STYLE_PLAIN,
     DEFAULT_AUTO_GAIN,
     DEFAULT_DISPLAY_DURATION,
+    DEFAULT_LISTENING_TEMPLATE,
     DEFAULT_NOISE_SUPPRESSION,
     EVENT_ASSIST,
     EVENT_GESTURE,
@@ -118,6 +123,8 @@ class EvenG1Device:
         self._dashboard_tracker: Any = None
         self._minute_unsub: CALLBACK_TYPE | None = None
         self.dashboard_text: str = ""
+        self._listening_tracker: Any = None
+        self.listening_text: str = ""
         # Calendars and to-do lists (refreshed in the background).
         self._agenda_events: list[agenda.AgendaEvent] = []
         self._agenda_todos: list[agenda.AgendaTodo] = []
@@ -188,6 +195,11 @@ class EvenG1Device:
             "assist_pipeline_name": self.pipeline_name,
             "dashboard_on_head_up": self.dashboard_on_head_up,
             "dashboard_gesture": self.dashboard_gesture,
+            "dashboard_style": self.options.get(
+                CONF_DASHBOARD_STYLE, DASHBOARD_STYLE_PLAIN
+            ),
+            # Later changes come as CMD_LISTENING.
+            "listening_text": self.listening_text,
         }
 
     @property
@@ -326,6 +338,7 @@ class EvenG1Device:
     def async_shutdown(self) -> None:
         """Tell connected apps to resubscribe (entry is being unloaded)."""
         self._stop_dashboard_tracking()
+        self._stop_listening_tracking()
         self._stop_agenda()
         self._send({"type": CMD_RELOAD})
         self._subscribers.clear()
@@ -336,6 +349,8 @@ class EvenG1Device:
         self.async_start_agenda()
         self.async_update_dashboard_tracking()
         self._send(self.app_config())
+        # A new assistant name changes the text: sent after the config.
+        self.async_update_listening_tracking()
 
     # ------------------------------------------------------------------
     # Calendars and to-do lists
@@ -443,6 +458,46 @@ class EvenG1Device:
         if self._dashboard_tracker is not None:
             self._dashboard_tracker.async_remove()
             self._dashboard_tracker = None
+
+    # ------------------------------------------------------------------
+    # Listening text (shown while the touch bar is held)
+    # ------------------------------------------------------------------
+
+    @property
+    def listening_template_source(self) -> str:
+        """Return the Jinja source of the listening text."""
+        template = (self.options.get(CONF_LISTENING_TEMPLATE) or "").strip()
+        return template or DEFAULT_LISTENING_TEMPLATE
+
+    @callback
+    def async_update_listening_tracking(self) -> None:
+        """Keep the rendered listening text up to date in the app."""
+        self._stop_listening_tracking()
+        template = Template(self.listening_template_source, self.hass)
+        variables = {"assistent": self.pipeline_name or "Home Assistant"}
+
+        @callback
+        def updated(_event: Any, updates: list[TrackTemplateResult]) -> None:
+            result = updates[-1].result
+            if isinstance(result, TemplateError):
+                text = f"Template error: {result}"
+            else:
+                text = str(result).strip()
+            if text == self.listening_text:
+                return
+            self.listening_text = text
+            self._send({"type": CMD_LISTENING, "text": text})
+
+        self._listening_tracker = async_track_template_result(
+            self.hass, [TrackTemplate(template, variables)], updated
+        )
+        self._listening_tracker.async_refresh()
+
+    @callback
+    def _stop_listening_tracking(self) -> None:
+        if self._listening_tracker is not None:
+            self._listening_tracker.async_remove()
+            self._listening_tracker = None
 
     @callback
     def _send(self, payload: dict[str, Any]) -> None:

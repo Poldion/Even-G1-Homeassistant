@@ -56,6 +56,7 @@ class SkAsmOp {
   static const fill = 0x50;
   static const glyphs = 0x52;
   static const draw = 0x53;
+  static const line = 0x54;
 }
 
 /// Assembles program code for an arm (VM.md §2) at a fixed arena address:
@@ -176,6 +177,9 @@ class SkAsm {
     SkW w,
     SkW h,
   ) => _op(SkAsmOp.draw, [src, srcStride, srcX, srcY, dstX, dstY, w, h]);
+
+  void line(SkW dst, SkW stride, SkW x0, SkW y0, SkW x1, SkW y1, SkW level) =>
+      _op(SkAsmOp.line, [dst, stride, x0, y0, x1, y1, level]);
 
   /// The code with every label resolved.
   Uint8List build() {

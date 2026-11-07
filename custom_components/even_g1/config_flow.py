@@ -32,13 +32,17 @@ from .const import (
     CONF_DASHBOARD_CALENDARS,
     CONF_DASHBOARD_ENTITIES,
     CONF_DASHBOARD_GESTURE,
+    CONF_DASHBOARD_STYLE,
     CONF_DASHBOARD_TEMPLATE,
     CONF_DASHBOARD_TODOS,
     CONF_DISPLAY_DURATION,
+    CONF_LISTENING_TEMPLATE,
     CONF_NOISE_SUPPRESSION,
     CONF_SHOW_TRANSCRIPT,
     DASHBOARD_GESTURE_NONE,
     DASHBOARD_GESTURES,
+    DASHBOARD_STYLE_PLAIN,
+    DASHBOARD_STYLES,
     DEFAULT_AUTO_GAIN,
     DEFAULT_DISPLAY_DURATION,
     DEFAULT_NOISE_SUPPRESSION,
@@ -51,6 +55,7 @@ DEFAULT_OPTIONS: dict[str, Any] = {
     CONF_ASSIST_PIPELINE: PIPELINE_PREFERRED,
     CONF_DISPLAY_DURATION: DEFAULT_DISPLAY_DURATION,
     CONF_DASHBOARD_GESTURE: DASHBOARD_GESTURE_NONE,
+    CONF_DASHBOARD_STYLE: DASHBOARD_STYLE_PLAIN,
     CONF_SHOW_TRANSCRIPT: True,
     CONF_AUTO_GAIN: DEFAULT_AUTO_GAIN,
     CONF_NOISE_SUPPRESSION: DEFAULT_NOISE_SUPPRESSION,
@@ -127,6 +132,12 @@ class EvenG1OptionsFlow(OptionsFlow):
                 vol.Required(
                     CONF_SHOW_TRANSCRIPT, default=options[CONF_SHOW_TRANSCRIPT]
                 ): BooleanSelector(),
+                vol.Optional(
+                    CONF_LISTENING_TEMPLATE,
+                    description={
+                        "suggested_value": options.get(CONF_LISTENING_TEMPLATE)
+                    },
+                ): TemplateSelector(),
                 vol.Required(
                     CONF_AUTO_GAIN, default=options[CONF_AUTO_GAIN]
                 ): NumberSelector(
@@ -163,6 +174,15 @@ class EvenG1OptionsFlow(OptionsFlow):
                         options=DASHBOARD_GESTURES,
                         mode=SelectSelectorMode.DROPDOWN,
                         translation_key=CONF_DASHBOARD_GESTURE,
+                    )
+                ),
+                vol.Required(
+                    CONF_DASHBOARD_STYLE, default=options[CONF_DASHBOARD_STYLE]
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=DASHBOARD_STYLES,
+                        mode=SelectSelectorMode.DROPDOWN,
+                        translation_key=CONF_DASHBOARD_STYLE,
                     )
                 ),
                 vol.Required(
