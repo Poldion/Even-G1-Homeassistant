@@ -7,6 +7,7 @@ import 'package:lc3_codec/lc3_codec.dart';
 
 import '../g1/g1_connection.dart';
 import '../settings.dart';
+import '../l10n/l10n.dart';
 
 /// Records the glasses microphone into a WAV file and sends it to
 /// WhisperNotes, which transcribes and summarises it and files the summary
@@ -65,7 +66,7 @@ class VoiceRecorder extends ChangeNotifier {
     final dir = await _folder();
     String two(int v) => v.toString().padLeft(2, '0');
     final name =
-        'Brillen-Notiz ${now.year}-${two(now.month)}-${two(now.day)} '
+        '${tr.coreRecordingFileName} ${now.year}-${two(now.month)}-${two(now.day)} '
         '${two(now.hour)}-${two(now.minute)}-${two(now.second)}';
     final path = File('${dir.path}/$name.wav');
     final file = await path.open(mode: FileMode.write);
@@ -85,7 +86,7 @@ class VoiceRecorder extends ChangeNotifier {
       try {
         pcm = decoder.decode(lc3);
       } catch (e) {
-        _log('Aufnahme: $e');
+        _log(tr.coreLogRecordingError('$e'));
         return;
       }
       _dataBytes += pcm.length;
@@ -95,7 +96,7 @@ class VoiceRecorder extends ChangeNotifier {
       const Duration(seconds: 3),
       (_) => _ensureMic(),
     );
-    _log('Aufnahme gestartet');
+    _log(tr.coreLogRecordingStarted);
     notifyListeners();
     await _ensureMic(force: true);
   }
@@ -104,7 +105,7 @@ class VoiceRecorder extends ChangeNotifier {
     if (!recording || !g1.connected) return;
     final silent = DateTime.now().difference(_lastAudio);
     if (!force && silent < const Duration(seconds: 3)) return;
-    if (!force) _log('Aufnahme: Mikrofon neu gestartet');
+    if (!force) _log(tr.coreLogRecordingMicRestarted);
     await g1.setMic(true);
   }
 
@@ -134,13 +135,15 @@ class VoiceRecorder extends ChangeNotifier {
 
     final seconds = _dataBytes / (sampleRate * 2);
     if (seconds < minDuration.inSeconds) {
-      _log('Aufnahme verworfen (zu kurz)');
+      _log(tr.coreLogRecordingTooShort);
       await _delete(path);
       return false;
     }
     _log(
-      'Aufnahme beendet: ${_format(Duration(seconds: seconds.round()))} '
-      '(Dauer ${_format(duration)})',
+      tr.coreLogRecordingStopped(
+        _format(Duration(seconds: seconds.round())),
+        _format(duration),
+      ),
     );
     unawaited(sendPending());
     return true;
@@ -160,7 +163,7 @@ class VoiceRecorder extends ChangeNotifier {
     notifyListeners();
     if (files.isEmpty) return;
     if (settings.whisperUrl.isEmpty) {
-      lastResult = 'WhisperNotes ist nicht eingerichtet';
+      lastResult = tr.coreWhisperNotSetUp;
       notifyListeners();
       return;
     }
@@ -172,11 +175,11 @@ class VoiceRecorder extends ChangeNotifier {
           final job = await _upload(file);
           await _delete(file);
           pending--;
-          lastResult = 'Gesendet an WhisperNotes (Job $job)';
-          _log('Aufnahme gesendet: ${_name(file)}');
+          lastResult = tr.coreWhisperSent(job);
+          _log(tr.coreLogRecordingSent(_name(file)));
         } catch (e) {
-          lastResult = 'Senden fehlgeschlagen: $e';
-          _log('Aufnahme nicht gesendet: $e');
+          lastResult = tr.coreWhisperFailed('$e');
+          _log(tr.coreLogRecordingNotSent('$e'));
           break;
         }
         notifyListeners();

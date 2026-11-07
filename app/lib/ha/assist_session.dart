@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'ha_client.dart';
+import '../l10n/l10n.dart';
 
 class AssistResult {
   AssistResult({
@@ -63,7 +64,7 @@ class AssistSession {
           AssistResult(
             query: _query,
             response: '',
-            error: 'Verbindung zu Home Assistant verloren',
+            error: tr.coreHaConnectionLost,
           ),
         );
       },
@@ -108,18 +109,22 @@ class AssistSession {
         );
       case 'run-end':
         _complete(
-          AssistResult(query: _query, response: '', error: 'Keine Antwort'),
+          AssistResult(
+            query: _query,
+            response: '',
+            error: tr.coreAssistNoAnswer,
+          ),
         );
     }
   }
 
   String _errorText(String? code, String? message) {
     return switch (code) {
-      'stt-no-text-recognized' => 'Ich habe nichts verstanden.',
-      'stt-stream-failed' => 'Spracherkennung fehlgeschlagen.',
-      'stt-provider-missing' || 'stt-provider-unsupported-metadata' =>
-        'Keine Spracherkennung in der Assist-Pipeline konfiguriert.',
-      _ => message ?? code ?? 'Unbekannter Fehler',
+      'stt-no-text-recognized' => tr.coreSttNothing,
+      'stt-stream-failed' => tr.coreSttFailed,
+      'stt-provider-missing' ||
+      'stt-provider-unsupported-metadata' => tr.coreSttMissing,
+      _ => message ?? code ?? tr.coreUnknownError,
     };
   }
 
@@ -159,6 +164,8 @@ class AssistSession {
   }
 
   Future<void> cancel() async {
-    _complete(AssistResult(query: _query, response: '', error: 'Abgebrochen'));
+    _complete(
+      AssistResult(query: _query, response: '', error: tr.coreCancelled),
+    );
   }
 }

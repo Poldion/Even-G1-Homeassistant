@@ -46,6 +46,9 @@ void main() {
   setUpAll(_loadFonts);
 
   testWidgets('overview and settings tabs build', (tester) async {
+    // The texts below are the German ones.
+    L10n.apply('de');
+    addTearDown(() => L10n.apply('en'));
     tester.view.physicalSize = const Size(412, 900);
     tester.view.devicePixelRatio = 1;
     SharedPreferences.setMockInitialValues({
