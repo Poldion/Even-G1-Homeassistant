@@ -31,6 +31,7 @@ jobs:
       - run: flutter pub get
       - name: Both languages complete (CLAUDE.md)
         run: |
+          mkdir -p build
           flutter gen-l10n
           if [ -s build/untranslated_messages.json ] && [ "$(tr -d ' \n' < build/untranslated_messages.json)" != "{}" ]; then
             echo "::error::Untranslated messages:"; cat build/untranslated_messages.json; exit 1
