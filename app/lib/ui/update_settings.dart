@@ -41,8 +41,8 @@ Future<void> checkForAppUpdate(
       title: Text(
         !found.switchesChannel
             ? 'Version ${found.version} ist verfügbar'
-            : found.channel == UpdateChannel.scouterKit
-            ? 'ScouterKit-Version ${found.version}'
+            : found.channel == UpdateChannel.preview
+            ? 'Vorabversion ${found.version}'
             : 'Stabile Version ${found.version}',
       ),
       content: SingleChildScrollView(
@@ -81,7 +81,7 @@ class UpdateSettings extends StatefulWidget {
 class _UpdateSettingsState extends State<UpdateSettings> {
   String _version = '';
   bool _checking = false;
-  UpdateChannel _channel = AppUpdater.buildChannel;
+  UpdateChannel _channel = UpdateChannel.stable;
 
   @override
   void initState() {
@@ -96,26 +96,20 @@ class _UpdateSettingsState extends State<UpdateSettings> {
     });
   }
 
-  /// Switches the update channel; the ScouterKit channel only after a
+  /// Switches the update channel; the preview channel only after a
   /// warning. Then looks for that channel's build right away.
   Future<void> _setChannel(UpdateChannel channel) async {
     if (channel == _channel) return;
-    if (channel == UpdateChannel.scouterKit) {
+    if (channel == UpdateChannel.preview) {
       final ok = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
           icon: const Icon(Icons.warning_amber),
-          title: const Text('ScouterKit-Version installieren?'),
+          title: const Text('Vorabversionen installieren?'),
           content: const SingleChildScrollView(
             child: Text(
-              'Diese experimentelle Version ist für Brillen mit der '
-              'Ersatz-Firmware ScouterKit (g1v0) gedacht. Diese Firmware '
-              'musst du selbst auf die Brille aufspielen. Das lässt sich '
-              'nicht rückgängig machen, und die offizielle Even-App '
-              'funktioniert danach nicht mehr (Anleitung: docs/SCOUTERKIT.md '
-              'im GitHub-Projekt).\n\n'
-              'Mit Evens Firmware arbeitet die ScouterKit-Version weiter wie '
-              'bisher (Einstellung „Even“ unter Brille).\n\n'
+              'Vorabversionen entstehen bei jeder Änderung am Projekt und '
+              'sind weniger getestet als die stabilen Versionen.\n\n'
               'Zurück zum stabilen Kanal geht es mit dem nächsten stabilen '
               'Release. Android installiert keine älteren Builds, sonst geht '
               'es nur über eine Neuinstallation.',
@@ -170,8 +164,8 @@ class _UpdateSettingsState extends State<UpdateSettings> {
           segments: const [
             ButtonSegment(value: UpdateChannel.stable, label: Text('Stabil')),
             ButtonSegment(
-              value: UpdateChannel.scouterKit,
-              label: Text('ScouterKit'),
+              value: UpdateChannel.preview,
+              label: Text('Vorabversion'),
               icon: Icon(Icons.science_outlined),
             ),
           ],

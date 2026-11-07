@@ -7,8 +7,14 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-11-07
+
+Ab dieser Version kommen die stabilen Versionen aus `main` und unterstützen
+beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
+`legacy` (bis 0.16.5).
+
 ### Added
-- Experimentell: Unterstützung für die Ersatz-Firmware
+- Unterstützung für die Ersatz-Firmware
   [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit). Die App spricht
   deren Protokoll 5. Sie zeichnet Texte mit einer eigenen Schrift auf das
   640 × 480 große Display und bildet Touchbar, Mikrofon, Akku, Etui, Tragen,
@@ -17,8 +23,8 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   du in den Einstellungen unter *Brille*. Die Even-Firmware bleibt Standard und
   funktioniert unverändert. Die App flasht nichts. Wie man installiert, welche
   Risiken es gibt und was es nicht gibt, steht in `docs/SCOUTERKIT.md`.
-- Builds dieses Branches erscheinen als Vorabversionen `sk-vX.Y.Z.N` und
-  aktualisieren sich über den Update-Kanal „ScouterKit“.
+- Jeder Stand von `main` erscheint als Vorabversion `sk-vX.Y.Z.N` im
+  Update-Kanal „Vorabversion“ (vorher „ScouterKit“).
 - ScouterKit: Texte und das Dashboard nutzen das ganze Display (11 Zeilen à
   42 Zeichen bei Standardhöhe statt 5 à 30). Die App meldet die Größe an Home
   Assistant, das Agenda und Dashboard daran anpasst.
@@ -42,6 +48,12 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   ein.
 
 ### Changed
+- Der Update-Kanal „Stabil“ installiert jetzt die Releases aus `main` mit
+  ScouterKit-Unterstützung. Mit Evens Firmware (Einstellung „Even“ unter
+  *Brille*, Standard) arbeitet die App wie bisher. Welcher Kanal installiert
+  ist, erkennt die App an der Versionsnummer.
+- Die Integration braucht diese App-Version und umgekehrt: Sie nimmt die neue
+  Displaygröße und die neuen Gesten an.
 - ScouterKit: Der Aufnahmepunkt `o` entfällt, weil g1v0 selbst ein Quadrat oben
   rechts im rechten Auge zeigt, solange das Mikrofon an ist. Die Prüfung
   beider Bügel (`0x39`) und der verzögerte Beenden-Befehl gelten nur noch für

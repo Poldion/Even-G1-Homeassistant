@@ -10,7 +10,7 @@ sprechen und die Brille in Automationen nutzen. Dazu gehören eine
 **Android-App**, die die Brille per Bluetooth verbindet, und eine
 **Home-Assistant-Integration**.
 
-Die App arbeitet mit Evens eigener Firmware oder – experimentell – mit der
+Die App arbeitet mit Evens eigener Firmware oder mit der
 freien Ersatz-Firmware **[ScouterKit (g1v0)](https://github.com/mafik/scouter_kit)**,
 die das ganze Display und alle Sensoren der Brille freigibt (siehe
 [Firmware](#firmware-even-oder-scouterkit)).
@@ -29,13 +29,18 @@ die das ganze Display und alle Sensoren der Brille freigibt (siehe
 
 | | Even-Firmware | [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) |
 | --- | --- | --- |
-| Status | Werksfirmware, stabil | experimentell, sehr junges Projekt |
+| Status | Werksfirmware | junges Projekt, mit dieser App gut erprobt |
 | Offizielle Even-App und ihre Funktionen | ja | nein |
 | Anzeige | 576 × 136 px, 5 Zeilen à ~30 Zeichen | 640 × 480 px, 11 Zeilen à 42 Zeichen |
 | Beide Augen gleichzeitig | nicht garantiert | ja |
 | Dashboard beim Hochschauen | über das Handy | ein Programm auf der Brille zeigt es selbst |
 | Gesten | Touchbar, Kopf heben | zusätzlich rechts gedrückt halten, Nicken, Kopfschütteln |
-| Branch / Releases | [`legacy`](https://github.com/Poldion/Even-G1-Homeassistant/tree/legacy), Releases `vX.Y.Z` | [`main`](https://github.com/Poldion/Even-G1-Homeassistant/tree/main), Vorabversionen `sk-vX.Y.Z.N` |
+
+Die Releases ab 0.17.0 (`vX.Y.Z`, Branch `main`) unterstützen beide
+Firmwares; welche deine Brille hat, wählst du in der App unter
+*Einstellungen → Brille*. Der alte Stand nur für Evens Firmware liegt im
+Branch [`legacy`](https://github.com/Poldion/Even-G1-Homeassistant/tree/legacy)
+(bis 0.16.5).
 
 **ScouterKit** ist eine freie Ersatz-Firmware von
 [mafik/scouter_kit](https://github.com/mafik/scouter_kit) (MIT-Lizenz). Sie
@@ -79,11 +84,13 @@ Einstellungen bleiben erhalten.
 
 App und Integration sollten dieselbe Version haben.
 
-**Für ScouterKit:** In der App unter *Einstellungen → App-Update* den
-Update-Kanal **ScouterKit** wählen; er installiert die Vorabversionen
-`even-g1-ha-sk-v….apk` aus diesem Branch. Danach unter *Einstellungen → Brille*
-**ScouterKit** wählen und die Brille im offenen Ladeetui koppeln
-(Details in [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md)).
+**Für ScouterKit:** In der App unter *Einstellungen → Brille* **ScouterKit**
+wählen und die Brille im offenen Ladeetui koppeln (Details in
+[docs/SCOUTERKIT.md](docs/SCOUTERKIT.md)).
+
+**Vorabversionen:** Jeder Stand von `main` erscheint als Vorabversion
+`sk-vX.Y.Z.N`. Wer sie haben will, wählt unter *Einstellungen → App-Update*
+den Kanal **Vorabversion**.
 
 ## Einrichtung
 

@@ -6,12 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Which builds the app updates to.
 enum UpdateChannel {
-  /// Releases (vX.Y.Z) from the legacy branch (Even's firmware).
+  /// Releases (vX.Y.Z) from the main branch.
   stable('stable'),
 
-  /// Pre-releases (sk-vX.Y.Z.N) from the main branch, for glasses with
-  /// the ScouterKit (g1v0) firmware.
-  scouterKit('scouterkit');
+  /// Pre-releases (sk-vX.Y.Z.N): every push to the main branch. The id and
+  /// tag prefix date from when they were the ScouterKit builds.
+  preview('scouterkit');
 
   const UpdateChannel(this.id);
   final String id;
@@ -55,11 +55,8 @@ class AppUpdater {
   static const _releases =
       'https://api.github.com/repos/Poldion/Even-G1-Homeassistant/releases?per_page=30';
 
-  /// Channel of this build.
-  static const buildChannel = UpdateChannel.scouterKit;
-
-  /// Tag prefix of the ScouterKit pre-releases.
-  static const scouterKitTagPrefix = 'sk-v';
+  /// Tag prefix of the pre-releases.
+  static const previewTagPrefix = 'sk-v';
   static const _channelKey = 'update_channel';
   static const downloadPrefix =
       'https://github.com/Poldion/Even-G1-Homeassistant/releases/download/';
@@ -90,10 +87,18 @@ class AppUpdater {
     return false;
   }
 
-  /// The channel chosen in the app (this build's channel until changed).
+  /// The channel a version belongs to: pre-releases have four parts
+  /// ("0.17.0.12"), releases three.
+  static UpdateChannel channelOf(String version) =>
+      version.split('+').first.split('.').length > 3
+      ? UpdateChannel.preview
+      : UpdateChannel.stable;
+
+  /// The channel chosen in the app (the installed build's until changed).
   static Future<UpdateChannel> channel() async {
     final prefs = await SharedPreferences.getInstance();
-    return UpdateChannel.fromId(prefs.getString(_channelKey)) ?? buildChannel;
+    return UpdateChannel.fromId(prefs.getString(_channelKey)) ??
+        channelOf(supported ? await currentVersion() : '');
   }
 
   static Future<void> setChannel(UpdateChannel channel) async {
@@ -102,21 +107,23 @@ class AppUpdater {
   }
 
   /// Reads an update from a GitHub release (JSON of the releases API).
-  /// Stable: releases vX.Y.Z; ScouterKit: pre-releases sk-vX.Y.Z.N.
+  /// Stable: releases vX.Y.Z; preview: pre-releases sk-vX.Y.Z.N.
+  /// [installed] is the channel of the installed build.
   static AppUpdate? parseRelease(
     Map<String, dynamic> release, {
     UpdateChannel channel = UpdateChannel.stable,
+    UpdateChannel installed = UpdateChannel.stable,
   }) {
     final tag = release['tag_name'];
     if (tag is! String || release['draft'] == true) return null;
     final prerelease = release['prerelease'] == true;
     final String version;
     if (channel == UpdateChannel.stable) {
-      if (prerelease || tag.startsWith(scouterKitTagPrefix)) return null;
+      if (prerelease || tag.startsWith(previewTagPrefix)) return null;
       version = tag.replaceFirst(RegExp(r'^v'), '');
     } else {
-      if (!prerelease || !tag.startsWith(scouterKitTagPrefix)) return null;
-      version = tag.substring(scouterKitTagPrefix.length);
+      if (!prerelease || !tag.startsWith(previewTagPrefix)) return null;
+      version = tag.substring(previewTagPrefix.length);
     }
     for (final asset in (release['assets'] as List? ?? const [])) {
       final name = asset['name'], url = asset['browser_download_url'];
@@ -127,7 +134,7 @@ class AppUpdater {
         return AppUpdate(
           version: version,
           channel: channel,
-          switchesChannel: channel != buildChannel,
+          switchesChannel: channel != installed,
           apkUrl: url,
           notes: (release['body'] as String? ?? '').split('\n---').first.trim(),
         );
@@ -140,6 +147,8 @@ class AppUpdater {
   /// the installed app, or any if the installed app is from another channel.
   static Future<AppUpdate?> check() async {
     final channel = await AppUpdater.channel();
+    final current = await currentVersion();
+    final installed = channelOf(current);
     final stable = channel == UpdateChannel.stable;
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
     try {
@@ -159,17 +168,17 @@ class AppUpdater {
       final json = jsonDecode(body);
       AppUpdate? update;
       if (json is Map<String, dynamic>) {
-        update = parseRelease(json, channel: channel);
+        update = parseRelease(json, channel: channel, installed: installed);
       } else if (json is List) {
         // Newest first.
         for (final r in json.whereType<Map<String, dynamic>>()) {
-          update = parseRelease(r, channel: channel);
+          update = parseRelease(r, channel: channel, installed: installed);
           if (update != null) break;
         }
       }
       if (update == null) return null;
       if (update.switchesChannel) return update;
-      return isNewer(update.version, await currentVersion()) ? update : null;
+      return isNewer(update.version, current) ? update : null;
     } finally {
       client.close();
     }

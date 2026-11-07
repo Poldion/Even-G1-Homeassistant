@@ -1,11 +1,10 @@
-name: ScouterKit build
+name: Preview build
 
-# Builds the experimental app for glasses with the ScouterKit (g1v0)
-# firmware on every push to main and publishes it as a pre-release
-# sk-vX.Y.Z.N (X.Y.Z from pubspec.yaml, N the run number). The app's
-# "ScouterKit" update channel installs these; the stable channel and
-# releases/latest never see them. Signed with the release key, so it
-# installs over the stable app and back.
+# Builds the app on every push to main and publishes it as a pre-release
+# sk-vX.Y.Z.N (X.Y.Z from pubspec.yaml, N the run number; the prefix dates
+# from the ScouterKit builds). The app's "Vorabversion" update channel
+# installs these; the stable channel and releases/latest never see them.
+# Signed with the release key, so it installs over the stable app and back.
 on:
   push:
     branches: ["main"]
@@ -76,19 +75,19 @@ jobs:
           V="$VERSION"
           cp app/build/app/outputs/flutter-apk/app-release.apk "even-g1-ha-sk-v$V.apk"
           {
-            echo "Experimentelle Version für Brillen mit der Ersatz-Firmware ScouterKit (g1v0), Stand ${GITHUB_SHA::7}."
+            echo "Vorabversion von main, Stand ${GITHUB_SHA::7}."
             echo
             awk '/^## \[Unreleased\]/{f=1; next} f && /^## \[/{exit} f{print}' CHANGELOG.md
             echo
             echo "---"
-            echo "**Installation:** über den Update-Kanal „ScouterKit“ in der App (Einstellungen → Updates). Die Firmware muss man selbst aufspielen, siehe docs/SCOUTERKIT.md."
+            echo "**Installation:** über den Update-Kanal „Vorabversion“ in der App (Einstellungen → Updates)."
           } > "$RUNNER_TEMP/notes.md"
           gh release create "sk-v$V" "even-g1-ha-sk-v$V.apk" \
             --prerelease \
             --target "$GITHUB_SHA" \
-            --title "ScouterKit v$V" \
+            --title "Vorabversion v$V" \
             --notes-file "$RUNNER_TEMP/notes.md"
-          # Keep the three newest ScouterKit pre-releases.
+          # Keep the three newest pre-releases.
           gh release list --limit 100 --json tagName,isPrerelease \
             --jq '.[] | select(.isPrerelease and (.tagName | startswith("sk-v"))) | .tagName' \
             | tail -n +4 \

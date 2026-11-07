@@ -96,7 +96,7 @@ jobs:
           flutter pub get
           flutter test
           # Build number = minutes since 1970: every newer build of any
-          # channel (stable or ScouterKit) has a higher one, so Android
+          # channel (stable or preview) has a higher one, so Android
           # accepts it as an update.
           flutter build apk --release --build-number=$(( $(date +%s) / 60 ))
 

@@ -43,7 +43,7 @@ void main() {
     );
   });
 
-  test('the ScouterKit channel takes only its pre-releases', () {
+  test('the preview channel takes only its pre-releases', () {
     const prefix = AppUpdater.downloadPrefix;
     Map<String, dynamic> release(String tag, {required bool pre}) => {
       'tag_name': tag,
@@ -57,27 +57,39 @@ void main() {
     };
     final sk = AppUpdater.parseRelease(
       release('sk-v0.17.0.4', pre: true),
-      channel: UpdateChannel.scouterKit,
+      channel: UpdateChannel.preview,
     );
     expect(sk?.version, '0.17.0.4');
-    expect(sk?.channel, UpdateChannel.scouterKit);
+    expect(sk?.channel, UpdateChannel.preview);
+    expect(sk?.switchesChannel, isTrue); // from a stable build
     expect(
-      sk?.switchesChannel,
-      AppUpdater.buildChannel != UpdateChannel.scouterKit,
+      AppUpdater.parseRelease(
+        release('sk-v0.17.0.4', pre: true),
+        channel: UpdateChannel.preview,
+        installed: UpdateChannel.preview,
+      )?.switchesChannel,
+      isFalse,
     );
     expect(AppUpdater.isNewer('0.17.0.5', '0.17.0.4'), isTrue);
     expect(
       AppUpdater.parseRelease(
         release('v0.16.4', pre: false),
-        channel: UpdateChannel.scouterKit,
+        channel: UpdateChannel.preview,
       ),
       isNull,
     );
-    // The stable channel never takes a ScouterKit build.
+    // The stable channel never takes a pre-release.
     expect(AppUpdater.parseRelease(release('sk-v0.17.0.4', pre: true)), isNull);
     expect(
       AppUpdater.parseRelease(release('sk-v0.17.0.4', pre: false)),
       isNull,
     );
+  });
+
+  test('tells the channel from the version', () {
+    expect(AppUpdater.channelOf('0.17.0'), UpdateChannel.stable);
+    expect(AppUpdater.channelOf('0.17.0+29000000'), UpdateChannel.stable);
+    expect(AppUpdater.channelOf('0.17.0.12'), UpdateChannel.preview);
+    expect(AppUpdater.channelOf(''), UpdateChannel.stable);
   });
 }
