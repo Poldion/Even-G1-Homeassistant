@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
+import '../l10n/l10n.dart';
 import 'protocol.dart';
 import 'text_layout.dart';
 
@@ -186,12 +187,12 @@ class G1Connection extends ChangeNotifier {
   bool get connected => (_left?.ready ?? false) && (_right?.ready ?? false);
 
   String get status {
-    if (connected) return 'verbunden';
-    if (!_wanted) return 'getrennt';
+    if (connected) return tr.g1StatusConnected;
+    if (!_wanted) return tr.g1StatusDisconnected;
     final l = _left?.ready ?? false;
     final r = _right?.ready ?? false;
-    if (l || r) return 'verbinde (${l ? 'L' : 'R'} bereit)…';
-    return 'verbinde…';
+    if (l || r) return tr.g1StatusConnectingOne(l ? 'L' : 'R');
+    return tr.g1StatusConnecting;
   }
 
   void _debug(String message) {
@@ -532,7 +533,7 @@ class G1Connection extends ChangeNotifier {
         final state = wearStateName(code);
         if (state != null) {
           set(wearState, state, (v) => wearState = v);
-          if (changed) _debug('Zustand: $state');
+          if (changed) _debug(tr.g1LogWearState(state));
         }
     }
     if (changed) notifyListeners();
@@ -653,17 +654,14 @@ class G1Connection extends ChangeNotifier {
       if (reply == null && _leftAcks == null && ++_leftAckMisses >= 3) {
         // This firmware does not answer: do not slow every text down.
         _leftAcks = false;
-        _debug('L bestätigt Texte nicht – Prüfung aus');
+        _debug(tr.g1LogLeftNoAcks);
         return true;
       }
       if (attempt >= leftAckRetries || !arm.ready) {
-        _debug('L: Text nicht bestätigt');
+        _debug(tr.g1LogLeftNotConfirmed);
         return false;
       }
-      _debug(
-        'L: Text ${reply == null ? 'unbeantwortet' : 'abgelehnt'} – '
-        'erneut gesendet',
-      );
+      _debug(reply == null ? tr.g1LogLeftUnanswered : tr.g1LogLeftRejected);
       ack = Completer<G1Response>();
       arm.pending[cmd] = ack;
       try {
@@ -745,7 +743,7 @@ class G1Connection extends ChangeNotifier {
   Future<void> setFastConnection(bool fast) async {
     if (fast == _fast || !Platform.isAndroid) return;
     _fast = fast;
-    _debug(fast ? 'Verbindung: schnell' : 'Verbindung: sparsam');
+    _debug(fast ? tr.g1LogConnectionFast : tr.g1LogConnectionSaving);
     for (final arm in [_right, _left]) {
       if (arm == null || !arm.ready || arm.writeOverride != null) continue;
       try {

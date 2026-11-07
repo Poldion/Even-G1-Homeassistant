@@ -1,0 +1,331 @@
+{
+  "g1StatusConnected": "connected",
+  "g1StatusDisconnected": "disconnected",
+  "g1StatusConnectingOne": "connecting ({side} ready)…",
+  "g1StatusConnecting": "connecting…",
+  "g1LogWearState": "State: {state}",
+  "g1LogLeftNoAcks": "L does not confirm texts – check off",
+  "g1LogLeftNotConfirmed": "L: text not confirmed",
+  "g1LogLeftUnanswered": "L: text unanswered – sent again",
+  "g1LogLeftRejected": "L: text rejected – sent again",
+  "g1LogConnectionFast": "Connection: fast",
+  "g1LogConnectionSaving": "Connection: power saving",
+  "g1LogDisplayMissingLeft": "Left display was missing ({screen}) – sent again",
+  "g1LogDisplayMissingRight": "Right display was missing ({screen}) – sent again",
+  "g1LogAutoBrightness": "Auto brightness: sensor {sensor} %, set {level} %",
+  "skLogNoService": "{arm} arm: no ScouterKit service – is g1v0 running on this arm?",
+  "skLogProtocol": "{arm} arm speaks protocol {protocol}, the app needs 5",
+  "skLogOtherArm": "{arm} arm reports as the other arm",
+  "skLogSafeMode": "{arm} arm in safe mode (after start errors): no display",
+  "skLogFontLoaded": "{arm}: font loaded ({bytes} B, {ms} ms)",
+  "skLogArmReady": "{arm} arm ready (g1v0 {version})",
+  "skLogArmReadyEncrypted": "{arm} arm ready (g1v0 {version}, encrypted)",
+  "skLogNoAnswerNotBonded": "{arm} arm does not answer and is not paired: put the glasses into the open charging case to pair them",
+  "skLogNotBonded": "{arm} arm not paired – put it into the open charging case to pair",
+  "skLogBonding": "{arm} arm is being paired (in the case)",
+  "skLogBondFailed": "Pairing {arm}: {error}",
+  "skLogEventsRejected": "{arm}: EVENTS rejected",
+  "skLogAnimationOn": "Animation: silent mode on",
+  "skLogAnimationOff": "Animation: silent mode off",
+  "skLogProgramStopped": "{arm}: program stopped",
+  "skLogProgramNotLoaded": "{arm}: program not loaded",
+  "skLogVmStartRejected": "{arm}: VM_START rejected",
+  "skLogProgramRunning": "{arm}: program running ({bytes} B)",
+  "skLogProgramRunningGestures": "{arm}: program running ({bytes} B, head gestures)",
+  "skLogNewSession": "{arm} arm: new session (restart?), setting up again",
+  "skLogResetupFailed": "Setting up {arm} again: {error}",
+  "skLogPacketError": "{arm}: error in packet {seq}: {error} (op 0x{op}, detail {detail})",
+  "skLogProgramHalted": "{arm}: program halted: {error} (0x{address}, op 0x{op})",
+  "skLogEncrypted": "{arm}: connection encrypted",
+  "skLogMicStopped": "{arm}: microphone stopped by the glasses ({reason})",
+  "skLogDisplayError": "{arm}: display error at start",
+  "skLogEvenCommandSkipped": "Even command to g1v0 skipped",
+  "skLogInCase": "Glasses in the charging case – display stays off (disturbs charging)",
+  "skLogAutoBrightness": "Auto brightness: {lux} lx, level {stock} {offset} → {level}",
+  "skLogMic": "Microphone: {error}",
+  "skLogMicNeedsEncryption": "The microphone needs an encrypted (paired) connection",
+  "skAnimSleepTitle": "Silent mode",
+  "skAnimSleepSubtitle": "see you soon",
+  "skAnimWakeTitle": "I'm back",
+  "skAnimWakeSubtitle": "Silent mode off",
+  "@g1StatusConnectingOne": {
+    "placeholders": {
+      "side": {
+        "type": "String"
+      }
+    }
+  },
+  "@g1LogWearState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "@g1LogDisplayMissingLeft": {
+    "placeholders": {
+      "screen": {
+        "type": "String"
+      }
+    }
+  },
+  "@g1LogDisplayMissingRight": {
+    "placeholders": {
+      "screen": {
+        "type": "String"
+      }
+    }
+  },
+  "@g1LogAutoBrightness": {
+    "placeholders": {
+      "sensor": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@skLogNoService": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogProtocol": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "protocol": {
+        "type": "int"
+      }
+    }
+  },
+  "@skLogOtherArm": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogSafeMode": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogFontLoaded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      },
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "@skLogArmReady": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogArmReadyEncrypted": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogNoAnswerNotBonded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogNotBonded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogBonding": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogBondFailed": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogEventsRejected": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogProgramStopped": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogProgramNotLoaded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogVmStartRejected": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogProgramRunning": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "@skLogProgramRunningGestures": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "@skLogNewSession": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogResetupFailed": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogPacketError": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "seq": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      },
+      "op": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "int"
+      }
+    }
+  },
+  "@skLogProgramHalted": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      },
+      "address": {
+        "type": "String"
+      },
+      "op": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogEncrypted": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogMicStopped": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "int"
+      }
+    }
+  },
+  "@skLogDisplayError": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "@skLogAutoBrightness": {
+    "placeholders": {
+      "lux": {
+        "type": "int"
+      },
+      "stock": {
+        "type": "int"
+      },
+      "offset": {
+        "type": "String"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "@skLogMic": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
+}

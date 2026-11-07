@@ -9,6 +9,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import '../g1/g1_connection.dart';
 import '../g1/protocol.dart';
+import '../l10n/l10n.dart';
 import 'sk_anim.dart';
 import 'sk_asm.dart';
 import 'sk_clock.dart';
@@ -195,12 +196,12 @@ class ScouterConnection extends G1Connection {
 
   @override
   String get status {
-    if (connected) return 'verbunden';
-    if (!_wanted && !_fake) return 'getrennt';
+    if (connected) return tr.g1StatusConnected;
+    if (!_wanted && !_fake) return tr.g1StatusDisconnected;
     final l = _arms[G1Side.left]?.ready ?? false;
     final r = _arms[G1Side.right]?.ready ?? false;
-    if (l || r) return 'verbinde (${l ? 'L' : 'R'} bereit)…';
-    return 'verbinde…';
+    if (l || r) return tr.g1StatusConnectingOne(l ? 'L' : 'R');
+    return tr.g1StatusConnecting;
   }
 
   void _debug(String message) => note(message);
@@ -356,10 +357,7 @@ class ScouterConnection extends G1Connection {
       final services = await device.discoverServices();
       final service = services.where((s) => s.uuid == SkUuids.service);
       if (service.isEmpty) {
-        _debug(
-          '${arm.side.name} arm: kein ScouterKit-Dienst – läuft g1v0 auf '
-          'diesem Bügel?',
-        );
+        _debug(tr.skLogNoService(arm.side.name));
         throw StateError('no g1v0 service');
       }
       final chars = service.first.characteristics;
@@ -413,21 +411,15 @@ class ScouterConnection extends G1Connection {
       final hello = SkHello(reply.body);
       if (hello.protocol != 5) {
         _wanted = false;
-        _debug(
-          '${arm.side.name} arm spricht Protokoll ${hello.protocol}, '
-          'die App braucht 5',
-        );
+        _debug(tr.skLogProtocol(arm.side.name, hello.protocol));
         throw StateError('protocol ${hello.protocol}');
       }
       arm.hello = hello;
       if (hello.left != (arm.side == G1Side.left)) {
-        _debug('${arm.side.name} arm meldet sich als anderer Bügel');
+        _debug(tr.skLogOtherArm(arm.side.name));
       }
       if (hello.safeMode) {
-        _debug(
-          '${arm.side.name} arm im sicheren Modus (nach Startfehlern): '
-          'keine Anzeige',
-        );
+        _debug(tr.skLogSafeMode(arm.side.name));
       }
       await _ensureBond(arm, hello);
 
@@ -460,8 +452,11 @@ class ScouterConnection extends G1Connection {
         if (!ok) throw StateError('font upload failed');
         arm.fontLoaded = true;
         _debug(
-          '${arm.side.code}: Schrift geladen (${font.blob.length} B, '
-          '${DateTime.now().difference(t0).inMilliseconds} ms)',
+          tr.skLogFontLoaded(
+            arm.side.code,
+            font.blob.length,
+            DateTime.now().difference(t0).inMilliseconds,
+          ),
         );
       }
       await _reportEvents(arm);
@@ -469,8 +464,9 @@ class ScouterConnection extends G1Connection {
       arm.ready = true;
       await _updateResident(arm);
       _debug(
-        '${arm.side.name} arm ready (g1v0 ${hello.version}'
-        '${hello.encrypted ? ', verschlüsselt' : ''})',
+        hello.encrypted
+            ? tr.skLogArmReadyEncrypted(arm.side.name, hello.version)
+            : tr.skLogArmReady(arm.side.name, hello.version),
       );
       notifyListeners();
       if (connected) _onBothConnected();
@@ -486,10 +482,7 @@ class ScouterConnection extends G1Connection {
     if (device == null || !Platform.isAndroid) return;
     final bond = await device.bondState.first;
     if (bond != BluetoothBondState.bonded) {
-      _debug(
-        '${arm.side.name} arm antwortet nicht und ist nicht gekoppelt: '
-        'Brille ins offene Ladeetui legen, dann wird gekoppelt',
-      );
+      _debug(tr.skLogNoAnswerNotBonded(arm.side.name));
     }
   }
 
@@ -501,17 +494,14 @@ class ScouterConnection extends G1Connection {
     final bond = await device.bondState.first;
     if (bond == BluetoothBondState.bonded) return;
     if (!hello.bondable) {
-      _debug(
-        '${arm.side.name} arm nicht gekoppelt – zum Koppeln ins offene '
-        'Ladeetui legen',
-      );
+      _debug(tr.skLogNotBonded(arm.side.name));
       return;
     }
-    _debug('${arm.side.name} arm wird gekoppelt (im Etui)');
+    _debug(tr.skLogBonding(arm.side.name));
     try {
       await device.createBond(timeout: 30);
     } catch (e) {
-      _debug('Koppeln ${arm.side.name}: $e');
+      _debug(tr.skLogBondFailed(arm.side.name, '$e'));
     }
   }
 
@@ -537,7 +527,7 @@ class ScouterConnection extends G1Connection {
     final mask = _eventMask(arm);
     final r = await _ctrl(arm, SkCtrl.events, [mask & 0xff, mask >> 8]);
     if (r == null || r.status != 0) {
-      _debug('${arm.side.code}: EVENTS abgelehnt');
+      _debug(tr.skLogEventsRejected(arm.side.code));
     }
     if (arm.side == G1Side.right && !arm.resident) {
       _headUp = false;
@@ -583,7 +573,7 @@ class ScouterConnection extends G1Connection {
     final synced = arms.length == 2 && arms.every((a) => a.clock.known);
     // Time for the first packets to arrive before the first frame.
     final at = SkClock.hostNow() + _drawLeadUs(arms) + 150000;
-    _debug(on ? 'Animation: Ruhemodus an' : 'Animation: Ruhemodus aus');
+    _debug(on ? tr.skLogAnimationOn : tr.skLogAnimationOff);
     await Future.wait(
       arms.map(
         (a) => a.link.run(
@@ -640,7 +630,7 @@ class ScouterConnection extends G1Connection {
       if (arm.resident) {
         await _ctrl(arm, SkCtrl.vmStop, const []);
         arm.resident = false;
-        _debug('${arm.side.code}: Programm beendet');
+        _debug(tr.skLogProgramStopped(arm.side.code));
         await _reportEvents(arm);
       }
       return;
@@ -659,7 +649,7 @@ class ScouterConnection extends G1Connection {
       _residentState(font),
     ]);
     if (!ok || !await _writeDashboard(arm)) {
-      _debug('${arm.side.code}: Programm nicht geladen');
+      _debug(tr.skLogProgramNotLoaded(arm.side.code));
       return;
     }
     final t = SkResident.table;
@@ -670,14 +660,15 @@ class ScouterConnection extends G1Connection {
       t >> 24 & 0xff,
     ]);
     if (r == null || r.status != 0) {
-      _debug('${arm.side.code}: VM_START abgelehnt');
+      _debug(tr.skLogVmStartRejected(arm.side.code));
       return;
     }
     arm.resident = true;
     arm.residentGestures = gestures;
     _debug(
-      '${arm.side.code}: Programm läuft (${p.code.length} B'
-      '${gestures ? ', Kopfgesten' : ''})',
+      gestures
+          ? tr.skLogProgramRunningGestures(arm.side.code, p.code.length)
+          : tr.skLogProgramRunning(arm.side.code, p.code.length),
     );
     await _reportEvents(arm);
     notifyListeners();
@@ -883,7 +874,7 @@ class ScouterConnection extends G1Connection {
     }
     if (state != null && state != wearState) {
       wearState = state;
-      _debug('Zustand: $state');
+      _debug(tr.g1LogWearState(state));
     }
     if (inCase.isEmpty) _caseNoted = false;
     notifyListeners();
@@ -971,14 +962,14 @@ class ScouterConnection extends G1Connection {
   /// The arm started a new session (a reboot): its memory is gone.
   void _resync(_SkArm arm) {
     if (arm.settingUp) return;
-    _debug('${arm.side.name} arm: neue Sitzung (Neustart?), richte neu ein');
+    _debug(tr.skLogNewSession(arm.side.name));
     arm.ready = false;
     arm.fontLoaded = false;
     arm.link.down();
     notifyListeners();
     unawaited(
       _setup(arm).catchError((Object e) {
-        _debug('Neueinrichtung ${arm.side.name}: $e');
+        _debug(tr.skLogResetupFailed(arm.side.name, '$e'));
         _scheduleReconnect();
       }),
     );
@@ -1066,9 +1057,13 @@ class ScouterConnection extends G1Connection {
         arm.link.onAck(e.u16(9), e.u16(11), e.u8(13), e.u32(14));
       case SkEvt.error when data.length >= 22:
         _debug(
-          '${arm.side.code}: Fehler in Paket ${e.u16(9)}: '
-          '${skErrorName(e.u8(13))} (op 0x${e.u8(12).toRadixString(16)}, '
-          'Detail ${e.u32(14)})',
+          tr.skLogPacketError(
+            arm.side.code,
+            e.u16(9),
+            skErrorName(e.u8(13)),
+            e.u8(12).toRadixString(16),
+            e.u32(14),
+          ),
         );
         arm.link.onError(e.u16(9));
       case SkEvt.notice when data.length >= 10:
@@ -1081,8 +1076,12 @@ class ScouterConnection extends G1Connection {
         _onNotify(arm, e.u32(12), e.u32(16));
       case SkEvt.halt when data.length >= 20:
         _debug(
-          '${arm.side.code}: Programm angehalten: ${skErrorName(e.u8(15))} '
-          '(0x${e.u32(10).toRadixString(16)}, op 0x${e.u8(14).toRadixString(16)})',
+          tr.skLogProgramHalted(
+            arm.side.code,
+            skErrorName(e.u8(15)),
+            e.u32(10).toRadixString(16),
+            e.u8(14).toRadixString(16),
+          ),
         );
         arm.resident = false;
         unawaited(_reportEvents(arm));
@@ -1095,12 +1094,12 @@ class ScouterConnection extends G1Connection {
   void _onNotice(_SkArm arm, int kind, Uint8List body) {
     switch (kind) {
       case 4:
-        _debug('${arm.side.code}: Verbindung verschlüsselt');
+        _debug(tr.skLogEncrypted(arm.side.code));
       case 5:
         final reason = body.isEmpty ? 0 : body[0];
-        _debug('${arm.side.code}: Mikrofon von der Brille beendet ($reason)');
+        _debug(tr.skLogMicStopped(arm.side.code, reason));
       case 3:
-        _debug('${arm.side.code}: Anzeigefehler beim Start');
+        _debug(tr.skLogDisplayError(arm.side.code));
     }
   }
 
@@ -1186,7 +1185,7 @@ class ScouterConnection extends G1Connection {
     Duration waitAfter = Duration.zero,
     bool ackLeft = false,
   }) async {
-    _debug('Even-Befehl an g1v0 übersprungen');
+    _debug(tr.skLogEvenCommandSkipped);
     return false;
   }
 
@@ -1242,7 +1241,7 @@ class ScouterConnection extends G1Connection {
       if (a.inCase != 1) return true;
       if (!_caseNoted) {
         _caseNoted = true;
-        _debug('Brille im Ladeetui – Anzeige bleibt aus (stört das Laden)');
+        _debug(tr.skLogInCase);
       }
       return false;
     }).toList();
@@ -1584,8 +1583,12 @@ class ScouterConnection extends G1Connection {
     await _runOn([code.take()]);
     brightnessPercent = G1Packets.brightnessPercent(level);
     _debug(
-      'Auto-Helligkeit: ${light ~/ 100} lx, Stufe ${stockLevel(light ~/ 100)} '
-      '${offset >= 0 ? '+' : ''}$offset → $level',
+      tr.skLogAutoBrightness(
+        light ~/ 100,
+        stockLevel(light ~/ 100),
+        '${offset >= 0 ? '+' : ''}$offset',
+        level,
+      ),
     );
     notifyListeners();
   }
@@ -1712,9 +1715,9 @@ class ScouterConnection extends G1Connection {
     final r = await _ctrl(arm, SkCtrl.mic, const [1, 1], tries: 1);
     if (r == null) return false;
     if (r.status != 0) {
-      _debug('Mikrofon: ${skErrorName(r.status)}');
+      _debug(tr.skLogMic(skErrorName(r.status)));
       if (r.status == 12) {
-        _debug('Mikrofon braucht eine verschlüsselte (gekoppelte) Verbindung');
+        _debug(tr.skLogMicNeedsEncryption);
       }
       return false;
     }
@@ -1725,7 +1728,7 @@ class ScouterConnection extends G1Connection {
   Future<void> setFastConnection(bool fast) async {
     if (fast == _fast) return;
     _fast = fast;
-    _debug(fast ? 'Verbindung: schnell' : 'Verbindung: sparsam');
+    _debug(fast ? tr.g1LogConnectionFast : tr.g1LogConnectionSaving);
     await _updatePriority();
   }
 
