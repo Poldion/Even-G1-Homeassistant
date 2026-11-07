@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import '../l10n/l10n.dart';
 import 'sk_font.dart';
 import 'sk_lib.dart';
 import 'sk_program.dart';
@@ -136,7 +137,7 @@ class SkAnimation {
     }
     return SkAnimation(
       _region(cx, cy),
-      _texts(font, 'Ruhemodus', 'bis gleich', cx, cy),
+      _texts(font, tr.skAnimSleepTitle, tr.skAnimSleepSubtitle, cx, cy),
       f,
     );
   }
@@ -187,7 +188,7 @@ class SkAnimation {
     }
     return SkAnimation(
       _region(cx, cy),
-      _texts(font, 'Bin wieder da', 'Ruhemodus aus', cx, cy),
+      _texts(font, tr.skAnimWakeTitle, tr.skAnimWakeSubtitle, cx, cy),
       f,
     );
   }

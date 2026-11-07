@@ -1,6 +1,58 @@
 {
   "@@locale": "en",
   "appTitle": "Even G1 for Home Assistant",
+  "g1LogAutoBrightness": "Auto brightness: sensor {sensor} %, set {level} %",
+  "@g1LogAutoBrightness": {
+    "placeholders": {
+      "sensor": {
+        "type": "int"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "g1LogConnectionFast": "Connection: fast",
+  "g1LogConnectionSaving": "Connection: power saving",
+  "g1LogDisplayMissingLeft": "Left display was missing ({screen}) – sent again",
+  "@g1LogDisplayMissingLeft": {
+    "placeholders": {
+      "screen": {
+        "type": "String"
+      }
+    }
+  },
+  "g1LogDisplayMissingRight": "Right display was missing ({screen}) – sent again",
+  "@g1LogDisplayMissingRight": {
+    "placeholders": {
+      "screen": {
+        "type": "String"
+      }
+    }
+  },
+  "g1LogLeftNoAcks": "L does not confirm texts – check off",
+  "g1LogLeftNotConfirmed": "L: text not confirmed",
+  "g1LogLeftRejected": "L: text rejected – sent again",
+  "g1LogLeftUnanswered": "L: text unanswered – sent again",
+  "g1LogWearState": "State: {state}",
+  "@g1LogWearState": {
+    "placeholders": {
+      "state": {
+        "type": "String"
+      }
+    }
+  },
+  "g1StatusConnected": "connected",
+  "g1StatusConnecting": "connecting…",
+  "g1StatusConnectingOne": "connecting ({side} ready)…",
+  "@g1StatusConnectingOne": {
+    "placeholders": {
+      "side": {
+        "type": "String"
+      }
+    }
+  },
+  "g1StatusDisconnected": "disconnected",
   "glasses": "Glasses",
   "languageEnglish": "English",
   "languageGerman": "Deutsch",
@@ -26,5 +78,282 @@
   "settingsNotificationsOn": "Phone notifications are forwarded",
   "settingsPairGlasses": "Pair glasses",
   "settingsRecordings": "Recordings",
-  "settingsWhisperNotSetUp": "WhisperNotes not set up"
+  "settingsWhisperNotSetUp": "WhisperNotes not set up",
+  "skAnimSleepSubtitle": "see you soon",
+  "skAnimSleepTitle": "Silent mode",
+  "skAnimWakeSubtitle": "Silent mode off",
+  "skAnimWakeTitle": "I'm back",
+  "skLogAnimationOff": "Animation: silent mode off",
+  "skLogAnimationOn": "Animation: silent mode on",
+  "skLogArmReady": "{arm} arm ready (g1v0 {version})",
+  "@skLogArmReady": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogArmReadyEncrypted": "{arm} arm ready (g1v0 {version}, encrypted)",
+  "@skLogArmReadyEncrypted": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogAutoBrightness": "Auto brightness: {lux} lx, level {stock} {offset} → {level}",
+  "@skLogAutoBrightness": {
+    "placeholders": {
+      "lux": {
+        "type": "int"
+      },
+      "stock": {
+        "type": "int"
+      },
+      "offset": {
+        "type": "String"
+      },
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogBondFailed": "Pairing {arm}: {error}",
+  "@skLogBondFailed": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogBonding": "{arm} arm is being paired (in the case)",
+  "@skLogBonding": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogDisplayError": "{arm}: display error at start",
+  "@skLogDisplayError": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogEncrypted": "{arm}: connection encrypted",
+  "@skLogEncrypted": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogEvenCommandSkipped": "Even command to g1v0 skipped",
+  "skLogEventsRejected": "{arm}: EVENTS rejected",
+  "@skLogEventsRejected": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogFontLoaded": "{arm}: font loaded ({bytes} B, {ms} ms)",
+  "@skLogFontLoaded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      },
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogInCase": "Glasses in the charging case – display stays off (disturbs charging)",
+  "skLogMic": "Microphone: {error}",
+  "@skLogMic": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogMicNeedsEncryption": "The microphone needs an encrypted (paired) connection",
+  "skLogMicStopped": "{arm}: microphone stopped by the glasses ({reason})",
+  "@skLogMicStopped": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogNewSession": "{arm} arm: new session (restart?), setting up again",
+  "@skLogNewSession": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogNoAnswerNotBonded": "{arm} arm does not answer and is not paired: put the glasses into the open charging case to pair them",
+  "@skLogNoAnswerNotBonded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogNoService": "{arm} arm: no ScouterKit service – is g1v0 running on this arm?",
+  "@skLogNoService": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogNotBonded": "{arm} arm not paired – put it into the open charging case to pair",
+  "@skLogNotBonded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogOtherArm": "{arm} arm reports as the other arm",
+  "@skLogOtherArm": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogPacketError": "{arm}: error in packet {seq}: {error} (op 0x{op}, detail {detail})",
+  "@skLogPacketError": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "seq": {
+        "type": "int"
+      },
+      "error": {
+        "type": "String"
+      },
+      "op": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogProgramHalted": "{arm}: program halted: {error} (0x{address}, op 0x{op})",
+  "@skLogProgramHalted": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      },
+      "address": {
+        "type": "String"
+      },
+      "op": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogProgramNotLoaded": "{arm}: program not loaded",
+  "@skLogProgramNotLoaded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogProgramRunning": "{arm}: program running ({bytes} B)",
+  "@skLogProgramRunning": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogProgramRunningGestures": "{arm}: program running ({bytes} B, head gestures)",
+  "@skLogProgramRunningGestures": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogProgramStopped": "{arm}: program stopped",
+  "@skLogProgramStopped": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogProtocol": "{arm} arm speaks protocol {protocol}, the app needs 5",
+  "@skLogProtocol": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "protocol": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogResetupFailed": "Setting up {arm} again: {error}",
+  "@skLogResetupFailed": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogSafeMode": "{arm} arm in safe mode (after start errors): no display",
+  "@skLogSafeMode": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogVmStartRejected": "{arm}: VM_START rejected",
+  "@skLogVmStartRejected": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  }
 }

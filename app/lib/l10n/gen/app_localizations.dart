@@ -104,6 +104,90 @@ abstract class AppLocalizations {
   /// **'Even G1 for Home Assistant'**
   String get appTitle;
 
+  /// No description provided for @g1LogAutoBrightness.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto brightness: sensor {sensor} %, set {level} %'**
+  String g1LogAutoBrightness(int sensor, int level);
+
+  /// No description provided for @g1LogConnectionFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection: fast'**
+  String get g1LogConnectionFast;
+
+  /// No description provided for @g1LogConnectionSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection: power saving'**
+  String get g1LogConnectionSaving;
+
+  /// No description provided for @g1LogDisplayMissingLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left display was missing ({screen}) – sent again'**
+  String g1LogDisplayMissingLeft(String screen);
+
+  /// No description provided for @g1LogDisplayMissingRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Right display was missing ({screen}) – sent again'**
+  String g1LogDisplayMissingRight(String screen);
+
+  /// No description provided for @g1LogLeftNoAcks.
+  ///
+  /// In en, this message translates to:
+  /// **'L does not confirm texts – check off'**
+  String get g1LogLeftNoAcks;
+
+  /// No description provided for @g1LogLeftNotConfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'L: text not confirmed'**
+  String get g1LogLeftNotConfirmed;
+
+  /// No description provided for @g1LogLeftRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'L: text rejected – sent again'**
+  String get g1LogLeftRejected;
+
+  /// No description provided for @g1LogLeftUnanswered.
+  ///
+  /// In en, this message translates to:
+  /// **'L: text unanswered – sent again'**
+  String get g1LogLeftUnanswered;
+
+  /// No description provided for @g1LogWearState.
+  ///
+  /// In en, this message translates to:
+  /// **'State: {state}'**
+  String g1LogWearState(String state);
+
+  /// No description provided for @g1StatusConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'connected'**
+  String get g1StatusConnected;
+
+  /// No description provided for @g1StatusConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'connecting…'**
+  String get g1StatusConnecting;
+
+  /// No description provided for @g1StatusConnectingOne.
+  ///
+  /// In en, this message translates to:
+  /// **'connecting ({side} ready)…'**
+  String g1StatusConnectingOne(String side);
+
+  /// No description provided for @g1StatusDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'disconnected'**
+  String get g1StatusDisconnected;
+
   /// No description provided for @glasses.
   ///
   /// In en, this message translates to:
@@ -217,6 +301,227 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'WhisperNotes not set up'**
   String get settingsWhisperNotSetUp;
+
+  /// No description provided for @skAnimSleepSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'see you soon'**
+  String get skAnimSleepSubtitle;
+
+  /// No description provided for @skAnimSleepTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Silent mode'**
+  String get skAnimSleepTitle;
+
+  /// No description provided for @skAnimWakeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Silent mode off'**
+  String get skAnimWakeSubtitle;
+
+  /// No description provided for @skAnimWakeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m back'**
+  String get skAnimWakeTitle;
+
+  /// No description provided for @skLogAnimationOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Animation: silent mode off'**
+  String get skLogAnimationOff;
+
+  /// No description provided for @skLogAnimationOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Animation: silent mode on'**
+  String get skLogAnimationOn;
+
+  /// No description provided for @skLogArmReady.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm ready (g1v0 {version})'**
+  String skLogArmReady(String arm, String version);
+
+  /// No description provided for @skLogArmReadyEncrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm ready (g1v0 {version}, encrypted)'**
+  String skLogArmReadyEncrypted(String arm, String version);
+
+  /// No description provided for @skLogAutoBrightness.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto brightness: {lux} lx, level {stock} {offset} → {level}'**
+  String skLogAutoBrightness(int lux, int stock, String offset, int level);
+
+  /// No description provided for @skLogBondFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairing {arm}: {error}'**
+  String skLogBondFailed(String arm, String error);
+
+  /// No description provided for @skLogBonding.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm is being paired (in the case)'**
+  String skLogBonding(String arm);
+
+  /// No description provided for @skLogDisplayError.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: display error at start'**
+  String skLogDisplayError(String arm);
+
+  /// No description provided for @skLogEncrypted.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: connection encrypted'**
+  String skLogEncrypted(String arm);
+
+  /// No description provided for @skLogEvenCommandSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Even command to g1v0 skipped'**
+  String get skLogEvenCommandSkipped;
+
+  /// No description provided for @skLogEventsRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: EVENTS rejected'**
+  String skLogEventsRejected(String arm);
+
+  /// No description provided for @skLogFontLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: font loaded ({bytes} B, {ms} ms)'**
+  String skLogFontLoaded(String arm, int bytes, int ms);
+
+  /// No description provided for @skLogInCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Glasses in the charging case – display stays off (disturbs charging)'**
+  String get skLogInCase;
+
+  /// No description provided for @skLogMic.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone: {error}'**
+  String skLogMic(String error);
+
+  /// No description provided for @skLogMicNeedsEncryption.
+  ///
+  /// In en, this message translates to:
+  /// **'The microphone needs an encrypted (paired) connection'**
+  String get skLogMicNeedsEncryption;
+
+  /// No description provided for @skLogMicStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: microphone stopped by the glasses ({reason})'**
+  String skLogMicStopped(String arm, int reason);
+
+  /// No description provided for @skLogNewSession.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm: new session (restart?), setting up again'**
+  String skLogNewSession(String arm);
+
+  /// No description provided for @skLogNoAnswerNotBonded.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm does not answer and is not paired: put the glasses into the open charging case to pair them'**
+  String skLogNoAnswerNotBonded(String arm);
+
+  /// No description provided for @skLogNoService.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm: no ScouterKit service – is g1v0 running on this arm?'**
+  String skLogNoService(String arm);
+
+  /// No description provided for @skLogNotBonded.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm not paired – put it into the open charging case to pair'**
+  String skLogNotBonded(String arm);
+
+  /// No description provided for @skLogOtherArm.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm reports as the other arm'**
+  String skLogOtherArm(String arm);
+
+  /// No description provided for @skLogPacketError.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: error in packet {seq}: {error} (op 0x{op}, detail {detail})'**
+  String skLogPacketError(
+    String arm,
+    int seq,
+    String error,
+    String op,
+    int detail,
+  );
+
+  /// No description provided for @skLogProgramHalted.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: program halted: {error} (0x{address}, op 0x{op})'**
+  String skLogProgramHalted(
+    String arm,
+    String error,
+    String address,
+    String op,
+  );
+
+  /// No description provided for @skLogProgramNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: program not loaded'**
+  String skLogProgramNotLoaded(String arm);
+
+  /// No description provided for @skLogProgramRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: program running ({bytes} B)'**
+  String skLogProgramRunning(String arm, int bytes);
+
+  /// No description provided for @skLogProgramRunningGestures.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: program running ({bytes} B, head gestures)'**
+  String skLogProgramRunningGestures(String arm, int bytes);
+
+  /// No description provided for @skLogProgramStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: program stopped'**
+  String skLogProgramStopped(String arm);
+
+  /// No description provided for @skLogProtocol.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm speaks protocol {protocol}, the app needs 5'**
+  String skLogProtocol(String arm, int protocol);
+
+  /// No description provided for @skLogResetupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up {arm} again: {error}'**
+  String skLogResetupFailed(String arm, String error);
+
+  /// No description provided for @skLogSafeMode.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm in safe mode (after start errors): no display'**
+  String skLogSafeMode(String arm);
+
+  /// No description provided for @skLogVmStartRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: VM_START rejected'**
+  String skLogVmStartRejected(String arm);
 }
 
 class _AppLocalizationsDelegate

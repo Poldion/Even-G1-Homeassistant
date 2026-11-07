@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../l10n/l10n.dart';
 import 'g1_connection.dart';
 import 'protocol.dart';
 
@@ -116,8 +117,10 @@ class AutoBrightness {
     if (g1.connected) {
       await g1.setBrightnessLevel(level, auto: false);
       log(
-        'Auto-Helligkeit: Sensor ${G1Packets.brightnessPercent(sensor)} %, '
-        'gesetzt ${G1Packets.brightnessPercent(level)} %',
+        tr.g1LogAutoBrightness(
+          G1Packets.brightnessPercent(sensor),
+          G1Packets.brightnessPercent(level),
+        ),
       );
     }
     _schedule(holdTime, generation);

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../l10n/l10n.dart';
 import 'g1_connection.dart';
 import 'protocol.dart';
 
@@ -213,8 +214,9 @@ class G1Display {
       if (id == null || id == _textScreen) continue;
       if (generation != _generation || page != _page) return;
       g1.note(
-        'Anzeige ${side == G1Side.left ? 'links' : 'rechts'} fehlte '
-        '(${screenName(id)}) – erneut gesendet',
+        side == G1Side.left
+            ? tr.g1LogDisplayMissingLeft(screenName(id))
+            : tr.g1LogDisplayMissingRight(screenName(id)),
       );
       await g1.sendText(
         _screens[_page],
