@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../bridge.dart';
+import '../l10n/l10n.dart';
 import '../notifications/phone_notifications.dart';
 
 /// Settings for forwarding the phone's notifications to the glasses.
@@ -44,10 +45,7 @@ class _NotificationSettingsState extends State<NotificationSettings>
   @override
   Widget build(BuildContext context) {
     if (!PhoneNotifications.supported) {
-      return const Text(
-        'Das Weiterleiten von Handy-Benachrichtigungen ist nur unter Android '
-        'verfügbar.',
-      );
+      return Text(tr.notifSetAndroidOnly);
     }
     final settings = widget.bridge.settings;
     return ListenableBuilder(
@@ -64,7 +62,7 @@ class _NotificationSettingsState extends State<NotificationSettings>
           children: [
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: const Text('Handy-Benachrichtigungen weiterleiten'),
+              title: Text(tr.notifSetForward),
               value: settings.forwardNotifications,
               onChanged: (v) =>
                   setState(() => settings.forwardNotifications = v),
@@ -73,35 +71,24 @@ class _NotificationSettingsState extends State<NotificationSettings>
               Card(
                 child: ListTile(
                   leading: const Icon(Icons.notifications_off),
-                  title: const Text('Zugriff auf Benachrichtigungen fehlt'),
-                  subtitle: const Text(
-                    'Erlaube „Even G1 HA“ in den Android-Einstellungen, '
-                    'Benachrichtigungen zu lesen.\n'
-                    'Meldet Android „App wurde Zugriff verweigert“: '
-                    'Einstellungen → Apps → Even G1 HA → ⋮ → '
-                    '„Eingeschränkte Einstellungen zulassen“, dann erneut '
-                    'auf Erlauben tippen.',
-                  ),
+                  title: Text(tr.notifSetNoAccess),
+                  subtitle: Text(tr.notifSetNoAccessHelp),
                   isThreeLine: true,
                   trailing: FilledButton(
                     onPressed: PhoneNotifications.openSettings,
-                    child: const Text('Erlauben'),
+                    child: Text(tr.notifSetAllow),
                   ),
                 ),
               ),
             if (apps.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  'Apps erscheinen hier, sobald sie eine Benachrichtigung '
-                  'gesendet haben. Neue Apps werden standardmäßig '
-                  'weitergeleitet.',
-                ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(tr.notifSetNoApps),
               )
             else ...[
-              const Padding(
-                padding: EdgeInsets.only(top: 8),
-                child: Text('Apps, deren Benachrichtigungen ankommen:'),
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(tr.notifSetApps),
               ),
               for (final app in apps)
                 SwitchListTile(

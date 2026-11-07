@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../bridge.dart';
 import '../g1/g1_connection.dart';
+import '../l10n/l10n.dart';
 import '../main.dart';
 import '../scouter/scouter_connection.dart';
 
@@ -62,8 +63,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
       _pairs = [];
       _restartNote = firmware.id == _running.id
           ? null
-          : 'Bitte die App schließen und neu öffnen, dann nach der Brille '
-                'suchen.';
+          : tr.glassesSetRestartNote;
     });
     unawaited(widget.bridge.reconnectGlasses());
   }
@@ -96,17 +96,14 @@ class _GlassesPairingState extends State<GlassesPairing> {
       children: [
         Text(
           s.glassesConfigured
-              ? 'Gekoppelt: ${s.glassesName}'
-              : 'Noch keine Brille gekoppelt.',
+              ? tr.glassesSetPaired(s.glassesName)
+              : tr.glassesSetNonePaired,
         ),
         const SizedBox(height: 4),
         Text(
           _running == G1Firmware.even
-              ? 'Die offizielle Even-App muss geschlossen sein, da sich die '
-                    'Brille nur mit einer App gleichzeitig verbindet.'
-              : 'ScouterKit (g1v0): Zum ersten Koppeln die Brille ins offene '
-                    'Ladeetui legen. Außerhalb des Etuis gehorcht sie nur '
-                    'gekoppelten Geräten.',
+              ? tr.glassesSetEvenHint
+              : tr.glassesSetScouterHint,
         ),
         const SizedBox(height: 8),
         SegmentedButton<G1Firmware>(
@@ -137,7 +134,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.bluetooth_searching),
-          label: Text(_scanning ? 'Suche…' : 'Nach Brillen suchen'),
+          label: Text(_scanning ? tr.glassesSetSearching : tr.glassesSetSearch),
         ),
         if (_error != null)
           Text(
@@ -153,7 +150,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
                   : 'G1 #${pair.channel}',
             ),
             subtitle: Text(
-              'Links: ${pair.leftName ?? '–'}\nRechts: ${pair.rightName ?? '–'}',
+              tr.glassesSetArms(pair.leftName ?? '–', pair.rightName ?? '–'),
             ),
             isThreeLine: true,
             enabled: pair.complete,
@@ -198,18 +195,13 @@ class _DisplaySettingsState extends State<DisplaySettings> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!connected)
-          const Padding(
-            padding: EdgeInsets.only(bottom: 8),
-            child: Text(
-              'Die Brille ist nicht verbunden. Änderungen werden beim '
-              'nächsten Verbinden übertragen.',
-            ),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(tr.glassesSetNotConnected),
           ),
         _SliderRow(
-          label: 'Aktivierungswinkel',
-          help:
-              'Ab dieser Kopfneigung schaltet die Brille beim Hochschauen '
-              'die Anzeige ein.',
+          label: tr.glassesSetAngle,
+          help: tr.glassesSetAngleHelp,
           value: _angle,
           min: 0,
           max: 60,
@@ -219,10 +211,8 @@ class _DisplaySettingsState extends State<DisplaySettings> {
           onChangeEnd: (v) => bridge.setHeadUpAngle(v.round()),
         ),
         _SliderRow(
-          label: 'Höhe',
-          help:
-              'Wie hoch der Text im Sichtfeld steht. Beim Loslassen zeigt '
-              'die Brille die neue Position kurz an und übernimmt sie.',
+          label: tr.glassesSetHeight,
+          help: tr.glassesSetHeightHelp,
           value: _height,
           min: 0,
           max: 8,
@@ -231,8 +221,8 @@ class _DisplaySettingsState extends State<DisplaySettings> {
           onChangeEnd: (v) => bridge.setDisplayPosition(height: v.round()),
         ),
         _SliderRow(
-          label: 'Distanz',
-          help: 'Wie weit entfernt der Text wirkt.',
+          label: tr.glassesSetDepth,
+          help: tr.glassesSetDepthHelp,
           value: _depth,
           min: 1,
           max: 9,
@@ -243,39 +233,33 @@ class _DisplaySettingsState extends State<DisplaySettings> {
         const SizedBox(height: 8),
         DropdownButtonFormField<int?>(
           initialValue: s.headUpMode,
-          decoration: const InputDecoration(
-            labelText: 'Even-Dashboard beim Hochschauen',
-            helperText:
-                '„Ausblenden“: Beim Hochschauen erscheint nur das '
-                'Home-Assistant-Dashboard (falls in HA eingestellt).',
+          decoration: InputDecoration(
+            labelText: tr.glassesSetHeadUpMode,
+            helperText: tr.glassesSetHeadUpModeHelp,
             helperMaxLines: 3,
           ),
-          items: const [
-            DropdownMenuItem(value: null, child: Text('Unverändert lassen')),
-            DropdownMenuItem(value: 0, child: Text('Anzeigen')),
-            DropdownMenuItem(value: 2, child: Text('Ausblenden')),
+          items: [
+            DropdownMenuItem(
+              value: null,
+              child: Text(tr.glassesSetLeaveUnchanged),
+            ),
+            DropdownMenuItem(value: 0, child: Text(tr.glassesSetShow)),
+            DropdownMenuItem(value: 2, child: Text(tr.glassesSetHide)),
           ],
           onChanged: (v) => bridge.setHeadUpMode(v),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Trageerkennung'),
-          subtitle: const Text(
-            'Die Brille meldet, ob sie getragen wird (auch an Home '
-            'Assistant: „Getragen“).',
-          ),
+          title: Text(tr.glassesSetWear),
+          subtitle: Text(tr.glassesSetWearHelp),
           value: bridge.wearDetection ?? false,
           onChanged: bridge.g1.connected ? bridge.setWearDetection : null,
         ),
         if (bridge.g1.supportsHeadGestures)
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Kopfgesten'),
-            subtitle: const Text(
-              'Nicken und Kopfschütteln als Gesten für Home Assistant. Der '
-              'Gyrosensor des rechten Bügels läuft dann ständig und braucht '
-              'etwas mehr Akku.',
-            ),
+            title: Text(tr.glassesSetHeadGestures),
+            subtitle: Text(tr.glassesSetHeadGesturesHelp),
             value: bridge.settings.headGestures,
             onChanged: bridge.setHeadGestures,
           ),
@@ -317,7 +301,7 @@ class _SliderRow extends StatelessWidget {
           children: [
             Expanded(child: Text(label, style: theme.textTheme.titleSmall)),
             Text(
-              notSet ? 'nicht gesetzt' : '${value.round()}$unit',
+              notSet ? tr.glassesSetNotSet : '${value.round()}$unit',
               style: theme.textTheme.bodyMedium,
             ),
           ],

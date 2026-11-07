@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../bridge.dart';
+import '../l10n/l10n.dart';
 
 /// WhisperNotes server and the recording dot.
 class RecordingSettings extends StatefulWidget {
@@ -32,7 +33,7 @@ class _RecordingSettingsState extends State<RecordingSettings> {
     s.whisperUrl = _url.text;
     s.whisperApiKey = _key.text;
     ScaffoldMessenger.of(context)
-        .showSnackBar(const SnackBar(content: Text('Gespeichert')));
+        .showSnackBar(SnackBar(content: Text(tr.saved)));
     widget.bridge.recorder.sendPending();
   }
 
@@ -43,50 +44,41 @@ class _RecordingSettingsState extends State<RecordingSettings> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Aufnahmen mit dem Brillen-Mikrofon gehen an WhisperNotes, werden '
-          'dort transkribiert und zusammengefasst und landen im Eingang von '
-          'BasaltNotes, wenn in WhisperNotes unter Einstellungen → BasaltNotes '
-          'ein Standard-Vault gewählt ist.',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(tr.recSetIntro, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 8),
         TextField(
           controller: _url,
           keyboardType: TextInputType.url,
-          decoration: const InputDecoration(
-            labelText: 'WhisperNotes-Adresse',
+          decoration: InputDecoration(
+            labelText: tr.recSetUrl,
             hintText: 'http://192.168.1.10:8000',
           ),
         ),
         TextField(
           controller: _key,
           obscureText: true,
-          decoration: const InputDecoration(
-            labelText: 'API-Schlüssel (optional)',
-            helperText: 'Nur nötig, wenn in WhisperNotes einer gesetzt ist.',
+          decoration: InputDecoration(
+            labelText: tr.recSetKey,
+            helperText: tr.recSetKeyHelp,
           ),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            FilledButton(onPressed: _save, child: const Text('Speichern')),
+            FilledButton(onPressed: _save, child: Text(tr.save)),
             const SizedBox(width: 8),
             if (r.pending > 0)
               TextButton(
                 onPressed: r.uploading ? null : r.sendPending,
-                child: Text('${r.pending} ausstehende senden'),
+                child: Text(tr.recSetSendPending(r.pending)),
               ),
           ],
         ),
         if (bridge.g1.evenFirmware)
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Punkt auf der Brille'),
-            subtitle: const Text(
-              'Kleiner Punkt oben rechts, solange aufgenommen wird und nichts '
-              'anderes angezeigt wird.',
-            ),
+            title: Text(tr.recSetDot),
+            subtitle: Text(tr.recSetDotHelp),
             value: bridge.settings.recordingDot,
             onChanged: bridge.setRecordingDot,
           )
@@ -94,9 +86,7 @@ class _RecordingSettingsState extends State<RecordingSettings> {
           Padding(
             padding: const EdgeInsets.only(top: 12),
             child: Text(
-              'Während einer Aufnahme zeigt ScouterKit selbst ein kleines '
-              'Quadrat oben rechts im rechten Auge, solange das Mikrofon an '
-              'ist. Es lässt sich nicht ausschalten.',
+              tr.recSetScouterDot,
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
