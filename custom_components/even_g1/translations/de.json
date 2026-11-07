@@ -39,8 +39,8 @@
           "dashboard_entities": "Werden auf dem Brillen-Dashboard als Zeilen „Name: Zustand“ angezeigt, in dieser Reihenfolge.",
           "dashboard_calendars": "Termine von heute (noch nicht vorbei) und morgen erscheinen auf dem Dashboard.",
           "dashboard_todos": "Offene To-dos mit Fälligkeitsdatum erscheinen auf dem Dashboard, die dringendsten zuerst.",
-          "dashboard_template": "Leer = Standard-Layout: Uhrzeit und Datum, Entitäten, Termine und To-dos auf einer Seite. Ein Template ersetzt das Layout unter den Entitäten und kann die Variablen kopfzeile, agenda und agenda_mehr nutzen.",
-          "listening_template": "Erscheint im Rahmen, solange du die linke Touchbar gedrückt hältst (nur ScouterKit). Leer = „{{ assistent }} hört zu …“; die Variable assistent ist der Name des Assistenten.",
+          "dashboard_template": "Leer = Standard-Layout: Uhrzeit und Datum, Entitäten, Termine und To-dos auf einer Seite. Ein Template ersetzt das Layout unter den Entitäten und kann die Variablen kopfzeile, agenda und agenda_mehr nutzen (auch englisch: header, agenda_more).",
+          "listening_template": "Erscheint im Rahmen, solange du die linke Touchbar gedrückt hältst (nur ScouterKit). Leer = „{{ assistant }} hört zu …“; die Variable assistent (oder assistant) ist der Name des Assistenten.",
           "dashboard_style": "Rahmen und Titelzeile zeichnet nur die ScouterKit-Firmware; mit Evens Firmware bleibt das Dashboard schlicht."
         }
       }

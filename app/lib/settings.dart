@@ -128,6 +128,10 @@ class Settings {
 
   /// Nodding and shaking the head as gestures (ScouterKit; the gyroscope
   /// then runs all the time, which costs battery).
+  /// App language: "system" (default), "en" or "de".
+  String get language => _prefs.getString('language') ?? 'system';
+  set language(String v) => _prefs.setString('language', v);
+
   bool get headGestures => _prefs.getBool('head_gestures') ?? false;
   set headGestures(bool v) => _prefs.setBool('head_gestures', v);
 

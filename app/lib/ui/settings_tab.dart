@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../bridge.dart';
+import '../l10n/l10n.dart';
 import 'diagnostics.dart';
 import 'glasses_settings.dart';
 import 'ha_settings.dart';
@@ -26,54 +27,93 @@ class SettingsTab extends StatelessWidget {
             icon: Icons.home,
             title: 'Home Assistant',
             subtitle: s.haConfigured
-                ? '${s.entryName.isEmpty ? 'Brille' : s.entryName} · ${bridge.haStatus}'
-                : 'Nicht eingerichtet',
+                ? '${s.entryName.isEmpty ? tr.glasses : s.entryName} · ${bridge.haStatus}'
+                : tr.settingsNotSetUp,
             initiallyExpanded: !s.haConfigured,
             child: HaSettings(bridge: bridge),
           ),
           _Section(
             icon: Icons.bluetooth,
-            title: 'Brille koppeln',
+            title: tr.settingsPairGlasses,
             subtitle: s.glassesConfigured
                 ? '${s.glassesName} · ${bridge.g1.status}'
-                : 'Noch keine Brille gekoppelt',
+                : tr.settingsNoGlassesPaired,
             initiallyExpanded: !s.glassesConfigured,
             child: GlassesPairing(bridge: bridge),
           ),
           _Section(
             icon: Icons.straighten,
-            title: 'Anzeige & Aktivierung',
-            subtitle: 'Aktivierungswinkel, Höhe, Distanz, Even-Dashboard',
+            title: tr.settingsDisplay,
+            subtitle: tr.settingsDisplaySubtitle,
             child: DisplaySettings(bridge: bridge),
           ),
           _Section(
             icon: Icons.notifications,
-            title: 'Benachrichtigungen',
+            title: tr.settingsNotifications,
             subtitle: s.forwardNotifications
-                ? 'Handy-Benachrichtigungen werden weitergeleitet'
-                : 'Weiterleitung aus',
+                ? tr.settingsNotificationsOn
+                : tr.settingsNotificationsOff,
             child: NotificationSettings(bridge: bridge),
           ),
           _Section(
             icon: Icons.mic_none,
-            title: 'Aufnahmen',
+            title: tr.settingsRecordings,
             subtitle: s.whisperUrl.isEmpty
-                ? 'WhisperNotes nicht eingerichtet'
+                ? tr.settingsWhisperNotSetUp
                 : 'WhisperNotes: ${s.whisperUrl}',
             child: RecordingSettings(bridge: bridge),
           ),
           _Section(
             icon: Icons.bug_report_outlined,
-            title: 'Diagnose',
-            subtitle: 'Testanzeige, Anzeige prüfen, Protokoll',
+            title: tr.settingsDiagnostics,
+            subtitle: tr.settingsDiagnosticsSubtitle,
             child: Diagnostics(bridge: bridge),
           ),
-          const _Section(
+          _Section(
             icon: Icons.system_update,
-            title: 'App-Update',
-            subtitle: 'Version und neue Versionen von GitHub',
-            child: UpdateSettings(),
+            title: tr.settingsAppUpdate,
+            subtitle: tr.settingsAppUpdateSubtitle,
+            child: const UpdateSettings(),
           ),
+          _Section(
+            icon: Icons.language,
+            title: tr.languageSetting,
+            subtitle: _languageName(L10n.setting),
+            child: _LanguageChoice(bridge: bridge),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _languageName(String setting) => switch (setting) {
+  'en' => tr.languageEnglish,
+  'de' => tr.languageGerman,
+  _ => tr.languageSystem(
+    L10n.systemCode == 'de' ? tr.languageGerman : tr.languageEnglish,
+  ),
+};
+
+/// System language (default), English or German.
+class _LanguageChoice extends StatelessWidget {
+  const _LanguageChoice({required this.bridge});
+
+  final Bridge bridge;
+
+  @override
+  Widget build(BuildContext context) {
+    return RadioGroup<String>(
+      groupValue: L10n.setting,
+      onChanged: (v) => bridge.setLanguage(v ?? 'system'),
+      child: Column(
+        children: [
+          for (final v in const ['system', 'en', 'de'])
+            RadioListTile<String>(
+              value: v,
+              title: Text(_languageName(v)),
+              contentPadding: EdgeInsets.zero,
+            ),
         ],
       ),
     );

@@ -2,7 +2,8 @@
 
 The selected calendars and to-do lists are read with the official
 ``calendar.get_events`` and ``todo.get_items`` actions and turned into short
-lines that fit the G1 display (5 lines of about 30 characters per page).
+lines that fit the G1 display (5 lines of about 30 characters per page),
+in Home Assistant's language (lang.py).
 """
 
 from __future__ import annotations
@@ -16,16 +17,13 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.util import dt as dt_util
 
+from .lang import EN, Words
+
 _LOGGER = logging.getLogger(__name__)
 
 # Characters per display line that safely fit without wrapping with Even's
 # firmware; the app reports the real width (ScouterKit: 42).
 LINE_WIDTH = 30
-WEEKDAYS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
-MONTHS = [
-    "Jan", "Feb", "März", "Apr", "Mai", "Juni",
-    "Juli", "Aug", "Sep", "Okt", "Nov", "Dez",
-]  # fmt: skip
 
 
 @dataclass(frozen=True)
@@ -144,20 +142,23 @@ def _line(prefix: str, text: str, suffix: str = "", width: int = LINE_WIDTH) -> 
     return f"{prefix}{text}{suffix}"
 
 
-def _day_label(day: date, today: date) -> str:
-    """Return "heute", "morgen", a weekday or a date."""
+def _day_label(day: date, today: date, w: Words = EN) -> str:
+    """Return "today", "tomorrow", a weekday or a date."""
     days = (day - today).days
     if days == 0:
-        return "heute"
+        return w.today
     if days == 1:
-        return "morgen"
+        return w.tomorrow
     if 1 < days < 7:
-        return WEEKDAYS[day.weekday()]
-    return day.strftime("%d.%m.")
+        return w.weekdays[day.weekday()]
+    return day.strftime(w.short_date)
 
 
 def event_lines(
-    events: list[AgendaEvent], now: datetime, width: int = LINE_WIDTH
+    events: list[AgendaEvent],
+    now: datetime,
+    width: int = LINE_WIDTH,
+    w: Words = EN,
 ) -> list[str]:
     """Return the lines for today's remaining and tomorrow's events."""
     today = now.date()
@@ -172,26 +173,29 @@ def event_lines(
         if event.all_day:
             if event.end <= today or event.start > tomorrow:  # type: ignore[operator]
                 continue
-            label = "heute" if event.start <= today else "morgen"  # type: ignore[operator]
+            label = w.today if event.start <= today else w.tomorrow  # type: ignore[operator]
         else:
             start, end = event.start, event.end
             assert isinstance(start, datetime) and isinstance(end, datetime)
             if end <= now or start.date() > tomorrow:
                 continue
             if start <= now:
-                label = f"bis {end:%H:%M}"
+                label = f"{w.until} {end:%H:%M}"
                 if end.date() != today:
-                    label = f"bis {_day_label(end.date(), today)}"
+                    label = f"{w.until} {_day_label(end.date(), today, w)}"
             elif start.date() == today:
                 label = f"{start:%H:%M}"
             else:
-                label = f"morgen {start:%H:%M}"
+                label = f"{w.tomorrow} {start:%H:%M}"
         lines.append(_line(f"» {label}  ", event.summary, width=width))
     return lines
 
 
 def todo_lines(
-    todos: list[AgendaTodo], now: datetime, width: int = LINE_WIDTH
+    todos: list[AgendaTodo],
+    now: datetime,
+    width: int = LINE_WIDTH,
+    w: Words = EN,
 ) -> list[str]:
     """Return the lines for to-dos, the most urgent first."""
     today = now.date()
@@ -205,13 +209,13 @@ def todo_lines(
         if isinstance(todo.due, datetime):
             overdue = todo.due < now
             label = (
-                todo.due.strftime("%d.%m.")
+                todo.due.strftime(w.short_date)
                 if todo.due_date < today
-                else f"{_day_label(todo.due_date, today)} {todo.due:%H:%M}"
+                else f"{_day_label(todo.due_date, today, w)} {todo.due:%H:%M}"
             )
         else:
             overdue = todo.due < today
-            label = _day_label(todo.due, today)
+            label = _day_label(todo.due, today, w)
         lines.append(
             _line("[!] " if overdue else "[ ] ", todo.summary, f" · {label}", width)
         )
@@ -224,14 +228,15 @@ def agenda(
     now: datetime,
     slots: int,
     width: int = LINE_WIDTH,
+    w: Words = EN,
 ) -> tuple[list[str], int]:
     """Return up to ``slots`` lines of at most ``width`` characters and the
     number of entries left out.
 
     Events come first, but one slot is kept for to-dos if there are any.
     """
-    ev_lines = event_lines(events, now, width)
-    todo_lines_ = todo_lines(todos, now, width)
+    ev_lines = event_lines(events, now, width, w)
+    todo_lines_ = todo_lines(todos, now, width, w)
     slots = max(slots, 0)
     n_events = max(min(len(ev_lines), slots - min(len(todo_lines_), 1)), 0)
     n_todos = min(len(todo_lines_), slots - n_events)
@@ -239,9 +244,8 @@ def agenda(
     return shown, len(ev_lines) + len(todo_lines_) - len(shown)
 
 
-def header(now: datetime, more: int = 0) -> str:
-    """Return "14:35  ·  Mo, 2. Nov" (plus "  ·  +N" if entries were left out)."""
-    text = (
-        f"{now:%H:%M}  ·  {WEEKDAYS[now.weekday()]}, {now.day}. {MONTHS[now.month - 1]}"
-    )
+def header(now: datetime, more: int = 0, w: Words = EN) -> str:
+    """Return "14:35  ·  Mon, Nov 2" (plus "  ·  +N" if entries were left out)."""
+    day = w.date.format(day=now.day, month=w.months[now.month - 1])
+    text = f"{now:%H:%M}  ·  {w.weekdays[now.weekday()]}, {day}"
     return f"{text}  ·  +{more}" if more else text

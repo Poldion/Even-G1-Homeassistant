@@ -1,0 +1,17 @@
+{
+  "glasses": "Glasses",
+  "settingsNotSetUp": "Not set up",
+  "settingsPairGlasses": "Pair glasses",
+  "settingsNoGlassesPaired": "No glasses paired yet",
+  "settingsDisplay": "Display & activation",
+  "settingsDisplaySubtitle": "Activation angle, height, distance, Even dashboard",
+  "settingsNotifications": "Notifications",
+  "settingsNotificationsOn": "Phone notifications are forwarded",
+  "settingsNotificationsOff": "Forwarding off",
+  "settingsRecordings": "Recordings",
+  "settingsWhisperNotSetUp": "WhisperNotes not set up",
+  "settingsDiagnostics": "Diagnostics",
+  "settingsDiagnosticsSubtitle": "Test text, check display, log",
+  "settingsAppUpdate": "App update",
+  "settingsAppUpdateSubtitle": "Version and new versions from GitHub"
+}

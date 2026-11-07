@@ -1,0 +1,30 @@
+{
+  "@@locale": "en",
+  "appTitle": "Even G1 for Home Assistant",
+  "glasses": "Glasses",
+  "languageEnglish": "English",
+  "languageGerman": "Deutsch",
+  "languageSetting": "Language",
+  "languageSystem": "System ({language})",
+  "@languageSystem": {
+    "placeholders": {
+      "language": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAppUpdate": "App update",
+  "settingsAppUpdateSubtitle": "Version and new versions from GitHub",
+  "settingsDiagnostics": "Diagnostics",
+  "settingsDiagnosticsSubtitle": "Test text, check display, log",
+  "settingsDisplay": "Display & activation",
+  "settingsDisplaySubtitle": "Activation angle, height, distance, Even dashboard",
+  "settingsNoGlassesPaired": "No glasses paired yet",
+  "settingsNotSetUp": "Not set up",
+  "settingsNotifications": "Notifications",
+  "settingsNotificationsOff": "Forwarding off",
+  "settingsNotificationsOn": "Phone notifications are forwarded",
+  "settingsPairGlasses": "Pair glasses",
+  "settingsRecordings": "Recordings",
+  "settingsWhisperNotSetUp": "WhisperNotes not set up"
+}

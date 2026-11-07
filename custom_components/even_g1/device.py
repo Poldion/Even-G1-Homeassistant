@@ -51,7 +51,6 @@ from .const import (
     DASHBOARD_STYLE_PLAIN,
     DEFAULT_AUTO_GAIN,
     DEFAULT_DISPLAY_DURATION,
-    DEFAULT_LISTENING_TEMPLATE,
     DEFAULT_NOISE_SUPPRESSION,
     EVENT_ASSIST,
     EVENT_GESTURE,
@@ -60,6 +59,7 @@ from .const import (
     MODE_SCREEN,
     PIPELINE_PREFERRED,
 )
+from .lang import hass_words
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -235,7 +235,8 @@ class EvenG1Device:
         Built-in layout: time and date, the selected entities as
         "Name: state unit" lines, then appointments and to-dos, all on one
         page. With a custom template: entity lines followed by the template,
-        which can use the variables ``kopfzeile``, ``agenda`` and
+        which can use the variables ``header``, ``agenda`` and ``agenda_more``
+        (German names: ``kopfzeile``, ``agenda``,
         ``agenda_mehr``.
         """
         lines = [
@@ -244,7 +245,7 @@ class EvenG1Device:
         ]
         if (template := self._custom_template) is not None:
             return "\n".join([*lines, template])
-        return "\n".join(["{{ kopfzeile }}", *lines, "{{ agenda }}"])
+        return "\n".join(["{{ header }}", *lines, "{{ agenda }}"])
 
     @property
     def page_lines(self) -> int:
@@ -262,16 +263,23 @@ class EvenG1Device:
         slots = self.page_lines - 1
         if self._custom_template is None:
             slots -= len(self.options.get(CONF_DASHBOARD_ENTITIES, []))
+        words = hass_words(self.hass)
         lines, more = agenda.agenda(
             self._agenda_events,
             self._agenda_todos,
             now,
             slots,
             self.line_width,
+            words,
         )
+        head = agenda.header(now, more, words)
+        text = "\n".join(lines)
+        # English and German names of the same values.
         return {
-            "kopfzeile": agenda.header(now, more),
-            "agenda": "\n".join(lines),
+            "header": head,
+            "kopfzeile": head,
+            "agenda": text,
+            "agenda_more": more,
             "agenda_mehr": more,
         }
 
@@ -467,14 +475,15 @@ class EvenG1Device:
     def listening_template_source(self) -> str:
         """Return the Jinja source of the listening text."""
         template = (self.options.get(CONF_LISTENING_TEMPLATE) or "").strip()
-        return template or DEFAULT_LISTENING_TEMPLATE
+        return template or hass_words(self.hass).listening
 
     @callback
     def async_update_listening_tracking(self) -> None:
         """Keep the rendered listening text up to date in the app."""
         self._stop_listening_tracking()
         template = Template(self.listening_template_source, self.hass)
-        variables = {"assistent": self.pipeline_name or "Home Assistant"}
+        name = self.pipeline_name or "Home Assistant"
+        variables = {"assistant": name, "assistent": name}
 
         @callback
         def updated(_event: Any, updates: list[TrackTemplateResult]) -> None:

@@ -36,9 +36,7 @@ DASHBOARD_GESTURE_NONE: Final = "none"
 DASHBOARD_STYLE_PLAIN: Final = "plain"
 DASHBOARD_STYLES: Final = [DASHBOARD_STYLE_PLAIN, "frame", "card", "title"]
 
-# Shown on the glasses while the touch bar is held (ScouterKit). Variable:
-# assistent, the name of the Assist pipeline.
-DEFAULT_LISTENING_TEMPLATE: Final = "{{ assistent }}\nhört zu …"
+# The default text while the touch bar is held (ScouterKit) is in lang.py.
 
 # Gestures reported by the app. These map to the 0xF5 sub commands of the
 # G1 BLE protocol (see app/lib/g1/protocol.dart).

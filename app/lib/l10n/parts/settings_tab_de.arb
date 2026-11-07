@@ -1,0 +1,17 @@
+{
+  "glasses": "Brille",
+  "settingsNotSetUp": "Nicht eingerichtet",
+  "settingsPairGlasses": "Brille koppeln",
+  "settingsNoGlassesPaired": "Noch keine Brille gekoppelt",
+  "settingsDisplay": "Anzeige & Aktivierung",
+  "settingsDisplaySubtitle": "Aktivierungswinkel, Höhe, Distanz, Even-Dashboard",
+  "settingsNotifications": "Benachrichtigungen",
+  "settingsNotificationsOn": "Handy-Benachrichtigungen werden weitergeleitet",
+  "settingsNotificationsOff": "Weiterleitung aus",
+  "settingsRecordings": "Aufnahmen",
+  "settingsWhisperNotSetUp": "WhisperNotes nicht eingerichtet",
+  "settingsDiagnostics": "Diagnose",
+  "settingsDiagnosticsSubtitle": "Testanzeige, Anzeige prüfen, Protokoll",
+  "settingsAppUpdate": "App-Update",
+  "settingsAppUpdateSubtitle": "Version und neue Versionen von GitHub"
+}
