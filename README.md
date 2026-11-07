@@ -25,6 +25,27 @@ die das ganze Display und alle Sensoren der Brille freigibt (siehe
 - **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
 - **Mit ScouterKit zusätzlich:** Texte auf dem ganzen Display (11 statt 5 Zeilen), beide Augen exakt gleichzeitig, App-Symbole bei Benachrichtigungen, Dashboard beim Hochschauen direkt von der Brille (ohne Handy), Nicken und Kopfschütteln als Gesten, Helligkeits-Offset zur Automatik, Dashboard-Designs mit Rahmen und Titelzeile, ein eigener Text beim Zuhören von Assist und eine Animation beim Ruhemodus
 
+## So sieht es aus
+
+Dashboard-Designs (Option *Design des Dashboards*), so wie die Brille sie mit
+ScouterKit zeichnet. Die Inhalte sind Beispiele.
+
+| Schlicht | Rahmen |
+| --- | --- |
+| ![Dashboard schlicht](docs/images/dashboard-plain.png) | ![Dashboard mit Rahmen](docs/images/dashboard-frame.png) |
+| **Karte** | **Titelzeile** |
+| ![Dashboard als Karte](docs/images/dashboard-card.png) | ![Dashboard mit Titelzeile](docs/images/dashboard-title.png) |
+
+Text beim Zuhören (Option *Text beim Zuhören*) und die Animation beim Ruhemodus:
+
+| Assist hört zu | Ruhemodus an | Ruhemodus aus |
+| --- | --- | --- |
+| ![Assist hört zu](docs/images/assist-listening.png) | ![Animation Ruhemodus an](docs/images/silent-sleep.gif) | ![Animation Ruhemodus aus](docs/images/silent-wake.gif) |
+
+Die Bilder hat ScouterKits eigener Interpreter
+(`src/vm`) aus genau den Befehlen gerendert, die die App an die Brille
+schickt. Mit Evens Firmware erscheinen alle Texte schlicht.
+
 ## Firmware: Even oder ScouterKit
 
 | | Even-Firmware | [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) |

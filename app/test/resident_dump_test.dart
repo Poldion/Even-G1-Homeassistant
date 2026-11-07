@@ -104,6 +104,22 @@ void dumpDesigns() {
         anim.code(font, maxCode: 242, start: 1200000),
       );
     }
+    // Examples for the README (made-up content).
+    const example =
+        '09:41  ·  Sa, 7. Nov\nWohnzimmer: 21,5 °C\nAußen: 8 °C, bewölkt\n'
+        'Waschmaschine: fertig\n» heute 18:00  Beispieltermin\n'
+        '» morgen 10:00  Noch ein Termin\n[ ] Beispiel-Aufgabe · heute';
+    for (final style in G1TextStyle.values) {
+      save(
+        'readme_${style.id}',
+        ScouterConnection.textCode(
+          font,
+          style == G1TextStyle.badge ? 'Jarvis\nhört zu …' : example,
+          maxCode: 242,
+          style: style,
+        ),
+      );
+    }
     // The resident program with a card dashboard (as _writeDashboard).
     final p = SkResident.build(gestures: false);
     final image = Uint8List.fromList(arena);
