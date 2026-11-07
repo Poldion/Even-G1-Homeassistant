@@ -5,10 +5,18 @@ name: Preview build
 # from the ScouterKit builds). The app's "Vorabversion" update channel
 # installs these; the stable channel and releases/latest never see them.
 # Signed with the release key, so it installs over the stable app and back.
+# Only changes to what goes into the APK make a new build: tests, docs and
+# the rest of the repository do not (the App workflow still tests them).
 on:
   push:
     branches: ["main"]
-    paths: ["app/**", ".github/workflows/scouterkit.yml"]
+    paths:
+      - "app/lib/**"
+      - "app/assets/**"
+      - "app/android/**"
+      - "app/pubspec.yaml"
+      - "app/pubspec.lock"
+      - ".github/workflows/scouterkit.yml"
   workflow_dispatch:
 
 permissions:

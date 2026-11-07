@@ -26,6 +26,20 @@ HA_URL=http://localhost:8123 HA_TOKEN=... HA_STT_ENGINE=stt.dein_stt flutter tes
 Die Integration wird in CI gegen die älteste unterstützte und die neueste
 Home-Assistant-Version getestet (`.github/workflows/integration.yml`).
 
+## Was ein Push auslöst
+
+| Geändert | Workflow | Ergebnis |
+| --- | --- | --- |
+| `README.md`, `CHANGELOG.md`, `docs/` (außer `DASHBOARD.md`), `.claude/` | – | nichts |
+| `docs/DASHBOARD.md` | Integration | Test der Beispiel-Templates |
+| `custom_components/`, `tests/` | Integration | Tests, kein Release |
+| `app/test/` und andere App-Dateien | App | Analyse, Tests, APK als Artefakt (kein Release) |
+| `app/lib/`, `app/assets/`, `app/android/`, `pubspec.*` auf `main` | App, Preview build | zusätzlich Vorabversion `sk-vX.Y.Z.N` |
+| – | Release | nur von Hand (*Actions → Release → Run workflow*) |
+
+Steht `[skip ci]` in der Commit-Nachricht, läuft bei diesem Push gar kein
+Workflow (eingebaute Funktion von GitHub).
+
 ## Versionen und Releases
 
 App und Integration tragen dieselbe Version nach
