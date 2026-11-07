@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../bridge.dart';
+import '../l10n/l10n.dart';
 import '../main.dart';
 import 'overview_page.dart';
 import 'settings_tab.dart';
 import 'update_settings.dart';
 
-/// Main screen with the tabs "Übersicht" and "Einstellungen".
+/// Main screen with the tabs "Overview" and "Settings".
 class AppShell extends StatefulWidget {
   const AppShell({super.key, required this.bridge});
 
@@ -35,7 +36,7 @@ class _AppShellState extends State<AppShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_tab == 0 ? 'Even G1 · Home Assistant' : 'Einstellungen'),
+        title: Text(_tab == 0 ? 'Even G1 · Home Assistant' : tr.uiSettings),
       ),
       body: IndexedStack(
         index: _tab,
@@ -47,16 +48,16 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _tab,
         onDestinationSelected: (i) => setState(() => _tab = i),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Übersicht',
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard),
+            label: tr.uiOverview,
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Einstellungen',
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: tr.uiSettings,
           ),
         ],
       ),

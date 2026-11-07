@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../bridge.dart';
+import '../l10n/l10n.dart';
 
 /// Test display, left/right check and the log.
 class Diagnostics extends StatefulWidget {
@@ -13,7 +14,7 @@ class Diagnostics extends StatefulWidget {
 }
 
 class _DiagnosticsState extends State<Diagnostics> {
-  final _testText = TextEditingController(text: 'Hallo von Home Assistant!');
+  final _testText = TextEditingController(text: tr.diagTestTextDefault);
 
   @override
   void dispose() {
@@ -31,7 +32,7 @@ class _DiagnosticsState extends State<Diagnostics> {
         TextField(
           controller: _testText,
           maxLines: 3,
-          decoration: const InputDecoration(labelText: 'Testtext'),
+          decoration: InputDecoration(labelText: tr.diagTestText),
         ),
         const SizedBox(height: 8),
         Row(
@@ -41,13 +42,13 @@ class _DiagnosticsState extends State<Diagnostics> {
                 onPressed: connected
                     ? () => bridge.sendTestText(_testText.text)
                     : null,
-                child: const Text('Auf Brille anzeigen'),
+                child: Text(tr.diagShowOnGlasses),
               ),
             ),
             const SizedBox(width: 8),
             OutlinedButton(
               onPressed: connected ? bridge.display.clear : null,
-              child: const Text('Schließen'),
+              child: Text(tr.diagClose),
             ),
           ],
         ),
@@ -61,20 +62,17 @@ class _DiagnosticsState extends State<Diagnostics> {
                 }
               : null,
           icon: const Icon(Icons.compare),
-          label: const Text('Anzeige links/rechts prüfen'),
+          label: Text(tr.diagCheckDisplay),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('Assist-Antworten im Even-AI-Modus (Test)'),
-          subtitle: const Text(
-            'Zeigt Antworten wie die offizielle Even-App an. Ausprobieren, '
-            'falls ein Auge etwas anderes zeigt als das andere.',
-          ),
+          title: Text(tr.diagEvenAi),
+          subtitle: Text(tr.diagEvenAiSubtitle),
           value: bridge.settings.evenAiAnswers,
           onChanged: bridge.setEvenAiAnswers,
         ),
         const SizedBox(height: 8),
-        Text('Protokoll', style: Theme.of(context).textTheme.titleSmall),
+        Text(tr.diagLog, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 4),
         Container(
           height: 260,

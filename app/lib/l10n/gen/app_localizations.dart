@@ -104,6 +104,54 @@ abstract class AppLocalizations {
   /// **'Even G1 for Home Assistant'**
   String get appTitle;
 
+  /// No description provided for @diagCheckDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Check left/right display'**
+  String get diagCheckDisplay;
+
+  /// No description provided for @diagClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get diagClose;
+
+  /// No description provided for @diagEvenAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Assist answers in Even AI mode (test)'**
+  String get diagEvenAi;
+
+  /// No description provided for @diagEvenAiSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows answers like the official Even app. Try it if one eye shows something different from the other.'**
+  String get diagEvenAiSubtitle;
+
+  /// No description provided for @diagLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Log'**
+  String get diagLog;
+
+  /// No description provided for @diagShowOnGlasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Show on glasses'**
+  String get diagShowOnGlasses;
+
+  /// No description provided for @diagTestText.
+  ///
+  /// In en, this message translates to:
+  /// **'Test text'**
+  String get diagTestText;
+
+  /// No description provided for @diagTestTextDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello from Home Assistant!'**
+  String get diagTestTextDefault;
+
   /// No description provided for @glasses.
   ///
   /// In en, this message translates to:
@@ -217,6 +265,342 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'WhisperNotes not set up'**
   String get settingsWhisperNotSetUp;
+
+  /// No description provided for @uiAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer: {text}'**
+  String uiAnswer(String text);
+
+  /// No description provided for @uiAssistHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the left touch bar, speak, release.'**
+  String get uiAssistHint;
+
+  /// No description provided for @uiAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Assistant: {name}'**
+  String uiAssistant(String name);
+
+  /// No description provided for @uiBatteryCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Case'**
+  String get uiBatteryCase;
+
+  /// No description provided for @uiBatteryLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get uiBatteryLeft;
+
+  /// No description provided for @uiBatteryRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Right'**
+  String get uiBatteryRight;
+
+  /// No description provided for @uiBrightness.
+  ///
+  /// In en, this message translates to:
+  /// **'Brightness'**
+  String get uiBrightness;
+
+  /// No description provided for @uiBrightnessAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The glasses set the brightness with their light sensor. The slider makes it brighter or darker.'**
+  String get uiBrightnessAutoHint;
+
+  /// No description provided for @uiBrightnessNow.
+  ///
+  /// In en, this message translates to:
+  /// **' (currently {percent} %)'**
+  String uiBrightnessNow(int percent);
+
+  /// No description provided for @uiBrightnessOffsetEven.
+  ///
+  /// In en, this message translates to:
+  /// **'About every two minutes, while nothing is shown, the app reads the light sensor and sets it {offset} %{current}.'**
+  String uiBrightnessOffsetEven(String offset, String current);
+
+  /// No description provided for @uiBrightnessOffsetScouter.
+  ///
+  /// In en, this message translates to:
+  /// **'The light sensor reports whenever the brightness changes noticeably while something is shown; the app then sets {offset} % relative to the automatic level{current}.'**
+  String uiBrightnessOffsetScouter(String offset, String current);
+
+  /// No description provided for @uiConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get uiConnect;
+
+  /// No description provided for @uiFirmware.
+  ///
+  /// In en, this message translates to:
+  /// **'Firmware: {version}'**
+  String uiFirmware(String version);
+
+  /// No description provided for @uiGlassesNotPaired.
+  ///
+  /// In en, this message translates to:
+  /// **'Not paired – see Settings'**
+  String get uiGlassesNotPaired;
+
+  /// No description provided for @uiHaNotSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set up – see Settings'**
+  String get uiHaNotSetUp;
+
+  /// No description provided for @uiListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening …'**
+  String get uiListening;
+
+  /// No description provided for @uiOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get uiOverview;
+
+  /// No description provided for @uiPreferredAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'preferred assistant'**
+  String get uiPreferredAssistant;
+
+  /// No description provided for @uiPreviewEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing shown by the app\n(the glasses may show their own screen)'**
+  String get uiPreviewEmpty;
+
+  /// No description provided for @uiPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview of the glasses display'**
+  String get uiPreviewTitle;
+
+  /// No description provided for @uiQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Question: {text}'**
+  String uiQuestion(String text);
+
+  /// No description provided for @uiRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get uiRecording;
+
+  /// No description provided for @uiRecordingFlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Glasses microphone → WhisperNotes → BasaltNotes'**
+  String get uiRecordingFlow;
+
+  /// No description provided for @uiRecordingPending.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 recording not sent yet} other{{count} recordings not sent yet}}'**
+  String uiRecordingPending(int count);
+
+  /// No description provided for @uiRecordingRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running · {time}'**
+  String uiRecordingRunning(String time);
+
+  /// No description provided for @uiRecordingSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter WhisperNotes in the settings'**
+  String get uiRecordingSetUp;
+
+  /// No description provided for @uiRecordingUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending to WhisperNotes …'**
+  String get uiRecordingUploading;
+
+  /// No description provided for @uiSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get uiSettings;
+
+  /// No description provided for @uiSilentMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Silent mode'**
+  String get uiSilentMode;
+
+  /// No description provided for @uiSilentModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No texts, notifications or dashboards. Assist keeps working.'**
+  String get uiSilentModeSubtitle;
+
+  /// No description provided for @uiStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get uiStart;
+
+  /// No description provided for @uiStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get uiStop;
+
+  /// No description provided for @uiWearCaseClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'In the case (lid closed)'**
+  String get uiWearCaseClosed;
+
+  /// No description provided for @uiWearCaseOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'In the case (lid open)'**
+  String get uiWearCaseOpen;
+
+  /// No description provided for @uiWearNotWorn.
+  ///
+  /// In en, this message translates to:
+  /// **'Taken off'**
+  String get uiWearNotWorn;
+
+  /// No description provided for @uiWearWorn.
+  ///
+  /// In en, this message translates to:
+  /// **'Worn'**
+  String get uiWearWorn;
+
+  /// No description provided for @updateAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available'**
+  String updateAvailable(String version);
+
+  /// No description provided for @updateCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get updateCancel;
+
+  /// No description provided for @updateChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Update channel'**
+  String get updateChannel;
+
+  /// No description provided for @updateChannelPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get updateChannelPreview;
+
+  /// No description provided for @updateChannelStable.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable'**
+  String get updateChannelStable;
+
+  /// No description provided for @updateCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get updateCheck;
+
+  /// No description provided for @updateCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check for updates.'**
+  String get updateCheckFailed;
+
+  /// No description provided for @updateDailyCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'The app looks for new versions on GitHub once a day when it starts.'**
+  String get updateDailyCheck;
+
+  /// No description provided for @updateDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The update could not be downloaded.'**
+  String get updateDownloadFailed;
+
+  /// No description provided for @updateInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get updateInstall;
+
+  /// No description provided for @updateInstallQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Download and install now? Your settings are kept.'**
+  String get updateInstallQuestion;
+
+  /// No description provided for @updateInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed: {version}'**
+  String updateInstalled(String version);
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
+  /// No description provided for @updatePreviewQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Install preview versions?'**
+  String get updatePreviewQuestion;
+
+  /// No description provided for @updatePreviewVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview {version}'**
+  String updatePreviewVersion(String version);
+
+  /// No description provided for @updatePreviewWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview versions are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.'**
+  String get updatePreviewWarning;
+
+  /// No description provided for @updateStableVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Stable version {version}'**
+  String updateStableVersion(String version);
+
+  /// No description provided for @updateSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get updateSwitch;
+
+  /// No description provided for @updateUpToDate.
+  ///
+  /// In en, this message translates to:
+  /// **'The app is up to date.'**
+  String get updateUpToDate;
+
+  /// No description provided for @updateVersionUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed version unknown'**
+  String get updateVersionUnknown;
 }
 
 class _AppLocalizationsDelegate

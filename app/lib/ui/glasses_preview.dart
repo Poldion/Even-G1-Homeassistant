@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../g1/display.dart';
+import '../l10n/l10n.dart';
 
 /// Shows what the app currently displays on the glasses: green text on a
 /// dark lens, roughly in the proportions of the display (Even's text view
@@ -37,9 +38,7 @@ class GlassesPreview extends StatelessWidget {
                         ? Alignment.topLeft
                         : Alignment.centerLeft,
                     child: Text(
-                      text?.trimRight() ??
-                          'Keine Anzeige der App\n(die Brille zeigt ggf. '
-                              'ihre eigene Oberfläche)',
+                      text?.trimRight() ?? tr.uiPreviewEmpty,
                       style: TextStyle(
                         color: text == null
                             ? const Color(0xFF3F6B3F)

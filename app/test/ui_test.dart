@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:even_g1_ha/bridge.dart';
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
+import 'package:even_g1_ha/l10n/l10n.dart';
 import 'package:even_g1_ha/main.dart';
 import 'package:even_g1_ha/settings.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,30 @@ Future<void> _shot(WidgetTester tester, String name) async {
 void main() {
   setUpAll(_loadFonts);
 
-  testWidgets('overview and settings tabs build', (tester) async {
+  tearDown(() => L10n.apply('en'));
+
+  testWidgets('English is the main language', (tester) async {
+    tester.view.physicalSize = const Size(412, 900);
+    tester.view.devicePixelRatio = 1;
+    SharedPreferences.setMockInitialValues({});
+    L10n.apply('system', system: const Locale('fr'));
+    final settings = await Settings.load();
+    final bridge = Bridge(
+      settings,
+      g1: G1Connection.fake((side, data) async {}),
+    );
+    await tester.pumpWidget(EvenG1App(bridge: bridge));
+    await tester.pump();
+    // Without Home Assistant the app opens on the settings tab.
+    expect(find.text('Settings'), findsNWidgets(2));
+    await tester.tap(find.text('Overview'));
+    await tester.pumpAndSettle();
+    expect(find.text('Silent mode'), findsOneWidget);
+    expect(find.text('Preview of the glasses display'), findsOneWidget);
+  });
+
+  testWidgets('overview and settings tabs build (German)', (tester) async {
+    L10n.apply('de');
     tester.view.physicalSize = const Size(412, 900);
     tester.view.devicePixelRatio = 1;
     SharedPreferences.setMockInitialValues({

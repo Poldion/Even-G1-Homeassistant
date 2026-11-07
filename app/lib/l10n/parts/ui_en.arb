@@ -1,0 +1,163 @@
+{
+  "diagCheckDisplay": "Check left/right display",
+  "diagClose": "Close",
+  "diagEvenAi": "Assist answers in Even AI mode (test)",
+  "diagEvenAiSubtitle": "Shows answers like the official Even app. Try it if one eye shows something different from the other.",
+  "diagLog": "Log",
+  "diagShowOnGlasses": "Show on glasses",
+  "diagTestText": "Test text",
+  "diagTestTextDefault": "Hello from Home Assistant!",
+  "uiAnswer": "Answer: {text}",
+  "@uiAnswer": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "uiAssistHint": "Hold the left touch bar, speak, release.",
+  "uiAssistant": "Assistant: {name}",
+  "@uiAssistant": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "uiBatteryCase": "Case",
+  "uiBatteryLeft": "Left",
+  "uiBatteryRight": "Right",
+  "uiBrightness": "Brightness",
+  "uiBrightnessAutoHint": "The glasses set the brightness with their light sensor. The slider makes it brighter or darker.",
+  "uiBrightnessNow": " (currently {percent} %)",
+  "@uiBrightnessNow": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "uiBrightnessOffsetEven": "About every two minutes, while nothing is shown, the app reads the light sensor and sets it {offset} %{current}.",
+  "@uiBrightnessOffsetEven": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "uiBrightnessOffsetScouter": "The light sensor reports whenever the brightness changes noticeably while something is shown; the app then sets {offset} % relative to the automatic level{current}.",
+  "@uiBrightnessOffsetScouter": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "uiConnect": "Connect",
+  "uiFirmware": "Firmware: {version}",
+  "@uiFirmware": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "uiGlassesNotPaired": "Not paired – see Settings",
+  "uiHaNotSetUp": "Not set up – see Settings",
+  "uiListening": "Listening …",
+  "uiOverview": "Overview",
+  "uiPreferredAssistant": "preferred assistant",
+  "uiPreviewEmpty": "Nothing shown by the app\n(the glasses may show their own screen)",
+  "uiPreviewTitle": "Preview of the glasses display",
+  "uiQuestion": "Question: {text}",
+  "@uiQuestion": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "uiRecording": "Recording",
+  "uiRecordingFlow": "Glasses microphone → WhisperNotes → BasaltNotes",
+  "uiRecordingPending": "{count, plural, =1{1 recording not sent yet} other{{count} recordings not sent yet}}",
+  "@uiRecordingPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "uiRecordingRunning": "Running · {time}",
+  "@uiRecordingRunning": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "uiRecordingSetUp": "Enter WhisperNotes in the settings",
+  "uiRecordingUploading": "Sending to WhisperNotes …",
+  "uiSettings": "Settings",
+  "uiSilentMode": "Silent mode",
+  "uiSilentModeSubtitle": "No texts, notifications or dashboards. Assist keeps working.",
+  "uiStart": "Start",
+  "uiStop": "Stop",
+  "uiWearCaseClosed": "In the case (lid closed)",
+  "uiWearCaseOpen": "In the case (lid open)",
+  "uiWearNotWorn": "Taken off",
+  "uiWearWorn": "Worn",
+  "updateAvailable": "Version {version} is available",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateCancel": "Cancel",
+  "updateChannel": "Update channel",
+  "updateChannelPreview": "Preview",
+  "updateChannelStable": "Stable",
+  "updateCheck": "Check for updates",
+  "updateCheckFailed": "Could not check for updates.",
+  "updateDailyCheck": "The app looks for new versions on GitHub once a day when it starts.",
+  "updateDownloadFailed": "The update could not be downloaded.",
+  "updateInstall": "Install",
+  "updateInstallQuestion": "Download and install now? Your settings are kept.",
+  "updateInstalled": "Installed: {version}",
+  "@updateInstalled": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "Later",
+  "updatePreviewQuestion": "Install preview versions?",
+  "updatePreviewVersion": "Preview {version}",
+  "@updatePreviewVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updatePreviewWarning": "Preview versions are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.",
+  "updateStableVersion": "Stable version {version}",
+  "@updateStableVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateSwitch": "Switch",
+  "updateUpToDate": "The app is up to date.",
+  "updateVersionUnknown": "Installed version unknown"
+}
