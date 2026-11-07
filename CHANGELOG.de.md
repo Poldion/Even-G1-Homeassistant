@@ -9,6 +9,18 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-11-07
+
+### Added
+- ScouterKit, Design-Set „Labor“: Die Antwort von Assist erscheint in einem
+  Terminal-Fenster, der Name des Assistenten auf der Leiste (mit
+  Seitenzahl, wenn die Antwort mehrere Seiten hat), darunter die Antwort
+  und am Ende ein Block-Cursor.
+
+### Changed
+- Die Beschreibung der Option *Design-Set* weist darauf hin, dass das
+  Dashboard eine eigene Option hat (*Design des Dashboards → Labor*).
+
 ## [0.20.0] - 2026-11-07
 
 ### Added
@@ -331,7 +343,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.17.0...v0.18.0

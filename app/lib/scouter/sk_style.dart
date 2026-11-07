@@ -170,7 +170,9 @@ class SkLayout {
     final lh = font.lineSpacing;
     final centre = SkPanel.width ~/ 2;
     int centred(String s) => max(0, centre - font.width(s) ~/ 2);
-    if (style == G1TextStyle.lab || style == G1TextStyle.labBadge) {
+    if (style == G1TextStyle.lab ||
+        style == G1TextStyle.labBadge ||
+        style == G1TextStyle.labTerminal) {
       return _lab(
         font,
         lines,
@@ -258,11 +260,21 @@ class SkLayout {
     final end = min(y + 8, bottomLimit + 1);
     final boxTop = max(0, top - pad);
     final inset = badge ? 8 : 10;
+    final last = out.last;
     return SkLayout(
       out,
       fills: [
         ...bar(x0 + inset, top - 1, w - 2 * inset, lh + 2, stripes: !badge),
         ...brackets(x0, boxTop, w, end - boxTop),
+        // The terminal's block cursor after the last line.
+        if (style == G1TextStyle.labTerminal && out.length > 1)
+          SkRect(
+            min(last.x + font.width(last.text) + 4, SkPanel.width - 24),
+            last.y + 4,
+            11,
+            font.ascent - 2,
+            15,
+          ),
       ],
     );
   }

@@ -9,6 +9,17 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-11-07
+
+### Added
+- ScouterKit, lab design set: Assist's answer appears in a terminal window,
+  the assistant's name on the bar (with the page number when the answer
+  has several pages), the answer below and a block cursor at its end.
+
+### Changed
+- The description of the *Design set* option says that the dashboard has
+  its own option (*Dashboard design → Lab*).
+
 ## [0.20.0] - 2026-11-07
 
 ### Added
@@ -322,7 +333,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...HEAD
+[0.21.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...v0.21.0
 [0.20.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.19.0...v0.20.0
 [0.19.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.18.0...v0.19.0
 [0.18.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.17.0...v0.18.0

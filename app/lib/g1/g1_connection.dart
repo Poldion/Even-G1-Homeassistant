@@ -32,7 +32,11 @@ enum G1TextStyle {
 
   /// Lab design set for the Assist status: centred, the first line on a
   /// bar, corner brackets.
-  labBadge('lab_badge');
+  labBadge('lab_badge'),
+
+  /// Lab design set for Assist answers: a terminal window, the first line
+  /// (the assistant) on a bar, a block cursor after the text.
+  labTerminal('lab_terminal');
 
   const G1TextStyle(this.id);
   final String id;

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
@@ -29,6 +30,10 @@ class G1Display {
 
   bool get active => _active;
 
+  /// The pages of the current text (tests).
+  @visibleForTesting
+  List<String> get debugScreens => _screens;
+
   /// Screen currently shown by the app on the glasses (null = nothing / the
   /// glasses' own content). Used for the preview in the app.
   final ValueNotifier<String?> screen = ValueNotifier(null);
@@ -45,6 +50,7 @@ class G1Display {
     bool evenAi = false,
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
+    String? pageTitle,
   }) async {
     _reset();
     _active = true;
@@ -56,8 +62,9 @@ class G1Display {
         : closeAfter;
     final generation = _generation;
     // Pages as large as this display allows (5 lines with Even's firmware).
-    final screens = await g1.layoutPages(text, icon: icon);
+    var screens = await g1.layoutPages(text, icon: icon);
     if (generation != _generation) return false;
+    if (pageTitle != null) screens = _withTitle(screens, pageTitle);
     _screens = screens;
 
     final ok = await _showPage(generation);
@@ -109,8 +116,39 @@ class G1Display {
   bool labDesign = false;
 
   /// Assist answer with automatic paging.
-  Future<bool> showAiAnswer(String text, {Duration? closeAfter}) =>
-      showText(text, closeAfter: closeAfter, evenAi: evenAiAnswers);
+  /// In the lab design set a terminal window titled [assistant].
+  Future<bool> showAiAnswer(
+    String text, {
+    Duration? closeAfter,
+    String? assistant,
+  }) {
+    final terminal = labDesign && g1.supportsDesigns;
+    return showText(
+      text,
+      closeAfter: closeAfter,
+      evenAi: evenAiAnswers,
+      style: terminal ? G1TextStyle.labTerminal : G1TextStyle.plain,
+      pageTitle: terminal ? (assistant ?? 'Home Assistant') : null,
+    );
+  }
+
+  /// [pages] again with [title] as the first line of each (one line less
+  /// per page), "title  2/3" with several pages.
+  List<String> _withTitle(List<String> pages, String title) {
+    final lines = [for (final p in pages) ...p.split('\n')];
+    while (lines.isNotEmpty && lines.last.trim().isEmpty) {
+      lines.removeLast();
+    }
+    final per = max(1, g1.displayLines - 1);
+    final n = max(1, (lines.length + per - 1) ~/ per);
+    return [
+      for (var i = 0; i < n; i++)
+        [
+          n > 1 ? '$title  ${i + 1}/$n' : title,
+          ...lines.skip(i * per).take(per),
+        ].join('\n'),
+    ];
+  }
 
   /// Experimental: show Assist status and answers with the Even AI statuses
   /// of the official app (0x31 displaying, 0x41 last page) instead of the

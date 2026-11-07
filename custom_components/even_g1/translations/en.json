@@ -43,7 +43,7 @@
           "dashboard_template": "Empty = default layout: time and date, entities, appointments and to-dos on one page. A template replaces the layout below the entities and can use the variables header, agenda and agenda_more (German names kopfzeile, agenda_mehr also work).",
           "listening_template": "Shown in a frame while you hold the left touch bar (ScouterKit only). Empty = \"{{ assistant }} is listening …\"; the variable assistant (or assistent) is the assistant's name.",
           "dashboard_style": "Only the ScouterKit firmware draws the frame and title; with Even's firmware the dashboard stays plain.",
-          "design_set": "ScouterKit only: look of the Assist status and the silent mode animation. Classic: bevelled frames. Lab: corner brackets, a striped bar, typed text and a scan line, inspired by retro lab terminals."
+          "design_set": "ScouterKit only: look of the Assist status, Assist's answers and the silent mode animation. Classic: bevelled frames. Lab: corner brackets, a striped bar, answers in a terminal window, typed text and a scan line, inspired by retro lab terminals. The dashboard has its own option (Dashboard design → Lab)."
         }
       }
     }

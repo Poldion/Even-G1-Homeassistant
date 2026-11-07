@@ -64,6 +64,11 @@ lab terminals; no names or logos of existing games are used.
 | **Silent mode on** | **Silent mode off** |
 | ![Lab silent mode on](docs/images/en/silent-sleep-lab.gif) | ![Lab silent mode off](docs/images/en/silent-wake-lab.gif) |
 
+Assist's answer appears in a terminal window: the assistant's name on the
+bar (with the page, e.g. `2/3`), the answer below, a block cursor at its end.
+
+![Lab answer](docs/images/en/assist-answer-lab.png)
+
 The images were rendered by ScouterKit's own interpreter (`src/vm`) from
 exactly the commands the app sends to the glasses. With Even's firmware all
 texts appear plain.
@@ -173,7 +178,7 @@ Options under *Integration → Configure*:
 | Default display duration | Seconds until hidden (0 = until double tap) |
 | Dashboard gesture | Head up, tap left or right |
 | Dashboard design | ScouterKit only: plain, frame, card (frame with title), title or lab |
-| Design set | ScouterKit only: look of the Assist status and the silent mode animation, classic or lab |
+| Design set | ScouterKit only: look of the Assist status, answers and the silent mode animation, classic or lab |
 | Dashboard entities | Lines "Name: state unit" on the glasses dashboard |
 | Calendars | Appointments of today (not yet over) and tomorrow |
 | To-do lists | Open to-dos with a due date, the most urgent first |

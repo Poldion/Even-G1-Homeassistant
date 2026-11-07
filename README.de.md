@@ -65,6 +65,12 @@ kommen nicht vor.
 | **Ruhemodus an** | **Ruhemodus aus** |
 | ![Labor: Ruhemodus an](docs/images/de/silent-sleep-lab.gif) | ![Labor: Ruhemodus aus](docs/images/de/silent-wake-lab.gif) |
 
+Die Antwort von Assist erscheint in einem Terminal-Fenster: der Name des
+Assistenten auf der Leiste (mit der Seite, z. B. `2/3`), darunter die
+Antwort, am Ende ein Block-Cursor.
+
+![Labor-Antwort](docs/images/de/assist-answer-lab.png)
+
 Die Bilder hat ScouterKits eigener Interpreter
 (`src/vm`) aus genau den Befehlen gerendert, die die App an die Brille
 schickt. Mit Evens Firmware erscheinen alle Texte schlicht.
@@ -177,7 +183,7 @@ Optionen unter *Integration → Konfigurieren*:
 | Standard-Anzeigedauer | Sekunden bis zum Ausblenden (0 = bis Doppeltippen) |
 | Dashboard-Geste | Kopf gehoben, Tippen links oder rechts |
 | Design des Dashboards | Nur ScouterKit: schlicht, Rahmen, Karte (Rahmen mit Titelzeile), Titelzeile oder Labor |
-| Design-Set | Nur ScouterKit: Aussehen des Assist-Status und der Ruhemodus-Animation, klassisch oder Labor |
+| Design-Set | Nur ScouterKit: Aussehen des Assist-Status, der Antworten und der Ruhemodus-Animation, klassisch oder Labor |
 | Dashboard-Entitäten | Zeilen „Name: Zustand Einheit“ auf dem Brillen-Dashboard |
 | Kalender | Termine von heute (noch nicht vorbei) und morgen |
 | To-do-Listen | Offene To-dos mit Fälligkeitsdatum, die dringendsten zuerst |

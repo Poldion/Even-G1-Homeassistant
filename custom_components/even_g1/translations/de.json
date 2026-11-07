@@ -43,7 +43,7 @@
           "dashboard_template": "Leer = Standard-Layout: Uhrzeit und Datum, Entitäten, Termine und To-dos auf einer Seite. Ein Template ersetzt das Layout unter den Entitäten und kann die Variablen kopfzeile, agenda und agenda_mehr nutzen (auch englisch: header, agenda_more).",
           "listening_template": "Erscheint im Rahmen, solange du die linke Touchbar gedrückt hältst (nur ScouterKit). Leer = „{{ assistant }} hört zu …“; die Variable assistent (oder assistant) ist der Name des Assistenten.",
           "dashboard_style": "Rahmen und Titelzeile zeichnet nur die ScouterKit-Firmware; mit Evens Firmware bleibt das Dashboard schlicht.",
-          "design_set": "Nur ScouterKit: Aussehen des Assist-Status und der Ruhemodus-Animation. Klassisch: Rahmen mit abgeschrägten Ecken. Labor: Eckklammern, gestreifte Leiste, getippter Text und eine Scanline, angelehnt an Retro-Labor-Terminals."
+          "design_set": "Nur ScouterKit: Aussehen des Assist-Status, der Antworten von Assist und der Ruhemodus-Animation. Klassisch: Rahmen mit abgeschrägten Ecken. Labor: Eckklammern, gestreifte Leiste, Antworten im Terminal-Fenster, getippter Text und eine Scanline, angelehnt an Retro-Labor-Terminals. Das Dashboard hat eine eigene Option (Design des Dashboards → Labor)."
         }
       }
     }

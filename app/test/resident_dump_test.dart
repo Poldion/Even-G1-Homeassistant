@@ -132,6 +132,23 @@ void dumpDesigns() {
           ),
         );
       }
+      final answer = {
+        'en':
+            'Jarvis\nThe washing machine finished ten minutes ago. '
+            'The living room is at 21.5 °C, outside it is 8 °C and cloudy.',
+        'de':
+            'Jarvis\nDie Waschmaschine ist seit zehn Minuten fertig. '
+            'Im Wohnzimmer sind es 21,5 °C, draußen 8 °C und bewölkt.',
+      }[lang]!;
+      save(
+        'readme_${lang}_lab_answer',
+        ScouterConnection.textCode(
+          font,
+          answer,
+          maxCode: 242,
+          style: G1TextStyle.labTerminal,
+        ),
+      );
       final anims = {
         'sleep': SkAnimation.sleep(font, cx: 320, cy: 196),
         'wake': SkAnimation.wake(font, cx: 320, cy: 196),

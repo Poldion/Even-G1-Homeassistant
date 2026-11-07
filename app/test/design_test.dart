@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:even_g1_ha/g1/display.dart';
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
@@ -175,6 +176,45 @@ void main() {
       rows: 11,
     );
     expect(bands.firstWhere((b) => b.text == text.split('\n').first).level, 0);
+  });
+
+  test('lab terminal: assistant on the bar, a cursor after the answer', () {
+    final layout = SkLayout.of(
+      font,
+      ['Jarvis', 'The washing machine is done.'],
+      G1TextStyle.labTerminal,
+      top: 140,
+      left: 24,
+    );
+    expect(layout.lines.first.level, 0);
+    final cursor = layout.fills.last;
+    final last = layout.lines.last;
+    expect(cursor.x, last.x + font.width(last.text) + 4);
+    expect(cursor.y, last.y + 4);
+    expect(cursor.level, 15);
+  });
+
+  test('answers in the lab set: titled pages in a terminal window', () async {
+    final g1 = ScouterConnection.fake(
+      (side, channel, data) async {},
+      font: font,
+    );
+    final display = G1Display(g1)..labDesign = true;
+    final long = List.generate(25, (i) => 'Line ${i + 1}').join('\n');
+    // Not connected: the pages are laid out, nothing is sent.
+    await display.showAiAnswer(long, assistant: 'Jarvis');
+    final pages = display.debugScreens;
+    expect(pages.length, 3); // 10 lines per page below the title
+    expect(pages.first.split('\n').first, 'Jarvis  1/3');
+    expect(pages.last.split('\n').first, 'Jarvis  3/3');
+    expect(pages.first.split('\n'), hasLength(g1.displayLines));
+    await display.showAiAnswer('Done.', assistant: 'Jarvis');
+    expect(display.debugScreens, ['Jarvis\nDone.']);
+    // Classic set: plain, no title.
+    display.labDesign = false;
+    await display.showAiAnswer('Done.', assistant: 'Jarvis');
+    expect(display.debugScreens, ['Done.']);
+    g1.dispose();
   });
 
   test('the library fits its area', () {

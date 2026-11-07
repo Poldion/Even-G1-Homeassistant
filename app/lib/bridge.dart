@@ -884,6 +884,7 @@ class Bridge extends ChangeNotifier {
     await display.showAiAnswer(
       result.response.isEmpty ? tr.coreDone : result.response,
       closeAfter: duration > 0 ? Duration(seconds: max(duration, 8)) : null,
+      assistant: haConfig.assistName,
     );
     // Logs what each arm shows, to spot left/right differences.
     unawaited(Future<void>.delayed(const Duration(seconds: 1), checkDisplay));
