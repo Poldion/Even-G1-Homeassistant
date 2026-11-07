@@ -159,6 +159,8 @@ Optionen unter *Integration → Konfigurieren*:
 | To-do-Listen | Offene To-dos mit Fälligkeitsdatum, die dringendsten zuerst |
 | Eigenes Dashboard-Template | Leer lassen für das Standard-Layout; sonst Jinja-Template unter den Entitäten |
 
+Beispiele für eigene Dashboards (Wetter, Zuhause, Energie, nur wichtige Hinweise, Text beim Zuhören) stehen in [docs/DASHBOARD.md](docs/DASHBOARD.md).
+
 Das Standard-Dashboard passt auf eine Seite der Brille (5 Zeilen):
 
 ```
