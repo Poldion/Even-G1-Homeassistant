@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../bridge.dart';
+import '../l10n/l10n.dart';
 import 'glasses_preview.dart';
 
 /// Start tab: connection and battery status, silent mode, Assist and the
@@ -12,11 +13,11 @@ class OverviewPage extends StatelessWidget {
 
   final Bridge bridge;
 
-  static const _wearLabels = {
-    'worn': 'Getragen',
-    'not_worn': 'Abgesetzt',
-    'case_open': 'Im Case (Deckel offen)',
-    'case_closed': 'Im Case (Deckel zu)',
+  static Map<String, String> get _wearLabels => {
+    'worn': tr.uiWearWorn,
+    'not_worn': tr.uiWearNotWorn,
+    'case_open': tr.uiWearCaseOpen,
+    'case_closed': tr.uiWearCaseClosed,
   };
 
   @override
@@ -50,14 +51,14 @@ class OverviewPage extends StatelessWidget {
                             children: [
                               Text(
                                 s.glassesName.isEmpty
-                                    ? 'Brille'
+                                    ? tr.glasses
                                     : s.glassesName,
                                 style: theme.textTheme.titleMedium,
                               ),
                               Text(
                                 s.glassesConfigured
                                     ? g1.status
-                                    : 'Nicht gekoppelt – siehe Einstellungen',
+                                    : tr.uiGlassesNotPaired,
                               ),
                             ],
                           ),
@@ -65,7 +66,7 @@ class OverviewPage extends StatelessWidget {
                         if (s.glassesConfigured && !g1.connected)
                           TextButton(
                             onPressed: bridge.reconnectGlasses,
-                            child: const Text('Verbinden'),
+                            child: Text(tr.uiConnect),
                           ),
                       ],
                     ),
@@ -73,10 +74,16 @@ class OverviewPage extends StatelessWidget {
                       const SizedBox(height: 16),
                       Row(
                         children: [
-                          _Battery(label: 'Links', percent: g1.batteryLeft),
-                          _Battery(label: 'Rechts', percent: g1.batteryRight),
                           _Battery(
-                            label: 'Case',
+                            label: tr.uiBatteryLeft,
+                            percent: g1.batteryLeft,
+                          ),
+                          _Battery(
+                            label: tr.uiBatteryRight,
+                            percent: g1.batteryRight,
+                          ),
+                          _Battery(
+                            label: tr.uiBatteryCase,
                             percent: g1.batteryCase,
                             charging: g1.caseCharging == true,
                           ),
@@ -85,7 +92,7 @@ class OverviewPage extends StatelessWidget {
                       if (g1.firmwareVersion != null) ...[
                         const SizedBox(height: 8),
                         Text(
-                          'Firmware: ${g1.firmwareVersion}',
+                          tr.uiFirmware(g1.firmwareVersion!),
                           style: theme.textTheme.bodySmall,
                         ),
                       ],
@@ -109,11 +116,8 @@ class OverviewPage extends StatelessWidget {
                       ? Icons.notifications_off
                       : Icons.notifications_active,
                 ),
-                title: const Text('Ruhemodus'),
-                subtitle: const Text(
-                  'Keine Texte, Benachrichtigungen oder Dashboards. Assist '
-                  'funktioniert weiter.',
-                ),
+                title: Text(tr.uiSilentMode),
+                subtitle: Text(tr.uiSilentModeSubtitle),
                 value: bridge.silentMode ?? false,
                 onChanged: g1.connected ? bridge.setSilentMode : null,
               ),
@@ -145,7 +149,9 @@ class OverviewPage extends StatelessWidget {
                                 style: theme.textTheme.titleMedium,
                               ),
                               Text(
-                                s.haConfigured ? bridge.haStatus : 'Nicht eingerichtet – siehe Einstellungen',
+                                s.haConfigured
+                                    ? bridge.haStatus
+                                    : tr.uiHaNotSetUp,
                               ),
                             ],
                           ),
@@ -153,7 +159,7 @@ class OverviewPage extends StatelessWidget {
                         if (s.haConfigured && !bridge.haConnected)
                           TextButton(
                             onPressed: bridge.restartHomeAssistant,
-                            child: const Text('Verbinden'),
+                            child: Text(tr.uiConnect),
                           ),
                       ],
                     ),
@@ -170,25 +176,25 @@ class OverviewPage extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              'Assistent: ${bridge.haConfig.assistName ?? 'bevorzugter Assistent'}',
+                              tr.uiAssistant(
+                                bridge.haConfig.assistName ??
+                                    tr.uiPreferredAssistant,
+                              ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        bridge.assistRunning
-                            ? 'Hört zu …'
-                            : 'Linke Touchbar gedrückt halten, sprechen, '
-                                  'loslassen.',
+                        bridge.assistRunning ? tr.uiListening : tr.uiAssistHint,
                         style: theme.textTheme.bodySmall,
                       ),
                       if (bridge.lastQuery != null) ...[
                         const SizedBox(height: 8),
-                        Text('Frage: ${bridge.lastQuery}'),
+                        Text(tr.uiQuestion(bridge.lastQuery!)),
                       ],
                       if (bridge.lastResponse != null)
-                        Text('Antwort: ${bridge.lastResponse}'),
+                        Text(tr.uiAnswer(bridge.lastResponse!)),
                     ],
                   ],
                 ),
@@ -199,7 +205,7 @@ class OverviewPage extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: ExpansionTile(
                 leading: const Icon(Icons.preview_outlined),
-                title: const Text('Vorschau der Brillenanzeige'),
+                title: Text(tr.uiPreviewTitle),
                 initiallyExpanded: s.showPreview,
                 onExpansionChanged: (v) => s.showPreview = v,
                 shape: const Border(),
@@ -269,6 +275,7 @@ class _Brightness extends StatelessWidget {
     final offset = bridge.brightnessOffset;
     final applied = bridge.g1.brightnessPercent;
     String signed(int v) => v > 0 ? '+$v' : '$v';
+    final current = applied == null ? '' : tr.uiBrightnessNow(applied);
     final small = Theme.of(context).textTheme.bodySmall;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
@@ -281,7 +288,7 @@ class _Brightness extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
-                  'Helligkeit',
+                  tr.uiBrightness,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
@@ -331,18 +338,10 @@ class _Brightness extends StatelessWidget {
               padding: const EdgeInsets.only(right: 8, bottom: 4),
               child: Text(
                 offset == 0
-                    ? 'Die Brille regelt die Helligkeit über ihren '
-                          'Lichtsensor. Der Regler verschiebt sie heller oder '
-                          'dunkler.'
+                    ? tr.uiBrightnessAutoHint
                     : bridge.g1.evenFirmware
-                    ? 'Die App misst etwa alle zwei Minuten, wenn nichts angezeigt '
-                          'wird, den Wert des Lichtsensors und stellt ihn '
-                          '${signed(offset)} % ein'
-                          '${applied == null ? '' : ' (gerade $applied %)'}.'
-                    : 'Der Lichtsensor meldet sich, sobald sich die Helligkeit '
-                          'deutlich ändert, solange etwas angezeigt wird; die App '
-                          'stellt dann ${signed(offset)} % gegenüber der Automatik '
-                          'ein${applied == null ? '' : ' (gerade $applied %)'}.',
+                    ? tr.uiBrightnessOffsetEven(signed(offset), current)
+                    : tr.uiBrightnessOffsetScouter(signed(offset), current),
                 style: small,
               ),
             ),
@@ -386,35 +385,35 @@ class _RecordingState extends State<_Recording> {
     final theme = Theme.of(context);
     final String subtitle;
     if (r.recording) {
-      subtitle = 'Läuft · ${r.elapsedText}';
+      subtitle = tr.uiRecordingRunning(r.elapsedText);
     } else if (r.uploading) {
-      subtitle = 'Wird an WhisperNotes gesendet …';
+      subtitle = tr.uiRecordingUploading;
     } else if (r.pending > 0) {
-      subtitle = '${r.pending} Aufnahme(n) noch nicht gesendet';
+      subtitle = tr.uiRecordingPending(r.pending);
     } else {
       subtitle =
           r.lastResult ??
           (bridge.settings.whisperUrl.isEmpty
-              ? 'WhisperNotes in den Einstellungen eintragen'
-              : 'Brillen-Mikrofon → WhisperNotes → BasaltNotes');
+              ? tr.uiRecordingSetUp
+              : tr.uiRecordingFlow);
     }
     return ListTile(
       leading: Icon(
         r.recording ? Icons.fiber_manual_record : Icons.mic_none,
         color: r.recording ? theme.colorScheme.error : null,
       ),
-      title: const Text('Aufnahme'),
+      title: Text(tr.uiRecording),
       subtitle: Text(subtitle),
       trailing: r.recording
           ? FilledButton.tonalIcon(
               onPressed: () => bridge.setRecording(false),
               icon: const Icon(Icons.stop),
-              label: const Text('Stopp'),
+              label: Text(tr.uiStop),
             )
           : FilledButton.icon(
               onPressed: () => bridge.setRecording(true),
               icon: const Icon(Icons.fiber_manual_record),
-              label: const Text('Start'),
+              label: Text(tr.uiStart),
             ),
     );
   }

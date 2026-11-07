@@ -45,10 +45,30 @@ Future<void> _shot(WidgetTester tester, String name) async {
 void main() {
   setUpAll(_loadFonts);
 
-  testWidgets('overview and settings tabs build', (tester) async {
-    // The texts below are the German ones.
+  tearDown(() => L10n.apply('en'));
+
+  testWidgets('English is the main language', (tester) async {
+    tester.view.physicalSize = const Size(412, 900);
+    tester.view.devicePixelRatio = 1;
+    SharedPreferences.setMockInitialValues({});
+    L10n.apply('system', system: const Locale('fr'));
+    final settings = await Settings.load();
+    final bridge = Bridge(
+      settings,
+      g1: G1Connection.fake((side, data) async {}),
+    );
+    await tester.pumpWidget(EvenG1App(bridge: bridge));
+    await tester.pump();
+    // Without Home Assistant the app opens on the settings tab.
+    expect(find.text('Settings'), findsNWidgets(2));
+    await tester.tap(find.text('Overview'));
+    await tester.pumpAndSettle();
+    expect(find.text('Silent mode'), findsOneWidget);
+    expect(find.text('Preview of the glasses display'), findsOneWidget);
+  });
+
+  testWidgets('overview and settings tabs build (German)', (tester) async {
     L10n.apply('de');
-    addTearDown(() => L10n.apply('en'));
     tester.view.physicalSize = const Size(412, 900);
     tester.view.devicePixelRatio = 1;
     SharedPreferences.setMockInitialValues({
@@ -56,11 +76,8 @@ void main() {
       'right_id': 'R',
       'glasses_name': 'G1 #45',
       'show_preview': true,
-      // The screens in German (the texts below); English is the default.
-      'language': 'de',
     });
     final settings = await Settings.load();
-    L10n.apply(settings.language);
     // Simulated, connected glasses that report battery and case status.
     final g1 = G1Connection.fake((side, data) async {});
     for (final (side, data) in [

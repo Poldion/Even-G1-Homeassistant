@@ -13,6 +13,312 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appTitle => 'Even G1 für Home Assistant';
 
   @override
+  String get coreAssistNoAnswer => 'Keine Antwort';
+
+  @override
+  String coreAssistUnavailable(String error) {
+    return 'Assist nicht verfügbar:\n$error';
+  }
+
+  @override
+  String get coreCancelled => 'Abgebrochen';
+
+  @override
+  String get coreChannelDescription =>
+      'Hält die Verbindung zur Brille im Hintergrund';
+
+  @override
+  String get coreChannelName => 'Even G1 Verbindung';
+
+  @override
+  String coreDisplayCheck(String left, String right) {
+    return 'Anzeige links: $left, rechts: $right';
+  }
+
+  @override
+  String coreDisplayCheckDiffers(String text) {
+    return '$text – UNTERSCHIEDLICH';
+  }
+
+  @override
+  String get coreDone => 'Erledigt.';
+
+  @override
+  String get coreGlassesNotConnected => 'Brille nicht verbunden';
+
+  @override
+  String coreHaConnected(String version) {
+    return 'verbunden (HA $version)';
+  }
+
+  @override
+  String get coreHaConnecting => 'verbinde…';
+
+  @override
+  String get coreHaConnectionLost => 'Verbindung zu Home Assistant verloren';
+
+  @override
+  String get coreHaDisconnected => 'getrennt';
+
+  @override
+  String get coreHaNotSetUp => 'nicht eingerichtet';
+
+  @override
+  String coreHaRetry(int seconds) {
+    return 'getrennt, neuer Versuch in ${seconds}s';
+  }
+
+  @override
+  String get coreHaTokenInvalid => 'Token ungültig';
+
+  @override
+  String coreListening(String assistant) {
+    return '$assistant\nhört zu …';
+  }
+
+  @override
+  String coreLogAnswer(String text) {
+    return 'Antwort: $text';
+  }
+
+  @override
+  String coreLogAssistError(String error) {
+    return 'Assist-Fehler: $error';
+  }
+
+  @override
+  String coreLogAssistStartFailed(String error) {
+    return 'Assist-Start fehlgeschlagen: $error';
+  }
+
+  @override
+  String get coreLogAssistStarted => 'Assist gestartet';
+
+  @override
+  String coreLogAudio(String error) {
+    return 'Audio: $error';
+  }
+
+  @override
+  String coreLogBrightness(int percent) {
+    return 'Helligkeit: $percent %';
+  }
+
+  @override
+  String get coreLogBrightnessAuto => 'Helligkeit: automatisch';
+
+  @override
+  String coreLogBrightnessOffset(String offset) {
+    return 'Helligkeit: automatisch, $offset %';
+  }
+
+  @override
+  String coreLogConfig(String name) {
+    return 'Konfiguration erhalten ($name)';
+  }
+
+  @override
+  String get coreLogDashboardTap => 'Dashboard (Tippen)';
+
+  @override
+  String get coreLogEvenAiOff => 'Antworten im Textmodus';
+
+  @override
+  String get coreLogEvenAiOn => 'Antworten im Even-AI-Modus';
+
+  @override
+  String get coreLogHeadGesturesOff => 'Kopfgesten aus';
+
+  @override
+  String get coreLogHeadGesturesOn => 'Kopfgesten an';
+
+  @override
+  String coreLogHeadUpAngle(int angle) {
+    return 'Aktivierungswinkel: $angle°';
+  }
+
+  @override
+  String get coreLogHeadUpHide => 'Hochschauen: Even-Dashboard ausblenden';
+
+  @override
+  String get coreLogHeadUpShow => 'Hochschauen: Even-Dashboard anzeigen';
+
+  @override
+  String get coreLogIntegrationReloaded =>
+      'Integration neu geladen, verbinde neu';
+
+  @override
+  String get coreLogMicFailed => 'Mikrofon konnte nicht aktiviert werden';
+
+  @override
+  String coreLogNotification(String app, String title) {
+    return 'Benachrichtigung: $app – $title';
+  }
+
+  @override
+  String coreLogNotificationsError(String error) {
+    return 'Benachrichtigungen: $error';
+  }
+
+  @override
+  String coreLogPosition(int height, int depth) {
+    return 'Anzeigeposition: Höhe $height, Distanz $depth';
+  }
+
+  @override
+  String coreLogPositionPreview(int height, int depth) {
+    return 'Anzeigeposition: Höhe $height, Distanz $depth (Vorschau)';
+  }
+
+  @override
+  String coreLogRecognized(String text) {
+    return 'Erkannt: $text';
+  }
+
+  @override
+  String coreLogRecordingError(String error) {
+    return 'Aufnahme: $error';
+  }
+
+  @override
+  String get coreLogRecordingMicRestarted => 'Aufnahme: Mikrofon neu gestartet';
+
+  @override
+  String get coreLogRecordingNoGlasses =>
+      'Aufnahme: Brille nicht verbunden, Mikrofon folgt';
+
+  @override
+  String coreLogRecordingNotSent(String error) {
+    return 'Aufnahme nicht gesendet: $error';
+  }
+
+  @override
+  String coreLogRecordingSent(String name) {
+    return 'Aufnahme gesendet: $name';
+  }
+
+  @override
+  String get coreLogRecordingStarted => 'Aufnahme gestartet';
+
+  @override
+  String coreLogRecordingStopped(String length, String duration) {
+    return 'Aufnahme beendet: $length (Dauer $duration)';
+  }
+
+  @override
+  String get coreLogRecordingTooShort => 'Aufnahme verworfen (zu kurz)';
+
+  @override
+  String coreLogShowText(String text) {
+    return 'Anzeige: $text';
+  }
+
+  @override
+  String get coreLogSilentDashboardSkipped =>
+      'Ruhemodus – Dashboard nicht angezeigt';
+
+  @override
+  String get coreLogSilentNoGlasses => 'Ruhemodus: Brille nicht verbunden';
+
+  @override
+  String get coreLogSilentOff => 'Ruhemodus aus';
+
+  @override
+  String get coreLogSilentOffGlasses => 'Ruhemodus aus (Brille)';
+
+  @override
+  String get coreLogSilentOn => 'Ruhemodus an';
+
+  @override
+  String get coreLogSilentOnGlasses => 'Ruhemodus an (Brille)';
+
+  @override
+  String get coreLogSilentTextSkipped => 'Ruhemodus – Text nicht angezeigt';
+
+  @override
+  String get coreLogTextDropped => 'Brille nicht verbunden – Text verworfen';
+
+  @override
+  String get coreLogWearOff => 'Trageerkennung aus';
+
+  @override
+  String get coreLogWearOn => 'Trageerkennung an';
+
+  @override
+  String get coreNoAnswer => 'keine Antwort';
+
+  @override
+  String get coreNoHaConnection => 'Keine Verbindung zu Home Assistant';
+
+  @override
+  String get coreRecordingFileName => 'Brillen-Notiz';
+
+  @override
+  String get coreServiceText => 'Verbindung aktiv';
+
+  @override
+  String get coreSttFailed => 'Spracherkennung fehlgeschlagen.';
+
+  @override
+  String get coreSttMissing =>
+      'Keine Spracherkennung in der Assist-Pipeline konfiguriert.';
+
+  @override
+  String get coreSttNothing => 'Ich habe nichts verstanden.';
+
+  @override
+  String get coreThinking => 'Home Assistant\nEinen Moment …';
+
+  @override
+  String get coreTimeout => 'Zeitüberschreitung';
+
+  @override
+  String coreTranscript(String text) {
+    return '» $text «\nEinen Moment …';
+  }
+
+  @override
+  String get coreUnknownError => 'Unbekannter Fehler';
+
+  @override
+  String coreWhisperFailed(String error) {
+    return 'Senden fehlgeschlagen: $error';
+  }
+
+  @override
+  String get coreWhisperNotSetUp => 'WhisperNotes ist nicht eingerichtet';
+
+  @override
+  String coreWhisperSent(String job) {
+    return 'Gesendet an WhisperNotes (Job $job)';
+  }
+
+  @override
+  String get diagCheckDisplay => 'Anzeige links/rechts prüfen';
+
+  @override
+  String get diagClose => 'Schließen';
+
+  @override
+  String get diagEvenAi => 'Assist-Antworten im Even-AI-Modus (Test)';
+
+  @override
+  String get diagEvenAiSubtitle =>
+      'Zeigt Antworten wie die offizielle Even-App an. Ausprobieren, falls ein Auge etwas anderes zeigt als das andere.';
+
+  @override
+  String get diagLog => 'Protokoll';
+
+  @override
+  String get diagShowOnGlasses => 'Auf Brille anzeigen';
+
+  @override
+  String get diagTestText => 'Testtext';
+
+  @override
+  String get diagTestTextDefault => 'Hallo von Home Assistant!';
+
+  @override
   String g1LogAutoBrightness(int sensor, int level) {
     return 'Auto-Helligkeit: Sensor $sensor %, gesetzt $level %';
   }
@@ -68,6 +374,119 @@ class AppLocalizationsDe extends AppLocalizations {
   String get glasses => 'Brille';
 
   @override
+  String get glassesSetAngle => 'Aktivierungswinkel';
+
+  @override
+  String get glassesSetAngleHelp =>
+      'Ab dieser Kopfneigung schaltet die Brille beim Hochschauen die Anzeige ein.';
+
+  @override
+  String glassesSetArms(String left, String right) {
+    return 'Links: $left\nRechts: $right';
+  }
+
+  @override
+  String get glassesSetDepth => 'Distanz';
+
+  @override
+  String get glassesSetDepthHelp => 'Wie weit entfernt der Text wirkt.';
+
+  @override
+  String get glassesSetEvenHint =>
+      'Die offizielle Even-App muss geschlossen sein, da sich die Brille nur mit einer App gleichzeitig verbindet.';
+
+  @override
+  String get glassesSetHeadGestures => 'Kopfgesten';
+
+  @override
+  String get glassesSetHeadGesturesHelp =>
+      'Nicken und Kopfschütteln als Gesten für Home Assistant. Der Gyrosensor des rechten Bügels läuft dann ständig und braucht etwas mehr Akku.';
+
+  @override
+  String get glassesSetHeadUpMode => 'Even-Dashboard beim Hochschauen';
+
+  @override
+  String get glassesSetHeadUpModeHelp =>
+      '„Ausblenden“: Beim Hochschauen erscheint nur das Home-Assistant-Dashboard (falls in HA eingestellt).';
+
+  @override
+  String get glassesSetHeight => 'Höhe';
+
+  @override
+  String get glassesSetHeightHelp =>
+      'Wie hoch der Text im Sichtfeld steht. Beim Loslassen zeigt die Brille die neue Position kurz an und übernimmt sie.';
+
+  @override
+  String get glassesSetHide => 'Ausblenden';
+
+  @override
+  String get glassesSetLeaveUnchanged => 'Unverändert lassen';
+
+  @override
+  String get glassesSetNonePaired => 'Noch keine Brille gekoppelt.';
+
+  @override
+  String get glassesSetNotConnected =>
+      'Die Brille ist nicht verbunden. Änderungen werden beim nächsten Verbinden übertragen.';
+
+  @override
+  String get glassesSetNotSet => 'nicht gesetzt';
+
+  @override
+  String glassesSetPaired(String name) {
+    return 'Gekoppelt: $name';
+  }
+
+  @override
+  String get glassesSetRestartNote =>
+      'Bitte die App schließen und neu öffnen, dann nach der Brille suchen.';
+
+  @override
+  String get glassesSetScouterHint =>
+      'ScouterKit (g1v0): Zum ersten Koppeln die Brille ins offene Ladeetui legen. Außerhalb des Etuis gehorcht sie nur gekoppelten Geräten.';
+
+  @override
+  String get glassesSetSearch => 'Nach Brillen suchen';
+
+  @override
+  String get glassesSetSearching => 'Suche…';
+
+  @override
+  String get glassesSetShow => 'Anzeigen';
+
+  @override
+  String get glassesSetWear => 'Trageerkennung';
+
+  @override
+  String get glassesSetWearHelp =>
+      'Die Brille meldet, ob sie getragen wird (auch an Home Assistant: „Getragen“).';
+
+  @override
+  String haSetConnectFailed(String error) {
+    return 'Verbindung fehlgeschlagen: $error';
+  }
+
+  @override
+  String get haSetGlasses => 'Brille in Home Assistant';
+
+  @override
+  String get haSetLoad => 'Verbinden & Brillen aus HA laden';
+
+  @override
+  String get haSetNoGlasses =>
+      'Keine Brille in Home Assistant gefunden. Füge zuerst die Integration \"Even Realities G1\" hinzu.';
+
+  @override
+  String get haSetNotInstalled =>
+      'Die Integration \"Even Realities G1\" ist in Home Assistant nicht installiert.';
+
+  @override
+  String get haSetToken => 'Langlebiges Zugriffstoken';
+
+  @override
+  String get haSetTokenHelp => 'HA → Profil → Sicherheit → Token erstellen';
+
+  @override
   String get languageEnglish => 'English';
 
   @override
@@ -80,6 +499,66 @@ class AppLocalizationsDe extends AppLocalizations {
   String languageSystem(String language) {
     return 'System ($language)';
   }
+
+  @override
+  String get notifSetAllow => 'Erlauben';
+
+  @override
+  String get notifSetAndroidOnly =>
+      'Das Weiterleiten von Handy-Benachrichtigungen ist nur unter Android verfügbar.';
+
+  @override
+  String get notifSetApps => 'Apps, deren Benachrichtigungen ankommen:';
+
+  @override
+  String get notifSetForward => 'Handy-Benachrichtigungen weiterleiten';
+
+  @override
+  String get notifSetNoAccess => 'Zugriff auf Benachrichtigungen fehlt';
+
+  @override
+  String get notifSetNoAccessHelp =>
+      'Erlaube „Even G1 HA“ in den Android-Einstellungen, Benachrichtigungen zu lesen.\nMeldet Android „App wurde Zugriff verweigert“: Einstellungen → Apps → Even G1 HA → ⋮ → „Eingeschränkte Einstellungen zulassen“, dann erneut auf Erlauben tippen.';
+
+  @override
+  String get notifSetNoApps =>
+      'Apps erscheinen hier, sobald sie eine Benachrichtigung gesendet haben. Neue Apps werden standardmäßig weitergeleitet.';
+
+  @override
+  String get recSetDot => 'Punkt auf der Brille';
+
+  @override
+  String get recSetDotHelp =>
+      'Kleiner Punkt oben rechts, solange aufgenommen wird und nichts anderes angezeigt wird.';
+
+  @override
+  String get recSetIntro =>
+      'Aufnahmen mit dem Brillen-Mikrofon gehen an WhisperNotes, werden dort transkribiert und zusammengefasst und landen im Eingang von BasaltNotes, wenn in WhisperNotes unter Einstellungen → BasaltNotes ein Standard-Vault gewählt ist.';
+
+  @override
+  String get recSetKey => 'API-Schlüssel (optional)';
+
+  @override
+  String get recSetKeyHelp =>
+      'Nur nötig, wenn in WhisperNotes einer gesetzt ist.';
+
+  @override
+  String get recSetScouterDot =>
+      'Während einer Aufnahme zeigt ScouterKit selbst ein kleines Quadrat oben rechts im rechten Auge, solange das Mikrofon an ist. Es lässt sich nicht ausschalten.';
+
+  @override
+  String recSetSendPending(int count) {
+    return '$count ausstehende senden';
+  }
+
+  @override
+  String get recSetUrl => 'WhisperNotes-Adresse';
+
+  @override
+  String get save => 'Speichern';
+
+  @override
+  String get saved => 'Gespeichert';
 
   @override
   String get settingsAppUpdate => 'App-Update';
@@ -296,4 +775,211 @@ class AppLocalizationsDe extends AppLocalizations {
   String skLogVmStartRejected(String arm) {
     return '$arm: VM_START abgelehnt';
   }
+
+  @override
+  String uiAnswer(String text) {
+    return 'Antwort: $text';
+  }
+
+  @override
+  String get uiAssistHint =>
+      'Linke Touchbar gedrückt halten, sprechen, loslassen.';
+
+  @override
+  String uiAssistant(String name) {
+    return 'Assistent: $name';
+  }
+
+  @override
+  String get uiBatteryCase => 'Case';
+
+  @override
+  String get uiBatteryLeft => 'Links';
+
+  @override
+  String get uiBatteryRight => 'Rechts';
+
+  @override
+  String get uiBrightness => 'Helligkeit';
+
+  @override
+  String get uiBrightnessAutoHint =>
+      'Die Brille regelt die Helligkeit über ihren Lichtsensor. Der Regler verschiebt sie heller oder dunkler.';
+
+  @override
+  String uiBrightnessNow(int percent) {
+    return ' (gerade $percent %)';
+  }
+
+  @override
+  String uiBrightnessOffsetEven(String offset, String current) {
+    return 'Die App misst etwa alle zwei Minuten, wenn nichts angezeigt wird, den Wert des Lichtsensors und stellt ihn $offset % ein$current.';
+  }
+
+  @override
+  String uiBrightnessOffsetScouter(String offset, String current) {
+    return 'Der Lichtsensor meldet sich, sobald sich die Helligkeit deutlich ändert, solange etwas angezeigt wird; die App stellt dann $offset % gegenüber der Automatik ein$current.';
+  }
+
+  @override
+  String get uiConnect => 'Verbinden';
+
+  @override
+  String uiFirmware(String version) {
+    return 'Firmware: $version';
+  }
+
+  @override
+  String get uiGlassesNotPaired => 'Nicht gekoppelt – siehe Einstellungen';
+
+  @override
+  String get uiHaNotSetUp => 'Nicht eingerichtet – siehe Einstellungen';
+
+  @override
+  String get uiListening => 'Hört zu …';
+
+  @override
+  String get uiOverview => 'Übersicht';
+
+  @override
+  String get uiPreferredAssistant => 'bevorzugter Assistent';
+
+  @override
+  String get uiPreviewEmpty =>
+      'Keine Anzeige der App\n(die Brille zeigt ggf. ihre eigene Oberfläche)';
+
+  @override
+  String get uiPreviewTitle => 'Vorschau der Brillenanzeige';
+
+  @override
+  String uiQuestion(String text) {
+    return 'Frage: $text';
+  }
+
+  @override
+  String get uiRecording => 'Aufnahme';
+
+  @override
+  String get uiRecordingFlow => 'Brillen-Mikrofon → WhisperNotes → BasaltNotes';
+
+  @override
+  String uiRecordingPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Aufnahmen noch nicht gesendet',
+      one: '1 Aufnahme noch nicht gesendet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String uiRecordingRunning(String time) {
+    return 'Läuft · $time';
+  }
+
+  @override
+  String get uiRecordingSetUp => 'WhisperNotes in den Einstellungen eintragen';
+
+  @override
+  String get uiRecordingUploading => 'Wird an WhisperNotes gesendet …';
+
+  @override
+  String get uiSettings => 'Einstellungen';
+
+  @override
+  String get uiSilentMode => 'Ruhemodus';
+
+  @override
+  String get uiSilentModeSubtitle =>
+      'Keine Texte, Benachrichtigungen oder Dashboards. Assist funktioniert weiter.';
+
+  @override
+  String get uiStart => 'Start';
+
+  @override
+  String get uiStop => 'Stopp';
+
+  @override
+  String get uiWearCaseClosed => 'Im Case (Deckel zu)';
+
+  @override
+  String get uiWearCaseOpen => 'Im Case (Deckel offen)';
+
+  @override
+  String get uiWearNotWorn => 'Abgesetzt';
+
+  @override
+  String get uiWearWorn => 'Getragen';
+
+  @override
+  String updateAvailable(String version) {
+    return 'Version $version ist verfügbar';
+  }
+
+  @override
+  String get updateCancel => 'Abbrechen';
+
+  @override
+  String get updateChannel => 'Update-Kanal';
+
+  @override
+  String get updateChannelPreview => 'Vorabversion';
+
+  @override
+  String get updateChannelStable => 'Stabil';
+
+  @override
+  String get updateCheck => 'Nach Updates suchen';
+
+  @override
+  String get updateCheckFailed => 'Konnte nicht nach Updates suchen.';
+
+  @override
+  String get updateDailyCheck =>
+      'Die App sucht einmal am Tag beim Start nach neuen Versionen auf GitHub.';
+
+  @override
+  String get updateDownloadFailed => 'Das Update konnte nicht geladen werden.';
+
+  @override
+  String get updateInstall => 'Installieren';
+
+  @override
+  String get updateInstallQuestion =>
+      'Jetzt laden und installieren? Deine Einstellungen bleiben erhalten.';
+
+  @override
+  String updateInstalled(String version) {
+    return 'Installiert: $version';
+  }
+
+  @override
+  String get updateLater => 'Später';
+
+  @override
+  String get updatePreviewQuestion => 'Vorabversionen installieren?';
+
+  @override
+  String updatePreviewVersion(String version) {
+    return 'Vorabversion $version';
+  }
+
+  @override
+  String get updatePreviewWarning =>
+      'Vorabversionen entstehen bei jeder Änderung am Projekt und sind weniger getestet als die stabilen Versionen.\n\nZurück zum stabilen Kanal geht es mit dem nächsten stabilen Release. Android installiert keine älteren Builds, sonst geht es nur über eine Neuinstallation.';
+
+  @override
+  String updateStableVersion(String version) {
+    return 'Stabile Version $version';
+  }
+
+  @override
+  String get updateSwitch => 'Wechseln';
+
+  @override
+  String get updateUpToDate => 'Die App ist aktuell.';
+
+  @override
+  String get updateVersionUnknown => 'Installierte Version unbekannt';
 }

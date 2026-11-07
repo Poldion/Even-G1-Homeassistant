@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:even_g1_ha/g1/g1_connection.dart';
+import 'package:even_g1_ha/l10n/l10n.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_anim.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
@@ -104,22 +105,41 @@ void dumpDesigns() {
         anim.code(font, maxCode: 242, start: 1200000),
       );
     }
-    // Examples for the README (made-up content).
-    const example =
-        '09:41  ·  Sa, 7. Nov\nWohnzimmer: 21,5 °C\nAußen: 8 °C, bewölkt\n'
-        'Waschmaschine: fertig\n» heute 18:00  Beispieltermin\n'
-        '» morgen 10:00  Noch ein Termin\n[ ] Beispiel-Aufgabe · heute';
-    for (final style in G1TextStyle.values) {
-      save(
-        'readme_${style.id}',
-        ScouterConnection.textCode(
-          font,
-          style == G1TextStyle.badge ? 'Jarvis\nhört zu …' : example,
-          maxCode: 242,
-          style: style,
-        ),
-      );
+    // Examples for the README (made-up content), in both languages.
+    const examples = {
+      'en':
+          '09:41  ·  Sat, Nov 7\nLiving room: 21.5 °C\nOutside: 8 °C, '
+          'cloudy\nWashing machine: done\n» today 18:00  Example event\n'
+          '» tomorrow 10:00  Another event\n[ ] Example task · today',
+      'de':
+          '09:41  ·  Sa, 7. Nov\nWohnzimmer: 21,5 °C\nAußen: 8 °C, bewölkt\n'
+          'Waschmaschine: fertig\n» heute 18:00  Beispieltermin\n'
+          '» morgen 10:00  Noch ein Termin\n[ ] Beispiel-Aufgabe · heute',
+    };
+    for (final MapEntry(key: lang, value: example) in examples.entries) {
+      L10n.apply(lang);
+      for (final style in G1TextStyle.values) {
+        save(
+          'readme_${lang}_${style.id}',
+          ScouterConnection.textCode(
+            font,
+            style == G1TextStyle.badge ? tr.coreListening('Jarvis') : example,
+            maxCode: 242,
+            style: style,
+          ),
+        );
+      }
+      for (final on in [true, false]) {
+        final anim = on
+            ? SkAnimation.sleep(font, cx: 320, cy: 196)
+            : SkAnimation.wake(font, cx: 320, cy: 196);
+        save(
+          'readme_${lang}_${on ? 'sleep' : 'wake'}',
+          anim.code(font, maxCode: 242, start: 1200000),
+        );
+      }
     }
+    L10n.apply('en');
     // The resident program with a card dashboard (as _writeDashboard).
     final p = SkResident.build(gestures: false);
     final image = Uint8List.fromList(arena);

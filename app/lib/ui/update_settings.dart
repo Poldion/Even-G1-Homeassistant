@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../update/app_update.dart';
+import '../l10n/l10n.dart';
 
 /// Checks for a new version and offers to install it.
 ///
@@ -19,18 +20,14 @@ Future<void> checkForAppUpdate(
     update = await AppUpdater.check();
   } catch (_) {
     if (manual) {
-      messenger?.showSnackBar(
-        const SnackBar(content: Text('Konnte nicht nach Updates suchen.')),
-      );
+      messenger?.showSnackBar(SnackBar(content: Text(tr.updateCheckFailed)));
     }
     return;
   }
   if (!context.mounted) return;
   if (update == null) {
     if (manual) {
-      messenger?.showSnackBar(
-        const SnackBar(content: Text('Die App ist aktuell.')),
-      );
+      messenger?.showSnackBar(SnackBar(content: Text(tr.updateUpToDate)));
     }
     return;
   }
@@ -40,33 +37,31 @@ Future<void> checkForAppUpdate(
     builder: (context) => AlertDialog(
       title: Text(
         !found.switchesChannel
-            ? 'Version ${found.version} ist verfügbar'
+            ? tr.updateAvailable(found.version)
             : found.channel == UpdateChannel.preview
-            ? 'Vorabversion ${found.version}'
-            : 'Stabile Version ${found.version}',
+            ? tr.updatePreviewVersion(found.version)
+            : tr.updateStableVersion(found.version),
       ),
       content: SingleChildScrollView(
         child: Text(
           '${found.notes.isEmpty ? '' : '${found.notes}\n\n'}'
-          'Jetzt laden und installieren? Deine Einstellungen bleiben erhalten.',
+          '${tr.updateInstallQuestion}',
         ),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Später'),
+          child: Text(tr.updateLater),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, true),
-          child: const Text('Installieren'),
+          child: Text(tr.updateInstall),
         ),
       ],
     ),
   );
   if (install == true && !await AppUpdater.install(found)) {
-    messenger?.showSnackBar(
-      const SnackBar(content: Text('Das Update konnte nicht geladen werden.')),
-    );
+    messenger?.showSnackBar(SnackBar(content: Text(tr.updateDownloadFailed)));
   }
 }
 
@@ -105,24 +100,16 @@ class _UpdateSettingsState extends State<UpdateSettings> {
         context: context,
         builder: (context) => AlertDialog(
           icon: const Icon(Icons.warning_amber),
-          title: const Text('Vorabversionen installieren?'),
-          content: const SingleChildScrollView(
-            child: Text(
-              'Vorabversionen entstehen bei jeder Änderung am Projekt und '
-              'sind weniger getestet als die stabilen Versionen.\n\n'
-              'Zurück zum stabilen Kanal geht es mit dem nächsten stabilen '
-              'Release. Android installiert keine älteren Builds, sonst geht '
-              'es nur über eine Neuinstallation.',
-            ),
-          ),
+          title: Text(tr.updatePreviewQuestion),
+          content: SingleChildScrollView(child: Text(tr.updatePreviewWarning)),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Abbrechen'),
+              child: Text(tr.updateCancel),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Wechseln'),
+              child: Text(tr.updateSwitch),
             ),
           ],
         ),
@@ -148,25 +135,24 @@ class _UpdateSettingsState extends State<UpdateSettings> {
       children: [
         Text(
           _version.isEmpty
-              ? 'Installierte Version unbekannt'
-              : 'Installiert: $_version',
+              ? tr.updateVersionUnknown
+              : tr.updateInstalled(_version),
         ),
         const SizedBox(height: 4),
-        Text(
-          'Die App sucht einmal am Tag beim Start nach neuen Versionen auf '
-          'GitHub.',
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
+        Text(tr.updateDailyCheck, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 8),
-        Text('Update-Kanal', style: Theme.of(context).textTheme.titleSmall),
+        Text(tr.updateChannel, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 4),
         SegmentedButton<UpdateChannel>(
-          segments: const [
-            ButtonSegment(value: UpdateChannel.stable, label: Text('Stabil')),
+          segments: [
+            ButtonSegment(
+              value: UpdateChannel.stable,
+              label: Text(tr.updateChannelStable),
+            ),
             ButtonSegment(
               value: UpdateChannel.preview,
-              label: Text('Vorabversion'),
-              icon: Icon(Icons.science_outlined),
+              label: Text(tr.updateChannelPreview),
+              icon: const Icon(Icons.science_outlined),
             ),
           ],
           selected: {_channel},
@@ -181,7 +167,7 @@ class _UpdateSettingsState extends State<UpdateSettings> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.system_update),
-          label: const Text('Nach Updates suchen'),
+          label: Text(tr.updateCheck),
         ),
       ],
     );

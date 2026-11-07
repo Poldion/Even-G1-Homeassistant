@@ -1,6 +1,292 @@
 {
   "@@locale": "en",
   "appTitle": "Even G1 for Home Assistant",
+  "coreAssistNoAnswer": "No answer",
+  "coreAssistUnavailable": "Assist not available:\n{error}",
+  "@coreAssistUnavailable": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreCancelled": "Cancelled",
+  "coreChannelDescription": "Keeps the connection to the glasses in the background",
+  "coreChannelName": "Even G1 connection",
+  "coreDisplayCheck": "Display left: {left}, right: {right}",
+  "@coreDisplayCheck": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "right": {
+        "type": "String"
+      }
+    }
+  },
+  "coreDisplayCheckDiffers": "{text} – DIFFERENT",
+  "@coreDisplayCheckDiffers": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreDone": "Done.",
+  "coreGlassesNotConnected": "Glasses not connected",
+  "coreHaConnected": "connected (HA {version})",
+  "@coreHaConnected": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "coreHaConnecting": "connecting…",
+  "coreHaConnectionLost": "Connection to Home Assistant lost",
+  "coreHaDisconnected": "disconnected",
+  "coreHaNotSetUp": "not set up",
+  "coreHaRetry": "disconnected, retrying in {seconds}s",
+  "@coreHaRetry": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "coreHaTokenInvalid": "Token invalid",
+  "coreListening": "{assistant}\nis listening …",
+  "@coreListening": {
+    "placeholders": {
+      "assistant": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogAnswer": "Answer: {text}",
+  "@coreLogAnswer": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogAssistError": "Assist error: {error}",
+  "@coreLogAssistError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogAssistStartFailed": "Assist start failed: {error}",
+  "@coreLogAssistStartFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogAssistStarted": "Assist started",
+  "coreLogAudio": "Audio: {error}",
+  "@coreLogAudio": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogBrightness": "Brightness: {percent} %",
+  "@coreLogBrightness": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "coreLogBrightnessAuto": "Brightness: automatic",
+  "coreLogBrightnessOffset": "Brightness: automatic, {offset} %",
+  "@coreLogBrightnessOffset": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogConfig": "Configuration received ({name})",
+  "@coreLogConfig": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogDashboardTap": "Dashboard (tap)",
+  "coreLogEvenAiOff": "Answers in text mode",
+  "coreLogEvenAiOn": "Answers in Even AI mode",
+  "coreLogHeadGesturesOff": "Head gestures off",
+  "coreLogHeadGesturesOn": "Head gestures on",
+  "coreLogHeadUpAngle": "Activation angle: {angle}°",
+  "@coreLogHeadUpAngle": {
+    "placeholders": {
+      "angle": {
+        "type": "int"
+      }
+    }
+  },
+  "coreLogHeadUpHide": "Head up: hide Even dashboard",
+  "coreLogHeadUpShow": "Head up: show Even dashboard",
+  "coreLogIntegrationReloaded": "Integration reloaded, reconnecting",
+  "coreLogMicFailed": "Microphone could not be switched on",
+  "coreLogNotification": "Notification: {app} – {title}",
+  "@coreLogNotification": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogNotificationsError": "Notifications: {error}",
+  "@coreLogNotificationsError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogPosition": "Display position: height {height}, distance {depth}",
+  "@coreLogPosition": {
+    "placeholders": {
+      "height": {
+        "type": "int"
+      },
+      "depth": {
+        "type": "int"
+      }
+    }
+  },
+  "coreLogPositionPreview": "Display position: height {height}, distance {depth} (preview)",
+  "@coreLogPositionPreview": {
+    "placeholders": {
+      "height": {
+        "type": "int"
+      },
+      "depth": {
+        "type": "int"
+      }
+    }
+  },
+  "coreLogRecognized": "Recognized: {text}",
+  "@coreLogRecognized": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingError": "Recording: {error}",
+  "@coreLogRecordingError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingMicRestarted": "Recording: microphone restarted",
+  "coreLogRecordingNoGlasses": "Recording: glasses not connected, microphone follows",
+  "coreLogRecordingNotSent": "Recording not sent: {error}",
+  "@coreLogRecordingNotSent": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingSent": "Recording sent: {name}",
+  "@coreLogRecordingSent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingStarted": "Recording started",
+  "coreLogRecordingStopped": "Recording stopped: {length} (duration {duration})",
+  "@coreLogRecordingStopped": {
+    "placeholders": {
+      "length": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogRecordingTooShort": "Recording discarded (too short)",
+  "coreLogShowText": "Display: {text}",
+  "@coreLogShowText": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreLogSilentDashboardSkipped": "Silent mode – dashboard not shown",
+  "coreLogSilentNoGlasses": "Silent mode: glasses not connected",
+  "coreLogSilentOff": "Silent mode off",
+  "coreLogSilentOffGlasses": "Silent mode off (glasses)",
+  "coreLogSilentOn": "Silent mode on",
+  "coreLogSilentOnGlasses": "Silent mode on (glasses)",
+  "coreLogSilentTextSkipped": "Silent mode – text not shown",
+  "coreLogTextDropped": "Glasses not connected – text dropped",
+  "coreLogWearOff": "Wear detection off",
+  "coreLogWearOn": "Wear detection on",
+  "coreNoAnswer": "no answer",
+  "coreNoHaConnection": "No connection to Home Assistant",
+  "coreRecordingFileName": "Glasses note",
+  "coreServiceText": "Connection active",
+  "coreSttFailed": "Speech recognition failed.",
+  "coreSttMissing": "No speech recognition configured in the Assist pipeline.",
+  "coreSttNothing": "I didn't catch that.",
+  "coreThinking": "Home Assistant\nOne moment …",
+  "coreTimeout": "Timeout",
+  "coreTranscript": "» {text} «\nOne moment …",
+  "@coreTranscript": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "coreUnknownError": "Unknown error",
+  "coreWhisperFailed": "Sending failed: {error}",
+  "@coreWhisperFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "coreWhisperNotSetUp": "WhisperNotes is not set up",
+  "coreWhisperSent": "Sent to WhisperNotes (job {job})",
+  "@coreWhisperSent": {
+    "placeholders": {
+      "job": {
+        "type": "String"
+      }
+    }
+  },
+  "diagCheckDisplay": "Check left/right display",
+  "diagClose": "Close",
+  "diagEvenAi": "Assist answers in Even AI mode (test)",
+  "diagEvenAiSubtitle": "Shows answers like the official Even app. Try it if one eye shows something different from the other.",
+  "diagLog": "Log",
+  "diagShowOnGlasses": "Show on glasses",
+  "diagTestText": "Test text",
+  "diagTestTextDefault": "Hello from Home Assistant!",
   "g1LogAutoBrightness": "Auto brightness: sensor {sensor} %, set {level} %",
   "@g1LogAutoBrightness": {
     "placeholders": {
@@ -54,6 +340,62 @@
   },
   "g1StatusDisconnected": "disconnected",
   "glasses": "Glasses",
+  "glassesSetAngle": "Activation angle",
+  "glassesSetAngleHelp": "From this head tilt the glasses switch the display on when you look up.",
+  "glassesSetArms": "Left: {left}\nRight: {right}",
+  "@glassesSetArms": {
+    "placeholders": {
+      "left": {
+        "type": "String"
+      },
+      "right": {
+        "type": "String"
+      }
+    }
+  },
+  "glassesSetDepth": "Distance",
+  "glassesSetDepthHelp": "How far away the text appears.",
+  "glassesSetEvenHint": "The official Even app must be closed, as the glasses connect to only one app at a time.",
+  "glassesSetHeadGestures": "Head gestures",
+  "glassesSetHeadGesturesHelp": "Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.",
+  "glassesSetHeadUpMode": "Even dashboard when looking up",
+  "glassesSetHeadUpModeHelp": "\"Hide\": when looking up only the Home Assistant dashboard appears (if set up in HA).",
+  "glassesSetHeight": "Height",
+  "glassesSetHeightHelp": "How high the text sits in your field of view. When you let go, the glasses briefly show the new position and apply it.",
+  "glassesSetHide": "Hide",
+  "glassesSetLeaveUnchanged": "Leave unchanged",
+  "glassesSetNonePaired": "No glasses paired yet.",
+  "glassesSetNotConnected": "The glasses are not connected. Changes are sent the next time they connect.",
+  "glassesSetNotSet": "not set",
+  "glassesSetPaired": "Paired: {name}",
+  "@glassesSetPaired": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "glassesSetRestartNote": "Please close and reopen the app, then search for the glasses.",
+  "glassesSetScouterHint": "ScouterKit (g1v0): For the first pairing put the glasses into the open charging case. Outside the case they obey only paired devices.",
+  "glassesSetSearch": "Search for glasses",
+  "glassesSetSearching": "Searching…",
+  "glassesSetShow": "Show",
+  "glassesSetWear": "Wear detection",
+  "glassesSetWearHelp": "The glasses report whether they are worn (also to Home Assistant: \"Worn\").",
+  "haSetConnectFailed": "Connection failed: {error}",
+  "@haSetConnectFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "haSetGlasses": "Glasses in Home Assistant",
+  "haSetLoad": "Connect & load glasses from HA",
+  "haSetNoGlasses": "No glasses found in Home Assistant. Add the \"Even Realities G1\" integration first.",
+  "haSetNotInstalled": "The \"Even Realities G1\" integration is not installed in Home Assistant.",
+  "haSetToken": "Long-lived access token",
+  "haSetTokenHelp": "HA → Profile → Security → Create token",
   "languageEnglish": "English",
   "languageGerman": "Deutsch",
   "languageSetting": "Language",
@@ -65,6 +407,30 @@
       }
     }
   },
+  "notifSetAllow": "Allow",
+  "notifSetAndroidOnly": "Forwarding phone notifications is only available on Android.",
+  "notifSetApps": "Apps whose notifications arrive:",
+  "notifSetForward": "Forward phone notifications",
+  "notifSetNoAccess": "Access to notifications missing",
+  "notifSetNoAccessHelp": "Allow \"Even G1 HA\" to read notifications in the Android settings.\nIf Android reports \"App was denied access\": Settings → Apps → Even G1 HA → ⋮ → \"Allow restricted settings\", then tap Allow again.",
+  "notifSetNoApps": "Apps appear here once they have sent a notification. New apps are forwarded by default.",
+  "recSetDot": "Dot on the glasses",
+  "recSetDotHelp": "Small dot at the top right while recording and nothing else is shown.",
+  "recSetIntro": "Recordings with the glasses microphone go to WhisperNotes, are transcribed and summarised there and end up in the BasaltNotes inbox if a default vault is chosen in WhisperNotes under Settings → BasaltNotes.",
+  "recSetKey": "API key (optional)",
+  "recSetKeyHelp": "Only needed if one is set in WhisperNotes.",
+  "recSetScouterDot": "During a recording ScouterKit itself shows a small square at the top right of the right eye while the microphone is on. It cannot be switched off.",
+  "recSetSendPending": "Send {count} pending",
+  "@recSetSendPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "recSetUrl": "WhisperNotes address",
+  "save": "Save",
+  "saved": "Saved",
   "settingsAppUpdate": "App update",
   "settingsAppUpdateSubtitle": "Version and new versions from GitHub",
   "settingsDiagnostics": "Diagnostics",
@@ -355,5 +721,158 @@
         "type": "String"
       }
     }
-  }
+  },
+  "uiAnswer": "Answer: {text}",
+  "@uiAnswer": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "uiAssistHint": "Hold the left touch bar, speak, release.",
+  "uiAssistant": "Assistant: {name}",
+  "@uiAssistant": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "uiBatteryCase": "Case",
+  "uiBatteryLeft": "Left",
+  "uiBatteryRight": "Right",
+  "uiBrightness": "Brightness",
+  "uiBrightnessAutoHint": "The glasses set the brightness with their light sensor. The slider makes it brighter or darker.",
+  "uiBrightnessNow": " (currently {percent} %)",
+  "@uiBrightnessNow": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "uiBrightnessOffsetEven": "About every two minutes, while nothing is shown, the app reads the light sensor and sets it {offset} %{current}.",
+  "@uiBrightnessOffsetEven": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "uiBrightnessOffsetScouter": "The light sensor reports whenever the brightness changes noticeably while something is shown; the app then sets {offset} % relative to the automatic level{current}.",
+  "@uiBrightnessOffsetScouter": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      },
+      "current": {
+        "type": "String"
+      }
+    }
+  },
+  "uiConnect": "Connect",
+  "uiFirmware": "Firmware: {version}",
+  "@uiFirmware": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "uiGlassesNotPaired": "Not paired – see Settings",
+  "uiHaNotSetUp": "Not set up – see Settings",
+  "uiListening": "Listening …",
+  "uiOverview": "Overview",
+  "uiPreferredAssistant": "preferred assistant",
+  "uiPreviewEmpty": "Nothing shown by the app\n(the glasses may show their own screen)",
+  "uiPreviewTitle": "Preview of the glasses display",
+  "uiQuestion": "Question: {text}",
+  "@uiQuestion": {
+    "placeholders": {
+      "text": {
+        "type": "String"
+      }
+    }
+  },
+  "uiRecording": "Recording",
+  "uiRecordingFlow": "Glasses microphone → WhisperNotes → BasaltNotes",
+  "uiRecordingPending": "{count, plural, =1{1 recording not sent yet} other{{count} recordings not sent yet}}",
+  "@uiRecordingPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "uiRecordingRunning": "Running · {time}",
+  "@uiRecordingRunning": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "uiRecordingSetUp": "Enter WhisperNotes in the settings",
+  "uiRecordingUploading": "Sending to WhisperNotes …",
+  "uiSettings": "Settings",
+  "uiSilentMode": "Silent mode",
+  "uiSilentModeSubtitle": "No texts, notifications or dashboards. Assist keeps working.",
+  "uiStart": "Start",
+  "uiStop": "Stop",
+  "uiWearCaseClosed": "In the case (lid closed)",
+  "uiWearCaseOpen": "In the case (lid open)",
+  "uiWearNotWorn": "Taken off",
+  "uiWearWorn": "Worn",
+  "updateAvailable": "Version {version} is available",
+  "@updateAvailable": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateCancel": "Cancel",
+  "updateChannel": "Update channel",
+  "updateChannelPreview": "Preview",
+  "updateChannelStable": "Stable",
+  "updateCheck": "Check for updates",
+  "updateCheckFailed": "Could not check for updates.",
+  "updateDailyCheck": "The app looks for new versions on GitHub once a day when it starts.",
+  "updateDownloadFailed": "The update could not be downloaded.",
+  "updateInstall": "Install",
+  "updateInstallQuestion": "Download and install now? Your settings are kept.",
+  "updateInstalled": "Installed: {version}",
+  "@updateInstalled": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateLater": "Later",
+  "updatePreviewQuestion": "Install preview versions?",
+  "updatePreviewVersion": "Preview {version}",
+  "@updatePreviewVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updatePreviewWarning": "Preview versions are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.",
+  "updateStableVersion": "Stable version {version}",
+  "@updateStableVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateSwitch": "Switch",
+  "updateUpToDate": "The app is up to date.",
+  "updateVersionUnknown": "Installed version unknown"
 }
