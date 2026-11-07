@@ -10,3 +10,4 @@ venv/
 *.keystore
 *.apk
 /even_g1-v*.zip
+.claude/worktrees/

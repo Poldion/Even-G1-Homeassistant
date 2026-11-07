@@ -1,283 +1,293 @@
-# Even Realities G1 für Home Assistant
+# Even Realities G1 for Home Assistant
+
+**English** | [Deutsch](README.de.md)
 
 [![Release](https://img.shields.io/github/v/release/Poldion/Even-G1-Homeassistant)](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
 [![Integration](https://github.com/Poldion/Even-G1-Homeassistant/actions/workflows/integration.yml/badge.svg)](https://github.com/Poldion/Even-G1-Homeassistant/actions/workflows/integration.yml)
 [![App](https://github.com/Poldion/Even-G1-Homeassistant/actions/workflows/app.yml/badge.svg)](https://github.com/Poldion/Even-G1-Homeassistant/actions/workflows/app.yml)
 
-Verbindet die Smart-Glasses **Even Realities G1** mit **Home Assistant**: Texte
-und ein eigenes Dashboard auf der Brille anzeigen, mit deinem Assistenten
-sprechen und die Brille in Automationen nutzen. Dazu gehören eine
-**Android-App**, die die Brille per Bluetooth verbindet, und eine
-**Home-Assistant-Integration**.
+Connects the **Even Realities G1** smart glasses with **Home Assistant**: show
+texts and your own dashboard on the glasses, talk to your assistant and use
+the glasses in automations. It consists of an **Android app** that connects
+the glasses via Bluetooth and a **Home Assistant integration**.
 
-Die App arbeitet mit Evens eigener Firmware oder mit der
-freien Ersatz-Firmware **[ScouterKit (g1v0)](https://github.com/mafik/scouter_kit)**,
-die das ganze Display und alle Sensoren der Brille freigibt (siehe
-[Firmware](#firmware-even-oder-scouterkit)).
+The app works with Even's own firmware or with the free replacement firmware
+**[ScouterKit (g1v0)](https://github.com/mafik/scouter_kit)**, which unlocks
+the whole display and all sensors of the glasses (see
+[Firmware](#firmware-even-or-scouterkit)).
 
-## Funktionen
+## Features
 
-- **Texte auf der Brille** per Aktion, Notify-Entität oder Automation, z. B. „Waschmaschine fertig“
-- **Assist:** linke Touchbar gedrückt halten, sprechen, loslassen; die Antwort deines Assistenten erscheint auf der Brille
-- **Dashboard für die Brille** mit Uhrzeit, Datum, Entitäten, Terminen und To-dos auf einer Seite, auf Wunsch beim Hochschauen
-- **Aufnahmen** mit dem Brillen-Mikrofon, gestartet in der App oder in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transkribiert und fasst zusammen, die Zusammenfassung landet in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
-- **Handy-Benachrichtigungen** auf der Brille, pro App wählbar
-- **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
-- **Mit ScouterKit zusätzlich:** Texte auf dem ganzen Display (11 statt 5 Zeilen), beide Augen exakt gleichzeitig, App-Symbole bei Benachrichtigungen, Dashboard beim Hochschauen direkt von der Brille (ohne Handy), Nicken und Kopfschütteln als Gesten, Helligkeits-Offset zur Automatik, Dashboard-Designs mit Rahmen und Titelzeile, ein eigener Text beim Zuhören von Assist und eine Animation beim Ruhemodus
+- **Texts on the glasses** via action, notify entity or automation, e.g. "Washing machine done"
+- **Assist:** hold the left touch bar, speak, release; your assistant's answer appears on the glasses
+- **Dashboard for the glasses** with time, date, entities, appointments and to-dos on one page, optionally when you look up
+- **Recordings** with the glasses' microphone, started in the app or in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transcribes and summarizes, the summary ends up in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
+- **Phone notifications** on the glasses, selectable per app
+- **Silent mode**, battery of glasses and case, wear state and gestures as entities
+- **Additionally with ScouterKit:** texts on the whole display (11 instead of 5 lines), both eyes exactly in sync, app icons for notifications, dashboard on head up straight from the glasses (without the phone), nodding and shaking the head as gestures, brightness offset on top of auto brightness, dashboard designs with frame and title, your own text while Assist listens and an animation for silent mode
 
-## So sieht es aus
+## Language
 
-Dashboard-Designs (Option *Design des Dashboards*), so wie die Brille sie mit
-ScouterKit zeichnet. Die Inhalte sind Beispiele.
+App and integration are available in **English** and **German**. The app
+follows the phone's language; you can switch it under *Settings → Language*.
+The integration follows the language of Home Assistant. Template variables
+have English and German names (for example `header` / `kopfzeile`).
 
-| Schlicht | Rahmen |
+## What it looks like
+
+Dashboard designs (option *Dashboard design*), as the glasses draw them with
+ScouterKit. The content is made up.
+
+| Plain | Frame |
 | --- | --- |
-| ![Dashboard schlicht](docs/images/dashboard-plain.png) | ![Dashboard mit Rahmen](docs/images/dashboard-frame.png) |
-| **Karte** | **Titelzeile** |
-| ![Dashboard als Karte](docs/images/dashboard-card.png) | ![Dashboard mit Titelzeile](docs/images/dashboard-title.png) |
+| ![Plain dashboard](docs/images/en/dashboard-plain.png) | ![Dashboard with frame](docs/images/en/dashboard-frame.png) |
+| **Card** | **Title** |
+| ![Dashboard as a card](docs/images/en/dashboard-card.png) | ![Dashboard with title](docs/images/en/dashboard-title.png) |
 
-Text beim Zuhören (Option *Text beim Zuhören*) und die Animation beim Ruhemodus:
+Text while listening (option *Text while listening*) and the silent mode
+animation:
 
-| Assist hört zu | Ruhemodus an | Ruhemodus aus |
+| Assist is listening | Silent mode on | Silent mode off |
 | --- | --- | --- |
-| ![Assist hört zu](docs/images/assist-listening.png) | ![Animation Ruhemodus an](docs/images/silent-sleep.gif) | ![Animation Ruhemodus aus](docs/images/silent-wake.gif) |
+| ![Assist is listening](docs/images/en/assist-listening.png) | ![Silent mode on animation](docs/images/en/silent-sleep.gif) | ![Silent mode off animation](docs/images/en/silent-wake.gif) |
 
-Die Bilder hat ScouterKits eigener Interpreter
-(`src/vm`) aus genau den Befehlen gerendert, die die App an die Brille
-schickt. Mit Evens Firmware erscheinen alle Texte schlicht.
+The images were rendered by ScouterKit's own interpreter (`src/vm`) from
+exactly the commands the app sends to the glasses. With Even's firmware all
+texts appear plain.
 
-## Firmware: Even oder ScouterKit
+## Firmware: Even or ScouterKit
 
-| | Even-Firmware | [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) |
+| | Even firmware | [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) |
 | --- | --- | --- |
-| Status | Werksfirmware | junges Projekt, mit dieser App gut erprobt |
-| Offizielle Even-App und ihre Funktionen | ja | nein |
-| Anzeige | 576 × 136 px, 5 Zeilen à ~30 Zeichen | 640 × 480 px, 11 Zeilen à 42 Zeichen |
-| Beide Augen gleichzeitig | nicht garantiert | ja |
-| Dashboard beim Hochschauen | über das Handy | ein Programm auf der Brille zeigt es selbst |
-| Gesten | Touchbar, Kopf heben | zusätzlich rechts gedrückt halten, Nicken, Kopfschütteln |
+| Status | factory firmware | young project, well tested with this app |
+| Official Even app and its features | yes | no |
+| Display | 576 × 136 px, 5 lines of ~30 characters | 640 × 480 px, 11 lines of 42 characters |
+| Both eyes at the same time | not guaranteed | yes |
+| Dashboard on head up | via the phone | a program on the glasses shows it itself |
+| Gestures | touch bar, head up | additionally hold right, nod, shake the head |
 
-Die Releases ab 0.17.0 (`vX.Y.Z`, Branch `main`) unterstützen beide
-Firmwares; welche deine Brille hat, wählst du in der App unter
-*Einstellungen → Brille*. Der alte Stand nur für Evens Firmware liegt im
-Branch [`legacy`](https://github.com/Poldion/Even-G1-Homeassistant/tree/legacy)
-(bis 0.16.5).
+Releases from 0.17.0 on (`vX.Y.Z`, branch `main`) support both firmwares;
+you choose which one your glasses have in the app under *Settings → Glasses*.
+The old state for Even's firmware only is in the branch
+[`legacy`](https://github.com/Poldion/Even-G1-Homeassistant/tree/legacy)
+(up to 0.16.5).
 
-**ScouterKit** ist eine freie Ersatz-Firmware von
-[mafik/scouter_kit](https://github.com/mafik/scouter_kit) (MIT-Lizenz). Sie
-ersetzt Evens Firmware auf beiden Bügeln und macht jeden Bügel zu einer kleinen
-programmierbaren Maschine; die App spricht deren Protokoll 5. Die App selbst
-spielt keine Firmware auf: Das geschieht mit den Werkzeugen von ScouterKit an
-einem Linux-Rechner, Schritt für Schritt nach deren
-[Anleitung](https://github.com/mafik/scouter_kit/tree/main/g1_firmware).
+**ScouterKit** is a free replacement firmware by
+[mafik/scouter_kit](https://github.com/mafik/scouter_kit) (MIT license). It
+replaces Even's firmware on both arms and turns each arm into a small
+programmable machine; the app speaks its protocol 5. The app itself does not
+flash any firmware: that is done with ScouterKit's tools on a Linux computer,
+step by step following their
+[guide](https://github.com/mafik/scouter_kit/tree/main/g1_firmware).
 
-> **Achtung:** Das Aufspielen lässt sich nicht ungeschehen machen (zurück geht
-> nur zu Evens öffentlicher 1.6.6), ein Fehler kann einen Bügel unbrauchbar
-> machen, und die Garantie erlischt vermutlich. Lies vorher
-> [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md) und die Anleitung von ScouterKit
-> ganz.
+> **Warning:** Flashing cannot be undone (you can only go back to Even's
+> public 1.6.6), a mistake can brick an arm, and the warranty is probably
+> void. Read [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md) and ScouterKit's guide
+> completely first.
 
 ## Installation
 
 ### Integration
 
-**HACS:** *HACS → ⋮ → Benutzerdefinierte Repositories* →
-`https://github.com/Poldion/Even-G1-Homeassistant` als *Integration* hinzufügen,
-„Even Realities G1“ installieren, Home Assistant neu starten.
+**HACS:** *HACS → ⋮ → Custom repositories* →
+add `https://github.com/Poldion/Even-G1-Homeassistant` as *Integration*,
+install "Even Realities G1", restart Home Assistant.
 
-**Manuell:** `even_g1-vX.Y.Z.zip` von der
-[Releases-Seite](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
-nach `config/custom_components/even_g1/` entpacken und Home Assistant neu
-starten.
+**Manual:** extract `even_g1-vX.Y.Z.zip` from the
+[releases page](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
+to `config/custom_components/even_g1/` and restart Home Assistant.
 
-Danach *Einstellungen → Geräte & Dienste → Integration hinzufügen →
-„Even Realities G1“*.
+Then *Settings → Devices & services → Add integration →
+"Even Realities G1"*.
 
 ### App (Android)
 
-`even-g1-ha-vX.Y.Z.apk` von der
-[Releases-Seite](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
-auf dem Handy herunterladen und installieren. Danach aktualisiert sich die
-App selbst: Sie sucht einmal am Tag nach einer neuen Version (oder unter
-*Einstellungen → App-Update*) und installiert sie auf Nachfrage. Beim ersten
-Update fragt Android einmalig, ob die App Apps installieren darf. Die
-Einstellungen bleiben erhalten.
+Download `even-g1-ha-vX.Y.Z.apk` from the
+[releases page](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
+on your phone and install it. After that the app updates itself: it looks
+for a new version once a day (or under *Settings → App update*) and installs
+it when you confirm. On the first update Android asks once whether the app
+may install apps. Your settings are kept.
 
-App und Integration sollten dieselbe Version haben.
+App and integration should have the same version.
 
-**Für ScouterKit:** In der App unter *Einstellungen → Brille* **ScouterKit**
-wählen und die Brille im offenen Ladeetui koppeln (Details in
+**For ScouterKit:** in the app under *Settings → Glasses* choose
+**ScouterKit** and pair the glasses in the open charging case (details in
 [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md)).
 
-**Vorabversionen:** Jeder Stand von `main` erscheint als Vorabversion
-`sk-vX.Y.Z.N`. Wer sie haben will, wählt unter *Einstellungen → App-Update*
-den Kanal **Vorabversion**.
+**Previews:** every state of `main` is published as a pre-release
+`sk-vX.Y.Z.N`. If you want them, choose the channel **Preview** under
+*Settings → App update*.
 
-## Einrichtung
+## Setup
 
-1. In Home Assistant ein Token erstellen: *Profil → Sicherheit → Langlebige Zugriffstoken*.
-2. Die offizielle Even-App schließen; die Brille verbindet sich nur mit einer App.
-3. In der App unter *Einstellungen → Home Assistant* URL und Token eintragen, *Verbinden & Brillen aus HA laden*, Brille wählen, *Speichern*.
-4. Unter *Einstellungen → Brille koppeln* nach Brillen suchen und deine G1 antippen.
-5. Optional *Einstellungen → Benachrichtigungen → Erlauben*. Meldet Android „App wurde Zugriff verweigert“: *Android-Einstellungen → Apps → Even G1 HA → ⋮ → Eingeschränkte Einstellungen zulassen*, dann erneut erlauben.
-6. Für stabilen Betrieb im Hintergrund die Akku-Optimierung für die App deaktivieren.
+1. Create a token in Home Assistant: *Profile → Security → Long-lived access tokens*.
+2. Close the official Even app; the glasses connect to one app only.
+3. In the app under *Settings → Home Assistant* enter URL and token, *Connect & load glasses from HA*, choose your glasses, *Save*.
+4. Under *Settings → Pair glasses* search for glasses and tap your G1.
+5. Optionally *Settings → Notifications → Allow*. If Android reports "App was denied access": *Android settings → Apps → Even G1 HA → ⋮ → Allow restricted settings*, then allow again.
+6. For reliable background operation disable battery optimization for the app.
 
-## Bedienung
+## Usage
 
-### An der Brille
+### On the glasses
 
-| Geste | Aktion |
+| Gesture | Action |
 | --- | --- |
-| Linke Touchbar gedrückt halten | Assist: sprechen, solange gedrückt (max. 30 s) |
-| Tippen links / rechts | Seite zurück / vor |
-| Doppeltippen | Anzeige schließen, Assist abbrechen |
-| Dreifachtippen | Ruhemodus an/aus |
-| Hochschauen | Home-Assistant-Dashboard (wenn als Dashboard-Geste gewählt) |
-| Rechte Touchbar gedrückt halten | nur ScouterKit: Geste `long_press_right` für eigene Automationen |
-| Nicken / Kopfschütteln | nur ScouterKit, unter *Anzeige & Aktivierung → Kopfgesten*: Gesten `nod` / `head_shake` |
+| Hold the left touch bar | Assist: speak while holding (max. 30 s) |
+| Tap left / right | Page back / forward |
+| Double tap | Close the display, cancel Assist |
+| Triple tap | Silent mode on/off |
+| Look up | Home Assistant dashboard (if chosen as dashboard gesture) |
+| Hold the right touch bar | ScouterKit only: gesture `long_press_right` for your own automations |
+| Nod / shake the head | ScouterKit only, under *Display & activation → Head gestures*: gestures `nod` / `head_shake` |
 
-### In der App
+### In the app
 
-- **Übersicht:** Verbindung, Akku links/rechts und Case, Trage-Zustand, Ruhemodus, Helligkeit (Regler, Automatik mit Offset), Home Assistant und Assistent, optionale Vorschau der Brillenanzeige.
-- **Einstellungen:** Home Assistant, Brille koppeln, *Anzeige & Aktivierung* (Aktivierungswinkel, Höhe, Distanz, Even-Dashboard beim Hochschauen), Benachrichtigungen, Diagnose.
+- **Overview:** connection, battery left/right and case, wear state, silent mode, brightness (slider, auto with offset), Home Assistant and assistant, optional preview of the glasses' display.
+- **Settings:** Home Assistant, pair glasses, *Display & activation* (activation angle, height, distance, Even dashboard on head up), notifications, language, diagnostics.
 
 ### In Home Assistant
 
-Optionen unter *Integration → Konfigurieren*:
+Options under *Integration → Configure*:
 
-| Option | Bedeutung |
+| Option | Meaning |
 | --- | --- |
-| Assistent | Welche Assist-Pipeline antwortet (auch über die Entität „Assistent“) |
-| Erkannte Frage anzeigen | Zeigt nach dem Loslassen die erkannte Frage |
-| Text beim Zuhören | Nur ScouterKit: Template, das im Rahmen erscheint, solange du die Touchbar hältst (Standard `{{ assistent }}` + „hört zu …“) |
-| Automatische Verstärkung / Rauschunterdrückung | Hilft bei leiser Sprache bzw. lauter Umgebung |
-| Standard-Anzeigedauer | Sekunden bis zum Ausblenden (0 = bis Doppeltippen) |
-| Dashboard-Geste | Kopf gehoben, Tippen links oder rechts |
-| Design des Dashboards | Nur ScouterKit: schlicht, Rahmen, Karte (Rahmen mit Titelzeile) oder Titelzeile |
-| Dashboard-Entitäten | Zeilen „Name: Zustand Einheit“ auf dem Brillen-Dashboard |
-| Kalender | Termine von heute (noch nicht vorbei) und morgen |
-| To-do-Listen | Offene To-dos mit Fälligkeitsdatum, die dringendsten zuerst |
-| Eigenes Dashboard-Template | Leer lassen für das Standard-Layout; sonst Jinja-Template unter den Entitäten |
+| Assistant | Which Assist pipeline answers (also via the "Assistant" entity) |
+| Show recognized question | Shows the recognized question after releasing |
+| Text while listening | ScouterKit only: template shown in a frame while you hold the touch bar (default `{{ assistant }}` + "is listening …"; `assistent` works too) |
+| Automatic gain / noise suppression | Helps with quiet speech or noisy surroundings |
+| Default display duration | Seconds until hidden (0 = until double tap) |
+| Dashboard gesture | Head up, tap left or right |
+| Dashboard design | ScouterKit only: plain, frame, card (frame with title) or title |
+| Dashboard entities | Lines "Name: state unit" on the glasses dashboard |
+| Calendars | Appointments of today (not yet over) and tomorrow |
+| To-do lists | Open to-dos with a due date, the most urgent first |
+| Own dashboard template | Leave empty for the built-in layout; otherwise a Jinja template below the entities (variables in English and German, e.g. `header` / `kopfzeile`) |
 
-Beispiele für eigene Dashboards (Wetter, Zuhause, Energie, nur wichtige Hinweise, Text beim Zuhören) stehen in [docs/DASHBOARD.md](docs/DASHBOARD.md).
+Examples for your own dashboards (weather, home, energy, only important
+notes, text while listening) are in [docs/DASHBOARD.md](docs/DASHBOARD.md).
 
-Das Standard-Dashboard passt auf eine Seite der Brille (5 Zeilen):
+The built-in dashboard fits on one page of the glasses (5 lines):
 
 ```
-14:35  ·  Mo, 2. Nov  ·  +2
-» heute  Geburtstag Anna
-» 15:00  Zahnarzt
-» morgen 09:00  Teammeeting
-[ ] Müll raus · morgen
+14:35  ·  Mon, Nov 2  ·  +2
+» today  Example birthday
+» 15:00  Example appointment
+» tomorrow 09:00  Team meeting
+[ ] Example task · tomorrow
 ```
 
-Erste Zeile Uhrzeit und Datum, `+2` heißt: zwei weitere Einträge passen
-nicht mehr drauf. Termine (`»`) kommen zuerst, mindestens eine Zeile bleibt
-für To-dos (`[ ]`, überfällig `[!]`). Ohne Einträge steht dort nur Uhrzeit und
-Datum. In eigenen Templates stehen die Variablen `kopfzeile`, `agenda` und
-`agenda_mehr` zur Verfügung.
+The first line shows time and date, `+2` means: two more entries do not fit.
+Appointments (`»`) come first, at least one line is kept for to-dos (`[ ]`,
+overdue `[!]`). Without entries only time and date are shown. Own templates
+can use the variables `header`, `agenda` and `agenda_more` (German:
+`kopfzeile`, `agenda`, `agenda_mehr`).
 
-Die Assist-Pipeline braucht eine Spracherkennung (z. B. *Home Assistant
-Cloud* oder *Whisper*); *Speech-to-Phrase* versteht nur feste Befehle.
-Damit beim Hochschauen nur das Home-Assistant-Dashboard erscheint, in der App
-*Even-Dashboard beim Hochschauen* auf *Ausblenden* stellen.
+The Assist pipeline needs speech recognition (e.g. *Home Assistant Cloud* or
+*Whisper*); *Speech-to-Phrase* only understands fixed commands.
+To show only the Home Assistant dashboard when you look up, set
+*Even dashboard on head up* to *Hide* in the app.
 
-### Aufnahmen (WhisperNotes → BasaltNotes)
+### Recordings (WhisperNotes → BasaltNotes)
 
-1. In der App unter *Einstellungen → Aufnahmen* die Adresse von WhisperNotes
-   eintragen (z. B. `http://192.168.1.10:8000`), bei Bedarf den API-Schlüssel.
-2. In WhisperNotes unter *Einstellungen → BasaltNotes* die Verbindung und einen
-   **Standard-Vault** einrichten.
-3. Aufnahme starten: auf der Übersicht der App mit *Start* oder in Home
-   Assistant mit `switch.<name>_aufnahme`. Solange aufgenommen wird, zeigt die
-   Brille oben rechts einen kleinen Punkt (`o`), wenn nichts anderes angezeigt
-   wird; abschaltbar in den Einstellungen.
-4. Beim Stoppen schickt die App die Aufnahme an WhisperNotes. Dort wird sie
-   transkribiert und zusammengefasst; die Zusammenfassung kommt als Notiz in
-   den Eingang von BasaltNotes. Ohne Verbindung bleibt die Aufnahme in der App
-   und wird später gesendet.
+1. In the app under *Settings → Recordings* enter the address of WhisperNotes
+   (e.g. `http://192.168.1.10:8000`), and the API key if needed.
+2. In WhisperNotes under *Settings → BasaltNotes* set up the connection and a
+   **default vault**.
+3. Start a recording: on the app's overview with *Start* or in Home Assistant
+   with `switch.<name>_recording`. While recording, the glasses show a small
+   dot (`o`) in the top right corner when nothing else is shown; can be
+   turned off in the settings.
+4. When you stop, the app sends the recording to WhisperNotes. There it is
+   transcribed and summarized; the summary arrives as a note in the BasaltNotes
+   inbox. Without a connection the recording stays in the app and is sent
+   later.
 
-Bitte nur mit Einverständnis aller Anwesenden aufnehmen.
+Please only record with the consent of everyone present.
 
-## Home-Assistant-Referenz
+## Home Assistant reference
 
-### Aktionen
+### Actions
 
 ```yaml
 action: even_g1.show_text
 data:
-  title: Waschmaschine
-  message: Die Wäsche ist fertig.
-  duration: 15          # optional, Sekunden; 0 = bis Doppeltippen
-  mode: screen          # oder "notification"
+  title: Washing machine
+  message: The laundry is done.
+  duration: 15          # optional, seconds; 0 = until double tap
+  mode: screen          # or "notification"
 ```
 
-`even_g1.clear` schließt die Anzeige, `even_g1.show_dashboard` zeigt das
-Dashboard. Außerdem gibt es `notify.<name>` für `notify.send_message`.
+`even_g1.clear` closes the display, `even_g1.show_dashboard` shows the
+dashboard. There is also `notify.<name>` for `notify.send_message`.
 
-### Entitäten
+### Entities
 
-| Entität | Beschreibung |
+Entity IDs follow the language Home Assistant had when the integration was
+set up; the English names are listed here.
+
+| Entity | Description |
 | --- | --- |
-| `select.<name>_assistent` | Assistent der Brille |
-| `switch.<name>_ruhemodus` | Ruhemodus |
-| `switch.<name>_aufnahme` | Aufnahme mit dem Brillen-Mikrofon; beim Ausschalten geht sie an WhisperNotes |
-| `sensor.<name>_akku_links` / `_akku_rechts` / `_akku_case` | Akkustand |
-| `binary_sensor.<name>_case_ladt` | Case hängt am Ladekabel |
-| `binary_sensor.<name>_getragen` | Brille wird getragen (braucht die Trageerkennung) |
-| `switch.<name>_trageerkennung` | Trageerkennung der Brille an/aus (auch in der App unter *Anzeige & Aktivierung*) |
-| `sensor.<name>_zustand` | `worn`, `not_worn`, `case_open`, `case_closed` |
-| `binary_sensor.<name>_brille_verbunden` / `_app_verbunden` | Verbindungen |
-| `sensor.<name>_letzte_frage` / `_letzte_antwort` | Letzte Assist-Interaktion |
-| `event.<name>_geste` | `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `long_press`, `long_press_release`, `other`; mit ScouterKit zusätzlich `long_press_right`, `long_press_right_release`, `nod`, `head_shake` |
+| `select.<name>_assistant` | Assistant of the glasses |
+| `switch.<name>_silent_mode` | Silent mode |
+| `switch.<name>_recording` | Recording with the glasses' microphone; when switched off it goes to WhisperNotes |
+| `sensor.<name>_battery_left` / `_battery_right` / `_case_battery` | Battery level |
+| `binary_sensor.<name>_case_charging` | Case is connected to the charging cable |
+| `binary_sensor.<name>_worn` | Glasses are worn (needs wear detection) |
+| `switch.<name>_wear_detection` | Wear detection of the glasses on/off (also in the app under *Display & activation*) |
+| `sensor.<name>_state` | `worn`, `not_worn`, `case_open`, `case_closed` |
+| `binary_sensor.<name>_glasses_connected` / `_app_connected` | Connections |
+| `sensor.<name>_last_question` / `_last_answer` | Last Assist interaction |
+| `event.<name>_gesture` | `single_tap_left`, `single_tap_right`, `double_tap`, `triple_tap`, `head_up`, `head_down`, `long_press`, `long_press_release`, `other`; with ScouterKit additionally `long_press_right`, `long_press_right_release`, `nod`, `head_shake` |
 
-Events: `even_g1_gesture` (`device_id`, `gesture`, `side`, `code`) und
+Events: `even_g1_gesture` (`device_id`, `gesture`, `side`, `code`) and
 `even_g1_assist` (`device_id`, `query`, `response`).
 
-### Beispiele
+### Examples
 
 ```yaml
 automation:
-  - alias: G1 – Wetter bei Tippen rechts
+  - alias: G1 – weather on tap right
     triggers:
       - trigger: state
-        entity_id: event.even_g1_geste
+        entity_id: event.even_g1_gesture
         attribute: event_type
         to: single_tap_right
     actions:
       - action: even_g1.show_text
         data:
-          title: Wetter
+          title: Weather
           message: "{{ state_attr('weather.home', 'temperature') }} °C"
           duration: 8
 
-  - alias: G1 – Ruhemodus nachts
+  - alias: G1 – silent mode at night
     triggers:
       - trigger: time
         at: "22:30:00"
     actions:
       - action: switch.turn_on
         target:
-          entity_id: switch.even_g1_ruhemodus
+          entity_id: switch.even_g1_silent_mode
 ```
 
-## Hinweise
+## Notes
 
-- Teile des Bluetooth-Protokolls stammen aus Community-Projekten und können je nach Firmware abweichen, siehe [docs/TECHNICAL.md](docs/TECHNICAL.md).
-- Die Bluetooth-Bibliothek [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) ist nur für nicht-kommerzielle Nutzung frei.
-- Kein offizielles Produkt von Even Realities.
-- ScouterKit ist ein Projekt von Dritten ([mafik/scouter_kit](https://github.com/mafik/scouter_kit)) und nicht Teil dieses Repositorys. Fragen zur Firmware selbst gehören dorthin.
+- Parts of the Bluetooth protocol come from community projects and may differ depending on the firmware, see [docs/TECHNICAL.md](docs/TECHNICAL.md).
+- The Bluetooth library [flutter_blue_plus](https://pub.dev/packages/flutter_blue_plus) is free for non-commercial use only.
+- Not an official Even Realities product.
+- ScouterKit is a third-party project ([mafik/scouter_kit](https://github.com/mafik/scouter_kit)) and not part of this repository. Questions about the firmware itself belong there.
 
-## Danksagung und Lizenzen Dritter
+## Acknowledgements and third-party licenses
 
-- [ScouterKit](https://github.com/mafik/scouter_kit) (MIT): Firmware g1v0, Protokoll 5 und VM, deren Interpreter die Programme dieser App lokal geprüft hat.
-- Benachrichtigungssymbole: Pebbles Symbole aus [PebbleOS](https://github.com/coredevices/PebbleOS) und [pebble-dev/iconography](https://github.com/pebble-dev/iconography), wie ScouterKit sie umwandelt (Apache License 2.0, siehe `app/assets/scouter/icons/NOTICE`).
-- Schrift [Departure Mono](https://departuremono.com/) von Helena Zhang (SIL Open Font License 1.1, `app/assets/scouter/DepartureMono-LICENSE.txt`).
-- Protokollwissen zur Even-Firmware aus [MentraOS](https://github.com/Mentra-Community/MentraOS), [even-g1-companion](https://github.com/Cheddies1/even-g1-companion), [g1-reverse](https://github.com/FreedomCoder-dev/g1-reverse) und dem [EvenDemoApp-Wiki](https://github.com/JohnRThomas/EvenDemoApp/wiki/Even-Realities-G1-BLE-Protocol).
+- [ScouterKit](https://github.com/mafik/scouter_kit) (MIT): firmware g1v0, protocol 5 and VM, whose interpreter was used to check this app's programs locally.
+- Notification icons: Pebble's icons from [PebbleOS](https://github.com/coredevices/PebbleOS) and [pebble-dev/iconography](https://github.com/pebble-dev/iconography), as converted by ScouterKit (Apache License 2.0, see `app/assets/scouter/icons/NOTICE`).
+- Font [Departure Mono](https://departuremono.com/) by Helena Zhang (SIL Open Font License 1.1, `app/assets/scouter/DepartureMono-LICENSE.txt`).
+- Protocol knowledge about Even's firmware from [MentraOS](https://github.com/Mentra-Community/MentraOS), [even-g1-companion](https://github.com/Cheddies1/even-g1-companion), [g1-reverse](https://github.com/FreedomCoder-dev/g1-reverse) and the [EvenDemoApp wiki](https://github.com/JohnRThomas/EvenDemoApp/wiki/Even-Realities-G1-BLE-Protocol).
 
-## Weitere Dokumentation
+## More documentation
 
-- [Änderungen](CHANGELOG.md)
-- [Technische Details und Protokoll](docs/TECHNICAL.md)
-- [ScouterKit (g1v0) statt Even-Firmware](docs/SCOUTERKIT.md) · [Firmware-Repository](https://github.com/mafik/scouter_kit)
-- [Entwicklung, Tests und Releases](docs/DEVELOPMENT.md)
+- [Changelog](CHANGELOG.md)
+- [Technical details and protocol](docs/TECHNICAL.md)
+- [ScouterKit (g1v0) instead of Even's firmware](docs/SCOUTERKIT.md) · [firmware repository](https://github.com/mafik/scouter_kit)
+- [Development, tests and releases](docs/DEVELOPMENT.md)

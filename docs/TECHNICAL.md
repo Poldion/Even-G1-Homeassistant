@@ -1,120 +1,121 @@
-# Technische Details
+# Technical details
 
-## Aufbau
+**English** | [Deutsch](TECHNICAL.de.md)
+
+## Architecture
 
 ```
-┌──────────────┐  BLE (2× Nordic UART)  ┌──────────────────┐  Websocket-API  ┌──────────────────────────┐
-│  Even G1     │ ◄────────────────────► │  Smartphone-App  │ ◄─────────────► │ Home Assistant           │
-│  L + R Bügel │  Text, Gesten, LC3-Mic │  (Flutter, app/) │  Text, Gesten,  │  + Integration even_g1   │
-└──────────────┘                        └──────────────────┘  Assist-Audio   │  + Assist-Pipeline       │
+┌──────────────┐  BLE (2× Nordic UART)  ┌──────────────────┐  Websocket API  ┌──────────────────────────┐
+│  Even G1     │ ◄────────────────────► │  Smartphone app  │ ◄─────────────► │ Home Assistant           │
+│  L + R arm   │  text, gestures, LC3   │  (Flutter, app/) │  text, gestures,│  + integration even_g1   │
+└──────────────┘                        └──────────────────┘  Assist audio   │  + Assist pipeline       │
                                                                              └──────────────────────────┘
 ```
 
-Die Brille spricht nur Bluetooth mit einem Smartphone. Die **App** hält die
-Verbindung zu beiden Bügeln, dekodiert das Mikrofon-Audio (LC3 → PCM) und
-verbindet sich mit Home Assistant. Die **Integration**
-(`custom_components/even_g1`) stellt Aktionen, Entitäten und Events bereit und
-schiebt Anzeigebefehle in Echtzeit an die App.
+The glasses only talk Bluetooth with one smartphone. The **app** keeps the
+connection to both arms, decodes the microphone audio (LC3 → PCM) and
+connects to Home Assistant. The **integration** (`custom_components/even_g1`)
+provides actions, entities and events and pushes display commands to the app
+in real time.
 
-| Pfad | Inhalt |
+| Path | Content |
 | --- | --- |
-| `custom_components/even_g1/` | Home-Assistant-Integration |
-| `app/` | Flutter-App (Android, iOS ohne Benachrichtigungen) |
-| `app/packages/lc3_codec/` | FFI-Plugin mit [google/liblc3](https://github.com/google/liblc3) für das Brillen-Mikrofon |
-| `tests/` | Tests der Integration (pytest) |
-| `app/test/`, `app/test_e2e/` | Tests der App, End-to-End-Test gegen eine echte HA-Instanz |
+| `custom_components/even_g1/` | Home Assistant integration |
+| `app/` | Flutter app (Android, iOS without notifications) |
+| `app/packages/lc3_codec/` | FFI plugin with [google/liblc3](https://github.com/google/liblc3) for the glasses' microphone |
+| `tests/` | Tests of the integration (pytest) |
+| `app/test/`, `app/test_e2e/` | Tests of the app, end-to-end test against a real HA instance |
 
-## BLE-Protokoll
+## BLE protocol
 
-Grundlage ist die offizielle [EvenDemoApp](https://github.com/even-realities/EvenDemoApp),
-ergänzt um Erkenntnisse aus [MentraOS](https://github.com/Mentra-Community/MentraOS),
-[even-g1-companion](https://github.com/Cheddies1/even-g1-companion) und dem
+The basis is the official [EvenDemoApp](https://github.com/even-realities/EvenDemoApp),
+extended with findings from [MentraOS](https://github.com/Mentra-Community/MentraOS),
+[even-g1-companion](https://github.com/Cheddies1/even-g1-companion) and the
 [eveng1 Python SDK](https://github.com/emingenc/even_glasses).
 
-| Befehl | Bedeutung |
+| Command | Meaning |
 | --- | --- |
-| `0x4E` | Text, Textmodus `0x71` (5 Zeilen à ~488 px, Blättern übernimmt die App). Optional Even-AI-Modus `0x31`/`0x41` |
-| `0x0E` | Mikrofon an/aus (rechter Bügel) |
-| `0xF1` | Mikrofon-Audio: LC3, 16 kHz, 10-ms-Frames, 20 Byte/Frame |
-| `0xF5` | Ereignisse: `00` Doppeltippen, `01` Tippen, `02`/`03` Kopf hoch/runter, `04`/`05` Ruhemodus, `17`/`18` Touchbar gehalten/losgelassen |
-| `0xF5` (Status) | `0A` Akku Brille, `0F` Akku Case, `0E` Case-Kabel, `06`/`07` auf-/abgesetzt, `08`/`0B` im Case offen/zu |
-| `0x25` | Heartbeat (alle 8 s) |
-| `0x03` | Ruhemodus `0C` an / `0A` aus |
-| `0x08 … 03 <v>` | Even-Dashboard beim Hochschauen (`00` anzeigen, `02` ausblenden) |
-| `0x01 <h> <a>` | Helligkeit `h` (0–42) und automatische Helligkeit `a` (`00`/`01`, Lichtsensor im rechten Bügel); `F5 12 <h>` meldet die aktuelle Stufe |
-| `0x29` | Helligkeit abfragen (rechter Bügel), Antwort `29 65 <h> <a>` |
-| `0x0B` | Aktivierungswinkel (0–60°) |
-| `0x26 08 00 <n> 02 <s> <h> <d>` | Höhe (0–8) und Distanz (1–9) der Anzeige; `s` = `01` Positionsvorschau der Brille, `00` übernehmen |
-| `0x27 <0/1>` / `0x3A` | Trageerkennung an/aus / abfragen (Antwort `3A C9 <0/1>`); nur mit ihr meldet die Brille `F5 06`/`07` |
-| `0x39` | Abfrage, was ein Bügel gerade anzeigt (`0x10` = Textanzeige); die App prüft damit nach jedem Text beide Bügel |
-| `0x4B` / `0x04` | Benachrichtigung / App-Whitelist (linker Bügel) |
+| `0x4E` | Text, text mode `0x71` (5 lines of ~488 px, the app does the paging). Optionally Even AI mode `0x31`/`0x41` |
+| `0x0E` | Microphone on/off (right arm) |
+| `0xF1` | Microphone audio: LC3, 16 kHz, 10 ms frames, 20 bytes/frame |
+| `0xF5` | Events: `00` double tap, `01` tap, `02`/`03` head up/down, `04`/`05` silent mode, `17`/`18` touch bar held/released |
+| `0xF5` (status) | `0A` battery glasses, `0F` battery case, `0E` case cable, `06`/`07` put on/taken off, `08`/`0B` in the case open/closed |
+| `0x25` | Heartbeat (every 8 s) |
+| `0x03` | Silent mode `0C` on / `0A` off |
+| `0x08 … 03 <v>` | Even dashboard on head up (`00` show, `02` hide) |
+| `0x01 <h> <a>` | Brightness `h` (0–42) and auto brightness `a` (`00`/`01`, light sensor in the right arm); `F5 12 <h>` reports the current level |
+| `0x29` | Query brightness (right arm), answer `29 65 <h> <a>` |
+| `0x0B` | Activation angle (0–60°) |
+| `0x26 08 00 <n> 02 <s> <h> <d>` | Height (0–8) and distance (1–9) of the display; `s` = `01` position preview of the glasses, `00` apply |
+| `0x27 <0/1>` / `0x3A` | Wear detection on/off / query (answer `3A C9 <0/1>`); only with it do the glasses report `F5 06`/`07` |
+| `0x39` | Query what an arm currently shows (`0x10` = text view); the app uses it to check both arms after every text |
+| `0x4B` / `0x04` | Notification / app whitelist (left arm) |
 
-Nur ein Teil davon ist offiziell dokumentiert; der Rest stammt aus
-Community-Projekten und kann je nach Firmware abweichen.
+Only part of this is officially documented; the rest comes from community
+projects and may differ depending on the firmware.
 
-**Senden an beide Bügel:** Wie bei MentraOS laufen alle Befehle über eine
-gemeinsame Warteschlange. Jedes Paket wird gleichzeitig an beide Bügel
-geschrieben (mit Bluetooth-Bestätigung), bevor das nächste folgt. Bei Texten
-(`0x4E`) wartet die App wie die offizielle App zusätzlich auf die Antwort des
-linken Bügels (`4E C9`/`CB`, der rechte antwortet erst später) und schickt das
-Paket bis zu zweimal erneut, wenn sie fehlt oder `CA` lautet. Lehnt ein
-Bügel einen Befehl ab, steht das im App-Protokoll (`L/R rejected 0x..`).
+**Sending to both arms:** as in MentraOS all commands go through a shared
+queue. Each packet is written to both arms at the same time (with Bluetooth
+acknowledgement) before the next one follows. For texts (`0x4E`) the app
+additionally waits, like the official app, for the left arm's answer
+(`4E C9`/`CB`, the right one answers later) and resends the packet up to
+twice if it is missing or reads `CA`. If an arm rejects a command, the app
+log says so (`L/R rejected 0x..`).
 
-**Assist:** Während die Touchbar gehalten wird, zeigt die Firmware ihre eigene
-Zuhör-Anzeige (der rechte Bügel zeichnet sie laufend neu). Danach zeigt die
-App „Einen Moment …“, die erkannte Frage und die Antwort auf beiden Bügeln.
+**Assist:** while the touch bar is held the firmware shows its own listening
+screen (the right arm keeps redrawing it). Afterwards the app shows
+"One moment …", the recognized question and the answer on both arms.
 
-## Automatische Helligkeit mit Offset
+## Auto brightness with offset
 
-Die Firmware nähert die Helligkeit im Auto-Modus schrittweise einer festen
-Tabelle an (Lichtsensor im rechten Bügel → Stufe 0–42, g1-reverse
-`compute_lux_brightness_bucket`) und schreibt die Stufe in dasselbe Feld, das
-`0x29` liest. Einen Offset gibt es nicht. Mit Offset schaltet die App daher
-etwa alle zwei Minuten, wenn nichts angezeigt wird, kurz den Auto-Modus ein
-(`01 <stufe> 01`), liest `0x29`, bis die Stufe dreimal gleich ist, und setzt
-dann `01 <stufe+offset> 00`. Wird währenddessen etwas angezeigt, bricht sie ab
-und stellt die letzte Stufe wieder her.
+In auto mode the firmware gradually approaches a fixed table (light sensor in
+the right arm → level 0–42, g1-reverse `compute_lux_brightness_bucket`) and
+writes the level into the same field that `0x29` reads. There is no offset.
+With an offset the app therefore switches auto mode on briefly about every
+two minutes while nothing is shown (`01 <level> 01`), reads `0x29` until the
+level is the same three times, and then sets `01 <level+offset> 00`. If
+something is shown meanwhile it aborts and restores the last level.
 
-## Aufnahmen
+## Recordings
 
-Die App schaltet das Mikrofon des rechten Bügels ein (`0x0E 01`), dekodiert
-das LC3-Audio zu PCM (16 kHz, mono, 16 bit) und schreibt es in eine WAV-Datei
-im Cache der App. Kommt drei Sekunden lang kein Audio (z. B. nach einem
-Verbindungsabbruch), wird das Mikrofon neu eingeschaltet. Assist funktioniert
-während einer Aufnahme weiter; das Mikrofon bleibt dann an.
+The app switches on the right arm's microphone (`0x0E 01`), decodes the LC3
+audio to PCM (16 kHz, mono, 16 bit) and writes it into a WAV file in the app's
+cache. If no audio arrives for three seconds (e.g. after a lost connection),
+the microphone is switched on again. Assist keeps working during a
+recording; the microphone then stays on.
 
-Beim Stoppen lädt die App die Datei wie das Dashboard von WhisperNotes hoch:
-`POST /api/jobs` (multipart, `file`, `kind=standard`, `recorded_at`), mit
-`Authorization: Bearer <API-Schlüssel>`, falls gesetzt. WhisperNotes legt die
-Zusammenfassung als Notiz vom Typ `meeting` im Standard-Vault von BasaltNotes
-ab; der Titel ist Datum und Dateiname („Brillen-Notiz …“).
+When stopping, the app uploads the file to WhisperNotes like its dashboard
+does: `POST /api/jobs` (multipart, `file`, `kind=standard`, `recorded_at`),
+with `Authorization: Bearer <API key>` if set. WhisperNotes stores the
+summary as a note of type `meeting` in the default vault of BasaltNotes; the
+title is the date and the file name ("Glasses note …").
 
-Der Punkt auf der Brille ist ein Text mit 74 Leerzeichen und `o` (Glyphenbreiten
-aus MentraOS: Leerzeichen 6 px). Er wird statt des leeren Textes gezeigt,
-wenn die App die Anzeige leert.
+The dot on the glasses is a text with 74 spaces and `o` (glyph widths from
+MentraOS: a space is 6 px). It is shown instead of the empty text when the
+app clears the display.
 
-## Akku
+## Battery
 
-- Bluetooth-Verbindung mit Priorität „balanced“ (wie MentraOS); „high“ für
-  beide Bügel nur während Assist: vom Gedrückthalten bis die Antwort wieder
-  ausgeblendet ist (höchstens 3 Minuten).
-- Heartbeat alle 8 s wie die offizielle App, Akkuabfrage alle 5 Minuten.
-- Nach jedem Text wird die Anzeige geleert und die Brille mit `0x18`
-  freigegeben, damit das Display ausgeht.
+- Bluetooth connection with priority "balanced" (like MentraOS); "high" for
+  both arms only during Assist: from holding the touch bar until the answer
+  is hidden again (at most 3 minutes).
+- Heartbeat every 8 s like the official app, battery query every 5 minutes.
+- After each text the display is cleared and the glasses are released with
+  `0x18`, so the display turns off.
 
-## Integration ↔ App
+## Integration ↔ app
 
-Websocket-Befehle der Integration:
+Websocket commands of the integration:
 
-| Befehl | Zweck |
+| Command | Purpose |
 | --- | --- |
-| `even_g1/devices` | Brillen-Einträge auflisten |
-| `even_g1/subscribe` | Anzeigebefehle, Konfiguration und Dashboard-Text als Push |
-| `even_g1/update_state` | Zustand der Brille melden (Verbindung, Akkus, Ruhemodus, Trage-Zustand) |
-| `even_g1/gesture` | Geste melden |
-| `even_g1/assist_run` | Assist-Pipeline mit Audio aus der Brille ausführen (ohne Sprachende-Erkennung) |
-| `even_g1/dashboard` | Dashboard rendern |
+| `even_g1/devices` | List the glasses entries |
+| `even_g1/subscribe` | Display commands, configuration and dashboard text as push |
+| `even_g1/update_state` | Report the glasses' state (connection, batteries, silent mode, wear state) |
+| `even_g1/gesture` | Report a gesture |
+| `even_g1/assist_run` | Run the Assist pipeline with audio from the glasses (without end-of-speech detection) |
+| `even_g1/dashboard` | Render the dashboard |
 
-Das Dashboard-Template wird in Home Assistant laufend gerendert und nur bei
-Änderungen an die App geschickt; beim Hochschauen zeigt die App den zuletzt
-erhaltenen Text sofort an.
+The dashboard template is rendered continuously in Home Assistant and only
+sent to the app on changes; when you look up the app shows the last received
+text immediately.

@@ -1,4 +1,6 @@
-# Entwicklung
+# Development
+
+**English** | [Deutsch](DEVELOPMENT.de.md)
 
 ## Tests
 
@@ -13,64 +15,65 @@ cd app
 flutter pub get
 flutter analyze && flutter test
 
-# LC3-Decoder (Host-Build)
+# LC3 decoder (host build)
 cd app/packages/lc3_codec
 cmake -S src -B build && cmake --build build
 LC3_CODEC_LIBRARY=build/liblc3_codec.so flutter test
 
-# End-to-End gegen eine laufende HA-Instanz mit der Integration
+# End to end against a running HA instance with the integration
 cd app
-HA_URL=http://localhost:8123 HA_TOKEN=... HA_STT_ENGINE=stt.dein_stt flutter test test_e2e
+HA_URL=http://localhost:8123 HA_TOKEN=... HA_STT_ENGINE=stt.your_stt flutter test test_e2e
 ```
 
-Die Integration wird in CI gegen die älteste unterstützte und die neueste
-Home-Assistant-Version getestet (`.github/workflows/integration.yml`).
+CI tests the integration against the oldest supported and the newest Home
+Assistant version (`.github/workflows/integration.yml`).
 
-## Was ein Push auslöst
+## What a push triggers
 
-| Geändert | Workflow | Ergebnis |
+| Changed | Workflow | Result |
 | --- | --- | --- |
-| `README.md`, `CHANGELOG.md`, `docs/` (außer `DASHBOARD.md`), `.claude/` | – | nichts |
-| `docs/DASHBOARD.md` | Integration | Test der Beispiel-Templates |
-| `custom_components/`, `tests/` | Integration | Tests, kein Release |
-| `app/test/` und andere App-Dateien | App | Analyse, Tests, APK als Artefakt (kein Release) |
-| `app/lib/`, `app/assets/`, `app/android/`, `pubspec.*` auf `main` | App, Preview build | zusätzlich Vorabversion `sk-vX.Y.Z.N` |
-| – | Release | nur von Hand (*Actions → Release → Run workflow*) |
+| `README.md`, `CHANGELOG.md`, `docs/` (except `DASHBOARD.md`), `.claude/` | – | nothing |
+| `docs/DASHBOARD.md` | Integration | test of the example templates |
+| `custom_components/`, `tests/` | Integration | tests, no release |
+| `app/test/` and other app files | App | analysis, tests, APK as artifact (no release) |
+| `app/lib/`, `app/assets/`, `app/android/`, `pubspec.*` on `main` | App, Preview build | additionally a pre-release `sk-vX.Y.Z.N` |
+| – | Release | only by hand (*Actions → Release → Run workflow*) |
 
-Steht `[skip ci]` in der Commit-Nachricht, läuft bei diesem Push gar kein
-Workflow (eingebaute Funktion von GitHub).
+If the commit message contains `[skip ci]`, no workflow runs for that push
+(a built-in GitHub feature).
 
-## Versionen und Releases
+## Versions and releases
 
-App und Integration tragen dieselbe Version nach
-[Semantic Versioning](https://semver.org/lang/de/):
+App and integration share one version following
+[Semantic Versioning](https://semver.org/):
 
-- `app/pubspec.yaml`: `version: X.Y.Z+N` (`N` bei jeder Veröffentlichung erhöhen)
+- `app/pubspec.yaml`: `version: X.Y.Z+N` (increase `N` with every release)
 - `custom_components/even_g1/manifest.json`: `"version": "X.Y.Z"`
-- `CHANGELOG.md`: Änderungen unter `## [Unreleased]` sammeln
+- `CHANGELOG.md` and `CHANGELOG.de.md`: collect changes under
+  `## [Unreleased]`, in English and German
 
-Release erstellen:
+Create a release:
 
-1. In `CHANGELOG.md` `[Unreleased]` in `## [X.Y.Z] - JJJJ-MM-TT` umbenennen,
-   ein neues leeres `[Unreleased]` darüber anlegen und die Links unten
-   ergänzen.
-2. Versionen in `pubspec.yaml` und `manifest.json` setzen, committen.
-3. Tag `vX.Y.Z` erstellen und pushen (`git tag vX.Y.Z && git push origin vX.Y.Z`)
-   oder unter *Actions → Release → Run workflow* den Branch wählen; dann legt
-   der Workflow den Tag selbst an.
+1. In both changelogs rename `[Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD`,
+   add a new empty `[Unreleased]` above it and extend the links at the
+   bottom.
+2. Set the versions in `pubspec.yaml` and `manifest.json`, commit.
+3. Create and push the tag `vX.Y.Z` (`git tag vX.Y.Z && git push origin vX.Y.Z`)
+   or choose the branch under *Actions → Release → Run workflow*; then the
+   workflow creates the tag itself.
 
-Der Workflow `.github/workflows/release.yml` prüft, dass Tag, App,
-Integration und Changelog übereinstimmen, baut die signierte APK und legt das
-Release mit `even-g1-ha-vX.Y.Z.apk`, `even_g1-vX.Y.Z.zip` und den Notizen aus
-dem Changelog an.
+The workflow `.github/workflows/release.yml` checks that tag, app,
+integration and changelog agree, builds the signed APK and creates the
+release with `even-g1-ha-vX.Y.Z.apk`, `even_g1-vX.Y.Z.zip` and the notes from
+the (English) changelog.
 
-## Signierung der APK
+## Signing the APK
 
-Android installiert ein Update nur, wenn es mit demselben Schlüssel signiert
-ist. Der Schlüssel liegt als Repository-Secrets vor:
+Android only installs an update if it is signed with the same key. The key
+is stored as repository secrets:
 
-- `ANDROID_KEYSTORE_BASE64`: Keystore (PKCS12, Alias `even-g1-ha`) als Base64
-- `ANDROID_KEYSTORE_PASSWORD`: Passwort von Keystore und Schlüssel
+- `ANDROID_KEYSTORE_BASE64`: keystore (PKCS12, alias `even-g1-ha`) as Base64
+- `ANDROID_KEYSTORE_PASSWORD`: password of keystore and key
 
-Ohne diese Secrets signieren die normalen CI-Builds mit einem wechselnden
-Testschlüssel (nur zum Testen); der Release-Workflow bricht ab.
+Without these secrets the normal CI builds sign with a changing test key
+(for testing only); the release workflow aborts.

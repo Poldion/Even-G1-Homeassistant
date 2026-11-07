@@ -1,230 +1,226 @@
-# ScouterKit (g1v0) statt Even-Firmware
+# ScouterKit (g1v0) instead of Even's firmware
 
-[ScouterKit](https://github.com/mafik/scouter_kit) ist eine freie Ersatz-Firmware
-(`g1v0`) für die beiden Bügel der Even G1. Die App kann seit diesem Branch mit
-beiden Firmwares arbeiten: mit Evens eigener Firmware (Standard) oder mit g1v0.
+**English** | [Deutsch](SCOUTERKIT.de.md)
 
-> **Lies das ganz, bevor du etwas installierst.** Das Aufspielen von g1v0 lässt
-> sich nicht ungeschehen machen, und ein Fehler kann einen Bügel unbrauchbar
-> machen. Die App selbst flasht nichts: Das Installieren geschieht mit den
-> Werkzeugen von ScouterKit, Schritt für Schritt von Hand.
+[ScouterKit](https://github.com/mafik/scouter_kit) is a free replacement
+firmware (`g1v0`) for the two arms of the Even G1. The app works with both
+firmwares: with Even's own firmware (default) or with g1v0.
 
-## Was sich ändert
+> **Read all of this before you install anything.** Flashing g1v0 cannot be
+> undone, and a mistake can brick an arm. The app itself flashes nothing:
+> installing is done with ScouterKit's tools, step by step by hand.
 
-| | Even-Firmware | g1v0 (ScouterKit) |
+## What changes
+
+| | Even firmware | g1v0 (ScouterKit) |
 | --- | --- | --- |
-| Offizielle Even-App | ja | **nein** |
-| Even-Dashboard, Even AI, Übersetzung, Navigation | ja | nein |
-| Benachrichtigungen | eigene Anzeige der Brille | als Text der App, mit dem Symbol der App |
-| Anzeige | 576 × 136 px, Text der Firmware, 5 Zeilen à ~30 Zeichen | 640 × 480 px, Text zeichnet die App, 11 Zeilen à 42 Zeichen (Standardhöhe) |
-| Beide Augen gleichzeitig | nicht garantiert (die App prüft und schickt nach) | ja, beide zeichnen im selben Moment |
-| Assist (Touchbar halten), Mikrofon | ja | ja (rechter Bügel, LC3 16 kbit/s wie bisher) |
-| Tippen, Doppeltippen | ja | ja |
-| Rechts gedrückt halten | Firmware (QuickNote) | eigene Geste für Home Assistant |
-| Nicken, Kopfschütteln | nein | ja, einschaltbar (Gyrosensor des rechten Bügels) |
-| Dreifach tippen = Ruhemodus | Firmware | die App merkt sich den Ruhemodus |
-| Kopf heben (Dashboard) | Firmware | ein Programm auf den Bügeln zeigt das Dashboard selbst |
-| Trageerkennung | an-/abschaltbar | immer an (Schalter hat keine Wirkung) |
-| Helligkeit, automatische Helligkeit | ja | ja (links folgt dem rechten Lichtsensor) |
-| Helligkeits-Offset | ja (Messung alle zwei Minuten) | ja (der Lichtsensor meldet Änderungen, solange etwas angezeigt wird) |
-| Aufnahmepunkt | `o` oben rechts, abschaltbar | Quadrat der Firmware oben rechts im rechten Auge, solange das Mikrofon an ist |
-| Anzeigehöhe | ja | verschiebt den Textblock; die Distanz hat keine Wirkung |
-| Updates | über die Even-App | nur über ScouterKits Werkzeuge |
+| Official Even app | yes | **no** |
+| Even dashboard, Even AI, translation, navigation | yes | no |
+| Notifications | the glasses' own display | as a text of the app, with the app's icon |
+| Display | 576 × 136 px, text by the firmware, 5 lines of ~30 characters | 640 × 480 px, text drawn by the app, 11 lines of 42 characters (default height) |
+| Both eyes at the same time | not guaranteed (the app checks and resends) | yes, both draw at the same moment |
+| Assist (hold the touch bar), microphone | yes | yes (right arm, LC3 16 kbit/s as before) |
+| Tap, double tap | yes | yes |
+| Hold right | firmware (QuickNote) | its own gesture for Home Assistant |
+| Nod, shake the head | no | yes, can be switched on (gyroscope of the right arm) |
+| Triple tap = silent mode | firmware | the app keeps the silent mode |
+| Look up (dashboard) | firmware | a program on the arms shows the dashboard itself |
+| Wear detection | can be switched on/off | always on (the switch has no effect) |
+| Brightness, auto brightness | yes | yes (left follows the right light sensor) |
+| Brightness offset | yes (measured every two minutes) | yes (the light sensor reports changes while something is shown) |
+| Recording dot | `o` top right, can be turned off | the firmware's square top right in the right eye while the microphone is on |
+| Display height | yes | moves the text block; the distance has no effect |
+| Updates | via the Even app | only via ScouterKit's tools |
 
-Liegt ein Bügel im Ladeetui, zeichnet die App auf ihm nichts: Leuchtende
-Pixel stören die Ladeverbindung des Etuis (VM.md §6.6).
+While an arm lies in the charging case the app draws nothing on it: lit
+pixels disturb the case's charging link (VM.md §6.6).
 
-## Risiken (aus ScouterKits Anleitung, Stand 2026-11-05)
+## Risks (from ScouterKit's guide, as of 2026-11-05)
 
-- **Kein Weg zurück zur jetzigen Firmware.** Zurück geht nur zu Evens
-  öffentlicher 1.6.6 (oder 1.5.6, 1.3.6). Das Zurückspielen wurde im
-  Emulator und auf einem Entwicklungsboard geprobt, **nicht auf einer echten
-  Brille**. Dabei gehen Evens CJK-Schriften und Demo-Bilder verloren.
-- **Ein Image, das Bluetooth nicht startet, macht den Bügel unbrauchbar.**
-  Retten lässt er sich dann nur, indem man ihn öffnet und über den Debug-Port
-  neu beschreibt. Das löscht den Bootloader und die Werkseinstellungen.
-  Installiere nur Images, die ScouterKits Emulator-Tests bestanden haben
-  (`scripts/gate.sh`).
-- **Stromausfall während der ersten ~20 s** nach dem Bestätigen: Installiere
-  nur mit geladenen Bügeln im Etui, das Etui am USB-Netzteil.
-- Das Projekt ist **sehr jung**: Es wurde am 2026-11-05 veröffentlicht und an
-  einem einzigen Brillenpaar entwickelt (beide Bügel mit Even 1.6.3). Mit
-  aufgesetzter Brille wurde es kaum getestet.
-- Die **Garantie** erlischt vermutlich.
-- Im Ladeetui nimmt ein Bügel Befehle und Firmware von **jedem** Bluetooth-Gerät
-  in der Nähe an (wie bei Even). Außerhalb des Etuis gehorcht er nur
-  gekoppelten Geräten.
+- **No way back to your current firmware.** You can only go back to Even's
+  public 1.6.6 (or 1.5.6, 1.3.6). Restoring was rehearsed in the emulator and
+  on a development board, **not on real glasses**. Even's CJK fonts and demo
+  images are lost in the process.
+- **An image that does not start Bluetooth bricks the arm.** It can then only
+  be rescued by opening it and rewriting it through the debug port. That
+  erases the bootloader and the factory settings. Only install images that
+  passed ScouterKit's emulator tests (`scripts/gate.sh`).
+- **Power loss during the first ~20 s** after confirming: only install with
+  charged arms in the case, the case on a USB power supply.
+- The project is **very young**: it was published on 2026-11-05 and developed
+  on a single pair of glasses (both arms with Even 1.6.3). It was hardly
+  tested while wearing the glasses.
+- The **warranty** is probably void.
+- In the charging case an arm accepts commands and firmware from **any**
+  Bluetooth device nearby (as with Even). Outside the case it only obeys
+  paired devices.
 
-Punkte ohne Rückweg, in dieser Reihenfolge: (1) den PC mit den Bügeln koppeln
-(das Handy verliert seine Kopplung), (2) die Installation auf dem linken Bügel
-bestätigen, (3) dasselbe auf dem rechten.
+Points of no return, in this order: (1) pairing the PC with the arms (the
+phone loses its pairing), (2) confirming the installation on the left arm,
+(3) the same on the right.
 
-## Vorher
+## Before
 
-1. **Firmware-Stand notieren.** In der Even-App unter Einstellungen → Über die
-   Brille. Ist sie neuer als 1.6.6, ist sie nach dem Wechsel endgültig weg.
-2. Beide Bügel und das Etui **voll laden**.
-3. Die App ab Version 0.17.0 installieren (stabiler Kanal). Sie unterstützt
-   beide Firmwares; mit Even-Firmware und der Einstellung „Even“ verhält sie
-   sich wie bisher.
+1. **Note your firmware version.** In the Even app under Settings → About the
+   glasses. If it is newer than 1.6.6, it is gone for good after the switch.
+2. **Fully charge** both arms and the case.
+3. Install the app from version 0.17.0 on (stable channel). It supports both
+   firmwares; with Even's firmware and the setting "Even" it behaves as
+   before.
 
-## Was du brauchst
+## What you need
 
-- Einen **Linux-Rechner mit Bluetooth LE**, BlueZ 5.82 getestet. Windows und
-  WSL gehen nicht, weil WSL kein Bluetooth hat. Es geht zum Beispiel mit einem
-  Ubuntu-Live-USB-Stick auf einem PC mit Bluetooth, mit einem Raspberry Pi 4/5
-  oder einem Linux-Notebook.
-- Zum Bauen des Images: rootless podman, git, curl und etwa 4 GB Platz. Das
-  Bauen geht auch auf einem anderen Linux-Rechner oder in WSL2. Das fertige
-  Image `app_update.bin` kopierst du dann auf den Rechner mit Bluetooth.
-- Python 3.10 oder neuer mit `bleak`, `Pillow` und `pyserial`.
+- A **Linux computer with Bluetooth LE**, tested with BlueZ 5.82. Windows and
+  WSL do not work because WSL has no Bluetooth. It works for example with an
+  Ubuntu live USB stick on a PC with Bluetooth, a Raspberry Pi 4/5 or a Linux
+  laptop.
+- To build the image: rootless podman, git, curl and about 4 GB of space.
+  Building also works on another Linux computer or in WSL2. You then copy the
+  finished image `app_update.bin` to the computer with Bluetooth.
+- Python 3.10 or newer with `bleak`, `Pillow` and `pyserial`.
 
-## Installieren (nach ScouterKits `g1_firmware/README.md`)
+## Install (following ScouterKit's `g1_firmware/README.md`)
 
-Die Befehle laufen im Ordner `g1_firmware/` von ScouterKit. Maßgeblich ist
-deren aktuelle Anleitung. Lies sie vor jedem Schritt nach, denn das Projekt
-ändert sich schnell.
+The commands run in ScouterKit's `g1_firmware/` folder. Their current guide
+is authoritative. Read it before every step, because the project changes
+quickly.
 
 ```bash
 git clone https://github.com/mafik/scouter_kit && cd scouter_kit/g1_firmware
 python3 -m venv .venv && .venv/bin/pip install -r ../tools/requirements.txt
-scripts/setup.sh build            # einmal: Container, NCS, Evens 1.6.6-Images
-scripts/build.sh 0.5.60           # Version wie in ScouterKits Anleitung
-scripts/setup.sh emulator         # einmal
-scripts/gate.sh 0.5.60 all        # ALLE Tests müssen bestehen
+scripts/setup.sh build            # once: container, NCS, Even's 1.6.6 images
+scripts/build.sh 0.5.60           # version as in ScouterKit's guide
+scripts/setup.sh emulator         # once
+scripts/gate.sh 0.5.60 all        # ALL tests must pass
 ```
 
-Dann, **einen Bügel nach dem anderen, links zuerst**:
+Then, **one arm after the other, left first**:
 
-1. Brille ins Etui, Deckel offen, Etui am USB. Bluetooth am Handy aus.
+1. Glasses in the case, lid open, case on USB. Bluetooth on the phone off.
 2. `bluetoothctl`: `agent NoInputNoOutput`, `default-agent`, `pairable on`,
-   `scan le`, bis `Even G1_NN_L_…` erscheint (Adresse notieren), `scan off`,
-   `pair LINKS_ADRESSE`, `quit`.
-3. Prüfen, nichts wird geändert:
-   `.venv/bin/python flash.py --ble LINKS_ADRESSE --stock list`
-4. Installieren:
-   `.venv/bin/python flash.py --ble LINKS_ADRESSE --stock --side L install work/build/g1v0-v0560/zephyr/app_update.bin`
-   Das Werkzeug lädt das Image hoch (Even läuft weiter, Abbruch ist hier noch
-   folgenlos) und fragt dann nach `yes`. **Erst dieses `yes` ist endgültig.**
-   Den Bügel danach nicht aus dem Etui nehmen. Er meldet sich als `G1v0_L` mit
-   einer **neuen Adresse**.
-5. PC neu koppeln (im Etui): `bluetoothctl pairable on`, dann
-   `.venv/bin/python ../tools/arm_pair.py NEUE_ADRESSE`.
-6. Prüfen: `.venv/bin/python ../tools/g1host.py --ble NEUE_ADRESSE hello`
-   zeigt `"proto": 5`. Mit `... grid --label LEFT --verify` erscheint ein
-   Testgitter im linken Glas.
-7. Rechter Bügel: Schritte 2–6 mit `--side R` und `--label RIGHT`.
+   `scan le` until `Even G1_NN_L_…` appears (note the address), `scan off`,
+   `pair LEFT_ADDRESS`, `quit`.
+3. Check, nothing is changed:
+   `.venv/bin/python flash.py --ble LEFT_ADDRESS --stock list`
+4. Install:
+   `.venv/bin/python flash.py --ble LEFT_ADDRESS --stock --side L install work/build/g1v0-v0560/zephyr/app_update.bin`
+   The tool uploads the image (Even keeps running, cancelling here has no
+   consequences yet) and then asks for `yes`. **Only this `yes` is final.**
+   Do not take the arm out of the case afterwards. It shows up as `G1v0_L`
+   with a **new address**.
+5. Pair the PC again (in the case): `bluetoothctl pairable on`, then
+   `.venv/bin/python ../tools/arm_pair.py NEW_ADDRESS`.
+6. Check: `.venv/bin/python ../tools/g1host.py --ble NEW_ADDRESS hello`
+   shows `"proto": 5`. With `... grid --label LEFT --verify` a test grid
+   appears in the left lens.
+7. Right arm: steps 2–6 with `--side R` and `--label RIGHT`.
 
-Ein Bügel mit g1v0 neben einem mit Even-Firmware wird nicht unterstützt.
-Mach beide, oder spiel den ersten zurück.
+One arm with g1v0 next to one with Even's firmware is not supported. Do
+both, or restore the first one.
 
-## Mit der App verbinden
+## Connect with the app
 
-1. In der App unter *Einstellungen → Brille* **ScouterKit** wählen, die App
-   schließen und wieder öffnen.
-2. Brille ins **offene Ladeetui** legen und *Nach Brillen suchen*. Die Bügel
-   heißen `G1v0_L` / `G1v0_R`. Das Paar antippen.
-3. Die App koppelt die Bügel nur, solange sie im Etui liegen. Ein Bügel
-   speichert drei Kopplungen, der PC und das Handy passen beide hinein.
-4. Beim ersten Verbinden nach jedem Neustart der Bügel lädt die App ihre
-   Schrift in den Speicher der Bügel, das dauert ein paar Sekunden. Im
-   Diagnose-Log steht `Schrift geladen`.
+1. In the app under *Settings → Glasses* choose **ScouterKit**, close the app
+   and open it again.
+2. Put the glasses in the **open charging case** and *Search for glasses*.
+   The arms are called `G1v0_L` / `G1v0_R`. Tap the pair.
+3. The app pairs the arms only while they are in the case. An arm stores
+   three pairings, the PC and the phone both fit.
+4. On the first connection after every restart of the arms the app loads its
+   font into the arms' memory, which takes a few seconds. The diagnostics log
+   shows `Font loaded`.
 
-Zurück zu Even: In der App **Even** wählen, neu starten und die Brille in der
-Even-App koppeln.
+Back to Even: choose **Even** in the app, restart it and pair the glasses in
+the Even app.
 
-## Zurück zur Even-Firmware
+## Back to Even's firmware
 
 ```bash
 scripts/fetch_stock.sh 1.6.6
-.venv/bin/python flash.py --ble NEUE_LINKS_ADRESSE --side L restore 1.6.6
+.venv/bin/python flash.py --ble NEW_LEFT_ADDRESS --side L restore 1.6.6
 ```
 
-Danach den rechten Bügel genauso zurückspielen. Dann im PC die Kopplungen
-entfernen (`bluetoothctl remove ADRESSE`) und die Brille in der Even-App neu
-koppeln.
+Then restore the right arm the same way. Then remove the pairings on the PC
+(`bluetoothctl remove ADDRESS`) and pair the glasses again in the Even app.
 
-## Hilfe bei Problemen (Kurzfassung)
+## Troubleshooting (short version)
 
-- **Bügel taucht nach der Installation nicht auf:** Lass ihn ein paar Minuten
-  im Etui am USB liegen. Der Bootloader wiederholt einen unterbrochenen
-  Kopiervorgang, ein Watchdog startet ihn neu.
-- **Er heißt `G1v0S_L` / `G1v0S_R`:** Er ist im sicheren Modus (nach drei
-  Fehlstarts). Die Anzeige ist aus, Updates gehen. Siehe ScouterKits Anleitung
-  unter *Recovery*.
-- **Die App verbindet sich außerhalb des Etuis nicht:** Der Bügel ist nicht mit
-  dem Handy gekoppelt. Leg die Brille ins offene Etui und verbinde neu.
-- **Das Mikrofon geht nicht:** g1v0 verlangt eine verschlüsselte Verbindung,
-  also eine Kopplung, auch im Etui.
+- **The arm does not show up after installing:** leave it in the case on USB
+  for a few minutes. The bootloader repeats an interrupted copy, a watchdog
+  restarts it.
+- **It is called `G1v0S_L` / `G1v0S_R`:** it is in safe mode (after three
+  failed starts). The display is off, updates work. See ScouterKit's guide
+  under *Recovery*.
+- **The app does not connect outside the case:** the arm is not paired with
+  the phone. Put the glasses in the open case and connect again.
+- **The microphone does not work:** g1v0 requires an encrypted connection,
+  that is a pairing, also in the case.
 
-## Programm auf den Bügeln
+## Program on the arms
 
-Ist in Home Assistant das Dashboard beim Hochschauen eingestellt (oder sind
-die Kopfgesten an), lädt die App beim Verbinden ein kleines Programm in jeden
-Bügel und startet es (`VM_START`, VM.md §5). Es liegt im Bereich hinter dem
-Bildpuffer (`0x35800`–`0x40000`) und läuft nur im Arbeitsspeicher; nach einem
-Neustart des Bügels ist es weg, und die App lädt es neu.
+If the dashboard on head up is set in Home Assistant (or head gestures are
+on), the app loads a small program into each arm when connecting and starts
+it (`VM_START`, VM.md §5). It lives in the area behind the frame buffer
+(`0x35800`–`0x40000`) and runs in RAM only; after a restart of the arm it is
+gone, and the app loads it again.
 
-- **Hochschauen** (`TILT`): Das Programm zeichnet die Dashboard-Zeilen, die die
-  App vorher hineingeschrieben hat, Zeile für Zeile über einen eigenen
-  Streifen und zeigt sie. Beim Runterschauen schaltet es die Anzeige ab. Es
-  zeichnet nichts, solange die App selbst etwas anzeigt (`busy`). Neue Inhalte
-  zeichnet es auf ein `USER0` der App neu, wenn das Dashboard gerade zu sehen
-  ist. Den Kopf meldet der rechte Bügel mit `NOTIFY 1, 1/0`.
-- **Kopfgesten** (rechter Bügel, `TIMER` alle 20 ms): Gyrosensor mit 52 Hz.
-  Ein Schwung zählt ab 90 °/s und wenn er mindestens doppelt so schnell ist
-  wie um die andere Achse; zwei Richtungswechsel um die x-Achse innerhalb von
-  0,4 s sind ein Nicken, drei um die y-Achse ein Kopfschütteln
-  (`NOTIFY 2, 1/2`).
-- Das Programm wurde mit ScouterKits Interpreter (`src/vm`) geprüft: Hoch-
-  und Runterschauen, belegte Anzeige, Nicken, Kopfschütteln, langsame und
-  diagonale Bewegungen.
+- **Look up** (`TILT`): the program draws the dashboard lines that the app
+  wrote into it before, line by line through a band of its own, and shows
+  them. When you look down it switches the display off. It draws nothing
+  while the app itself shows something (`busy`). It redraws new content on a
+  `USER0` from the app if the dashboard is visible. The right arm reports the
+  head with `NOTIFY 1, 1/0`.
+- **Head gestures** (right arm, `TIMER` every 20 ms): gyroscope at 52 Hz. A
+  swing counts from 90 °/s and if it is at least twice as fast as around the
+  other axis; two changes of direction around the x axis within 0.4 s are a
+  nod, three around the y axis a head shake (`NOTIFY 2, 1/2`).
+- The program was checked with ScouterKit's interpreter (`src/vm`): looking
+  up and down, a busy display, nodding, shaking the head, slow and diagonal
+  movements.
 
-## Designs und Animationen
+## Designs and animations
 
-Mit der Schrift lädt die App eine kleine Bibliothek in jeden Bügel
-(`app/lib/scouter/sk_lib.dart`, `0x3E000`–`0x3F400`). Pakete rufen sie mit
-`CALL` auf:
+Together with the font the app loads a small library into each arm
+(`app/lib/scouter/sk_lib.dart`, `0x3E000`–`0x3F400`). Packets call it with
+`CALL`:
 
-- `box` zeichnet einen Rahmen mit abgeschrägten Ecken (zwei Pixel breit) in
-  den Bildpuffer. Daraus entstehen die Dashboard-Designs, der Text beim
-  Zuhören und die Statusmeldungen von Assist. Das Programm auf den Bügeln
-  zeichnet dieselben Rahmen streifenweise aus Rechtecken; beide Wege ergeben
-  im Interpreter dasselbe Bild.
-- `scene` zeichnet ein Einzelbild einer Animation: einen Bereich löschen,
-  den Rahmen, bis zu zwei Textzeilen, dann nur diesen Bereich zeigen
-  (`DRAW`, etwa 10 ms). Die App schickt alle Bilder vorab als Pakete, die mit
-  `SLEEP_UNTIL` auf ihre Zeit in der Uhr des jeweiligen Bügels warten. So
-  laufen beide Augen mit 30 Bildern pro Sekunde gleichzeitig, unabhängig von
-  der Funkverbindung (VM.md §7). Ein Bild kostet rund 70 Byte.
+- `box` draws a frame with bevelled corners (two pixels wide) into the frame
+  buffer. The dashboard designs, the text while listening and the Assist
+  status messages are made from it. The program on the arms draws the same
+  frames band by band from rectangles; both ways give the same image in the
+  interpreter.
+- `scene` draws one frame of an animation: clear a region, the frame, up to
+  two text lines, then show only that region (`DRAW`, about 10 ms). The app
+  sends all frames ahead as packets that wait for their time in the clock of
+  the respective arm with `SLEEP_UNTIL`. That way both eyes run at 30 frames
+  per second at the same time, independent of the radio link (VM.md §7). One
+  frame costs about 70 bytes.
 
-## Technik
+## Technical details
 
-Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
+The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
 
-- Dienst `f3da4d59-…4400`: `CMD` (Pakete mit Befehlen), `CTRL`
-  (Steuerungsanfragen), `EVT` (Ereignisse).
-- Pakete haben eine Sequenznummer. Die App schickt höchstens so viele, wie
-  der Bügel freigegeben hat (32). Lücken, die die selektive Bestätigung
-  meldet, und nach Zeitüberschreitung (RFC 6298) unbestätigte Pakete schickt
-  sie erneut (`app/lib/scouter/sk_link.dart`).
-- Text: Die App lädt einmal pro Sitzung die Schrift *Departure Mono*
-  (OFL-Lizenz, 11 px, auf 22 px verdoppelt, nur lateinische Zeichen und
-  Satzzeichen, 422 Zeichen in etwa 16 KB) in den Speicher jedes Bügels. Pro Text löscht
-  `FILL` den Bildpuffer, `GLYPHS` zeichnet jede Zeile und `DRAW` zeigt das
-  Bild auf einmal. Ausblenden schaltet die Anzeige mit `PANEL` = 0 ganz ab,
-  denn auch ein schwarzes, eingeschaltetes Display braucht Strom.
-- Ereignisse: Touchbar, Tragen, Akku und Etui kommen als `INPUT`. Die
-  Kopfneigung meldet der rechte Bügel, sobald sie einen Bereich verlässt,
-  den die App setzt.
-- Mikrofon: `MIC` mit 16 kbit/s. Die Bügel geben es nach 2 s von selbst frei,
-  deshalb erneuert die App die Freigabe alle 0,8 s.
-- Beide Augen gleichzeitig: Die App misst den Uhrenversatz jedes Bügels mit
-  `PING` (alle 3 Minuten), bereitet das Bild auf beiden vor und schickt dann
-  jedem `SLEEP_UNTIL T` + `DRAW`, mit `T` in der Uhr des Bügels (VM.md §7).
-- Helligkeit mit Offset: `AUTO_BRIGHTNESS` = 0, das `LIGHT`-Bit in `EVENTS`.
-  Verlässt das Licht den Bereich ±25 % um die letzte Messung, rechnet die App
-  die Stufe mit der Tabelle der Firmware aus und addiert den Offset.
-- Eine neue *Epoche* bedeutet, dass der Bügel neu gestartet ist und sein
-  Speicher leer ist. Die App richtet ihn dann neu ein und lädt die Schrift
-  erneut.
+- Service `f3da4d59-…4400`: `CMD` (packets with commands), `CTRL` (control
+  requests), `EVT` (events).
+- Packets have a sequence number. The app sends at most as many as the arm
+  has granted (32). It resends gaps that the selective acknowledgement
+  reports, and packets unacknowledged after a timeout (RFC 6298)
+  (`app/lib/scouter/sk_link.dart`).
+- Text: once per session the app loads the font *Departure Mono* (OFL
+  license, 11 px, doubled to 22 px, Latin characters and punctuation only,
+  422 characters in about 16 KB) into the memory of each arm. Per text `FILL`
+  clears the frame buffer, `GLYPHS` draws each line and `DRAW` shows the image
+  at once. Hiding switches the display off completely with `PANEL` = 0,
+  because even a black display that is switched on draws power.
+- Events: touch bar, wearing, battery and case arrive as `INPUT`. The right
+  arm reports the head tilt as soon as it leaves a range the app sets.
+- Microphone: `MIC` at 16 kbit/s. The arms release it after 2 s by
+  themselves, so the app renews the grant every 0.8 s.
+- Both eyes at the same time: the app measures the clock offset of each arm
+  with `PING` (every 3 minutes), prepares the image on both and then sends
+  each `SLEEP_UNTIL T` + `DRAW`, with `T` in the arm's clock (VM.md §7).
+- Brightness with offset: `AUTO_BRIGHTNESS` = 0, the `LIGHT` bit in `EVENTS`.
+  If the light leaves the range ±25 % around the last measurement, the app
+  computes the level with the firmware's table and adds the offset.
+- A new *epoch* means the arm restarted and its memory is empty. The app then
+  sets it up again and loads the font again.

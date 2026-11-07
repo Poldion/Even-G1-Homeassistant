@@ -2,9 +2,9 @@ name: Integration
 
 on:
   push:
-    paths: ["custom_components/**", "tests/**", "scripts/**", "requirements_test.txt", ".github/workflows/integration.yml", "hacs.json", "docs/DASHBOARD.md"]
+    paths: ["custom_components/**", "tests/**", "scripts/**", "requirements_test.txt", ".github/workflows/integration.yml", "hacs.json", "docs/DASHBOARD.md", "docs/DASHBOARD.de.md"]
   pull_request:
-    paths: ["custom_components/**", "tests/**", "scripts/**", "requirements_test.txt", ".github/workflows/integration.yml", "hacs.json", "docs/DASHBOARD.md"]
+    paths: ["custom_components/**", "tests/**", "scripts/**", "requirements_test.txt", ".github/workflows/integration.yml", "hacs.json", "docs/DASHBOARD.md", "docs/DASHBOARD.de.md"]
   workflow_dispatch:
 
 permissions:

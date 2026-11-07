@@ -13,6 +13,17 @@ reads; do not push, tag or edit anything.
 
 ## Checklist
 
+### Two languages (see CLAUDE.md)
+- Every doc exists in English (`NAME.md`, main) and German (`NAME.de.md`)
+  with the same sections, examples and images (`docs/images/en/` and
+  `docs/images/de/`); a language switch at the top; links stay in one
+  language. `CHANGELOG.md` and `CHANGELOG.de.md` have the same versions and
+  entries.
+- App: no hard-coded user-visible text in `app/lib` outside
+  `app/lib/l10n/`; `app_en.arb` and `app_de.arb` have the same keys.
+- Integration: `translations/en.json` and `de.json` have the same keys;
+  `lang.py` defines every word for both languages.
+
 ### Versioning and releases
 - Releases use **Semantic Versioning** tags of the form `vMAJOR.MINOR.PATCH`
   (e.g. `v0.8.0`). No moving or ad-hoc tags such as `latest` or `app-latest`.

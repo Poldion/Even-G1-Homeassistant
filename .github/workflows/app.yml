@@ -29,6 +29,13 @@ jobs:
           flutter-version: 3.47.7
           cache: true
       - run: flutter pub get
+      - name: Both languages complete (CLAUDE.md)
+        run: |
+          flutter gen-l10n
+          if [ -s build/untranslated_messages.json ] && [ "$(tr -d ' \n' < build/untranslated_messages.json)" != "{}" ]; then
+            echo "::error::Untranslated messages:"; cat build/untranslated_messages.json; exit 1
+          fi
+          git diff --exit-code -- lib/l10n/gen || { echo "::error::Run flutter gen-l10n and commit lib/l10n/gen."; exit 1; }
       - run: flutter analyze
       - run: flutter test
       - name: Test LC3 decoder (host build)

@@ -1,235 +1,240 @@
-# Dashboards für die Brille
+# Dashboards for the glasses
 
-Das Dashboard ist ein Text, den Home Assistant aus einem Template rendert und
-die App bei jeder Änderung auf die Brille legt. Du stellst es unter
-*Einstellungen → Geräte & Dienste → Even Realities G1 → Konfigurieren* ein.
+**English** | [Deutsch](DASHBOARD.de.md)
 
-![Dashboard als Karte](images/dashboard-card.png)
+The dashboard is a text that Home Assistant renders from a template and the
+app puts on the glasses whenever it changes. You set it up under
+*Settings → Devices & services → Even Realities G1 → Configure*.
 
-## Die Bausteine
+![Dashboard as a card](images/en/dashboard-card.png)
 
-| Option | Wirkung |
+## The building blocks
+
+| Option | Effect |
 | --- | --- |
-| Dashboard-Geste | Wann es erscheint: beim Hochschauen, beim Tippen links oder rechts, oder nie (dann nur per Aktion `even_g1.show_dashboard`) |
-| Design des Dashboards | Nur ScouterKit: schlicht, Rahmen, Karte oder Titelzeile (Bilder im [README](../README.md#so-sieht-es-aus)) |
-| Dashboard-Entitäten | Je Entität eine Zeile „Name: Zustand Einheit“, ganz oben |
-| Kalender / To-do-Listen | Termine von heute und morgen, fällige To-dos |
-| Eigenes Dashboard-Template | Ersetzt das Standard-Layout unter den Entitäten-Zeilen |
+| Dashboard gesture | When it appears: when you look up, on a tap left or right, or never (then only via the action `even_g1.show_dashboard`) |
+| Dashboard design | ScouterKit only: plain, frame, card or title (images in the [README](../README.md#what-it-looks-like)) |
+| Dashboard entities | One line "Name: state unit" per entity, at the top |
+| Calendars / to-do lists | Appointments of today and tomorrow, to-dos that are due |
+| Own dashboard template | Replaces the built-in layout below the entity lines |
 
-Ohne eigenes Template besteht das Dashboard aus Kopfzeile (Uhrzeit und Datum),
-den Entitäten-Zeilen und der Agenda. Ein eigenes Template ist ein normales
-[Home-Assistant-Template](https://www.home-assistant.io/docs/configuration/templating/)
-und kann zusätzlich diese Variablen nutzen:
+Without an own template the dashboard consists of the header (time and
+date), the entity lines and the agenda. An own template is a normal
+[Home Assistant template](https://www.home-assistant.io/docs/configuration/templating/)
+and can also use these variables:
 
-| Variable | Inhalt |
+| Variable | Content |
 | --- | --- |
-| `kopfzeile` | `09:41  ·  Sa, 7. Nov`, mit `  ·  +N`, wenn Termine nicht mehr passen |
-| `agenda` | Termine und To-dos, eine Zeile pro Eintrag, schon auf die Seite gekürzt |
-| `agenda_mehr` | Anzahl der Einträge, die nicht mehr auf die Seite passten |
+| `header` | `09:41  ·  Sat, Nov 7`, with `  ·  +N` if appointments no longer fit |
+| `agenda` | Appointments and to-dos, one line per entry, already cut to the page |
+| `agenda_more` | Number of entries that did not fit on the page |
 
-### Platz auf dem Display
+Every variable also has a German name: `kopfzeile` instead of `header`,
+`agenda_mehr` instead of `agenda_more` (`agenda` is the same in both
+languages).
 
-| Firmware | Zeilen | Zeichen pro Zeile |
+### Space on the display
+
+| Firmware | Lines | Characters per line |
 | --- | --- | --- |
-| Even | 5 | etwa 30 |
-| ScouterKit | 11 (je nach Höhe 8–14) | 42 |
+| Even | 5 | about 30 |
+| ScouterKit | 11 (8–14 depending on the height) | 42 |
 
-Längere Zeilen bricht die App um. Mehr Zeilen als eine Seite erscheinen beim
-Tippen auf mehreren Seiten; das Dashboard beim Hochschauen zeigt nur die erste.
-Leerzeilen bleiben erhalten und eignen sich als Abstand.
+The app wraps longer lines. More lines than one page appear on several pages
+when you tap; the dashboard on head up shows only the first one. Empty lines
+are kept and work well as spacing.
 
-Mit den Designs *Karte* und *Titelzeile* wird die **erste Zeile** zentriert als
-Titel gesetzt, mit einer Linie darunter. Die Kopfzeile passt dafür gut.
+With the designs *Card* and *Title* the **first line** is centred as a title,
+with a rule below it. The header fits that well.
 
-### Tipps zum Schreiben
+### Tips for writing
 
-- Ein Zeilenumbruch im Template ist ein Zeilenumbruch auf der Brille. Mit
-  `{%-` und `-%}` entfernst du die Umbrüche um Steuerbefehle herum, sodass
-  ausgeblendete Zeilen keine Leerzeilen hinterlassen.
-- Das Dashboard rendert neu, sobald sich eine verwendete Entität ändert, und
-  jede volle Minute. Die Uhrzeit bleibt so aktuell, ohne dass die Brille
-  dauernd neu zeichnet: Die App schickt nur, was sich geändert hat.
-- Templates testest du unter *Entwicklerwerkzeuge → Template*. Die Variablen
-  `kopfzeile` und `agenda` gibt es dort nicht; ersetze sie zum Testen durch
-  einen festen Text.
-- Unbekannte Entitäten liefern `unknown`. `states('…') | float(0)` und
-  `| default('–')` fangen das ab.
+- A line break in the template is a line break on the glasses. With `{%-`
+  and `-%}` you remove the line breaks around statements, so hidden lines do
+  not leave empty lines behind.
+- The dashboard renders again as soon as an entity it uses changes, and
+  every full minute. That keeps the time current without the glasses
+  redrawing all the time: the app only sends what changed.
+- Test templates under *Developer tools → Template*. The variables `header`
+  and `agenda` do not exist there; replace them with a fixed text for
+  testing.
+- Unknown entities return `unknown`. `states('…') | float(0)` and
+  `| default('–')` catch that.
 
-Die Entitäten-IDs in den Beispielen sind Platzhalter. Ersetze sie durch deine.
+The entity IDs in the examples are placeholders. Replace them with yours.
 
-## Beispiele
+## Examples
 
-### 1. Uhr und Wetter
+### 1. Clock and weather
 
-Für Evens Firmware mit ihren 5 Zeilen gut geeignet.
+Well suited for Even's firmware with its 5 lines.
 
 ```jinja
-{{ kopfzeile }}
-{% set w = 'weather.zuhause' -%}
-{{ state_translated(w) }}, {{ state_attr(w, 'temperature') | round(0) }} °C
+{{ header }}
+{% set w = 'weather.home' -%}
+{{ state_translated(w) }}, {{ state_attr(w, 'temperature') | float(0) | round(0) }} °C
 {{ agenda }}
 ```
 
 ```
-09:41  ·  Sa, 7. Nov
-Bewölkt, 8 °C
-» heute 18:00  Beispieltermin
+09:41  ·  Sat, Nov 7
+Cloudy, 8 °C
+» today 18:00  Example appointment
 ```
 
-### 2. Zuhause auf einen Blick
+### 2. Home at a glance
 
-Zählt offene Fenster und eingeschaltete Lichter, statt jede Entität einzeln
-aufzuführen.
+Counts open windows and lights that are on, instead of listing every entity.
 
 ```jinja
-{{ kopfzeile }}
-{%- set fenster = states.binary_sensor
+{{ header }}
+{%- set windows = states.binary_sensor
      | selectattr('attributes.device_class', 'defined')
      | selectattr('attributes.device_class', 'eq', 'window')
      | selectattr('state', 'eq', 'on') | list %}
-{%- set lichter = states.light | selectattr('state', 'eq', 'on') | list %}
-Innen {{ states('sensor.wohnzimmer_temperatur') | float(0) | round(1) }} °C · Außen {{ states('sensor.aussen_temperatur') | float(0) | round(0) }} °C
-{{ fenster | count }} Fenster offen · {{ lichter | count }} Lichter an
+{%- set lights = states.light | selectattr('state', 'eq', 'on') | list %}
+Inside {{ states('sensor.living_room_temperature') | float(0) | round(1) }} °C · Out {{ states('sensor.outside_temperature') | float(0) | round(0) }} °C
+{{ windows | count }} windows open · {{ lights | count }} lights on
 {{ agenda }}
 ```
 
 ```
-09:41  ·  Sa, 7. Nov
-Innen 21.5 °C · Außen 8 °C
-1 Fenster offen · 3 Lichter an
-» heute 18:00  Beispieltermin
-» morgen 10:00  Noch ein Termin
+09:41  ·  Sat, Nov 7
+Inside 21.5 °C · Out 8 °C
+1 windows open · 3 lights on
+» today 18:00  Example appointment
+» tomorrow 10:00  Another appointment
 ```
 
-### 3. Nur zeigen, was gerade wichtig ist
+### 3. Only show what matters right now
 
-Zeilen erscheinen nur, wenn es etwas zu sagen gibt. Steht nichts an, bleibt
-ein kurzer Hinweis.
+Lines appear only when there is something to say. If nothing is due, a
+short note remains.
 
 ```jinja
-{{ kopfzeile }}
-{%- set hinweise = [] %}
-{%- if is_state('binary_sensor.haustuer', 'on') %}
-  {%- set hinweise = hinweise + ['Haustür ist offen'] %}
+{{ header }}
+{%- set notes = [] %}
+{%- if is_state('binary_sensor.front_door', 'on') %}
+  {%- set notes = notes + ['Front door is open'] %}
 {%- endif %}
-{%- if is_state('sensor.waschmaschine_status', 'fertig') %}
-  {%- set hinweise = hinweise + ['Wäsche ist fertig'] %}
+{%- if is_state('sensor.washing_machine_status', 'done') %}
+  {%- set notes = notes + ['Laundry is done'] %}
 {%- endif %}
-{%- if states('sensor.handy_akku') | int(100) < 20 %}
-  {%- set hinweise = hinweise + ['Handy-Akku: ' ~ states('sensor.handy_akku') ~ ' %'] %}
+{%- if states('sensor.phone_battery') | int(100) < 20 %}
+  {%- set notes = notes + ['Phone battery: ' ~ states('sensor.phone_battery') ~ ' %'] %}
 {%- endif %}
-{%- for h in hinweise %}
-! {{ h }}
+{%- for n in notes %}
+! {{ n }}
 {%- endfor %}
-{%- if not hinweise and not agenda %}
-Alles erledigt.
+{%- if not notes and not agenda %}
+All done.
 {%- endif %}
 {{ agenda }}
 ```
 
 ```
-09:41  ·  Sa, 7. Nov
-! Haustür ist offen
-! Wäsche ist fertig
-» heute 18:00  Beispieltermin
+09:41  ·  Sat, Nov 7
+! Front door is open
+! Laundry is done
+» today 18:00  Example appointment
 ```
 
-### 4. Energie
+### 4. Energy
 
 ```jinja
-{{ kopfzeile }}
-{%- set pv = states('sensor.pv_leistung') | float(0) %}
-{%- set netz = states('sensor.netz_leistung') | float(0) %}
-{%- set speicher = states('sensor.speicher_ladestand') | float(0) %}
-{{ '%-12s%6.0f W' | format('PV', pv) }}
-{{ '%-12s%6.0f W' | format('Verbrauch', pv + netz) }}
-{{ '%-12s%6.0f W' | format('Einspeisung' if netz < 0 else 'Bezug', netz | abs) }}
-{{ '%-12s%6.0f %%' | format('Speicher', speicher) }}
+{{ header }}
+{%- set pv = states('sensor.pv_power') | float(0) %}
+{%- set grid = states('sensor.grid_power') | float(0) %}
+{%- set battery = states('sensor.battery_level') | float(0) %}
+{{ '%-12s%6.0f W' | format('Solar', pv) }}
+{{ '%-12s%6.0f W' | format('Consumption', pv + grid) }}
+{{ '%-12s%6.0f W' | format('Feed-in' if grid < 0 else 'Grid', grid | abs) }}
+{{ '%-12s%6.0f %%' | format('Battery', battery) }}
 ```
 
-Die Brille nutzt eine Schrift mit fester Breite, deshalb stehen Zahlen mit
-`format` sauber untereinander:
+The glasses use a monospaced font, so numbers line up neatly with
+`format`:
 
 ```
-09:41  ·  Sa, 7. Nov
-PV            3420 W
-Verbrauch      880 W
-Einspeisung   2540 W
-Speicher        76 %
+09:41  ·  Sat, Nov 7
+Solar         3420 W
+Consumption    880 W
+Feed-in       2540 W
+Battery         76 %
 ```
 
-### 5. Morgens anders als abends
+### 5. Different in the morning and in the evening
 
 ```jinja
-{{ kopfzeile }}
+{{ header }}
 {%- if now().hour < 11 %}
-Guten Morgen!
-Außen {{ states('sensor.aussen_temperatur') | float(0) | round(0) }} °C · Regen {{ states('sensor.regenwahrscheinlichkeit') | default('–') }} %
+Good morning!
+Out {{ states('sensor.outside_temperature') | float(0) | round(0) }} °C · Rain {{ states('sensor.rain_probability') | default('–') }} %
 {%- elif now().hour >= 21 %}
-Gute Nacht.
-Wecker {{ as_timestamp(states('sensor.handy_naechster_wecker'), 0) | timestamp_custom('%H:%M', default='–') }}
+Good night.
+Alarm {{ as_timestamp(states('sensor.phone_next_alarm'), 0) | timestamp_custom('%H:%M', default='–') }}
 {%- endif %}
 {{ agenda }}
 ```
 
-### 6. Unterwegs
+### 6. On the road
 
 ```jinja
-{{ kopfzeile }}
-Zur Arbeit: {{ states('sensor.fahrzeit_arbeit') | default('–') }} min
-{%- set akku = states('sensor.auto_ladestand') %}
-{%- if akku not in ['unknown', 'unavailable'] %}
-Auto: {{ akku }} %, {{ states('sensor.auto_reichweite') }} km
+{{ header }}
+To work: {{ states('sensor.travel_time_work') | default('–') }} min
+{%- set charge = states('sensor.car_battery') %}
+{%- if charge not in ['unknown', 'unavailable'] %}
+Car: {{ charge }} %, {{ states('sensor.car_range') }} km
 {%- endif %}
 {{ agenda }}
 ```
 
-### 7. Agenda mit eigener Überschrift
+### 7. Agenda with its own heading
 
-Die Variablen lassen sich frei anordnen, etwa die Agenda mit Abstand und
-Hinweis auf weitere Einträge:
+The variables can be arranged freely, for example the agenda with some
+space and a note about further entries:
 
 ```jinja
-{{ kopfzeile }}
+{{ header }}
 
-Termine & Aufgaben
-{{ agenda if agenda else 'Nichts geplant.' }}
-{%- if agenda_mehr %}
-… und {{ agenda_mehr }} weitere
+Appointments & tasks
+{{ agenda if agenda else 'Nothing planned.' }}
+{%- if agenda_more %}
+… and {{ agenda_more }} more
 {%- endif %}
 ```
 
-## Text beim Zuhören
+## Text while listening
 
-Die Option *Text beim Zuhören* (nur ScouterKit) ist ebenfalls ein Template. Es
-erscheint zentriert im Rahmen, solange du die linke Touchbar hältst. Die
-Variable `assistent` enthält den Namen des gewählten Assistenten.
+The option *Text while listening* (ScouterKit only) is a template too. It
+appears centred in a frame while you hold the left touch bar. The variable
+`assistant` (German `assistent`) holds the name of the chosen assistant.
 
-![Assist hört zu](images/assist-listening.png)
+![Assist is listening](images/en/assist-listening.png)
 
 ```jinja
-{{ assistent }}
-hört zu …
+{{ assistant }}
+is listening …
 ```
 
 ```jinja
-{{ 'Guten Morgen' if now().hour < 11 else 'Hallo' }}!
-Was kann ich tun?
+{{ 'Good morning' if now().hour < 11 else 'Hello' }}!
+What can I do?
 ```
 
 ```jinja
-{{ assistent }} hört zu
-{{ states('sensor.wohnzimmer_temperatur') | float(0) | round(1) }} °C drinnen
+{{ assistant }} is listening
+{{ states('sensor.living_room_temperature') | float(0) | round(1) }} °C inside
 ```
 
-## Dashboard per Automation zeigen
+## Show the dashboard from an automation
 
-Die Aktion `even_g1.show_dashboard` zeigt das Dashboard unabhängig von der
-Geste, zum Beispiel morgens beim Aufsetzen der Brille:
+The action `even_g1.show_dashboard` shows the dashboard regardless of the
+gesture, for example in the morning when you put on the glasses:
 
 ```yaml
 automation:
-  - alias: Dashboard beim Aufsetzen
+  - alias: Dashboard when putting on the glasses
     triggers:
       - trigger: state
         entity_id: sensor.even_g1_state
@@ -244,5 +249,5 @@ automation:
           duration: 15
 ```
 
-Für einzelne Meldungen ohne Dashboard gibt es `even_g1.show_text` (siehe
-[README](../README.md)).
+For single messages without the dashboard there is `even_g1.show_text` (see
+the [README](../README.md)).
