@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:even_g1_ha/bridge.dart';
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
+import 'package:even_g1_ha/l10n/l10n.dart';
 import 'package:even_g1_ha/main.dart';
 import 'package:even_g1_ha/settings.dart';
 import 'package:flutter/material.dart';
@@ -52,8 +53,11 @@ void main() {
       'right_id': 'R',
       'glasses_name': 'G1 #45',
       'show_preview': true,
+      // The texts below are the German ones.
+      'language': 'de',
     });
     final settings = await Settings.load();
+    L10n.apply(settings.language);
     // Simulated, connected glasses that report battery and case status.
     final g1 = G1Connection.fake((side, data) async {});
     for (final (side, data) in [

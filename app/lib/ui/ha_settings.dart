@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../bridge.dart';
 import '../ha/ha_client.dart';
+import '../l10n/l10n.dart';
 
 /// Connection to Home Assistant: URL, token and the glasses entry.
 class HaSettings extends StatefulWidget {
@@ -56,9 +57,7 @@ class _HaSettingsState extends State<HaSettings> {
       setState(() {
         _entries = entries;
         if (entries.isEmpty) {
-          _error =
-              'Keine Brille in Home Assistant gefunden. Füge zuerst die '
-              'Integration "Even Realities G1" hinzu.';
+          _error = tr.haSetNoGlasses;
         }
         if (!entries.any((e) => e['entry_id'] == _entryId)) {
           _entryId = entries.isEmpty ? null : entries.first['entry_id'];
@@ -67,12 +66,11 @@ class _HaSettingsState extends State<HaSettings> {
     } on HaException catch (e) {
       setState(() {
         _error = e.code == 'unknown_command'
-            ? 'Die Integration "Even Realities G1" ist in Home Assistant '
-                  'nicht installiert.'
+            ? tr.haSetNotInstalled
             : e.toString();
       });
     } catch (e) {
-      setState(() => _error = 'Verbindung fehlgeschlagen: $e');
+      setState(() => _error = tr.haSetConnectFailed('$e'));
     } finally {
       await client.close();
       if (mounted) setState(() => _busy = false);
@@ -92,7 +90,7 @@ class _HaSettingsState extends State<HaSettings> {
     await widget.bridge.restartHomeAssistant();
     if (mounted) {
       ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Gespeichert')));
+          .showSnackBar(SnackBar(content: Text(tr.saved)));
     }
   }
 
@@ -114,9 +112,9 @@ class _HaSettingsState extends State<HaSettings> {
           controller: _token,
           autocorrect: false,
           obscureText: true,
-          decoration: const InputDecoration(
-            labelText: 'Langlebiges Zugriffstoken',
-            helperText: 'HA → Profil → Sicherheit → Token erstellen',
+          decoration: InputDecoration(
+            labelText: tr.haSetToken,
+            helperText: tr.haSetTokenHelp,
           ),
         ),
         const SizedBox(height: 12),
@@ -128,7 +126,7 @@ class _HaSettingsState extends State<HaSettings> {
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
               : const Icon(Icons.sync),
-          label: const Text('Verbinden & Brillen aus HA laden'),
+          label: Text(tr.haSetLoad),
         ),
         if (_error != null)
           Padding(
@@ -142,9 +140,7 @@ class _HaSettingsState extends State<HaSettings> {
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
             initialValue: _entryId,
-            decoration: const InputDecoration(
-              labelText: 'Brille in Home Assistant',
-            ),
+            decoration: InputDecoration(labelText: tr.haSetGlasses),
             items: [
               for (final e in _entries)
                 DropdownMenuItem(
@@ -158,7 +154,7 @@ class _HaSettingsState extends State<HaSettings> {
         const SizedBox(height: 12),
         FilledButton(
           onPressed: _entryId == null ? null : _save,
-          child: const Text('Speichern'),
+          child: Text(tr.save),
         ),
       ],
     );

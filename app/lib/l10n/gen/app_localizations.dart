@@ -110,6 +110,198 @@ abstract class AppLocalizations {
   /// **'Glasses'**
   String get glasses;
 
+  /// No description provided for @glassesSetAngle.
+  ///
+  /// In en, this message translates to:
+  /// **'Activation angle'**
+  String get glassesSetAngle;
+
+  /// No description provided for @glassesSetAngleHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'From this head tilt the glasses switch the display on when you look up.'**
+  String get glassesSetAngleHelp;
+
+  /// No description provided for @glassesSetArms.
+  ///
+  /// In en, this message translates to:
+  /// **'Left: {left}\nRight: {right}'**
+  String glassesSetArms(String left, String right);
+
+  /// No description provided for @glassesSetDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get glassesSetDepth;
+
+  /// No description provided for @glassesSetDepthHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How far away the text appears.'**
+  String get glassesSetDepthHelp;
+
+  /// No description provided for @glassesSetEvenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The official Even app must be closed, as the glasses connect to only one app at a time.'**
+  String get glassesSetEvenHint;
+
+  /// No description provided for @glassesSetHeadGestures.
+  ///
+  /// In en, this message translates to:
+  /// **'Head gestures'**
+  String get glassesSetHeadGestures;
+
+  /// No description provided for @glassesSetHeadGesturesHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.'**
+  String get glassesSetHeadGesturesHelp;
+
+  /// No description provided for @glassesSetHeadUpMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Even dashboard when looking up'**
+  String get glassesSetHeadUpMode;
+
+  /// No description provided for @glassesSetHeadUpModeHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'\"Hide\": when looking up only the Home Assistant dashboard appears (if set up in HA).'**
+  String get glassesSetHeadUpModeHelp;
+
+  /// No description provided for @glassesSetHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Height'**
+  String get glassesSetHeight;
+
+  /// No description provided for @glassesSetHeightHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'How high the text sits in your field of view. When you let go, the glasses briefly show the new position and apply it.'**
+  String get glassesSetHeightHelp;
+
+  /// No description provided for @glassesSetHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get glassesSetHide;
+
+  /// No description provided for @glassesSetLeaveUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave unchanged'**
+  String get glassesSetLeaveUnchanged;
+
+  /// No description provided for @glassesSetNonePaired.
+  ///
+  /// In en, this message translates to:
+  /// **'No glasses paired yet.'**
+  String get glassesSetNonePaired;
+
+  /// No description provided for @glassesSetNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'The glasses are not connected. Changes are sent the next time they connect.'**
+  String get glassesSetNotConnected;
+
+  /// No description provided for @glassesSetNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'not set'**
+  String get glassesSetNotSet;
+
+  /// No description provided for @glassesSetPaired.
+  ///
+  /// In en, this message translates to:
+  /// **'Paired: {name}'**
+  String glassesSetPaired(String name);
+
+  /// No description provided for @glassesSetRestartNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Please close and reopen the app, then search for the glasses.'**
+  String get glassesSetRestartNote;
+
+  /// No description provided for @glassesSetScouterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'ScouterKit (g1v0): For the first pairing put the glasses into the open charging case. Outside the case they obey only paired devices.'**
+  String get glassesSetScouterHint;
+
+  /// No description provided for @glassesSetSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for glasses'**
+  String get glassesSetSearch;
+
+  /// No description provided for @glassesSetSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching…'**
+  String get glassesSetSearching;
+
+  /// No description provided for @glassesSetShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get glassesSetShow;
+
+  /// No description provided for @glassesSetWear.
+  ///
+  /// In en, this message translates to:
+  /// **'Wear detection'**
+  String get glassesSetWear;
+
+  /// No description provided for @glassesSetWearHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The glasses report whether they are worn (also to Home Assistant: \"Worn\").'**
+  String get glassesSetWearHelp;
+
+  /// No description provided for @haSetConnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed: {error}'**
+  String haSetConnectFailed(String error);
+
+  /// No description provided for @haSetGlasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Glasses in Home Assistant'**
+  String get haSetGlasses;
+
+  /// No description provided for @haSetLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect & load glasses from HA'**
+  String get haSetLoad;
+
+  /// No description provided for @haSetNoGlasses.
+  ///
+  /// In en, this message translates to:
+  /// **'No glasses found in Home Assistant. Add the \"Even Realities G1\" integration first.'**
+  String get haSetNoGlasses;
+
+  /// No description provided for @haSetNotInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'The \"Even Realities G1\" integration is not installed in Home Assistant.'**
+  String get haSetNotInstalled;
+
+  /// No description provided for @haSetToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-lived access token'**
+  String get haSetToken;
+
+  /// No description provided for @haSetTokenHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'HA → Profile → Security → Create token'**
+  String get haSetTokenHelp;
+
   /// No description provided for @languageEnglish.
   ///
   /// In en, this message translates to:
@@ -133,6 +325,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System ({language})'**
   String languageSystem(String language);
+
+  /// No description provided for @notifSetAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get notifSetAllow;
+
+  /// No description provided for @notifSetAndroidOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Forwarding phone notifications is only available on Android.'**
+  String get notifSetAndroidOnly;
+
+  /// No description provided for @notifSetApps.
+  ///
+  /// In en, this message translates to:
+  /// **'Apps whose notifications arrive:'**
+  String get notifSetApps;
+
+  /// No description provided for @notifSetForward.
+  ///
+  /// In en, this message translates to:
+  /// **'Forward phone notifications'**
+  String get notifSetForward;
+
+  /// No description provided for @notifSetNoAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Access to notifications missing'**
+  String get notifSetNoAccess;
+
+  /// No description provided for @notifSetNoAccessHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow \"Even G1 HA\" to read notifications in the Android settings.\nIf Android reports \"App was denied access\": Settings → Apps → Even G1 HA → ⋮ → \"Allow restricted settings\", then tap Allow again.'**
+  String get notifSetNoAccessHelp;
+
+  /// No description provided for @notifSetNoApps.
+  ///
+  /// In en, this message translates to:
+  /// **'Apps appear here once they have sent a notification. New apps are forwarded by default.'**
+  String get notifSetNoApps;
+
+  /// No description provided for @recSetDot.
+  ///
+  /// In en, this message translates to:
+  /// **'Dot on the glasses'**
+  String get recSetDot;
+
+  /// No description provided for @recSetDotHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Small dot at the top right while recording and nothing else is shown.'**
+  String get recSetDotHelp;
+
+  /// No description provided for @recSetIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings with the glasses microphone go to WhisperNotes, are transcribed and summarised there and end up in the BasaltNotes inbox if a default vault is chosen in WhisperNotes under Settings → BasaltNotes.'**
+  String get recSetIntro;
+
+  /// No description provided for @recSetKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API key (optional)'**
+  String get recSetKey;
+
+  /// No description provided for @recSetKeyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only needed if one is set in WhisperNotes.'**
+  String get recSetKeyHelp;
+
+  /// No description provided for @recSetScouterDot.
+  ///
+  /// In en, this message translates to:
+  /// **'During a recording ScouterKit itself shows a small square at the top right of the right eye while the microphone is on. It cannot be switched off.'**
+  String get recSetScouterDot;
+
+  /// No description provided for @recSetSendPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Send {count} pending'**
+  String recSetSendPending(int count);
+
+  /// No description provided for @recSetUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'WhisperNotes address'**
+  String get recSetUrl;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
 
   /// No description provided for @settingsAppUpdate.
   ///
