@@ -849,6 +849,16 @@
   "updateCheckFailed": "Could not check for updates.",
   "updateDailyCheck": "The app looks for new versions on GitHub once a day when it starts.",
   "updateDownloadFailed": "The update could not be downloaded.",
+  "updateHeldBackBody": "Version {version} and later support only glasses with the ScouterKit firmware. Your glasses run Even's firmware, so this app stays on its current version, which keeps working.\n\nSupport for Even's firmware is no longer developed (branch \"legacy\" on GitHub). If you switch to ScouterKit, choose it under Settings → Glasses; then updates are offered again.",
+  "@updateHeldBackBody": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateHeldBackOk": "OK",
+  "updateHeldBackTitle": "No more updates for Even's firmware",
   "updateInstall": "Install",
   "updateInstallQuestion": "Download and install now? Your settings are kept.",
   "updateInstalled": "Installed: {version}",

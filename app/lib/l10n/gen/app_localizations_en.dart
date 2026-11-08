@@ -957,6 +957,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateDownloadFailed => 'The update could not be downloaded.';
 
   @override
+  String updateHeldBackBody(String version) {
+    return 'Version $version and later support only glasses with the ScouterKit firmware. Your glasses run Even\'s firmware, so this app stays on its current version, which keeps working.\n\nSupport for Even\'s firmware is no longer developed (branch \"legacy\" on GitHub). If you switch to ScouterKit, choose it under Settings → Glasses; then updates are offered again.';
+  }
+
+  @override
+  String get updateHeldBackOk => 'OK';
+
+  @override
+  String get updateHeldBackTitle => 'No more updates for Even\'s firmware';
+
+  @override
   String get updateInstall => 'Install';
 
   @override

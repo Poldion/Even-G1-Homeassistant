@@ -75,6 +75,13 @@ texts appear plain.
 
 ## Firmware: Even or ScouterKit
 
+> **Even's firmware is no longer developed further.** 0.24.x is the last
+> version that supports it; from 0.25.0 on the app works only with
+> ScouterKit. Glasses with Even's firmware keep 0.24.x (the app offers them
+> no newer version). The branch
+> [`legacy`](https://github.com/Poldion/Even-G1-Homeassistant/tree/legacy)
+> stays as it is.
+
 | | Even firmware | [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) |
 | --- | --- | --- |
 | Status | factory firmware | young project, well tested with this app |

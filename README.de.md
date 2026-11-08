@@ -77,6 +77,13 @@ schickt. Mit Evens Firmware erscheinen alle Texte schlicht.
 
 ## Firmware: Even oder ScouterKit
 
+> **Evens Firmware wird nicht mehr weiterentwickelt.** 0.24.x ist die letzte
+> Version, die sie unterstützt; ab 0.25.0 arbeitet die App nur noch mit
+> ScouterKit. Brillen mit Evens Firmware bleiben auf 0.24.x (die App bietet
+> ihnen keine neuere Version an). Der Branch
+> [`legacy`](https://github.com/Poldion/Even-G1-Homeassistant/tree/legacy)
+> bleibt, wie er ist.
+
 | | Even-Firmware | [ScouterKit (g1v0)](https://github.com/mafik/scouter_kit) |
 | --- | --- | --- |
 | Status | Werksfirmware | junges Projekt, mit dieser App gut erprobt |

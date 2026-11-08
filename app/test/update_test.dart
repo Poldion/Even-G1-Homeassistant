@@ -92,4 +92,14 @@ void main() {
     expect(AppUpdater.channelOf('0.17.0.12'), UpdateChannel.preview);
     expect(AppUpdater.channelOf(''), UpdateChannel.stable);
   });
+
+  test('glasses with Even firmware get no version from 0.25.0 on', () {
+    const u = AppUpdate(version: '0.25.0', apkUrl: 'x', notes: '');
+    expect(AppUpdater.holdBackForEven(u, even: true).heldBack, isTrue);
+    expect(AppUpdater.holdBackForEven(u, even: false).heldBack, isFalse);
+    const old = AppUpdate(version: '0.24.3', apkUrl: 'x', notes: '');
+    expect(AppUpdater.holdBackForEven(old, even: true).heldBack, isFalse);
+    const preview = AppUpdate(version: '0.25.0.7', apkUrl: 'x', notes: '');
+    expect(AppUpdater.holdBackForEven(preview, even: true).heldBack, isTrue);
+  });
 }

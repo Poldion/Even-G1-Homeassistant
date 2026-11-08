@@ -1615,6 +1615,24 @@ abstract class AppLocalizations {
   /// **'The update could not be downloaded.'**
   String get updateDownloadFailed;
 
+  /// No description provided for @updateHeldBackBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} and later support only glasses with the ScouterKit firmware. Your glasses run Even\'s firmware, so this app stays on its current version, which keeps working.\n\nSupport for Even\'s firmware is no longer developed (branch \"legacy\" on GitHub). If you switch to ScouterKit, choose it under Settings → Glasses; then updates are offered again.'**
+  String updateHeldBackBody(String version);
+
+  /// No description provided for @updateHeldBackOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get updateHeldBackOk;
+
+  /// No description provided for @updateHeldBackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No more updates for Even\'s firmware'**
+  String get updateHeldBackTitle;
+
   /// No description provided for @updateInstall.
   ///
   /// In en, this message translates to:

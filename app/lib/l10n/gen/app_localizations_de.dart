@@ -961,6 +961,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get updateDownloadFailed => 'Das Update konnte nicht geladen werden.';
 
   @override
+  String updateHeldBackBody(String version) {
+    return 'Ab Version $version unterstützt die App nur noch Brillen mit der ScouterKit-Firmware. Deine Brille läuft mit Evens Firmware, deshalb bleibt die App auf ihrer jetzigen Version, die weiter funktioniert.\n\nDie Unterstützung für Evens Firmware wird nicht mehr weiterentwickelt (Branch „legacy“ auf GitHub). Wechselst du zu ScouterKit, wähle es unter Einstellungen → Brille; dann werden wieder Updates angeboten.';
+  }
+
+  @override
+  String get updateHeldBackOk => 'OK';
+
+  @override
+  String get updateHeldBackTitle => 'Keine Updates mehr für Evens Firmware';
+
+  @override
   String get updateInstall => 'Installieren';
 
   @override

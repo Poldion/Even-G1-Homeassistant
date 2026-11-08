@@ -32,6 +32,7 @@ class AppUpdate {
     required this.notes,
     this.channel = UpdateChannel.stable,
     this.switchesChannel = false,
+    this.heldBack = false,
   });
 
   final String version;
@@ -41,6 +42,10 @@ class AppUpdate {
 
   /// The build comes from another channel than the installed app.
   final bool switchesChannel;
+
+  /// Not offered: from [AppUpdater.scouterKitOnlyFrom] on the app supports
+  /// only ScouterKit, and these glasses run Even's firmware.
+  final bool heldBack;
 }
 
 /// Looks for newer releases on GitHub and installs them (Android).
@@ -54,6 +59,31 @@ class AppUpdater {
       'https://api.github.com/repos/Poldion/Even-G1-Homeassistant/releases/latest';
   static const _releases =
       'https://api.github.com/repos/Poldion/Even-G1-Homeassistant/releases?per_page=30';
+
+  /// The first version without Even's firmware: glasses that run it stay on
+  /// the last version before (the legacy branch is not developed further).
+  static const scouterKitOnlyFrom = '0.25.0';
+
+  /// The glasses run Even's firmware (the app's setting; Even is the
+  /// default of apps that never paired ScouterKit glasses).
+  static Future<bool> evenFirmware() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getString('glasses_firmware') ?? 'even') == 'even';
+  }
+
+  /// [update] for glasses with Even's firmware: held back from
+  /// [scouterKitOnlyFrom] on.
+  static AppUpdate holdBackForEven(AppUpdate update, {required bool even}) {
+    if (!even || isNewer(scouterKitOnlyFrom, update.version)) return update;
+    return AppUpdate(
+      version: update.version,
+      apkUrl: update.apkUrl,
+      notes: update.notes,
+      channel: update.channel,
+      switchesChannel: update.switchesChannel,
+      heldBack: true,
+    );
+  }
 
   /// Tag prefix of the pre-releases.
   static const previewTagPrefix = 'sk-v';
@@ -177,6 +207,7 @@ class AppUpdater {
         }
       }
       if (update == null) return null;
+      update = holdBackForEven(update, even: await evenFirmware());
       if (update.switchesChannel) return update;
       return isNewer(update.version, current) ? update : null;
     } finally {

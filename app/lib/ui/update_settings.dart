@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../update/app_update.dart';
 import '../l10n/l10n.dart';
@@ -32,6 +33,31 @@ Future<void> checkForAppUpdate(
     return;
   }
   final found = update;
+  if (found.heldBack) {
+    // Even's firmware: no update; say why (on start once per version).
+    final prefs = await SharedPreferences.getInstance();
+    const key = 'update_held_back_shown';
+    if (!manual && prefs.getString(key) == found.version) return;
+    await prefs.setString(key, found.version);
+    if (!context.mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.info_outline),
+        title: Text(tr.updateHeldBackTitle),
+        content: SingleChildScrollView(
+          child: Text(tr.updateHeldBackBody(found.version)),
+        ),
+        actions: [
+          FilledButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(tr.updateHeldBackOk),
+          ),
+        ],
+      ),
+    );
+    return;
+  }
   final install = await showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(
