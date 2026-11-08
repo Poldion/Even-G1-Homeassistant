@@ -31,20 +31,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coreChannelName => 'Even G1 connection';
 
   @override
-  String coreDisplayCheck(String left, String right) {
-    return 'Display left: $left, right: $right';
-  }
-
-  @override
-  String coreDisplayCheckDiffers(String text) {
-    return '$text – DIFFERENT';
-  }
-
-  @override
   String get coreDone => 'Done.';
-
-  @override
-  String get coreGlassesNotConnected => 'Glasses not connected';
 
   @override
   String coreHaConnected(String version) {
@@ -121,10 +108,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coreLogDashboardTap => 'Dashboard (tap)';
 
   @override
-  String get coreLogEvenAiOff => 'Answers in text mode';
-
-  @override
-  String get coreLogEvenAiOn => 'Answers in Even AI mode';
+  String coreLogDisplayHeight(int height) {
+    return 'Display height $height';
+  }
 
   @override
   String get coreLogHeadGesturesOff => 'Head gestures off';
@@ -136,12 +122,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String coreLogHeadUpAngle(int angle) {
     return 'Activation angle: $angle°';
   }
-
-  @override
-  String get coreLogHeadUpHide => 'Head up: hide Even dashboard';
-
-  @override
-  String get coreLogHeadUpShow => 'Head up: show Even dashboard';
 
   @override
   String get coreLogIntegrationReloaded => 'Integration reloaded, reconnecting';
@@ -157,16 +137,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String coreLogNotificationsError(String error) {
     return 'Notifications: $error';
-  }
-
-  @override
-  String coreLogPosition(int height, int depth) {
-    return 'Display position: height $height, distance $depth';
-  }
-
-  @override
-  String coreLogPositionPreview(int height, int depth) {
-    return 'Display position: height $height, distance $depth (preview)';
   }
 
   @override
@@ -244,9 +214,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coreLogWearOn => 'Wear detection on';
 
   @override
-  String get coreNoAnswer => 'no answer';
-
-  @override
   String get coreNoHaConnection => 'No connection to Home Assistant';
 
   @override
@@ -293,17 +260,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get diagCheckDisplay => 'Check left/right display';
-
-  @override
   String get diagClose => 'Close';
-
-  @override
-  String get diagEvenAi => 'Assist answers in Even AI mode (test)';
-
-  @override
-  String get diagEvenAiSubtitle =>
-      'Shows answers like the official Even app. Try it if one eye shows something different from the other.';
 
   @override
   String get diagLog => 'Log';
@@ -318,37 +275,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diagTestTextDefault => 'Hello from Home Assistant!';
 
   @override
-  String g1LogAutoBrightness(int sensor, int level) {
-    return 'Auto brightness: sensor $sensor %, set $level %';
-  }
-
-  @override
   String get g1LogConnectionFast => 'Connection: fast';
 
   @override
   String get g1LogConnectionSaving => 'Connection: power saving';
-
-  @override
-  String g1LogDisplayMissingLeft(String screen) {
-    return 'Left display was missing ($screen) – sent again';
-  }
-
-  @override
-  String g1LogDisplayMissingRight(String screen) {
-    return 'Right display was missing ($screen) – sent again';
-  }
-
-  @override
-  String get g1LogLeftNoAcks => 'L does not confirm texts – check off';
-
-  @override
-  String get g1LogLeftNotConfirmed => 'L: text not confirmed';
-
-  @override
-  String get g1LogLeftRejected => 'L: text rejected – sent again';
-
-  @override
-  String get g1LogLeftUnanswered => 'L: text unanswered – sent again';
 
   @override
   String g1LogWearState(String state) {
@@ -385,16 +315,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get glassesSetDepth => 'Distance';
-
-  @override
-  String get glassesSetDepthHelp => 'How far away the text appears.';
-
-  @override
-  String get glassesSetEvenHint =>
-      'The official Even app must be closed, as the glasses connect to only one app at a time.';
-
-  @override
   String get glassesSetHeadGestures => 'Head gestures';
 
   @override
@@ -402,24 +322,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.';
 
   @override
-  String get glassesSetHeadUpMode => 'Even dashboard when looking up';
-
-  @override
-  String get glassesSetHeadUpModeHelp =>
-      '\"Hide\": when looking up only the Home Assistant dashboard appears (if set up in HA).';
-
-  @override
   String get glassesSetHeight => 'Height';
 
   @override
   String get glassesSetHeightHelp =>
       'How high the text sits in your field of view. When you let go, the glasses briefly show the new position and apply it.';
-
-  @override
-  String get glassesSetHide => 'Hide';
-
-  @override
-  String get glassesSetLeaveUnchanged => 'Leave unchanged';
 
   @override
   String get glassesSetNonePaired => 'No glasses paired yet.';
@@ -437,10 +344,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get glassesSetRestartNote =>
-      'Please close and reopen the app, then search for the glasses.';
-
-  @override
   String get glassesSetScouterHint =>
       'ScouterKit (g1v0): For the first pairing put the glasses into the open charging case. Outside the case they obey only paired devices.';
 
@@ -449,16 +352,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get glassesSetSearching => 'Searching…';
-
-  @override
-  String get glassesSetShow => 'Show';
-
-  @override
-  String get glassesSetWear => 'Wear detection';
-
-  @override
-  String get glassesSetWearHelp =>
-      'The glasses report whether they are worn (also to Home Assistant: \"Worn\").';
 
   @override
   String haSetConnectFailed(String error) {
@@ -524,13 +417,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Apps appear here once they have sent a notification. New apps are forwarded by default.';
 
   @override
-  String get recSetDot => 'Dot on the glasses';
-
-  @override
-  String get recSetDotHelp =>
-      'Small dot at the top right while recording and nothing else is shown.';
-
-  @override
   String get recSetIntro =>
       'Recordings with the glasses microphone go to WhisperNotes, are transcribed and summarised there and end up in the BasaltNotes inbox if a default vault is chosen in WhisperNotes under Settings → BasaltNotes.';
 
@@ -576,7 +462,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsDisplaySubtitle =>
-      'Activation angle, height, distance, Even dashboard';
+      'Activation angle, height, head gestures';
 
   @override
   String get settingsNoGlassesPaired => 'No glasses paired yet';
@@ -666,9 +552,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String skLogEncrypted(String arm) {
     return '$arm: connection encrypted';
   }
-
-  @override
-  String get skLogEvenCommandSkipped => 'Even command to g1v0 skipped';
 
   @override
   String skLogEventsRejected(String arm) {
@@ -825,11 +708,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String uiBrightnessOffsetEven(String offset, String current) {
-    return 'About every two minutes, while nothing is shown, the app reads the light sensor and sets it $offset %$current.';
-  }
-
-  @override
   String uiBrightnessOffsetScouter(String offset, String current) {
     return 'The light sensor reports whenever the brightness changes noticeably while something is shown; the app then sets $offset % relative to the automatic level$current.';
   }
@@ -955,6 +833,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateDownloadFailed => 'The update could not be downloaded.';
+
+  @override
+  String get updateEvenNoticeBody =>
+      'Since 0.25.0 the app works only with glasses that run the ScouterKit firmware. Your glasses were paired with Even\'s firmware, which is no longer supported.\n\nWith Even\'s firmware, install 0.24.x, the last version for it, from the releases page. Android installs an older version only after uninstalling this one; your settings are lost then.';
+
+  @override
+  String get updateEvenNoticeScouterKit => 'I use ScouterKit';
+
+  @override
+  String get updateEvenNoticeTitle => 'This version needs ScouterKit';
 
   @override
   String updateHeldBackBody(String version) {

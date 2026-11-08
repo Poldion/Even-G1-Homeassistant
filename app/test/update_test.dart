@@ -1,5 +1,6 @@
 import 'package:even_g1_ha/update/app_update.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   test('compares versions numerically', () {
@@ -101,5 +102,14 @@ void main() {
     expect(AppUpdater.holdBackForEven(old, even: true).heldBack, isFalse);
     const preview = AppUpdate(version: '0.25.0.7', apkUrl: 'x', notes: '');
     expect(AppUpdater.holdBackForEven(preview, even: true).heldBack, isTrue);
+  });
+
+  test('only glasses stored as Even firmware are held back', () async {
+    SharedPreferences.setMockInitialValues({});
+    expect(await AppUpdater.evenFirmware(), isFalse);
+    SharedPreferences.setMockInitialValues({'glasses_firmware': 'even'});
+    expect(await AppUpdater.evenFirmware(), isTrue);
+    SharedPreferences.setMockInitialValues({'glasses_firmware': 'scouterkit'});
+    expect(await AppUpdater.evenFirmware(), isFalse);
   });
 }

@@ -3,14 +3,10 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
-import '../l10n/l10n.dart';
 import 'g1_connection.dart';
 import 'protocol.dart';
 
 /// Shows (multi page) texts on the glasses with automatic and manual paging.
-///
-/// Everything (Home Assistant texts, Assist status and answers) is sent in
-/// the plain text mode of the glasses; the app does the paging itself.
 class G1Display {
   G1Display(this.g1);
 
@@ -42,12 +38,11 @@ class G1Display {
   String get pageLabel =>
       _screens.length > 1 ? '${_page + 1}/${_screens.length}' : '';
 
-  /// Shows a text. [closeAfter] returns to the dashboard after the last page
-  /// was shown for that long (null or zero: stay until dismissed).
+  /// Shows a text. [closeAfter] switches the display off after the last
+  /// page was shown for that long (null or zero: stay until dismissed).
   Future<bool> showText(
     String text, {
     Duration? closeAfter,
-    bool evenAi = false,
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
     String? pageTitle,
@@ -56,12 +51,10 @@ class G1Display {
     _active = true;
     _icon = icon;
     _style = style;
-    _evenAi = evenAi;
     _closeAfter = (closeAfter == null || closeAfter == Duration.zero)
         ? null
         : closeAfter;
     final generation = _generation;
-    // Pages as large as this display allows (5 lines with Even's firmware).
     var screens = await g1.layoutPages(text, icon: icon);
     if (generation != _generation) return false;
     if (pageTitle != null) screens = _withTitle(screens, pageTitle);
@@ -69,11 +62,6 @@ class G1Display {
 
     final ok = await _showPage(generation);
     if (generation != _generation) return ok;
-    // Even's firmware sometimes drops a text on one arm; g1v0 confirms every
-    // packet and draws both eyes at the same moment.
-    if (!evenAi && verifyBothArms && g1.evenFirmware) {
-      unawaited(_verifyBothArms(generation, _page));
-    }
 
     if (_screens.length > 1) {
       _pageTimer = Timer.periodic(pageInterval, (timer) async {
@@ -89,48 +77,32 @@ class G1Display {
         }
       });
     } else {
-      if (evenAi) {
-        // Like the official app: 0x30 first, 0x40 after a moment.
-        Future<void>.delayed(const Duration(seconds: 3), () {
-          if (generation == _generation) _showPage(generation, last: true);
-        });
-      }
       _scheduleClose();
     }
     return ok;
   }
 
-  /// Short status line during Assist (e.g. "Ich höre zu …"), in a frame
-  /// where the glasses draw designs.
+  /// Short status line during Assist (e.g. "Ich höre zu …"), in a frame.
   Future<bool> showAiStatus(String text) => showText(
     text,
-    evenAi: evenAiAnswers,
-    style: !g1.supportsDesigns
-        ? G1TextStyle.plain
-        : labDesign
-        ? G1TextStyle.labBadge
-        : G1TextStyle.badge,
+    style: labDesign ? G1TextStyle.labBadge : G1TextStyle.badge,
   );
 
   /// The lab design set for the Assist status (set by Home Assistant).
   bool labDesign = false;
 
-  /// Assist answer with automatic paging.
-  /// In the lab design set a terminal window titled [assistant].
+  /// Assist answer with automatic paging; in the lab design set a terminal
+  /// window titled [assistant].
   Future<bool> showAiAnswer(
     String text, {
     Duration? closeAfter,
     String? assistant,
-  }) {
-    final terminal = labDesign && g1.supportsDesigns;
-    return showText(
-      text,
-      closeAfter: closeAfter,
-      evenAi: evenAiAnswers,
-      style: terminal ? G1TextStyle.labTerminal : G1TextStyle.plain,
-      pageTitle: terminal ? (assistant ?? 'Home Assistant') : null,
-    );
-  }
+  }) => showText(
+    text,
+    closeAfter: closeAfter,
+    style: labDesign ? G1TextStyle.labTerminal : G1TextStyle.plain,
+    pageTitle: labDesign ? (assistant ?? 'Home Assistant') : null,
+  );
 
   /// [pages] again with [title] as the first line of each (one line less
   /// per page), "title  2/3" with several pages.
@@ -150,14 +122,7 @@ class G1Display {
     ];
   }
 
-  /// Experimental: show Assist status and answers with the Even AI statuses
-  /// of the official app (0x31 displaying, 0x41 last page) instead of the
-  /// plain text mode. The firmware drives its Even AI screen on both arms
-  /// itself in that mode.
-  bool evenAiAnswers = false;
-  bool _evenAi = false;
-
-  /// App icon of the notification on the display (ScouterKit).
+  /// App icon of the notification on the display.
   String? _icon;
   G1TextStyle _style = G1TextStyle.plain;
 
@@ -165,44 +130,16 @@ class G1Display {
   Future<bool> showAiError(String text) =>
       showText(text, closeAfter: const Duration(seconds: 5));
 
-  /// Returns to the dashboard.
+  /// Switches the display off.
   Future<bool> clear() async {
     _reset();
     return showIdle();
   }
 
-  /// Shown when nothing else is on the display (e.g. the recording dot),
-  /// sent as is without layout so leading spaces are kept.
-  String? idleText;
-
-  /// Time after emptying the display until the glasses are released with
-  /// the exit command.
-  static const releaseDelay = Duration(seconds: 1);
-  Timer? _releaseTimer;
-
-  /// Shows [idleText] or empties the display.
-  ///
-  /// Texts keep the glasses on their Even AI surface. While they stay there,
-  /// the next long press does not start Assist (only silent mode on/off
-  /// helped). So after emptying the display with a blank text (immediately,
-  /// without the firmware's teardown) the glasses are released with the exit
-  /// command 0x18 a moment later.
+  /// Empties the display (the panels switch off).
   Future<bool> showIdle() async {
-    final idle = idleText;
     screen.value = null;
-    _releaseTimer?.cancel();
-    if (idle != null) return g1.sendText(idle);
-    final ok = await g1.blankScreen();
-    // Only Even's firmware stays on its Even AI surface after a blank text;
-    // g1v0 switches the panel off.
-    if (!g1.evenFirmware) return ok;
-    final generation = _generation;
-    _releaseTimer = Timer(releaseDelay, () {
-      if (generation == _generation && !_active && idleText == null) {
-        unawaited(g1.exitToDashboard());
-      }
-    });
-    return ok;
+    return g1.blankScreen();
   }
 
   /// The glasses left the text view on their own (double tap).
@@ -221,54 +158,10 @@ class G1Display {
     _scheduleClose();
   }
 
-  Future<bool> _showPage(int generation, {bool last = false}) async {
+  Future<bool> _showPage(int generation) async {
     if (generation != _generation || !g1.connected) return false;
     screen.value = _screens[_page];
-    if (!_evenAi) {
-      return g1.sendText(_screens[_page], icon: _icon, style: _style);
-    }
-    final isLast =
-        last || (_screens.length > 1 && _page == _screens.length - 1);
-    final status = _manual
-        ? G1ScreenStatus.aiManual
-        : isLast
-        ? G1ScreenStatus.aiComplete
-        : G1ScreenStatus.aiDisplaying;
-    return g1.sendText(
-      _screens[_page],
-      status: status | G1ScreenStatus.newContent,
-      page: _page + 1,
-      pages: _screens.length,
-    );
-  }
-
-  /// Check after showing a text that both arms display it and send it again
-  /// to an arm that does not (e.g. the left arm while the glasses handle the
-  /// head up movement).
-  bool verifyBothArms = true;
-  static const verifyDelay = Duration(milliseconds: 400);
-
-  /// Screen id (0x39) of the text surface used by 0x4E (even-g1-companion).
-  static const _textScreen = 0x10;
-
-  Future<void> _verifyBothArms(int generation, int page) async {
-    await Future<void>.delayed(verifyDelay);
-    for (final side in G1Side.values) {
-      if (generation != _generation || page != _page || !g1.connected) return;
-      final id = await g1.readScreenState(side);
-      if (id == null || id == _textScreen) continue;
-      if (generation != _generation || page != _page) return;
-      g1.note(
-        side == G1Side.left
-            ? tr.g1LogDisplayMissingLeft(screenName(id))
-            : tr.g1LogDisplayMissingRight(screenName(id)),
-      );
-      await g1.sendText(
-        _screens[_page],
-        left: side == G1Side.left,
-        right: side == G1Side.right,
-      );
-    }
+    return g1.sendText(_screens[_page], icon: _icon, style: _style);
   }
 
   void _scheduleClose() {
@@ -285,7 +178,6 @@ class G1Display {
 
   void _reset() {
     _generation++;
-    _releaseTimer?.cancel();
     _pageTimer?.cancel();
     _closeTimer?.cancel();
     _pageTimer = null;
@@ -294,7 +186,6 @@ class G1Display {
     _manual = false;
     _active = false;
     _closeAfter = null;
-    _evenAi = false;
     _style = G1TextStyle.plain;
     screen.value = null;
   }

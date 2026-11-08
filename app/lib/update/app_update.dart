@@ -64,11 +64,11 @@ class AppUpdater {
   /// the last version before (the legacy branch is not developed further).
   static const scouterKitOnlyFrom = '0.25.0';
 
-  /// The glasses run Even's firmware (the app's setting; Even is the
-  /// default of apps that never paired ScouterKit glasses).
+  /// The glasses run Even's firmware: stored by versions up to 0.24 that
+  /// paired such glasses.
   static Future<bool> evenFirmware() async {
     final prefs = await SharedPreferences.getInstance();
-    return (prefs.getString('glasses_firmware') ?? 'even') == 'even';
+    return prefs.getString('glasses_firmware') == 'even';
   }
 
   /// [update] for glasses with Even's firmware: held back from

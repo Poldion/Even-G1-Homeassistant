@@ -74,22 +74,13 @@ class _RecordingSettingsState extends State<RecordingSettings> {
               ),
           ],
         ),
-        if (bridge.g1.evenFirmware)
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(tr.recSetDot),
-            subtitle: Text(tr.recSetDotHelp),
-            value: bridge.settings.recordingDot,
-            onChanged: bridge.setRecordingDot,
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Text(
-              tr.recSetScouterDot,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+        Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Text(
+            tr.recSetScouterDot,
+            style: Theme.of(context).textTheme.bodySmall,
           ),
+        ),
       ],
     );
   }

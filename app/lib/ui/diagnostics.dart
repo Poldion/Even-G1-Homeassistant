@@ -52,25 +52,6 @@ class _DiagnosticsState extends State<Diagnostics> {
             ),
           ],
         ),
-        TextButton.icon(
-          onPressed: connected
-              ? () async {
-                  final text = await bridge.checkDisplay();
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context)
-                      .showSnackBar(SnackBar(content: Text(text)));
-                }
-              : null,
-          icon: const Icon(Icons.compare),
-          label: Text(tr.diagCheckDisplay),
-        ),
-        SwitchListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text(tr.diagEvenAi),
-          subtitle: Text(tr.diagEvenAiSubtitle),
-          value: bridge.settings.evenAiAnswers,
-          onChanged: bridge.setEvenAiAnswers,
-        ),
         const SizedBox(height: 8),
         Text(tr.diagLog, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 4),

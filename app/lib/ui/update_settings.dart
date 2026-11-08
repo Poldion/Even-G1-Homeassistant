@@ -2,8 +2,54 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../bridge.dart';
 import '../update/app_update.dart';
 import '../l10n/l10n.dart';
+
+/// Releases page of the last version that supports Even's firmware.
+const evenFirmwareRelease =
+    'https://github.com/Poldion/Even-G1-Homeassistant/releases/tag/v0.24.0';
+
+/// Once on start: glasses paired with Even's firmware (stored by 0.24 and
+/// earlier) do not work with this version, which supports only ScouterKit.
+Future<void> showEvenFirmwareNotice(BuildContext context, Bridge bridge) async {
+  final s = bridge.settings;
+  if (s.glassesFirmware != 'even' || !s.glassesConfigured) return;
+  final prefs = await SharedPreferences.getInstance();
+  const key = 'even_firmware_notice_shown';
+  if (prefs.getBool(key) ?? false) return;
+  await prefs.setBool(key, true);
+  if (!context.mounted) return;
+  final scouterKit = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      icon: const Icon(Icons.warning_amber),
+      title: Text(tr.updateEvenNoticeTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(tr.updateEvenNoticeBody),
+            const SizedBox(height: 8),
+            const SelectableText(evenFirmwareRelease),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(tr.updateHeldBackOk),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(tr.updateEvenNoticeScouterKit),
+        ),
+      ],
+    ),
+  );
+  if (scouterKit == true) s.glassesFirmware = 'scouterkit';
+}
 
 /// Checks for a new version and offers to install it.
 ///

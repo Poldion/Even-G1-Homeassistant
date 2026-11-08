@@ -32,7 +32,7 @@ DEFAULT_NOISE_SUPPRESSION: Final = 0
 
 DASHBOARD_GESTURE_NONE: Final = "none"
 
-# Designs of the dashboard (drawn by ScouterKit; Even's firmware shows text).
+# Designs of the dashboard (drawn by the glasses).
 DASHBOARD_STYLE_PLAIN: Final = "plain"
 DASHBOARD_STYLES: Final = [DASHBOARD_STYLE_PLAIN, "frame", "card", "title", "lab"]
 

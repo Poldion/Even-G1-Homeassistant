@@ -28,6 +28,7 @@ class _AppShellState extends State<AppShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await ensureBackgroundOperation();
       await widget.bridge.start();
+      if (mounted) await showEvenFirmwareNotice(context, widget.bridge);
       if (mounted) await checkForAppUpdate(context);
     });
   }

@@ -33,7 +33,7 @@
           "assist_pipeline": "Answers when you hold the left touch bar. Also selectable with the \"Assistant\" entity of the device.",
           "auto_gain": "Boosts quiet speech (0 = off, 31 = max). Helps if questions are often not understood.",
           "noise_suppression": "0 = off, 4 = strong. Helps in noisy surroundings.",
-          "dashboard_gesture": "With \"Head up\" the app shows the template as soon as you look up, on top of the Even dashboard, and closes it when you look down.",
+          "dashboard_gesture": "With \"Head up\" the glasses show the dashboard as soon as you look up and switch it off when you look down.",
           "dashboard_entities": "Shown as \"Name: state\" lines on the glasses dashboard, in this order.",
           "dashboard_calendars": "Appointments of today (not yet over) and tomorrow appear on the dashboard.",
           "dashboard_todos": "Open to-dos with a due date appear on the dashboard, the most urgent first.",

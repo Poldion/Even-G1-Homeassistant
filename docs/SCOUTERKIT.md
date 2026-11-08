@@ -1,35 +1,35 @@
-# ScouterKit (g1v0) instead of Even's firmware
+# ScouterKit (g1v0)
 
 **English** | [Deutsch](SCOUTERKIT.de.md)
 
 [ScouterKit](https://github.com/mafik/scouter_kit) is a free replacement
-firmware (`g1v0`) for the two arms of the Even G1. The app works with both
-firmwares: with Even's own firmware (default) or with g1v0.
+firmware (`g1v0`) for the two arms of the Even G1. Since 0.25.0 the app
+works only with g1v0. Glasses with Even's own firmware need app 0.24.x, the
+last version for it; it is no longer developed further.
 
 > **Read all of this before you install anything.** Flashing g1v0 cannot be
 > undone, and a mistake can brick an arm. The app itself flashes nothing:
 > installing is done with ScouterKit's tools, step by step by hand.
 
-## What changes
+## What changes compared to Even's firmware
 
 | | Even firmware | g1v0 (ScouterKit) |
 | --- | --- | --- |
 | Official Even app | yes | **no** |
 | Even dashboard, Even AI, translation, navigation | yes | no |
 | Notifications | the glasses' own display | as a text of the app, with the app's icon |
-| Display | 576 × 136 px, text by the firmware, 5 lines of ~30 characters | 640 × 480 px, text drawn by the app, 11 lines of 42 characters (default height) |
-| Both eyes at the same time | not guaranteed (the app checks and resends) | yes, both draw at the same moment |
+| Display | 576 × 136 px, 5 lines of ~30 characters | 640 × 480 px, text drawn by the app, 11 lines of 42 characters (default height) |
+| Both eyes at the same time | not guaranteed | yes, both draw at the same moment |
 | Assist (hold the touch bar), microphone | yes | yes (right arm, LC3 16 kbit/s as before) |
 | Tap, double tap | yes | yes |
 | Hold right | firmware (QuickNote) | its own gesture for Home Assistant |
 | Nod, shake the head | no | yes, can be switched on (gyroscope of the right arm) |
 | Triple tap = silent mode | firmware | the app keeps the silent mode |
 | Look up (dashboard) | firmware | a program on the arms shows the dashboard itself |
-| Wear detection | can be switched on/off | always on (the switch has no effect) |
-| Brightness, auto brightness | yes | yes (left follows the right light sensor) |
-| Brightness offset | yes (measured every two minutes) | yes (the light sensor reports changes while something is shown) |
-| Recording dot | `o` top right, can be turned off | the firmware's square top right in the right eye while the microphone is on |
-| Display height | yes | moves the text block; the distance has no effect |
+| Wear detection | can be switched on/off | always on |
+| Brightness, auto brightness | yes | yes (left follows the right light sensor), with an offset |
+| Recording | no indicator | the firmware's square top right in the right eye while the microphone is on |
+| Display height and distance | both | height (moves the text block) |
 | Updates | via the Even app | only via ScouterKit's tools |
 
 While an arm lies in the charging case the app draws nothing on it: lit
@@ -64,9 +64,8 @@ phone loses its pairing), (2) confirming the installation on the left arm,
 1. **Note your firmware version.** In the Even app under Settings → About the
    glasses. If it is newer than 1.6.6, it is gone for good after the switch.
 2. **Fully charge** both arms and the case.
-3. Install the app from version 0.17.0 on (stable channel). It supports both
-   firmwares; with Even's firmware and the setting "Even" it behaves as
-   before.
+3. Install the app (0.25.0 or later). It works only with g1v0; with Even's
+   firmware it does not connect.
 
 ## What you need
 
@@ -120,18 +119,13 @@ both, or restore the first one.
 
 ## Connect with the app
 
-1. In the app under *Settings → Glasses* choose **ScouterKit**, close the app
-   and open it again.
-2. Put the glasses in the **open charging case** and *Search for glasses*.
+1. Put the glasses in the **open charging case** and *Search for glasses*.
    The arms are called `G1v0_L` / `G1v0_R`. Tap the pair.
-3. The app pairs the arms only while they are in the case. An arm stores
+2. The app pairs the arms only while they are in the case. An arm stores
    three pairings, the PC and the phone both fit.
-4. On the first connection after every restart of the arms the app loads its
+3. On the first connection after every restart of the arms the app loads its
    font into the arms' memory, which takes a few seconds. The diagnostics log
    shows `Font loaded`.
-
-Back to Even: choose **Even** in the app, restart it and pair the glasses in
-the Even app.
 
 ## Back to Even's firmware
 
@@ -142,6 +136,8 @@ scripts/fetch_stock.sh 1.6.6
 
 Then restore the right arm the same way. Then remove the pairings on the PC
 (`bluetoothctl remove ADDRESS`) and pair the glasses again in the Even app.
+With Even's firmware this app needs version 0.24.x (uninstall the newer one
+first; Android does not install older versions over newer ones).
 
 ## Troubleshooting (short version)
 

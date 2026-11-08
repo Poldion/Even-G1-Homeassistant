@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
 import 'bridge.dart';
-import 'g1/g1_connection.dart';
 import 'l10n/l10n.dart';
 import 'scouter/scouter_connection.dart';
 import 'settings.dart';
@@ -15,11 +14,7 @@ Future<void> main() async {
   FlutterForegroundTask.initCommunicationPort();
   final settings = await Settings.load();
   L10n.apply(settings.language);
-  final firmware = G1Firmware.fromId(settings.glassesFirmware);
-  final bridge = Bridge(
-    settings,
-    g1: firmware == G1Firmware.scouterKit ? ScouterConnection() : null,
-  );
+  final bridge = Bridge(settings, g1: ScouterConnection());
   runApp(EvenG1App(bridge: bridge));
 }
 

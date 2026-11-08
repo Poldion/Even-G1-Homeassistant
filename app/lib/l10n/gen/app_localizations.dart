@@ -134,29 +134,11 @@ abstract class AppLocalizations {
   /// **'Even G1 connection'**
   String get coreChannelName;
 
-  /// No description provided for @coreDisplayCheck.
-  ///
-  /// In en, this message translates to:
-  /// **'Display left: {left}, right: {right}'**
-  String coreDisplayCheck(String left, String right);
-
-  /// No description provided for @coreDisplayCheckDiffers.
-  ///
-  /// In en, this message translates to:
-  /// **'{text} – DIFFERENT'**
-  String coreDisplayCheckDiffers(String text);
-
   /// No description provided for @coreDone.
   ///
   /// In en, this message translates to:
   /// **'Done.'**
   String get coreDone;
-
-  /// No description provided for @coreGlassesNotConnected.
-  ///
-  /// In en, this message translates to:
-  /// **'Glasses not connected'**
-  String get coreGlassesNotConnected;
 
   /// No description provided for @coreHaConnected.
   ///
@@ -266,17 +248,11 @@ abstract class AppLocalizations {
   /// **'Dashboard (tap)'**
   String get coreLogDashboardTap;
 
-  /// No description provided for @coreLogEvenAiOff.
+  /// No description provided for @coreLogDisplayHeight.
   ///
   /// In en, this message translates to:
-  /// **'Answers in text mode'**
-  String get coreLogEvenAiOff;
-
-  /// No description provided for @coreLogEvenAiOn.
-  ///
-  /// In en, this message translates to:
-  /// **'Answers in Even AI mode'**
-  String get coreLogEvenAiOn;
+  /// **'Display height {height}'**
+  String coreLogDisplayHeight(int height);
 
   /// No description provided for @coreLogHeadGesturesOff.
   ///
@@ -295,18 +271,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Activation angle: {angle}°'**
   String coreLogHeadUpAngle(int angle);
-
-  /// No description provided for @coreLogHeadUpHide.
-  ///
-  /// In en, this message translates to:
-  /// **'Head up: hide Even dashboard'**
-  String get coreLogHeadUpHide;
-
-  /// No description provided for @coreLogHeadUpShow.
-  ///
-  /// In en, this message translates to:
-  /// **'Head up: show Even dashboard'**
-  String get coreLogHeadUpShow;
 
   /// No description provided for @coreLogIntegrationReloaded.
   ///
@@ -331,18 +295,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications: {error}'**
   String coreLogNotificationsError(String error);
-
-  /// No description provided for @coreLogPosition.
-  ///
-  /// In en, this message translates to:
-  /// **'Display position: height {height}, distance {depth}'**
-  String coreLogPosition(int height, int depth);
-
-  /// No description provided for @coreLogPositionPreview.
-  ///
-  /// In en, this message translates to:
-  /// **'Display position: height {height}, distance {depth} (preview)'**
-  String coreLogPositionPreview(int height, int depth);
 
   /// No description provided for @coreLogRecognized.
   ///
@@ -464,12 +416,6 @@ abstract class AppLocalizations {
   /// **'Wear detection on'**
   String get coreLogWearOn;
 
-  /// No description provided for @coreNoAnswer.
-  ///
-  /// In en, this message translates to:
-  /// **'no answer'**
-  String get coreNoAnswer;
-
   /// No description provided for @coreNoHaConnection.
   ///
   /// In en, this message translates to:
@@ -548,29 +494,11 @@ abstract class AppLocalizations {
   /// **'Sent to WhisperNotes (job {job})'**
   String coreWhisperSent(String job);
 
-  /// No description provided for @diagCheckDisplay.
-  ///
-  /// In en, this message translates to:
-  /// **'Check left/right display'**
-  String get diagCheckDisplay;
-
   /// No description provided for @diagClose.
   ///
   /// In en, this message translates to:
   /// **'Close'**
   String get diagClose;
-
-  /// No description provided for @diagEvenAi.
-  ///
-  /// In en, this message translates to:
-  /// **'Assist answers in Even AI mode (test)'**
-  String get diagEvenAi;
-
-  /// No description provided for @diagEvenAiSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Shows answers like the official Even app. Try it if one eye shows something different from the other.'**
-  String get diagEvenAiSubtitle;
 
   /// No description provided for @diagLog.
   ///
@@ -596,12 +524,6 @@ abstract class AppLocalizations {
   /// **'Hello from Home Assistant!'**
   String get diagTestTextDefault;
 
-  /// No description provided for @g1LogAutoBrightness.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto brightness: sensor {sensor} %, set {level} %'**
-  String g1LogAutoBrightness(int sensor, int level);
-
   /// No description provided for @g1LogConnectionFast.
   ///
   /// In en, this message translates to:
@@ -613,42 +535,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connection: power saving'**
   String get g1LogConnectionSaving;
-
-  /// No description provided for @g1LogDisplayMissingLeft.
-  ///
-  /// In en, this message translates to:
-  /// **'Left display was missing ({screen}) – sent again'**
-  String g1LogDisplayMissingLeft(String screen);
-
-  /// No description provided for @g1LogDisplayMissingRight.
-  ///
-  /// In en, this message translates to:
-  /// **'Right display was missing ({screen}) – sent again'**
-  String g1LogDisplayMissingRight(String screen);
-
-  /// No description provided for @g1LogLeftNoAcks.
-  ///
-  /// In en, this message translates to:
-  /// **'L does not confirm texts – check off'**
-  String get g1LogLeftNoAcks;
-
-  /// No description provided for @g1LogLeftNotConfirmed.
-  ///
-  /// In en, this message translates to:
-  /// **'L: text not confirmed'**
-  String get g1LogLeftNotConfirmed;
-
-  /// No description provided for @g1LogLeftRejected.
-  ///
-  /// In en, this message translates to:
-  /// **'L: text rejected – sent again'**
-  String get g1LogLeftRejected;
-
-  /// No description provided for @g1LogLeftUnanswered.
-  ///
-  /// In en, this message translates to:
-  /// **'L: text unanswered – sent again'**
-  String get g1LogLeftUnanswered;
 
   /// No description provided for @g1LogWearState.
   ///
@@ -704,24 +590,6 @@ abstract class AppLocalizations {
   /// **'Left: {left}\nRight: {right}'**
   String glassesSetArms(String left, String right);
 
-  /// No description provided for @glassesSetDepth.
-  ///
-  /// In en, this message translates to:
-  /// **'Distance'**
-  String get glassesSetDepth;
-
-  /// No description provided for @glassesSetDepthHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'How far away the text appears.'**
-  String get glassesSetDepthHelp;
-
-  /// No description provided for @glassesSetEvenHint.
-  ///
-  /// In en, this message translates to:
-  /// **'The official Even app must be closed, as the glasses connect to only one app at a time.'**
-  String get glassesSetEvenHint;
-
   /// No description provided for @glassesSetHeadGestures.
   ///
   /// In en, this message translates to:
@@ -734,18 +602,6 @@ abstract class AppLocalizations {
   /// **'Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.'**
   String get glassesSetHeadGesturesHelp;
 
-  /// No description provided for @glassesSetHeadUpMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Even dashboard when looking up'**
-  String get glassesSetHeadUpMode;
-
-  /// No description provided for @glassesSetHeadUpModeHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'\"Hide\": when looking up only the Home Assistant dashboard appears (if set up in HA).'**
-  String get glassesSetHeadUpModeHelp;
-
   /// No description provided for @glassesSetHeight.
   ///
   /// In en, this message translates to:
@@ -757,18 +613,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How high the text sits in your field of view. When you let go, the glasses briefly show the new position and apply it.'**
   String get glassesSetHeightHelp;
-
-  /// No description provided for @glassesSetHide.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide'**
-  String get glassesSetHide;
-
-  /// No description provided for @glassesSetLeaveUnchanged.
-  ///
-  /// In en, this message translates to:
-  /// **'Leave unchanged'**
-  String get glassesSetLeaveUnchanged;
 
   /// No description provided for @glassesSetNonePaired.
   ///
@@ -794,12 +638,6 @@ abstract class AppLocalizations {
   /// **'Paired: {name}'**
   String glassesSetPaired(String name);
 
-  /// No description provided for @glassesSetRestartNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Please close and reopen the app, then search for the glasses.'**
-  String get glassesSetRestartNote;
-
   /// No description provided for @glassesSetScouterHint.
   ///
   /// In en, this message translates to:
@@ -817,24 +655,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Searching…'**
   String get glassesSetSearching;
-
-  /// No description provided for @glassesSetShow.
-  ///
-  /// In en, this message translates to:
-  /// **'Show'**
-  String get glassesSetShow;
-
-  /// No description provided for @glassesSetWear.
-  ///
-  /// In en, this message translates to:
-  /// **'Wear detection'**
-  String get glassesSetWear;
-
-  /// No description provided for @glassesSetWearHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'The glasses report whether they are worn (also to Home Assistant: \"Worn\").'**
-  String get glassesSetWearHelp;
 
   /// No description provided for @haSetConnectFailed.
   ///
@@ -944,18 +764,6 @@ abstract class AppLocalizations {
   /// **'Apps appear here once they have sent a notification. New apps are forwarded by default.'**
   String get notifSetNoApps;
 
-  /// No description provided for @recSetDot.
-  ///
-  /// In en, this message translates to:
-  /// **'Dot on the glasses'**
-  String get recSetDot;
-
-  /// No description provided for @recSetDotHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Small dot at the top right while recording and nothing else is shown.'**
-  String get recSetDotHelp;
-
   /// No description provided for @recSetIntro.
   ///
   /// In en, this message translates to:
@@ -1037,7 +845,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDisplaySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Activation angle, height, distance, Even dashboard'**
+  /// **'Activation angle, height, head gestures'**
   String get settingsDisplaySubtitle;
 
   /// No description provided for @settingsNoGlassesPaired.
@@ -1189,12 +997,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{arm}: connection encrypted'**
   String skLogEncrypted(String arm);
-
-  /// No description provided for @skLogEvenCommandSkipped.
-  ///
-  /// In en, this message translates to:
-  /// **'Even command to g1v0 skipped'**
-  String get skLogEvenCommandSkipped;
 
   /// No description provided for @skLogEventsRejected.
   ///
@@ -1398,12 +1200,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **' (currently {percent} %)'**
   String uiBrightnessNow(int percent);
-
-  /// No description provided for @uiBrightnessOffsetEven.
-  ///
-  /// In en, this message translates to:
-  /// **'About every two minutes, while nothing is shown, the app reads the light sensor and sets it {offset} %{current}.'**
-  String uiBrightnessOffsetEven(String offset, String current);
 
   /// No description provided for @uiBrightnessOffsetScouter.
   ///
@@ -1614,6 +1410,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'The update could not be downloaded.'**
   String get updateDownloadFailed;
+
+  /// No description provided for @updateEvenNoticeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Since 0.25.0 the app works only with glasses that run the ScouterKit firmware. Your glasses were paired with Even\'s firmware, which is no longer supported.\n\nWith Even\'s firmware, install 0.24.x, the last version for it, from the releases page. Android installs an older version only after uninstalling this one; your settings are lost then.'**
+  String get updateEvenNoticeBody;
+
+  /// No description provided for @updateEvenNoticeScouterKit.
+  ///
+  /// In en, this message translates to:
+  /// **'I use ScouterKit'**
+  String get updateEvenNoticeScouterKit;
+
+  /// No description provided for @updateEvenNoticeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This version needs ScouterKit'**
+  String get updateEvenNoticeTitle;
 
   /// No description provided for @updateHeldBackBody.
   ///

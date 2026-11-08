@@ -9,6 +9,22 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-11-08
+
+### Removed
+- Support for Even's own firmware. The app works only with ScouterKit
+  (g1v0); Even's firmware is no longer developed further. Glasses with it
+  keep 0.24.x (0.24.0 offers them no newer version); the branch `legacy`
+  stays as it is.
+- With it: the firmware choice, Even's Bluetooth protocol, the Even AI answer
+  mode, the recording dot, the Even dashboard on head up, the display
+  distance, the display check of both arms and the app's own auto
+  brightness measurement.
+
+### Added
+- A one-time notice on start for apps that were paired with Even's firmware:
+  this version needs ScouterKit, with Even's firmware use 0.24.x.
+
 ## [0.24.0] - 2026-11-08
 
 ### Changed
@@ -383,7 +399,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...HEAD
+[0.25.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...v0.22.1

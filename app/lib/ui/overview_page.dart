@@ -339,8 +339,6 @@ class _Brightness extends StatelessWidget {
               child: Text(
                 offset == 0
                     ? tr.uiBrightnessAutoHint
-                    : bridge.g1.evenFirmware
-                    ? tr.uiBrightnessOffsetEven(signed(offset), current)
                     : tr.uiBrightnessOffsetScouter(signed(offset), current),
                 style: small,
               ),

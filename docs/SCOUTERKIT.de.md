@@ -1,36 +1,36 @@
-# ScouterKit (g1v0) statt Even-Firmware
+# ScouterKit (g1v0)
 
 [English](SCOUTERKIT.md) | **Deutsch**
 
 [ScouterKit](https://github.com/mafik/scouter_kit) ist eine freie Ersatz-Firmware
-(`g1v0`) für die beiden Bügel der Even G1. Die App kann mit
-beiden Firmwares arbeiten: mit Evens eigener Firmware (Standard) oder mit g1v0.
+(`g1v0`) für die beiden Bügel der Even G1. Seit 0.25.0 arbeitet die App nur
+noch mit g1v0. Brillen mit Evens eigener Firmware brauchen die App 0.24.x, die
+letzte Version dafür; sie wird nicht mehr weiterentwickelt.
 
 > **Lies das ganz, bevor du etwas installierst.** Das Aufspielen von g1v0 lässt
 > sich nicht ungeschehen machen, und ein Fehler kann einen Bügel unbrauchbar
 > machen. Die App selbst flasht nichts: Das Installieren geschieht mit den
 > Werkzeugen von ScouterKit, Schritt für Schritt von Hand.
 
-## Was sich ändert
+## Was sich gegenüber Evens Firmware ändert
 
 | | Even-Firmware | g1v0 (ScouterKit) |
 | --- | --- | --- |
 | Offizielle Even-App | ja | **nein** |
 | Even-Dashboard, Even AI, Übersetzung, Navigation | ja | nein |
 | Benachrichtigungen | eigene Anzeige der Brille | als Text der App, mit dem Symbol der App |
-| Anzeige | 576 × 136 px, Text der Firmware, 5 Zeilen à ~30 Zeichen | 640 × 480 px, Text zeichnet die App, 11 Zeilen à 42 Zeichen (Standardhöhe) |
-| Beide Augen gleichzeitig | nicht garantiert (die App prüft und schickt nach) | ja, beide zeichnen im selben Moment |
+| Anzeige | 576 × 136 px, 5 Zeilen à ~30 Zeichen | 640 × 480 px, Text zeichnet die App, 11 Zeilen à 42 Zeichen (Standardhöhe) |
+| Beide Augen gleichzeitig | nicht garantiert | ja, beide zeichnen im selben Moment |
 | Assist (Touchbar halten), Mikrofon | ja | ja (rechter Bügel, LC3 16 kbit/s wie bisher) |
 | Tippen, Doppeltippen | ja | ja |
 | Rechts gedrückt halten | Firmware (QuickNote) | eigene Geste für Home Assistant |
 | Nicken, Kopfschütteln | nein | ja, einschaltbar (Gyrosensor des rechten Bügels) |
 | Dreifach tippen = Ruhemodus | Firmware | die App merkt sich den Ruhemodus |
 | Kopf heben (Dashboard) | Firmware | ein Programm auf den Bügeln zeigt das Dashboard selbst |
-| Trageerkennung | an-/abschaltbar | immer an (Schalter hat keine Wirkung) |
-| Helligkeit, automatische Helligkeit | ja | ja (links folgt dem rechten Lichtsensor) |
-| Helligkeits-Offset | ja (Messung alle zwei Minuten) | ja (der Lichtsensor meldet Änderungen, solange etwas angezeigt wird) |
-| Aufnahmepunkt | `o` oben rechts, abschaltbar | Quadrat der Firmware oben rechts im rechten Auge, solange das Mikrofon an ist |
-| Anzeigehöhe | ja | verschiebt den Textblock; die Distanz hat keine Wirkung |
+| Trageerkennung | an-/abschaltbar | immer an |
+| Helligkeit, automatische Helligkeit | ja | ja (links folgt dem rechten Lichtsensor), mit Offset |
+| Aufnahme | keine Anzeige | Quadrat der Firmware oben rechts im rechten Auge, solange das Mikrofon an ist |
+| Anzeigehöhe und -distanz | beides | Höhe (verschiebt den Textblock) |
 | Updates | über die Even-App | nur über ScouterKits Werkzeuge |
 
 Liegt ein Bügel im Ladeetui, zeichnet die App auf ihm nichts: Leuchtende
@@ -66,9 +66,8 @@ bestätigen, (3) dasselbe auf dem rechten.
 1. **Firmware-Stand notieren.** In der Even-App unter Einstellungen → Über die
    Brille. Ist sie neuer als 1.6.6, ist sie nach dem Wechsel endgültig weg.
 2. Beide Bügel und das Etui **voll laden**.
-3. Die App ab Version 0.17.0 installieren (stabiler Kanal). Sie unterstützt
-   beide Firmwares; mit Even-Firmware und der Einstellung „Even“ verhält sie
-   sich wie bisher.
+3. Die App installieren (0.25.0 oder neuer). Sie arbeitet nur mit g1v0; mit
+   Evens Firmware verbindet sie sich nicht.
 
 ## Was du brauchst
 
@@ -122,18 +121,13 @@ Mach beide, oder spiel den ersten zurück.
 
 ## Mit der App verbinden
 
-1. In der App unter *Einstellungen → Brille* **ScouterKit** wählen, die App
-   schließen und wieder öffnen.
-2. Brille ins **offene Ladeetui** legen und *Nach Brillen suchen*. Die Bügel
+1. Brille ins **offene Ladeetui** legen und *Nach Brillen suchen*. Die Bügel
    heißen `G1v0_L` / `G1v0_R`. Das Paar antippen.
-3. Die App koppelt die Bügel nur, solange sie im Etui liegen. Ein Bügel
+2. Die App koppelt die Bügel nur, solange sie im Etui liegen. Ein Bügel
    speichert drei Kopplungen, der PC und das Handy passen beide hinein.
-4. Beim ersten Verbinden nach jedem Neustart der Bügel lädt die App ihre
+3. Beim ersten Verbinden nach jedem Neustart der Bügel lädt die App ihre
    Schrift in den Speicher der Bügel, das dauert ein paar Sekunden. Im
    Diagnose-Log steht `Schrift geladen`.
-
-Zurück zu Even: In der App **Even** wählen, neu starten und die Brille in der
-Even-App koppeln.
 
 ## Zurück zur Even-Firmware
 
@@ -144,7 +138,9 @@ scripts/fetch_stock.sh 1.6.6
 
 Danach den rechten Bügel genauso zurückspielen. Dann im PC die Kopplungen
 entfernen (`bluetoothctl remove ADRESSE`) und die Brille in der Even-App neu
-koppeln.
+koppeln. Mit Evens Firmware braucht diese App die Version 0.24.x (die neuere
+vorher deinstallieren; Android installiert keine ältere Version über eine
+neuere).
 
 ## Hilfe bei Problemen (Kurzfassung)
 

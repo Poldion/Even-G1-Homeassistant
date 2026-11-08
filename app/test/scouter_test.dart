@@ -369,7 +369,7 @@ void main() {
       expect(pages.first.split('\n'), hasLength(11));
       expect(pages.last.split('\n'), ['Zeile 23', 'Zeile 24', 'Zeile 25']);
       // A higher text block leaves room for more lines.
-      await g1.setDisplayPosition(0, 5, 0);
+      await g1.setDisplayHeight(0);
       expect(g1.displayLines, 14);
     });
 
@@ -498,8 +498,8 @@ void main() {
         G1Event.doubleTap,
         G1Event.silentModeOn,
         G1Event.silentModeOff,
-        G1Event.evenAiStart,
-        G1Event.evenAiStop,
+        G1Event.longPressStart,
+        G1Event.longPressStop,
       ]);
       expect(
         gestureName(G1Event.rightHoldStart, G1Side.right),
@@ -630,7 +630,7 @@ void main() {
       // 120 lx: stock's level 17, +8.
       g1.receive(G1Side.right, input(arms.epoch, SkTrigger.light, 12000));
       await Future<void>.delayed(const Duration(milliseconds: 20));
-      expect(g1.brightnessPercent, G1Packets.brightnessPercent(25));
+      expect(g1.brightnessPercent, G1Brightness.percent(25));
       expect(arms.ops[G1Side.left], contains(SkOp.sysWrite));
       // Manual brightness ends the offset mode.
       await g1.setBrightnessLevel(10, auto: false);

@@ -33,8 +33,9 @@ class Settings {
   String get glassesName => _prefs.getString('glasses_name') ?? '';
   set glassesName(String v) => _prefs.setString('glasses_name', v);
 
-  /// Firmware of the paired glasses: "even" or "scouterkit" (g1v0).
-  String get glassesFirmware => _prefs.getString('glasses_firmware') ?? 'even';
+  /// Firmware of the paired glasses: "scouterkit" (g1v0); "even" was
+  /// stored by versions up to 0.24 for glasses with Even's firmware.
+  String get glassesFirmware => _prefs.getString('glasses_firmware') ?? '';
   set glassesFirmware(String v) => _prefs.setString('glasses_firmware', v);
 
   /// Forward phone notifications to the glasses.
@@ -66,8 +67,7 @@ class Settings {
     ),
   );
 
-  // Glasses display settings. null = not set by this app (the glasses keep
-  // what the Even app configured).
+  // Glasses display settings. null = not set by this app (the default).
   int? _optInt(String key) {
     final v = _prefs.getInt(key);
     return v == null || v < 0 ? null : v;
@@ -82,14 +82,6 @@ class Settings {
   /// Height (0–8) of the display content.
   int? get displayHeight => _optInt('display_height');
   set displayHeight(int? v) => _setOptInt('display_height', v);
-
-  /// Distance (1–9) of the display content.
-  int? get displayDepth => _optInt('display_depth');
-  set displayDepth(int? v) => _setOptInt('display_depth', v);
-
-  /// What the glasses show on head up: 0 = Even dashboard, 2 = nothing.
-  int? get headUpMode => _optInt('head_up_mode');
-  set headUpMode(int? v) => _setOptInt('head_up_mode', v);
 
   /// Display brightness in percent.
   int? get brightness => _optInt('brightness');
@@ -123,9 +115,6 @@ class Settings {
   String get whisperApiKey => _prefs.getString('whisper_api_key') ?? '';
   set whisperApiKey(String v) => _prefs.setString('whisper_api_key', v.trim());
 
-  /// Small dot on the glasses while recording.
-  bool get recordingDot => _prefs.getBool('recording_dot') ?? true;
-
   /// Nodding and shaking the head as gestures (ScouterKit; the gyroscope
   /// then runs all the time, which costs battery).
   /// App language: "system" (default), "en" or "de".
@@ -134,12 +123,6 @@ class Settings {
 
   bool get headGestures => _prefs.getBool('head_gestures') ?? false;
   set headGestures(bool v) => _prefs.setBool('head_gestures', v);
-
-  set recordingDot(bool v) => _prefs.setBool('recording_dot', v);
-
-  /// Experimental: Assist answers in the Even AI mode of the official app.
-  bool get evenAiAnswers => _prefs.getBool('even_ai_answers') ?? false;
-  set evenAiAnswers(bool v) => _prefs.setBool('even_ai_answers', v);
 
   /// Preview of the glasses display expanded on the overview.
   bool get showPreview => _prefs.getBool('show_preview') ?? false;

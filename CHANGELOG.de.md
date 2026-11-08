@@ -9,6 +9,23 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-11-08
+
+### Removed
+- Unterstützung für Evens eigene Firmware. Die App arbeitet nur noch mit
+  ScouterKit (g1v0); Evens Firmware wird nicht mehr weiterentwickelt. Brillen
+  damit bleiben auf 0.24.x (0.24.0 bietet ihnen keine neuere Version an);
+  der Branch `legacy` bleibt, wie er ist.
+- Damit entfallen: die Wahl der Firmware, Evens Bluetooth-Protokoll, der
+  Even-AI-Antwortmodus, der Aufnahmepunkt, das Even-Dashboard beim
+  Hochschauen, die Anzeigedistanz, die Anzeigeprüfung beider Bügel und die
+  eigene Messung der automatischen Helligkeit in der App.
+
+### Added
+- Ein einmaliger Hinweis beim Start für Apps, die mit Evens Firmware
+  gekoppelt waren: Diese Version braucht ScouterKit, mit Evens Firmware 0.24.x
+  nutzen.
+
 ## [0.24.0] - 2026-11-08
 
 ### Changed
@@ -394,7 +411,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...HEAD
+[0.25.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...v0.22.1

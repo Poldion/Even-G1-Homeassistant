@@ -22,7 +22,6 @@ class _GlassesPairingState extends State<GlassesPairing> {
   List<G1Pair> _pairs = [];
   bool _scanning = false;
   String? _error;
-  String? _restartNote;
   StreamSubscription<List<G1Pair>>? _scanSub;
 
   @override
@@ -31,9 +30,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
     super.dispose();
   }
 
-  /// Searches for glasses with Even's firmware or with ScouterKit (g1v0);
-  /// Android runs one scan at a time, so g1v0 arms are looked for in the
-  /// same scan by their names.
+  /// Searches for glasses with ScouterKit (g1v0).
   void _scan() {
     _scanSub?.cancel();
     setState(() {
@@ -41,9 +38,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
       _scanning = true;
       _error = null;
     });
-    final scouterKit = !widget.bridge.g1.evenFirmware;
-    final scan = scouterKit ? ScouterConnection.scan() : G1Connection.scan();
-    _scanSub = scan.listen(
+    _scanSub = ScouterConnection.scan().listen(
       (pairs) => setState(() => _pairs = pairs),
       onError: (Object e) => setState(() => _error = '$e'),
       onDone: () {
@@ -51,25 +46,6 @@ class _GlassesPairingState extends State<GlassesPairing> {
       },
     );
   }
-
-  /// Switches the firmware the app talks to; takes effect after a restart.
-  void _setFirmware(G1Firmware firmware) {
-    final s = widget.bridge.settings;
-    s.glassesFirmware = firmware.id;
-    s.leftId = '';
-    s.rightId = '';
-    s.glassesName = '';
-    setState(() {
-      _pairs = [];
-      _restartNote = firmware.id == _running.id
-          ? null
-          : tr.glassesSetRestartNote;
-    });
-    unawaited(widget.bridge.reconnectGlasses());
-  }
-
-  G1Firmware get _running =>
-      widget.bridge.g1.evenFirmware ? G1Firmware.even : G1Firmware.scouterKit;
 
   Future<void> _select(G1Pair pair) async {
     await _scanSub?.cancel();
@@ -80,10 +56,8 @@ class _GlassesPairingState extends State<GlassesPairing> {
     final s = widget.bridge.settings;
     s.leftId = pair.leftId!;
     s.rightId = pair.rightId!;
-    s.glassesFirmware = pair.firmware.id;
-    s.glassesName = pair.firmware == G1Firmware.scouterKit
-        ? 'G1 (g1v0) ${pair.channel}'
-        : 'G1 #${pair.channel}';
+    s.glassesFirmware = 'scouterkit';
+    s.glassesName = 'G1 (g1v0) ${pair.channel}';
     await ensureBackgroundOperation();
     await widget.bridge.reconnectGlasses();
   }
@@ -100,34 +74,10 @@ class _GlassesPairingState extends State<GlassesPairing> {
               : tr.glassesSetNonePaired,
         ),
         const SizedBox(height: 4),
-        Text(
-          _running == G1Firmware.even
-              ? tr.glassesSetEvenHint
-              : tr.glassesSetScouterHint,
-        ),
-        const SizedBox(height: 8),
-        SegmentedButton<G1Firmware>(
-          segments: const [
-            ButtonSegment(value: G1Firmware.even, label: Text('Even')),
-            ButtonSegment(
-              value: G1Firmware.scouterKit,
-              label: Text('ScouterKit'),
-            ),
-          ],
-          selected: {G1Firmware.fromId(s.glassesFirmware)},
-          onSelectionChanged: _scanning ? null : (v) => _setFirmware(v.first),
-        ),
-        if (_restartNote != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              _restartNote!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ),
+        Text(tr.glassesSetScouterHint),
         const SizedBox(height: 12),
         OutlinedButton.icon(
-          onPressed: _scanning || _restartNote != null ? null : _scan,
+          onPressed: _scanning ? null : _scan,
           icon: _scanning
               ? const SizedBox.square(
                   dimension: 16,
@@ -144,11 +94,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
         for (final pair in _pairs)
           ListTile(
             leading: const Icon(Icons.visibility),
-            title: Text(
-              pair.firmware == G1Firmware.scouterKit
-                  ? 'G1 (g1v0) ${pair.channel}'
-                  : 'G1 #${pair.channel}',
-            ),
+            title: Text('G1 (g1v0) ${pair.channel}'),
             subtitle: Text(
               tr.glassesSetArms(pair.leftName ?? '–', pair.rightName ?? '–'),
             ),
@@ -161,8 +107,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
   }
 }
 
-/// Activation angle, height and distance of the display content and what
-/// the glasses show when looking up.
+/// Activation angle and height of the display content, head gestures.
 class DisplaySettings extends StatefulWidget {
   const DisplaySettings({super.key, required this.bridge});
 
@@ -175,7 +120,6 @@ class DisplaySettings extends StatefulWidget {
 class _DisplaySettingsState extends State<DisplaySettings> {
   late double _angle;
   late double _height;
-  late double _depth;
 
   @override
   void initState() {
@@ -183,7 +127,6 @@ class _DisplaySettingsState extends State<DisplaySettings> {
     final s = widget.bridge.settings;
     _angle = (s.headUpAngle ?? Bridge.defaultHeadUpAngle).toDouble();
     _height = (s.displayHeight ?? Bridge.defaultDisplayHeight).toDouble();
-    _depth = (s.displayDepth ?? Bridge.defaultDisplayDepth).toDouble();
   }
 
   @override
@@ -218,51 +161,15 @@ class _DisplaySettingsState extends State<DisplaySettings> {
           max: 8,
           notSet: s.displayHeight == null,
           onChanged: (v) => setState(() => _height = v),
-          onChangeEnd: (v) => bridge.setDisplayPosition(height: v.round()),
-        ),
-        _SliderRow(
-          label: tr.glassesSetDepth,
-          help: tr.glassesSetDepthHelp,
-          value: _depth,
-          min: 1,
-          max: 9,
-          notSet: s.displayDepth == null,
-          onChanged: (v) => setState(() => _depth = v),
-          onChangeEnd: (v) => bridge.setDisplayPosition(depth: v.round()),
-        ),
-        const SizedBox(height: 8),
-        DropdownButtonFormField<int?>(
-          initialValue: s.headUpMode,
-          decoration: InputDecoration(
-            labelText: tr.glassesSetHeadUpMode,
-            helperText: tr.glassesSetHeadUpModeHelp,
-            helperMaxLines: 3,
-          ),
-          items: [
-            DropdownMenuItem(
-              value: null,
-              child: Text(tr.glassesSetLeaveUnchanged),
-            ),
-            DropdownMenuItem(value: 0, child: Text(tr.glassesSetShow)),
-            DropdownMenuItem(value: 2, child: Text(tr.glassesSetHide)),
-          ],
-          onChanged: (v) => bridge.setHeadUpMode(v),
+          onChangeEnd: (v) => bridge.setDisplayHeight(v.round()),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: Text(tr.glassesSetWear),
-          subtitle: Text(tr.glassesSetWearHelp),
-          value: bridge.wearDetection ?? false,
-          onChanged: bridge.g1.connected ? bridge.setWearDetection : null,
+          title: Text(tr.glassesSetHeadGestures),
+          subtitle: Text(tr.glassesSetHeadGesturesHelp),
+          value: bridge.settings.headGestures,
+          onChanged: bridge.setHeadGestures,
         ),
-        if (bridge.g1.supportsHeadGestures)
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(tr.glassesSetHeadGestures),
-            subtitle: Text(tr.glassesSetHeadGesturesHelp),
-            value: bridge.settings.headGestures,
-            onChanged: bridge.setHeadGestures,
-          ),
       ],
     );
   }

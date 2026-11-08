@@ -13,8 +13,8 @@ app puts on the glasses whenever it changes. You set it up under
 | Option | Effect |
 | --- | --- |
 | Dashboard gesture | When it appears: when you look up, on a tap left or right, or never (then only via the action `even_g1.show_dashboard`) |
-| Dashboard design | ScouterKit only: plain, frame, card, title or lab (images in the [README](../README.md#what-it-looks-like)) |
-| Design set | ScouterKit only: classic or lab look for the Assist status and the silent mode animation |
+| Dashboard design | Plain, frame, card, title or lab (images in the [README](../README.md#what-it-looks-like)) |
+| Design set | Classic or lab look for the Assist status and the silent mode animation |
 | Dashboard entities | One line "Name: state unit" per entity, at the top |
 | Calendars / to-do lists | Appointments of today and tomorrow, to-dos that are due |
 | Own dashboard template | Replaces the built-in layout below the entity lines |
@@ -36,20 +36,17 @@ Every variable also has a German name: `kopfzeile` instead of `header`,
 is the same in both languages).
 
 **The clock runs on the glasses.** `clock` (and the time in `header`) is a
-placeholder that the app fills in. With ScouterKit the program on the arms
-counts the minutes itself and redraws exactly at the full minute, on both
+placeholder that the glasses fill in: the program on the arms counts the minutes itself and redraws exactly at the full minute, on both
 eyes and even without a connection to the phone; the app only sets the time
 every few minutes. So Home Assistant no longer sends the dashboard every
-minute, only when its content changes. With Even's firmware the app fills
-in the time. Write `{{ clock }}` instead of `{{ now().strftime('%H:%M') }}`;
+minute, only when its content changes. Write `{{ clock }}` instead of `{{ now().strftime('%H:%M') }}`;
 the glasses keep one clock per dashboard (the first one).
 
 ### Space on the display
 
-| Firmware | Lines | Characters per line |
-| --- | --- | --- |
-| Even | 5 | about 30 |
-| ScouterKit | 11 (8–14 depending on the height) | 42 |
+| Lines | Characters per line |
+| --- | --- |
+| 11 (8–14 depending on the height) | 42 |
 
 The app wraps longer lines. More lines than one page appear on several pages
 when you tap; the dashboard on head up shows only the first one. Empty lines
@@ -79,11 +76,10 @@ The entity IDs in the examples are placeholders. Replace them with yours.
 
 If the app cannot reach Home Assistant, a line
 `! Home Assistant unreachable` appears below the dashboard: what it shows is
-as old as the last connection. With ScouterKit the glasses also notice by
-themselves when the phone is gone and show `! No connection to the phone`
-(the clock keeps running). The line disappears as soon as the connection is
-back (within 5 seconds). With Even's firmware only the Home Assistant line
-exists, because without the phone nothing reaches the glasses.
+as old as the last connection. The glasses also notice by themselves when
+the phone is gone and show `! No connection to the phone` (the clock keeps
+running). The line disappears as soon as the connection is back (within 5
+seconds).
 
 ![Dashboard with status line](images/en/dashboard-status.png)
 
@@ -91,7 +87,7 @@ exists, because without the phone nothing reaches the glasses.
 
 ### 1. Clock and weather
 
-Well suited for Even's firmware with its 5 lines.
+Short and enough for a quick look.
 
 ```jinja
 {{ header }}
@@ -230,7 +226,7 @@ Appointments & tasks
 
 ## Text while listening
 
-The option *Text while listening* (ScouterKit only) is a template too. It
+The option *Text while listening* is a template too. It
 appears centred in a frame while you hold the left touch bar. The variable
 `assistant` (German `assistent`) holds the name of the chosen assistant.
 

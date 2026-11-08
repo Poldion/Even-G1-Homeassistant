@@ -179,9 +179,6 @@ class ScouterConnection extends G1Connection {
   }
 
   @override
-  bool get evenFirmware => false;
-
-  @override
   String get firmwareName => 'ScouterKit (g1v0)';
 
   String? _armVersion(G1Side side) => _arms[side]?.hello?.version;
@@ -244,10 +241,7 @@ class ScouterConnection extends G1Connection {
           final ad = SkAdvert.parse(name, r.advertisementData.manufacturerData);
           if (ad == null) continue;
           final key = ad.pairId.isEmpty ? '?' : ad.pairId;
-          final pair = pairs.putIfAbsent(
-            key,
-            () => G1Pair(key, firmware: G1Firmware.scouterKit),
-          );
+          final pair = pairs.putIfAbsent(key, () => G1Pair(key));
           final id = r.device.remoteId.str;
           final label = ad.safeMode ? '$name (sicherer Modus)' : name;
           if (ad.left && pair.leftId != id) {
@@ -578,12 +572,6 @@ class ScouterConnection extends G1Connection {
       _dashboardOnHeadUp &&
       _arms.length == 2 &&
       _arms.values.every((a) => a.ready && a.resident);
-
-  @override
-  bool get supportsHeadGestures => true;
-
-  @override
-  bool get supportsDesigns => true;
 
   /// Plays the silent mode animation on both eyes at the same moment
   /// (SkAnimation); the panels are off again at its end.
@@ -1021,7 +1009,7 @@ class ScouterConnection extends G1Connection {
     if (caseBattery != null) batteryCase = caseBattery;
     final level = known(values[6], SkPanel.maxBrightness);
     if (level != null && arm.side == G1Side.right) {
-      brightnessPercent = G1Packets.brightnessPercent(level);
+      brightnessPercent = G1Brightness.percent(level);
     }
     _applyArmState();
   }
@@ -1202,7 +1190,7 @@ class ScouterConnection extends G1Connection {
   }
 
   /// Feeds an event as if it came from the arm (tests).
-  @override
+  @visibleForTesting
   void receive(G1Side side, Uint8List data) {
     final arm = _arms[side];
     if (arm != null) _onEvent(arm, data);
@@ -1296,14 +1284,14 @@ class ScouterConnection extends G1Connection {
             _emit(
               arm.side,
               arm.side == G1Side.left
-                  ? G1Event.evenAiStart
+                  ? G1Event.longPressStart
                   : G1Event.rightHoldStart,
             );
           case SkGesture.longEnd:
             _emit(
               arm.side,
               arm.side == G1Side.left
-                  ? G1Event.evenAiStop
+                  ? G1Event.longPressStop
                   : G1Event.rightHoldStop,
             );
         }
@@ -1346,28 +1334,6 @@ class ScouterConnection extends G1Connection {
   // ---------------------------------------------------------------------------
 
   @override
-  Future<bool> send(
-    List<Uint8List> packets, {
-    bool left = true,
-    bool right = true,
-    Duration waitAfter = Duration.zero,
-    bool ackLeft = false,
-  }) async {
-    _debug(tr.skLogEvenCommandSkipped);
-    return false;
-  }
-
-  @override
-  Future<G1Response> request(
-    G1Side side,
-    Uint8List data, {
-    Duration timeout = const Duration(milliseconds: 1500),
-  }) => Future.error(G1TimeoutException(side, data.isEmpty ? -1 : data[0]));
-
-  @override
-  Future<bool> sendHeartbeat() async => connected;
-
-  @override
   Future<void> refreshBattery() async {
     for (final arm in _arms.values) {
       if (!arm.ready) continue;
@@ -1396,16 +1362,11 @@ class ScouterConnection extends G1Connection {
   @override
   Future<bool> sendText(
     String text, {
-    int status = G1ScreenStatus.textShow | G1ScreenStatus.newContent,
-    int page = 0,
-    int pages = 1,
-    bool left = true,
-    bool right = true,
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
   }) async {
     final font = _loadedFont ??= await _fontLoader();
-    final arms = _targets(left: left, right: right).where((a) {
+    final arms = _targets().where((a) {
       if (a.inCase != 1) return true;
       if (!_caseNoted) {
         _caseNoted = true;
@@ -1413,7 +1374,7 @@ class ScouterConnection extends G1Connection {
       }
       return false;
     }).toList();
-    if (arms.isEmpty) return _targets(left: left, right: right).isNotEmpty;
+    if (arms.isEmpty) return _targets().isNotEmpty;
     final maxCode = arms.map((a) => a.link.maxPacket).reduce(min) - 2;
     final name = icon == null ? null : _iconName(icon);
     if (name != null) {
@@ -1628,26 +1589,9 @@ class ScouterConnection extends G1Connection {
     return _runOn([code.take()]);
   }
 
-  /// g1v0 has no dashboard to return to.
-  @override
-  Future<bool> exitToDashboard() async => true;
-
-  @override
-  Future<int?> readScreenState(G1Side side) async => null;
-
   // ---------------------------------------------------------------------------
   // Settings
   // ---------------------------------------------------------------------------
-
-  /// Even settings that g1v0 does not have are ignored.
-  @override
-  Future<bool> sendSetting(Uint8List packet) async => true;
-
-  @override
-  Future<bool> sendWhitelist(Map<String, String> apps) async => true;
-
-  @override
-  Future<bool> sendNotification(List<Uint8List> packets) async => false;
 
   @override
   Future<bool> setBrightness(int percent, {required bool auto}) =>
@@ -1666,9 +1610,6 @@ class ScouterConnection extends G1Connection {
   int? _offsetLevels;
   int? _offsetApplied;
   Timer? _lightTimer;
-
-  @override
-  bool get supportsBrightnessOffset => true;
 
   /// g1v0's automatic brightness has no offset either, but its light sensor
   /// (right arm, measuring while the panel is on, VM.md §6.7) reports when
@@ -1741,7 +1682,7 @@ class ScouterConnection extends G1Connection {
     _offsetApplied = level;
     final code = SkCode()..sysWrite(SkProp.brightness, level);
     await _runOn([code.take()]);
-    brightnessPercent = G1Packets.brightnessPercent(level);
+    brightnessPercent = G1Brightness.percent(level);
     _debug(
       tr.skLogAutoBrightness(
         light ~/ 100,
@@ -1769,7 +1710,7 @@ class ScouterConnection extends G1Connection {
         ..sysWrite(SkProp.brightness, l);
     }
     final ok = await _runOn([code.take()]);
-    brightnessPercent = G1Packets.brightnessPercent(l);
+    brightnessPercent = G1Brightness.percent(l);
     notifyListeners();
     return ok;
   }
@@ -1783,7 +1724,7 @@ class ScouterConnection extends G1Connection {
       SkProp.autoBrightness,
     ]);
     if (v == null || v[0] > SkPanel.maxBrightness) return null;
-    return (percent: G1Packets.brightnessPercent(v[0]), auto: v[1] == 1);
+    return (percent: G1Brightness.percent(v[0]), auto: v[1] == 1);
   }
 
   @override
@@ -1821,19 +1762,9 @@ class ScouterConnection extends G1Connection {
     return _setTiltRange(arm);
   }
 
-  /// No Even dashboard on g1v0.
+  /// The height (0–8) moves the text block.
   @override
-  Future<bool> setHeadUpMode(int mode) async => true;
-
-  /// The height (0–8) moves the text block; the distance has no
-  /// counterpart.
-  @override
-  Future<bool> setDisplayPosition(
-    int height,
-    int depth,
-    int counter, {
-    bool preview = false,
-  }) async {
+  Future<bool> setDisplayHeight(int height) async {
     textTop = 60 + height.clamp(0, 8) * 20;
     // Fewer or more lines fit now (Home Assistant's dashboard follows).
     notifyListeners();

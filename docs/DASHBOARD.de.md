@@ -13,8 +13,8 @@ die App bei jeder Änderung auf die Brille legt. Du stellst es unter
 | Option | Wirkung |
 | --- | --- |
 | Dashboard-Geste | Wann es erscheint: beim Hochschauen, beim Tippen links oder rechts, oder nie (dann nur per Aktion `even_g1.show_dashboard`) |
-| Design des Dashboards | Nur ScouterKit: schlicht, Rahmen, Karte, Titelzeile oder Labor (Bilder im [README](../README.de.md#so-sieht-es-aus)) |
-| Design-Set | Nur ScouterKit: klassisches oder Labor-Aussehen für Assist-Status und Ruhemodus-Animation |
+| Design des Dashboards | Schlicht, Rahmen, Karte, Titelzeile oder Labor (Bilder im [README](../README.de.md#so-sieht-es-aus)) |
+| Design-Set | Klassisches oder Labor-Aussehen für Assist-Status und Ruhemodus-Animation |
 | Dashboard-Entitäten | Je Entität eine Zeile „Name: Zustand Einheit“, ganz oben |
 | Kalender / To-do-Listen | Termine von heute und morgen, fällige To-dos |
 | Eigenes Dashboard-Template | Ersetzt das Standard-Layout unter den Entitäten-Zeilen |
@@ -36,21 +36,18 @@ Jede Variable gibt es auch mit englischem Namen: `header` statt `kopfzeile`,
 beiden Sprachen so).
 
 **Die Uhr läuft auf der Brille.** `uhr` (und die Uhrzeit in `kopfzeile`)
-ist ein Platzhalter, den die App füllt. Mit ScouterKit zählt das Programm
-auf den Bügeln die Minuten selbst und zeichnet genau zur vollen Minute neu,
+ist ein Platzhalter, den die Brille füllt: Das Programm auf den Bügeln zählt die Minuten selbst und zeichnet genau zur vollen Minute neu,
 auf beiden Augen und auch ohne Verbindung zum Handy; die App stellt die Zeit
 nur alle paar Minuten nach. Home Assistant schickt das Dashboard deshalb
-nicht mehr jede Minute, sondern nur, wenn sich der Inhalt ändert. Mit Evens
-Firmware setzt die App die Uhrzeit ein. Schreib `{{ uhr }}` statt
+nicht mehr jede Minute, sondern nur, wenn sich der Inhalt ändert. Schreib `{{ uhr }}` statt
 `{{ now().strftime('%H:%M') }}`; die Brille führt eine Uhr pro Dashboard (die
 erste).
 
 ### Platz auf dem Display
 
-| Firmware | Zeilen | Zeichen pro Zeile |
-| --- | --- | --- |
-| Even | 5 | etwa 30 |
-| ScouterKit | 11 (je nach Höhe 8–14) | 42 |
+| Zeilen | Zeichen pro Zeile |
+| --- | --- |
+| 11 (je nach Höhe 8–14) | 42 |
 
 Längere Zeilen bricht die App um. Mehr Zeilen als eine Seite erscheinen beim
 Tippen auf mehreren Seiten; das Dashboard beim Hochschauen zeigt nur die erste.
@@ -82,11 +79,9 @@ Die Entitäten-IDs in den Beispielen sind Platzhalter. Ersetze sie durch deine.
 
 Erreicht die App Home Assistant nicht, steht unter dem Dashboard die Zeile
 `! Home Assistant nicht erreichbar`: Was es zeigt, ist so alt wie die letzte
-Verbindung. Mit ScouterKit merkt die Brille außerdem selbst, wenn das Handy
-weg ist, und zeigt `! Keine Verbindung zum Handy` (die Uhr läuft weiter). Die
-Zeile verschwindet, sobald die Verbindung wieder steht (binnen 5 Sekunden).
-Mit Evens Firmware gibt es nur die Home-Assistant-Zeile, denn ohne Handy
-erreicht die Brille nichts.
+Verbindung. Die Brille merkt außerdem selbst, wenn das Handy weg ist, und
+zeigt `! Keine Verbindung zum Handy` (die Uhr läuft weiter). Die Zeile
+verschwindet, sobald die Verbindung wieder steht (binnen 5 Sekunden).
 
 ![Dashboard mit Statuszeile](images/de/dashboard-status.png)
 
@@ -94,7 +89,7 @@ erreicht die Brille nichts.
 
 ### 1. Uhr und Wetter
 
-Für Evens Firmware mit ihren 5 Zeilen gut geeignet.
+Kurz und genug für einen schnellen Blick.
 
 ```jinja
 {{ kopfzeile }}
@@ -234,7 +229,7 @@ Termine & Aufgaben
 
 ## Text beim Zuhören
 
-Die Option *Text beim Zuhören* (nur ScouterKit) ist ebenfalls ein Template. Es
+Die Option *Text beim Zuhören* ist ebenfalls ein Template. Es
 erscheint zentriert im Rahmen, solange du die linke Touchbar hältst. Die
 Variable `assistent` (englisch `assistant`) enthält den Namen des gewählten
 Assistenten.

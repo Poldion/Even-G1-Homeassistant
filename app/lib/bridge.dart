@@ -4,13 +4,13 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:lc3_codec/lc3_codec.dart';
 
-import 'g1/auto_brightness.dart';
 import 'g1/display.dart';
 import 'g1/g1_connection.dart';
 import 'g1/protocol.dart';
 import 'ha/assist_session.dart';
 import 'ha/ha_client.dart';
 import 'notifications/phone_notifications.dart';
+import 'scouter/scouter_connection.dart';
 import 'scouter/sk_icons.dart';
 import 'l10n/l10n.dart';
 import 'recording/recorder.dart';
@@ -59,7 +59,7 @@ class HaConfig {
   /// "single_tap_left", "single_tap_right" or "none".
   final String dashboardGesture;
 
-  /// Design of the dashboard (ScouterKit draws it; Even shows it plain).
+  /// Design of the dashboard.
   final G1TextStyle dashboardStyle;
 
   /// Design set "lab" for the Assist status and the animations.
@@ -74,13 +74,8 @@ class HaConfig {
 
 /// Connects the glasses with Home Assistant.
 class Bridge extends ChangeNotifier {
-  Bridge(this.settings, {G1Connection? g1}) : g1 = g1 ?? G1Connection() {
-    display = G1Display(this.g1)..evenAiAnswers = settings.evenAiAnswers;
-    autoBrightnessOffset = AutoBrightness(
-      this.g1,
-      idle: () => !display.active && !assistRunning,
-      log: _log,
-    );
+  Bridge(this.settings, {G1Connection? g1}) : g1 = g1 ?? ScouterConnection() {
+    display = G1Display(this.g1);
     recorder = VoiceRecorder(this.g1, settings, _log)
       ..addListener(notifyListeners);
     this.g1.addListener(_onGlassesChanged);
@@ -95,21 +90,17 @@ class Bridge extends ChangeNotifier {
   static const notificationAppId = 'io.github.poldion.even_g1_ha';
   static const followUpWindow = Duration(minutes: 5);
 
-  /// How long a notification stays on g1v0 (ScouterKit), which shows
-  /// notifications as texts.
+  /// How long a notification stays on the display.
   static const notificationDuration = Duration(seconds: 8);
   static const maxRecording = Duration(seconds: 30);
 
-  // Shown after the touch bar was released. While it is held, the glasses
-  // firmware shows its own Even AI listening screen: the right (master) arm
-  // redraws it continuously, so drawing over it only reached the left arm.
+  /// Shown after the touch bar was released, while Assist works.
   static String get thinkingText => tr.coreThinking;
 
   final Settings settings;
   final G1Connection g1;
   late final G1Display display;
   late final VoiceRecorder recorder;
-  late final AutoBrightness autoBrightnessOffset;
 
   HaClient? _ha;
   int _haGeneration = 0;
@@ -133,8 +124,6 @@ class Bridge extends ChangeNotifier {
   Timer? _recordTimer;
   String? _conversationId;
   DateTime? _conversationTime;
-  bool _whitelistSent = false;
-  int _notificationId = 0;
   Map<String, Object?>? _lastReported;
 
   /// Rendered dashboard template, pushed by Home Assistant on changes.
@@ -180,8 +169,7 @@ class Bridge extends ChangeNotifier {
     });
   }
 
-  /// Rendered listening template: shown while the touch bar is held
-  /// (ScouterKit; Even's firmware shows its own screen then).
+  /// Rendered listening template: shown while the touch bar is held.
   String? _listeningText;
 
   String get listeningText =>
@@ -189,8 +177,6 @@ class Bridge extends ChangeNotifier {
       tr.coreListening(haConfig.assistName ?? 'Home Assistant');
   bool _dashboardShown = false;
   bool _glassesSettingsApplied = false;
-  int _dashboardCounter = 0;
-  Timer? _positionPreview;
 
   void _log(String line) {
     final now = DateTime.now();
@@ -225,7 +211,6 @@ class Bridge extends ChangeNotifier {
   }
 
   Future<void> reconnectGlasses() async {
-    _whitelistSent = false;
     if (settings.glassesConfigured) {
       await g1.connect(settings.leftId, settings.rightId);
     } else {
@@ -371,8 +356,7 @@ class Bridge extends ChangeNotifier {
     );
   }
 
-  /// Shows a notification with the glasses' own notification display
-  /// (0x4B). Only apps on the whitelist (0x04) are shown by the firmware.
+  /// Shows a notification as a text with the app's icon.
   Future<void> _sendGlassesNotification({
     required String appIdentifier,
     required String displayName,
@@ -380,38 +364,13 @@ class Bridge extends ChangeNotifier {
     required String message,
     String subtitle = '',
   }) async {
-    if (!g1.evenFirmware) {
-      // g1v0 has no notification view: shown as a text.
-      _dashboardShown = false;
-      final head = title == displayName ? title : '$displayName: $title';
-      final body = [subtitle, message].where((s) => s.isNotEmpty).join('\n');
-      await display.showText(
-        body.isEmpty ? head : '$head\n$body',
-        closeAfter: notificationDuration,
-        icon: SkIcons.forApp(appIdentifier, displayName),
-      );
-      return;
-    }
-    if (!_whitelistSent) {
-      final apps = <String, String>{notificationAppId: 'Home Assistant'};
-      settings.notificationApps.forEach((pkg, app) {
-        if (app.enabled) apps[pkg] = app.name;
-      });
-      _whitelistSent = await g1.sendWhitelist(apps);
-    }
-    // Distinct ids: the glasses replace a notification with the same id.
-    _notificationId = _notificationId % 255 + 1;
-    String cut(String s, int max) =>
-        s.length <= max ? s : '${s.substring(0, max - 1)}…';
-    await g1.sendNotification(
-      G1Packets.notification(
-        msgId: _notificationId,
-        appIdentifier: appIdentifier,
-        displayName: cut(displayName, 40),
-        title: cut(title, 80),
-        subtitle: cut(subtitle, 80),
-        message: cut(message, 500),
-      ),
+    _dashboardShown = false;
+    final head = title == displayName ? title : '$displayName: $title';
+    final body = [subtitle, message].where((s) => s.isNotEmpty).join('\n');
+    await display.showText(
+      body.isEmpty ? head : '$head\n$body',
+      closeAfter: notificationDuration,
+      icon: SkIcons.forApp(appIdentifier, displayName),
     );
   }
 
@@ -425,7 +384,6 @@ class Bridge extends ChangeNotifier {
         ...apps,
         n.packageName: NotificationApp(n.appName, true),
       };
-      _whitelistSent = false;
       notifyListeners();
     }
     if (!settings.forwardNotifications || !(app?.enabled ?? true)) return;
@@ -449,7 +407,6 @@ class Bridge extends ChangeNotifier {
       ...apps,
       packageName: NotificationApp(app.name, enabled),
     };
-    _whitelistSent = false;
     notifyListeners();
   }
 
@@ -492,7 +449,6 @@ class Bridge extends ChangeNotifier {
 
   void _onGlassesChanged() {
     if (!g1.connected) {
-      _whitelistSent = false;
       _glassesSettingsApplied = false;
       _dashboardShown = false;
     } else {
@@ -508,17 +464,11 @@ class Bridge extends ChangeNotifier {
   Future<void> _applyGlassesSettings() async {
     if (!g1.connected || _glassesSettingsApplied) return;
     _glassesSettingsApplied = true;
-    if (g1.supportsHeadGestures) {
-      await g1.setHeadGestures(settings.headGestures);
-    }
+    await g1.setHeadGestures(settings.headGestures);
     await _syncDashboard();
     final angle = settings.headUpAngle;
     if (angle != null) await _sendHeadUpAngle(angle);
-    final mode = settings.headUpMode;
-    if (mode != null) await _sendHeadUpMode(mode);
-    if (settings.displayHeight != null || settings.displayDepth != null) {
-      await _sendDisplayPosition();
-    }
+    if (settings.displayHeight != null) await _sendDisplayHeight();
     final wear = settings.wearDetection;
     if (wear != null) {
       await g1.setWearDetection(wear);
@@ -527,8 +477,7 @@ class Bridge extends ChangeNotifier {
     }
     unawaited(_reportState());
     if (settings.brightness != null || settings.autoBrightness != null) {
-      // Like MentraOS: the app's setting is sent on every connection.
-      autoBrightnessOffset.sensorLevel = null;
+      // The app's setting is sent on every connection.
       await _sendBrightness();
     } else {
       // Not set in this app yet: show what the glasses use.
@@ -572,8 +521,8 @@ class Bridge extends ChangeNotifier {
 
   Timer? _brightnessTimer;
 
-  /// Sets the brightness; switches the automatic brightness off like the
-  /// Even app. Sent with a short delay so dragging the slider does not flood
+  /// Sets the brightness and switches the automatic brightness off. Sent
+  /// with a short delay so dragging the slider does not flood
   /// the glasses.
   void setBrightness(int percent) {
     brightness = percent.clamp(0, 100);
@@ -602,8 +551,8 @@ class Bridge extends ChangeNotifier {
   /// Offset of the automatic brightness in percent (-50..50).
   late int brightnessOffset = settings.brightnessOffset;
 
-  /// Sets the offset of the automatic brightness. With an offset the app
-  /// manages the automatic brightness itself (see [AutoBrightness]).
+  /// Sets the offset of the automatic brightness (the glasses apply it from
+  /// their light sensor).
   void setBrightnessOffset(int percent) {
     brightnessOffset = percent.clamp(-50, 50);
     settings.brightnessOffset = brightnessOffset;
@@ -617,22 +566,15 @@ class Bridge extends ChangeNotifier {
 
   Future<void> _sendBrightness() async {
     final auto = autoBrightness ?? false;
-    if (!auto || brightnessOffset == 0) autoBrightnessOffset.stop();
     if (!g1.connected) return;
     if (auto && brightnessOffset != 0) {
-      final levels = (brightnessOffset * G1Packets.maxBrightness / 100).round();
+      final levels = (brightnessOffset * G1Brightness.max / 100).round();
       _log(
         tr.coreLogBrightnessOffset(
           '${brightnessOffset > 0 ? '+' : ''}$brightnessOffset',
         ),
       );
-      if (g1.supportsBrightnessOffset) {
-        // ScouterKit: from the light sensor while something is shown.
-        autoBrightnessOffset.stop();
-        await g1.setAutoBrightnessOffset(levels);
-      } else {
-        autoBrightnessOffset.start(levels);
-      }
+      await g1.setAutoBrightnessOffset(levels);
       return;
     }
     final percent = brightness ?? 50;
@@ -645,30 +587,14 @@ class Bridge extends ChangeNotifier {
     await g1.setHeadUpAngle(angle);
   }
 
-  Future<void> _sendHeadUpMode(int mode) async {
-    _log(mode == 0 ? tr.coreLogHeadUpShow : tr.coreLogHeadUpHide);
-    await g1.setHeadUpMode(mode);
-  }
-
-  Future<void> _sendDisplayPosition({bool preview = false}) async {
+  Future<void> _sendDisplayHeight() async {
     final height = settings.displayHeight ?? defaultDisplayHeight;
-    final depth = settings.displayDepth ?? defaultDisplayDepth;
-    _log(
-      preview
-          ? tr.coreLogPositionPreview(height, depth)
-          : tr.coreLogPosition(height, depth),
-    );
-    await g1.setDisplayPosition(
-      height,
-      depth,
-      _dashboardCounter++,
-      preview: preview,
-    );
+    _log(tr.coreLogDisplayHeight(height));
+    await g1.setDisplayHeight(height);
   }
 
   static const defaultHeadUpAngle = 30;
   static const defaultDisplayHeight = 4;
-  static const defaultDisplayDepth = 5;
 
   /// Changes the activation angle (stored in the app, sent to the glasses).
   Future<void> setHeadUpAngle(int angle) async {
@@ -677,27 +603,11 @@ class Bridge extends ChangeNotifier {
     if (g1.connected) await _sendHeadUpAngle(angle);
   }
 
-  /// Shows (0) or hides (2) the Even dashboard on head up.
-  Future<void> setHeadUpMode(int? mode) async {
-    settings.headUpMode = mode;
+  /// Changes the height of the display content (0–8).
+  Future<void> setDisplayHeight(int height) async {
+    settings.displayHeight = height;
     notifyListeners();
-    if (g1.connected && mode != null) await _sendHeadUpMode(mode);
-  }
-
-  /// Changes height and distance of the display content. The glasses show
-  /// their own position preview for a moment, then the position is applied
-  /// (like the official app).
-  Future<void> setDisplayPosition({int? height, int? depth}) async {
-    if (height != null) settings.displayHeight = height;
-    if (depth != null) settings.displayDepth = depth;
-    notifyListeners();
-    if (!g1.connected) return;
-    _positionPreview?.cancel();
-    await _sendDisplayPosition(preview: true);
-    _positionPreview = Timer(
-      const Duration(seconds: 3),
-      () => unawaited(_sendDisplayPosition()),
-    );
+    if (g1.connected) await _sendDisplayHeight();
   }
 
   /// Single tap configured as dashboard gesture: show the dashboard, or
@@ -726,7 +636,8 @@ class Bridge extends ChangeNotifier {
     return true;
   }
 
-  /// Head raised: cover the Even dashboard with the Home Assistant one.
+  /// Head raised: show the Home Assistant dashboard (when the glasses do
+  /// not draw it themselves).
   /// Hands the dashboard to glasses that show it on head up themselves
   /// (ScouterKit's resident program); not in silent mode.
   Future<void> _syncDashboard() async {
@@ -775,9 +686,9 @@ class Bridge extends ChangeNotifier {
     if (gesture == null) return; // status push (battery, case, wear)
 
     switch (event.code) {
-      case G1Event.evenAiStart:
+      case G1Event.longPressStart:
         unawaited(_startAssist());
-      case G1Event.evenAiStop:
+      case G1Event.longPressStop:
         unawaited(_finishAssist());
       case G1Event.singleTap:
         if (!await _onTapDashboard(gesture)) await display.onTap(event.side);
@@ -858,10 +769,8 @@ class Bridge extends ChangeNotifier {
         _log(tr.coreLogAudio('$e'));
       }
     });
-    // With Even's firmware nothing is drawn while the touch bar is held (see
-    // thinkingText); ScouterKit shows the listening template.
     _startFastConnection();
-    if (g1.supportsDesigns) unawaited(display.showAiStatus(listeningText));
+    unawaited(display.showAiStatus(listeningText));
     if (!await g1.setMic(true)) {
       _log(tr.coreLogMicFailed);
     }
@@ -934,28 +843,15 @@ class Bridge extends ChangeNotifier {
       closeAfter: duration > 0 ? Duration(seconds: max(duration, 8)) : null,
       assistant: haConfig.assistName,
     );
-    // Logs what each arm shows, to spot left/right differences.
-    unawaited(Future<void>.delayed(const Duration(seconds: 1), checkDisplay));
-  }
-
-  /// Experimental: Assist answers in the Even AI mode of the official app.
-  void setEvenAiAnswers(bool enabled) {
-    settings.evenAiAnswers = enabled;
-    display.evenAiAnswers = enabled;
-    _log(enabled ? tr.coreLogEvenAiOn : tr.coreLogEvenAiOff);
-    notifyListeners();
   }
 
   // ---------------------------------------------------------------------------
   // Recording (WhisperNotes)
   // ---------------------------------------------------------------------------
 
-  /// Dot in the upper right corner (glyph widths from MentraOS: a space is
-  /// 6 px wide, the display about 488 px).
-  static final recordingDotText = '${' ' * 74}o';
-
   /// Starts or stops a recording with the glasses microphone. Finished
-  /// recordings are sent to WhisperNotes.
+  /// recordings are sent to WhisperNotes. The glasses show a block in the
+  /// right eye's top corner while the microphone is on.
   Future<void> setRecording(bool enabled) async {
     if (enabled == recorder.recording) return;
     if (enabled) {
@@ -963,29 +859,11 @@ class Bridge extends ChangeNotifier {
         _log(tr.coreLogRecordingNoGlasses);
       }
       await recorder.start();
-      display.idleText = _recordingDot ? recordingDotText : null;
-      if (g1.connected && !display.active) await display.showIdle();
     } else {
-      display.idleText = null;
       await recorder.stop(releaseMic: !assistRunning);
-      if (g1.connected && !display.active) await display.showIdle();
     }
     notifyListeners();
     await _reportState();
-  }
-
-  /// The "o" in the corner, with Even's firmware only: g1v0 itself draws a
-  /// block in the right eye's top corner whenever the microphone is on
-  /// (VM.md §6.5), which a recording keeps on.
-  bool get _recordingDot => settings.recordingDot && g1.evenFirmware;
-
-  /// Shows or hides the recording dot while recording.
-  Future<void> setRecordingDot(bool enabled) async {
-    settings.recordingDot = enabled;
-    notifyListeners();
-    if (!recorder.recording) return;
-    display.idleText = _recordingDot ? recordingDotText : null;
-    if (g1.connected && !display.active) await display.showIdle();
   }
 
   /// Switches the silent mode of the glasses.
@@ -1008,24 +886,13 @@ class Bridge extends ChangeNotifier {
     await _reportState();
   }
 
-  /// Animation on the glasses when silent mode changes (ScouterKit).
+  /// Animation on the glasses when silent mode changes.
   Future<void> _silentModeFeedback(bool on) async {
-    if (!g1.connected || !g1.supportsDesigns || assistRunning) return;
+    if (!g1.connected || assistRunning) return;
     // The animation draws only its region: the rest of the panel dark.
     _dashboardShown = false;
     await display.clear();
     await g1.playSilentModeAnimation(on, lab: haConfig.labDesign);
-  }
-
-  /// Asks both arms which screen they show and writes it to the log.
-  Future<String> checkDisplay() async {
-    if (!g1.connected) return tr.coreGlassesNotConnected;
-    final left = await g1.readScreenState(G1Side.left);
-    final right = await g1.readScreenState(G1Side.right);
-    String name(int? id) => id == null ? tr.coreNoAnswer : screenName(id);
-    final text = tr.coreDisplayCheck(name(left), name(right));
-    _log(left == right ? text : tr.coreDisplayCheckDiffers(text));
-    return text;
   }
 
   Future<void> _abortAssist() async {
@@ -1066,7 +933,6 @@ class Bridge extends ChangeNotifier {
     _clockTimer?.cancel();
     _ha?.close();
     recorder.dispose();
-    autoBrightnessOffset.stop();
     g1.dispose();
     super.dispose();
   }

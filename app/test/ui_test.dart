@@ -3,8 +3,6 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:even_g1_ha/bridge.dart';
-import 'package:even_g1_ha/g1/g1_connection.dart';
-import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/l10n/l10n.dart';
 import 'package:even_g1_ha/main.dart';
 import 'package:even_g1_ha/settings.dart';
@@ -13,6 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'fake_glasses.dart';
 
 // Renders the main screens. With SCREENSHOT_DIR set, real fonts are loaded
 // and PNGs are written there for a visual check.
@@ -53,10 +53,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     L10n.apply('system', system: const Locale('fr'));
     final settings = await Settings.load();
-    final bridge = Bridge(
-      settings,
-      g1: G1Connection.fake((side, data) async {}),
-    );
+    final bridge = Bridge(settings, g1: FakeGlasses(isConnected: false));
     await tester.pumpWidget(EvenG1App(bridge: bridge));
     await tester.pump();
     // Without Home Assistant the app opens on the settings tab.
@@ -79,16 +76,12 @@ void main() {
     });
     final settings = await Settings.load();
     // Simulated, connected glasses that report battery and case status.
-    final g1 = G1Connection.fake((side, data) async {});
-    for (final (side, data) in [
-      (G1Side.left, [0xF5, 0x0A, 84]),
-      (G1Side.right, [0xF5, 0x0A, 81]),
-      (G1Side.right, [0xF5, 0x0F, 62]),
-      (G1Side.right, [0xF5, 0x0E, 1]),
-      (G1Side.right, [0xF5, 0x06]),
-    ]) {
-      g1.receive(side, Uint8List.fromList(data));
-    }
+    final g1 = FakeGlasses()
+      ..batteryLeft = 84
+      ..batteryRight = 81
+      ..batteryCase = 62
+      ..caseCharging = true
+      ..wearState = 'worn';
     final bridge = Bridge(settings, g1: g1);
     await tester.pumpWidget(
       RepaintBoundary(

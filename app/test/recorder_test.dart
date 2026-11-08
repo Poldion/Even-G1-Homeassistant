@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/recording/recorder.dart';
 import 'package:even_g1_ha/settings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'fake_glasses.dart';
 
 void main() {
   test('writes a 16 kHz mono PCM16 WAV header', () {
@@ -48,7 +49,7 @@ void main() {
         .writeAsString(jsonEncode({'recorded_at': '2026-11-02T14:35:00'}));
 
     final recorder = VoiceRecorder(
-      G1Connection.fake((side, data) async {}),
+      FakeGlasses(),
       settings,
       (_) {},
       folder: dir,
@@ -74,7 +75,7 @@ void main() {
     final dir = await Directory.systemTemp.createTemp('rec');
     await File('${dir.path}/a.wav').writeAsBytes(VoiceRecorder.wavHeader(0));
     final recorder = VoiceRecorder(
-      G1Connection.fake((side, data) async {}),
+      FakeGlasses(),
       settings,
       (_) {},
       folder: dir,

@@ -13,27 +13,7 @@
   "coreCancelled": "Cancelled",
   "coreChannelDescription": "Keeps the connection to the glasses in the background",
   "coreChannelName": "Even G1 connection",
-  "coreDisplayCheck": "Display left: {left}, right: {right}",
-  "@coreDisplayCheck": {
-    "placeholders": {
-      "left": {
-        "type": "String"
-      },
-      "right": {
-        "type": "String"
-      }
-    }
-  },
-  "coreDisplayCheckDiffers": "{text} – DIFFERENT",
-  "@coreDisplayCheckDiffers": {
-    "placeholders": {
-      "text": {
-        "type": "String"
-      }
-    }
-  },
   "coreDone": "Done.",
-  "coreGlassesNotConnected": "Glasses not connected",
   "coreHaConnected": "connected (HA {version})",
   "@coreHaConnected": {
     "placeholders": {
@@ -122,8 +102,14 @@
     }
   },
   "coreLogDashboardTap": "Dashboard (tap)",
-  "coreLogEvenAiOff": "Answers in text mode",
-  "coreLogEvenAiOn": "Answers in Even AI mode",
+  "coreLogDisplayHeight": "Display height {height}",
+  "@coreLogDisplayHeight": {
+    "placeholders": {
+      "height": {
+        "type": "int"
+      }
+    }
+  },
   "coreLogHeadGesturesOff": "Head gestures off",
   "coreLogHeadGesturesOn": "Head gestures on",
   "coreLogHeadUpAngle": "Activation angle: {angle}°",
@@ -134,8 +120,6 @@
       }
     }
   },
-  "coreLogHeadUpHide": "Head up: hide Even dashboard",
-  "coreLogHeadUpShow": "Head up: show Even dashboard",
   "coreLogIntegrationReloaded": "Integration reloaded, reconnecting",
   "coreLogMicFailed": "Microphone could not be switched on",
   "coreLogNotification": "Notification: {app} – {title}",
@@ -154,28 +138,6 @@
     "placeholders": {
       "error": {
         "type": "String"
-      }
-    }
-  },
-  "coreLogPosition": "Display position: height {height}, distance {depth}",
-  "@coreLogPosition": {
-    "placeholders": {
-      "height": {
-        "type": "int"
-      },
-      "depth": {
-        "type": "int"
-      }
-    }
-  },
-  "coreLogPositionPreview": "Display position: height {height}, distance {depth} (preview)",
-  "@coreLogPositionPreview": {
-    "placeholders": {
-      "height": {
-        "type": "int"
-      },
-      "depth": {
-        "type": "int"
       }
     }
   },
@@ -244,7 +206,6 @@
   "coreLogTextDropped": "Glasses not connected – text dropped",
   "coreLogWearOff": "Wear detection off",
   "coreLogWearOn": "Wear detection on",
-  "coreNoAnswer": "no answer",
   "coreNoHaConnection": "No connection to Home Assistant",
   "coreRecordingFileName": "Glasses note",
   "coreServiceText": "Connection active",
@@ -279,47 +240,13 @@
       }
     }
   },
-  "diagCheckDisplay": "Check left/right display",
   "diagClose": "Close",
-  "diagEvenAi": "Assist answers in Even AI mode (test)",
-  "diagEvenAiSubtitle": "Shows answers like the official Even app. Try it if one eye shows something different from the other.",
   "diagLog": "Log",
   "diagShowOnGlasses": "Show on glasses",
   "diagTestText": "Test text",
   "diagTestTextDefault": "Hello from Home Assistant!",
-  "g1LogAutoBrightness": "Auto brightness: sensor {sensor} %, set {level} %",
-  "@g1LogAutoBrightness": {
-    "placeholders": {
-      "sensor": {
-        "type": "int"
-      },
-      "level": {
-        "type": "int"
-      }
-    }
-  },
   "g1LogConnectionFast": "Connection: fast",
   "g1LogConnectionSaving": "Connection: power saving",
-  "g1LogDisplayMissingLeft": "Left display was missing ({screen}) – sent again",
-  "@g1LogDisplayMissingLeft": {
-    "placeholders": {
-      "screen": {
-        "type": "String"
-      }
-    }
-  },
-  "g1LogDisplayMissingRight": "Right display was missing ({screen}) – sent again",
-  "@g1LogDisplayMissingRight": {
-    "placeholders": {
-      "screen": {
-        "type": "String"
-      }
-    }
-  },
-  "g1LogLeftNoAcks": "L does not confirm texts – check off",
-  "g1LogLeftNotConfirmed": "L: text not confirmed",
-  "g1LogLeftRejected": "L: text rejected – sent again",
-  "g1LogLeftUnanswered": "L: text unanswered – sent again",
   "g1LogWearState": "State: {state}",
   "@g1LogWearState": {
     "placeholders": {
@@ -353,17 +280,10 @@
       }
     }
   },
-  "glassesSetDepth": "Distance",
-  "glassesSetDepthHelp": "How far away the text appears.",
-  "glassesSetEvenHint": "The official Even app must be closed, as the glasses connect to only one app at a time.",
   "glassesSetHeadGestures": "Head gestures",
   "glassesSetHeadGesturesHelp": "Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.",
-  "glassesSetHeadUpMode": "Even dashboard when looking up",
-  "glassesSetHeadUpModeHelp": "\"Hide\": when looking up only the Home Assistant dashboard appears (if set up in HA).",
   "glassesSetHeight": "Height",
   "glassesSetHeightHelp": "How high the text sits in your field of view. When you let go, the glasses briefly show the new position and apply it.",
-  "glassesSetHide": "Hide",
-  "glassesSetLeaveUnchanged": "Leave unchanged",
   "glassesSetNonePaired": "No glasses paired yet.",
   "glassesSetNotConnected": "The glasses are not connected. Changes are sent the next time they connect.",
   "glassesSetNotSet": "not set",
@@ -375,13 +295,9 @@
       }
     }
   },
-  "glassesSetRestartNote": "Please close and reopen the app, then search for the glasses.",
   "glassesSetScouterHint": "ScouterKit (g1v0): For the first pairing put the glasses into the open charging case. Outside the case they obey only paired devices.",
   "glassesSetSearch": "Search for glasses",
   "glassesSetSearching": "Searching…",
-  "glassesSetShow": "Show",
-  "glassesSetWear": "Wear detection",
-  "glassesSetWearHelp": "The glasses report whether they are worn (also to Home Assistant: \"Worn\").",
   "haSetConnectFailed": "Connection failed: {error}",
   "@haSetConnectFailed": {
     "placeholders": {
@@ -414,8 +330,6 @@
   "notifSetNoAccess": "Access to notifications missing",
   "notifSetNoAccessHelp": "Allow \"Even G1 HA\" to read notifications in the Android settings.\nIf Android reports \"App was denied access\": Settings → Apps → Even G1 HA → ⋮ → \"Allow restricted settings\", then tap Allow again.",
   "notifSetNoApps": "Apps appear here once they have sent a notification. New apps are forwarded by default.",
-  "recSetDot": "Dot on the glasses",
-  "recSetDotHelp": "Small dot at the top right while recording and nothing else is shown.",
   "recSetIntro": "Recordings with the glasses microphone go to WhisperNotes, are transcribed and summarised there and end up in the BasaltNotes inbox if a default vault is chosen in WhisperNotes under Settings → BasaltNotes.",
   "recSetKey": "API key (optional)",
   "recSetKeyHelp": "Only needed if one is set in WhisperNotes.",
@@ -436,7 +350,7 @@
   "settingsDiagnostics": "Diagnostics",
   "settingsDiagnosticsSubtitle": "Test text, check display, log",
   "settingsDisplay": "Display & activation",
-  "settingsDisplaySubtitle": "Activation angle, height, distance, Even dashboard",
+  "settingsDisplaySubtitle": "Activation angle, height, head gestures",
   "settingsNoGlassesPaired": "No glasses paired yet",
   "settingsNotSetUp": "Not set up",
   "settingsNotifications": "Notifications",
@@ -529,7 +443,6 @@
       }
     }
   },
-  "skLogEvenCommandSkipped": "Even command to g1v0 skipped",
   "skLogEventsRejected": "{arm}: EVENTS rejected",
   "@skLogEventsRejected": {
     "placeholders": {
@@ -758,17 +671,6 @@
       }
     }
   },
-  "uiBrightnessOffsetEven": "About every two minutes, while nothing is shown, the app reads the light sensor and sets it {offset} %{current}.",
-  "@uiBrightnessOffsetEven": {
-    "placeholders": {
-      "offset": {
-        "type": "String"
-      },
-      "current": {
-        "type": "String"
-      }
-    }
-  },
   "uiBrightnessOffsetScouter": "The light sensor reports whenever the brightness changes noticeably while something is shown; the app then sets {offset} % relative to the automatic level{current}.",
   "@uiBrightnessOffsetScouter": {
     "placeholders": {
@@ -849,6 +751,9 @@
   "updateCheckFailed": "Could not check for updates.",
   "updateDailyCheck": "The app looks for new versions on GitHub once a day when it starts.",
   "updateDownloadFailed": "The update could not be downloaded.",
+  "updateEvenNoticeBody": "Since 0.25.0 the app works only with glasses that run the ScouterKit firmware. Your glasses were paired with Even's firmware, which is no longer supported.\n\nWith Even's firmware, install 0.24.x, the last version for it, from the releases page. Android installs an older version only after uninstalling this one; your settings are lost then.",
+  "updateEvenNoticeScouterKit": "I use ScouterKit",
+  "updateEvenNoticeTitle": "This version needs ScouterKit",
   "updateHeldBackBody": "Version {version} and later support only glasses with the ScouterKit firmware. Your glasses run Even's firmware, so this app stays on its current version, which keeps working.\n\nSupport for Even's firmware is no longer developed (branch \"legacy\" on GitHub). If you switch to ScouterKit, choose it under Settings → Glasses; then updates are offered again.",
   "@updateHeldBackBody": {
     "placeholders": {
