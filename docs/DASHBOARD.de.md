@@ -78,6 +78,18 @@ eingefasst von Eckklammern.
 
 Die Entitäten-IDs in den Beispielen sind Platzhalter. Ersetze sie durch deine.
 
+## Verbindungsstatus
+
+Erreicht die App Home Assistant nicht, steht unter dem Dashboard die Zeile
+`! Home Assistant nicht erreichbar`: Was es zeigt, ist so alt wie die letzte
+Verbindung. Mit ScouterKit merkt die Brille außerdem selbst, wenn das Handy
+weg ist, und zeigt `! Keine Verbindung zum Handy` (die Uhr läuft weiter). Die
+Zeile verschwindet, sobald die Verbindung wieder steht (binnen 5 Sekunden).
+Mit Evens Firmware gibt es nur die Home-Assistant-Zeile, denn ohne Handy
+erreicht die Brille nichts.
+
+![Dashboard mit Statuszeile](images/de/dashboard-status.png)
+
 ## Beispiele
 
 ### 1. Uhr und Wetter

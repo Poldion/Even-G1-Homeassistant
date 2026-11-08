@@ -176,6 +176,10 @@ gone, and the app loads it again.
   without the phone), writes the digits (glyphs 0–9) and redraws if the
   dashboard is shown. The app sets the time again after each clock sync
   (every 3 minutes).
+- **Status line**: below the dashboard (above it if there is no room) the
+  program shows `! No connection to the phone` while its own `LINK` is 0,
+  or `! Home Assistant unreachable` while the app says so (`USER2`). It
+  checks again every 5 s.
 - **Watch** (every 5 s): each arm switches its panel off while the head is
   down and the app shows nothing (also right after a restart, which keeps
   the panel's image), and the right arm repeats its head state to the left

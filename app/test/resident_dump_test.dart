@@ -219,6 +219,34 @@ void dumpDesigns() {
       w(SkResident.lineHeight.address, font.lineSpacing);
       w(SkResident.count.address, bands.length);
       save('resident_${style.id}', [], Uint8List.fromList(image));
+      if (style == G1TextStyle.card) {
+        // The status line (Home Assistant unreachable / no phone).
+        for (final lang in ['en', 'de']) {
+          L10n.apply(lang);
+          final noPhone = font.encode(tr.skStatusNoPhone);
+          final noHa = font.encode(tr.skStatusHaOffline);
+          image.setRange(
+            SkResident.statusText,
+            SkResident.statusText + noPhone.length,
+            noPhone,
+          );
+          image.setRange(
+            SkResident.statusText + SkResident.statusMax,
+            SkResident.statusText + SkResident.statusMax + noHa.length,
+            noHa,
+          );
+          w(SkResident.statusN1.address, noPhone.length);
+          w(SkResident.statusN2.address, noHa.length);
+          w(
+            SkResident.statusY.address,
+            ScouterConnection.statusLineY(bands, font.lineSpacing, 140),
+          );
+          w(SkResident.haOffline.address, 1);
+          save('resident_status_$lang', [], Uint8List.fromList(image));
+          w(SkResident.haOffline.address, 0);
+        }
+        L10n.apply('en');
+      }
     }
     // The clock: 14:59 at arm time 1.2 s, the digits in the first line.
     {

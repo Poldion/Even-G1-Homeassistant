@@ -261,6 +261,10 @@ class G1Connection extends ChangeNotifier {
   /// (ScouterKit).
   bool get supportsDesigns => false;
 
+  /// Whether the app reaches Home Assistant; the glasses' own dashboard
+  /// shows a status line while it does not (ScouterKit).
+  Future<void> setHomeAssistantOnline(bool online) async {}
+
   /// Plays the animation of silent mode switching [on] or off, with [lab]
   /// in the lab design set.
   Future<void> playSilentModeAnimation(bool on, {bool lab = false}) async {}

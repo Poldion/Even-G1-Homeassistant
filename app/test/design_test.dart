@@ -274,6 +274,35 @@ void main() {
     g1.dispose();
   });
 
+  test('the status line goes below the dashboard, else above it', () {
+    final bands = ScouterConnection.dashboardBands(
+      font,
+      text,
+      G1TextStyle.card,
+      top: 140,
+      rows: 11,
+    );
+    final y = ScouterConnection.statusLineY(bands, font.lineSpacing, 140);
+    final box = SkLayout.of(
+      font,
+      text.split('\n'),
+      G1TextStyle.card,
+      top: 140,
+      left: 24,
+    ).box!;
+    expect(y, box.bottom + 6);
+    // A full display: above the dashboard.
+    final full = ScouterConnection.dashboardBands(
+      font,
+      List.generate(11, (i) => 'Line $i').join('\n'),
+      G1TextStyle.card,
+      top: 140,
+      rows: 11,
+    );
+    final above = ScouterConnection.statusLineY(full, font.lineSpacing, 140);
+    expect(above + font.lineSpacing, lessThanOrEqualTo(128));
+  });
+
   test('the library fits its area', () {
     final lib = SkLib.build();
     expect(SkLib.code + lib.code.length, lessThanOrEqualTo(SkLib.codeEnd));

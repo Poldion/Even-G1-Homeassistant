@@ -75,6 +75,18 @@ stands dark on a light bar with hazard stripes, framed by corner brackets.
 
 The entity IDs in the examples are placeholders. Replace them with yours.
 
+## Connection status
+
+If the app cannot reach Home Assistant, a line
+`! Home Assistant unreachable` appears below the dashboard: what it shows is
+as old as the last connection. With ScouterKit the glasses also notice by
+themselves when the phone is gone and show `! No connection to the phone`
+(the clock keeps running). The line disappears as soon as the connection is
+back (within 5 seconds). With Even's firmware only the Home Assistant line
+exists, because without the phone nothing reaches the glasses.
+
+![Dashboard with status line](images/en/dashboard-status.png)
+
 ## Examples
 
 ### 1. Clock and weather

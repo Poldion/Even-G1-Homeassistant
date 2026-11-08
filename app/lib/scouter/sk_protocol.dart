@@ -70,6 +70,7 @@ class SkEvt {
 /// Properties (VM.md §2.5).
 class SkProp {
   static const timeUs = 0x00;
+  static const hostLink = 0x04;
   static const battPct = 0x11;
   static const charge = 0x12;
   static const inCase = 0x13;
@@ -113,6 +114,7 @@ class SkTrigger {
   static const peer = 9;
   static const user0 = 12;
   static const user1 = 13;
+  static const user2 = 14;
 }
 
 /// `TOUCH_GESTURE` values (VM.md §2.5).

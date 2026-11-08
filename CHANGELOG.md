@@ -9,6 +9,14 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-11-08
+
+### Added
+- The dashboard shows a status line when a connection is impaired:
+  `! Home Assistant unreachable` (the app cannot reach Home Assistant), and
+  with ScouterKit `! No connection to the phone`, which the glasses notice
+  by themselves. The line disappears when the connection is back.
+
 ## [0.22.1] - 2026-11-08
 
 ### Fixed
@@ -367,7 +375,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...v0.21.1

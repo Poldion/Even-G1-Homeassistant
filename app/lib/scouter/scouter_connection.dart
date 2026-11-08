@@ -553,6 +553,26 @@ class ScouterConnection extends G1Connection {
   /// Bands of the dashboard as last written (SkResident.rows).
   int _residentRows = 0;
 
+  /// The app reaches Home Assistant (status line otherwise).
+  bool _haOnline = true;
+
+  @override
+  Future<void> setHomeAssistantOnline(bool online) async {
+    if (online == _haOnline) return;
+    _haOnline = online;
+    for (final arm in _arms.values.where((a) => a.ready && a.resident)) {
+      await arm.link.run([
+        (SkCode()
+              ..write(
+                SkResident.haOffline.address,
+                SkLib.u32s([online ? 0 : 1]),
+              )
+              ..raise(SkTrigger.user2))
+            .take(),
+      ]);
+    }
+  }
+
   @override
   bool get showsDashboardItself =>
       _dashboardOnHeadUp &&
@@ -789,6 +809,12 @@ class ScouterConnection extends G1Connection {
       }
     }
     arm.clockAt = clockAt;
+    final statusY = statusLineY(bands, font.lineSpacing, textTop);
+    final noPhone = font.encode(tr.skStatusNoPhone);
+    final noHa = font.encode(tr.skStatusHaOffline);
+    List<int> fit(List<int> g) => g.length <= SkResident.statusMax
+        ? g
+        : g.sublist(0, SkResident.statusMax);
     List<int> u32(int v) => [v & 0xff, v >> 8 & 0xff, v >> 16 & 0xff, v >> 24];
     final codes = <Uint8List>[
       // No lines while they change, so the program never draws half of them.
@@ -806,6 +832,25 @@ class ScouterConnection extends G1Connection {
       ),
       _residentState(font),
       _clockCode(arm),
+      ...skUpload(
+        SkResident.statusText,
+        Uint8List.fromList([
+          ...fit(noPhone),
+          ...List.filled(SkResident.statusMax - fit(noPhone).length, 0),
+          ...fit(noHa),
+        ]),
+        maxCode,
+      ),
+      (SkCode()
+            ..write(
+              SkResident.haOffline.address,
+              SkLib.u32s([_haOnline ? 0 : 1, statusY, 0]),
+            )
+            ..write(
+              SkResident.statusN1.address,
+              SkLib.u32s([fit(noPhone).length, fit(noHa).length]),
+            ))
+          .take(),
     ];
     final last = SkCode()..write(SkResident.count.address, u32(_residentRows));
     if (redraw) last.raise(SkTrigger.user0);
@@ -846,6 +891,28 @@ class ScouterConnection extends G1Connection {
         await arm.link.run([_clockCode(arm)]);
       }
     }
+  }
+
+  /// Where the status line goes: below the dashboard, else above it, else
+  /// nowhere (0).
+  @visibleForTesting
+  static int statusLineY(
+    List<({int x, int y, String? text, List<SkRect> rects, int level})> bands,
+    int lh,
+    int textTop,
+  ) {
+    var bottom = 0, top = textTop;
+    for (final band in bands) {
+      if (band.text != null) bottom = max(bottom, band.y + lh);
+      for (final r in band.rects) {
+        if (r.level > 0) bottom = max(bottom, band.y + r.y + r.h);
+      }
+      if (band.text == null && band.rects.isEmpty) continue;
+      top = min(top, band.y + band.rects.fold<int>(0, (m, r) => min(m, r.y)));
+    }
+    var y = bottom + 6;
+    if (y + lh > SkPanel.height) y = top - lh - 6;
+    return max(0, y);
   }
 
   /// The dashboard as the resident program draws it: bands of one line's

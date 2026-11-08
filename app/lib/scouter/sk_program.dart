@@ -33,7 +33,12 @@ class SkResident {
   static const rects = 0x35D00;
   static const maxRects = 89;
   static const text = 0x36400;
-  static const textEnd = band;
+  static const textEnd = statusText;
+
+  /// The two status lines (no phone, no Home Assistant), [statusMax]
+  /// glyph bytes each, at the end of the text area.
+  static const statusText = band - 2 * statusMax;
+  static const statusMax = 64;
   static const band = 0x37000;
   static const bandRows = 32;
   static const code = 0x39800;
@@ -69,10 +74,21 @@ class SkResident {
   static final _timeY = SkW.at(state + 92);
   static final _beat = SkW.at(state + 96);
 
+  // Status line below the dashboard (written by the app): Home Assistant
+  // unreachable, the line's y (0: no room), the glyph counts of the two
+  // texts; the program keeps which one it shows (0 none, 1 no phone, 2 no
+  // Home Assistant).
+  static final haOffline = SkW.at(state + 52);
+  static final statusY = SkW.at(state + 56);
+  static final statusShown = SkW.at(state + 60);
+  static final statusN1 = SkW.at(state + 100);
+  static final statusN2 = SkW.at(state + 104);
+
   /// Every [watchUs] each arm makes sure its panel is off while the head is
   /// down and the app shows nothing, and the right arm repeats its head
   /// state to the left one, so a missed message or a restart heals itself.
   static const watchUs = 5000000;
+  static const statusLevel = 11;
 
   static const flagDashboard = 1;
   static const flagGestures = 2;
@@ -174,6 +190,12 @@ class SkResident {
     a.label('done');
     a.end();
 
+    // USER2: Home Assistant became reachable or unreachable.
+    a.label('user2');
+    a.beq(shown, c0, 'done');
+    a.call('statusCheck');
+    a.end();
+
     // USER1: the app set the clock anew.
     a.label('user1');
     a.call('armTimer');
@@ -215,6 +237,9 @@ class SkResident {
       a.label('beat');
       a.sysWrite(a.c(SkProp.peerSend), r0);
     }
+    // The status line follows the connection while the dashboard shows.
+    a.beq(shown, c0, 'ret');
+    a.call('statusCheck');
     a.ret();
 
     // tick: a new minute: count on, redraw if the dashboard is shown.
@@ -303,9 +328,59 @@ class SkResident {
     a.draw(bandAt, stride, c0, c0, c0, r5, bandW, lineHeight);
     a.add(r3, r3, c1);
     a.bltu(r3, rows, 'line');
+    a.call('status');
     a.mov(shown, c1);
     a.label('ret');
     a.ret();
+
+    // statusId: r1 = the status to show: 1 when this arm has no phone
+    // (LINK), 2 when the app reports Home Assistant unreachable, else 0.
+    a.label('statusId');
+    a.mov(r1, c0);
+    a.sysRead(r0, a.c(SkProp.hostLink));
+    a.bne(r0, c0, 'stHa');
+    a.mov(r1, c1);
+    a.ret();
+    a.label('stHa');
+    a.beq(haOffline, c0, 'ret');
+    a.mov(r1, a.c(2));
+    a.ret();
+
+    // status: draws the status line (empty without a status).
+    a.label('status');
+    a.call('statusId');
+    a.label('stDraw');
+    a.mov(statusShown, r1);
+    a.beq(statusY, c0, 'ret');
+    final sBand = a.c(band), sStride = a.c(SkPanel.stride);
+    a.fill(sBand, sStride, c0, c0, a.c(SkPanel.width), lineHeight, c0);
+    a.beq(r1, c0, 'stOut');
+    a.mov(r2, a.c(statusText));
+    a.mov(r3, statusN1);
+    a.beq(r1, c1, 'stText');
+    a.mov(r2, a.c(statusText + statusMax));
+    a.mov(r3, statusN2);
+    a.label('stText');
+    a.glyphs(
+      a.c(SkArena.font),
+      sBand,
+      sStride,
+      left,
+      ascent,
+      a.c(2), // MASK
+      a.c(statusLevel),
+      r2,
+      r3,
+    );
+    a.label('stOut');
+    a.draw(sBand, sStride, c0, c0, c0, statusY, a.c(SkPanel.width), lineHeight);
+    a.ret();
+
+    // statusCheck: redraws the status line if it changed.
+    a.label('statusCheck');
+    a.call('statusId');
+    a.beq(r1, statusShown, 'ret');
+    a.jmp('stDraw');
 
     // hide: the panel off again unless the app shows something.
     a.label('hide');
@@ -426,6 +501,7 @@ class SkResident {
     entry(SkTrigger.user0, 'user0');
     entry(SkTrigger.timer, 'timer');
     entry(SkTrigger.user1, 'user1');
+    entry(SkTrigger.user2, 'user2');
     return (code: bytes, pool: a.pool(), table: t.buffer.asUint8List());
   }
 

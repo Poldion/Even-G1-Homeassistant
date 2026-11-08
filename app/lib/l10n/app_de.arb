@@ -204,6 +204,8 @@
   "skLogResetupFailed": "Neueinrichtung {arm}: {error}",
   "skLogSafeMode": "{arm} arm im sicheren Modus (nach Startfehlern): keine Anzeige",
   "skLogVmStartRejected": "{arm}: VM_START abgelehnt",
+  "skStatusHaOffline": "! Home Assistant nicht erreichbar",
+  "skStatusNoPhone": "! Keine Verbindung zum Handy",
   "uiAnswer": "Antwort: {text}",
   "uiAssistHint": "Linke Touchbar gedrückt halten, sprechen, loslassen.",
   "uiAssistant": "Assistent: {name}",

@@ -179,6 +179,10 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   weiter (auch ohne Handy), schreibt die Ziffern (Glyphen 0–9) und zeichnet
   neu, wenn das Dashboard zu sehen ist. Die App stellt die Zeit nach jedem
   Uhrenabgleich (alle 3 Minuten) neu.
+- **Statuszeile**: Unter dem Dashboard (darüber, wenn kein Platz ist)
+  zeigt das Programm `! Keine Verbindung zum Handy`, solange sein eigenes
+  `LINK` 0 ist, oder `! Home Assistant nicht erreichbar`, solange die App das
+  meldet (`USER2`). Es prüft alle 5 s erneut.
 - **Wachhund** (alle 5 s): Jeder Bügel schaltet seine Anzeige ab, solange
   der Kopf unten ist und die App nichts zeigt (auch gleich nach einem
   Neustart, der das Bild der Anzeige stehen lässt), und der rechte Bügel

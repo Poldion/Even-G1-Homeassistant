@@ -9,6 +9,14 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-11-08
+
+### Added
+- Das Dashboard zeigt eine Statuszeile, wenn eine Verbindung gestört ist:
+  `! Home Assistant nicht erreichbar` (die App erreicht Home Assistant
+  nicht) und mit ScouterKit `! Keine Verbindung zum Handy`, was die Brille
+  selbst bemerkt. Die Zeile verschwindet, sobald die Verbindung wieder steht.
+
 ## [0.22.1] - 2026-11-08
 
 ### Fixed
@@ -378,7 +386,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.23.0...HEAD
+[0.23.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...v0.23.0
 [0.22.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...v0.21.1

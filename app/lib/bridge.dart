@@ -141,8 +141,21 @@ class Bridge extends ChangeNotifier {
   String _dashboardText = '';
 
   /// The dashboard as the app shows it, with the current time.
-  String get _dashboardNow =>
-      withClock(_dashboardText.isEmpty ? 'Home Assistant' : _dashboardText);
+  String get _dashboardNow {
+    final text = withClock(
+      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+    );
+    // The dashboard is as old as the last connection: say so.
+    return haConnected || !settings.haConfigured
+        ? text
+        : '$text\n${tr.skStatusHaOffline}';
+  }
+
+  /// Home Assistant reachable or not; the glasses' own dashboard shows it.
+  void _setHaConnected(bool connected) {
+    haConnected = connected;
+    if (g1.connected) unawaited(g1.setHomeAssistantOnline(connected));
+  }
 
   Timer? _clockTimer;
 
@@ -202,7 +215,7 @@ class Bridge extends ChangeNotifier {
 
   Future<void> restartHomeAssistant() async {
     _haGeneration++;
-    haConnected = false;
+    _setHaConnected(false);
     await _ha?.close();
     if (settings.haConfigured) {
       unawaited(_runHomeAssistant());
@@ -240,7 +253,7 @@ class Bridge extends ChangeNotifier {
           'entry_id': settings.entryId,
         });
         if (!wanted()) return;
-        haConnected = true;
+        _setHaConnected(true);
         backoff = 2;
         _setHaStatus(tr.coreHaConnected(client.haVersion ?? '?'));
         _lastReported = null;
@@ -270,7 +283,7 @@ class Bridge extends ChangeNotifier {
         _log('Home Assistant: $e');
       } finally {
         ping?.cancel();
-        if (wanted()) haConnected = false;
+        if (wanted()) _setHaConnected(false);
         await client.close();
         if (wanted()) notifyListeners();
       }
@@ -484,6 +497,7 @@ class Bridge extends ChangeNotifier {
       _dashboardShown = false;
     } else {
       unawaited(_applyGlassesSettings());
+      unawaited(g1.setHomeAssistantOnline(haConnected));
       if (recorder.recording && !display.active) unawaited(display.showIdle());
     }
     unawaited(_reportState());

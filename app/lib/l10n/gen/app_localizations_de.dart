@@ -789,6 +789,12 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get skStatusHaOffline => '! Home Assistant nicht erreichbar';
+
+  @override
+  String get skStatusNoPhone => '! Keine Verbindung zum Handy';
+
+  @override
   String uiAnswer(String text) {
     return 'Antwort: $text';
   }
