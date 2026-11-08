@@ -9,6 +9,16 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.22.1] - 2026-11-08
+
+### Fixed
+- ScouterKit: the display sometimes stayed on with the head down. A restart
+  of the program on the arms kept the panel's image, and a lost message
+  between the arms left the left eye in the old state. Now each arm switches
+  its panel off at start and every 5 seconds while the head is down and the
+  app shows nothing, and the right arm repeats its head state to the left
+  one every 5 seconds.
+
 ## [0.22.0] - 2026-11-07
 
 ### Added
@@ -357,7 +367,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...HEAD
+[0.22.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...v0.21.0

@@ -9,6 +9,16 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.22.1] - 2026-11-08
+
+### Fixed
+- ScouterKit: Die Anzeige blieb manchmal bei gesenktem Kopf an. Ein Neustart
+  des Programms auf den Bügeln ließ das Bild der Anzeige stehen, und eine
+  verlorene Nachricht zwischen den Bügeln ließ das linke Auge im alten
+  Zustand. Jetzt schaltet jeder Bügel seine Anzeige beim Start und alle
+  5 Sekunden ab, solange der Kopf unten ist und die App nichts zeigt, und der
+  rechte Bügel wiederholt dem linken alle 5 Sekunden seinen Kopfzustand.
+
 ## [0.22.0] - 2026-11-07
 
 ### Added
@@ -368,7 +378,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...HEAD
+[0.22.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.0...v0.22.1
 [0.22.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.1...v0.22.0
 [0.21.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.21.0...v0.21.1
 [0.21.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.20.0...v0.21.0

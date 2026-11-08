@@ -67,6 +67,12 @@ class SkResident {
   static final _signY = SkW.at(state + 84);
   static final _countY = SkW.at(state + 88);
   static final _timeY = SkW.at(state + 92);
+  static final _beat = SkW.at(state + 96);
+
+  /// Every [watchUs] each arm makes sure its panel is off while the head is
+  /// down and the app shows nothing, and the right arm repeats its head
+  /// state to the left one, so a missed message or a restart heals itself.
+  static const watchUs = 5000000;
 
   static const flagDashboard = 1;
   static const flagGestures = 2;
@@ -121,6 +127,8 @@ class SkResident {
     }
     a.mov(up, c0);
     a.mov(shown, c0);
+    // A restart leaves the panel's image: dark until the head is up.
+    a.call('darken');
     a.call('armTimer');
     if (peer == peerFollower) a.end();
 
@@ -175,9 +183,37 @@ class SkResident {
     // minute begins (the detector's timer ticks every 20 ms anyway).
     a.label('armTimer');
     if (!gestures) {
-      a.beq(clockAt, c0, 'ret');
-      a.add(r0, clockRef, a.c(minuteUs));
+      // The next check, or the next minute if that comes first.
+      a.sysRead(r0, a.c(SkProp.timeUs));
+      a.add(r0, r0, a.c(watchUs));
+      a.beq(clockAt, c0, 'armSet');
+      a.add(r1, clockRef, a.c(minuteUs));
+      a.sub(r2, r1, r0);
+      a.bges(r2, c0, 'armSet');
+      a.mov(r0, r1);
+      a.label('armSet');
       a.sysWrite(a.c(SkProp.timer), r0);
+    }
+    a.ret();
+
+    // darken: the panel off while the head is down and the app shows
+    // nothing (it may still hold an old image).
+    a.label('darken');
+    a.bne(up, c0, 'ret');
+    a.bne(busy, c0, 'ret');
+    a.sysWrite(a.c(SkProp.panel), c0);
+    a.mov(shown, c0);
+    a.ret();
+
+    // watch: darken, and the right arm repeats its head state.
+    a.label('watch');
+    a.call('darken');
+    if (peer == peerLeader) {
+      a.mov(r0, a.c(peerDown));
+      a.beq(up, c0, 'beat');
+      a.mov(r0, a.c(peerUp));
+      a.label('beat');
+      a.sysWrite(a.c(SkProp.peerSend), r0);
     }
     a.ret();
 
@@ -287,6 +323,11 @@ class SkResident {
       a.add(r0, r0, a.c(periodUs));
       a.sysWrite(a.c(SkProp.timer), r0);
       a.call('tick');
+      a.add(_beat, _beat, c1);
+      a.bltu(_beat, a.c(watchUs ~/ periodUs), 'noWatch');
+      a.mov(_beat, c0);
+      a.call('watch');
+      a.label('noWatch');
       a.add(_tick, _tick, c1);
       a.beq(_cool, c0, 'sample');
       a.sub(_cool, _cool, c1);
@@ -345,6 +386,7 @@ class SkResident {
       // TIMER: a new minute (the clock).
       a.label('timer');
       a.call('tick');
+      a.call('watch');
       a.call('armTimer');
       a.end();
     }

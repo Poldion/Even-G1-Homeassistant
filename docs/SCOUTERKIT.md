@@ -176,6 +176,10 @@ gone, and the app loads it again.
   without the phone), writes the digits (glyphs 0–9) and redraws if the
   dashboard is shown. The app sets the time again after each clock sync
   (every 3 minutes).
+- **Watch** (every 5 s): each arm switches its panel off while the head is
+  down and the app shows nothing (also right after a restart, which keeps
+  the panel's image), and the right arm repeats its head state to the left
+  one. A lost message or a restart heals itself within 5 seconds.
 - **Both eyes together** (arm-to-arm link, VM.md §6.9): only the right arm
   follows the tilt. On a change it sends `PEER_SEND` 1 (up) or 2 (down) to
   the left arm and switches 150 ms later; the left arm's `PEER` handler

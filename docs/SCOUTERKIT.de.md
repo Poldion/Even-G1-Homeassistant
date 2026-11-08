@@ -179,6 +179,11 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   weiter (auch ohne Handy), schreibt die Ziffern (Glyphen 0–9) und zeichnet
   neu, wenn das Dashboard zu sehen ist. Die App stellt die Zeit nach jedem
   Uhrenabgleich (alle 3 Minuten) neu.
+- **Wachhund** (alle 5 s): Jeder Bügel schaltet seine Anzeige ab, solange
+  der Kopf unten ist und die App nichts zeigt (auch gleich nach einem
+  Neustart, der das Bild der Anzeige stehen lässt), und der rechte Bügel
+  wiederholt dem linken seinen Kopfzustand. Eine verlorene Nachricht oder ein
+  Neustart heilt sich so binnen 5 Sekunden.
 - **Beide Augen zusammen** (Funkverbindung der Bügel, VM.md §6.9): Nur der
   rechte Bügel folgt der Neigung. Bei einem Wechsel schickt er dem linken
   `PEER_SEND` 1 (hoch) oder 2 (runter) und schaltet 150 ms später; der
