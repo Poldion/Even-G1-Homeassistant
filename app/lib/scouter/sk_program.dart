@@ -33,7 +33,11 @@ class SkResident {
   static const rects = 0x35D00;
   static const maxRects = 89;
   static const text = 0x36400;
-  static const textEnd = statusText;
+  static const textEnd = labelText;
+
+  /// The recording label's glyphs (small font).
+  static const labelText = statusText - labelMax;
+  static const labelMax = 64;
 
   /// The two status lines (no phone, no Home Assistant), [statusMax]
   /// glyph bytes each, at the end of the text area.
@@ -84,6 +88,33 @@ class SkResident {
   static final statusN1 = SkW.at(state + 100);
   static final statusN2 = SkW.at(state + 104);
 
+  // The microphone (right arm, written by the app): its stand under the
+  // firmware's indicator. The recording label (small font): glyph count (0:
+  // none), where it goes, its width and its baseline.
+  static final micOn = SkW.at(state + 108);
+  static final labelN = SkW.at(state + 112);
+  static final labelX = SkW.at(state + 116);
+  static final labelY = SkW.at(state + 120);
+  static final labelW = SkW.at(state + 124);
+  static final labelBase = SkW.at(state + 128);
+  static const labelH = 14;
+  static const labelLevel = 12;
+
+  /// Region of the microphone's stand; the firmware draws its 16 × 16
+  /// indicator at (620, 4) on the right arm (VM.md §6.5): the head.
+  static const standX = 610, standY = 2, standW = 30, standH = bandRows;
+  static const standLevel = 11;
+
+  /// The stand in panel coordinates: a holder around the indicator's lower
+  /// half, a stem and a base.
+  static const standRects = [
+    (614, 10, 2, 14),
+    (638, 10, 2, 14),
+    (614, 22, 26, 2),
+    (626, 24, 3, 7),
+    (619, 31, 17, 2),
+  ];
+
   /// Every [watchUs] each arm makes sure its panel is off while the head is
   /// down and the app shows nothing, and the right arm repeats its head
   /// state to the left one, so a missed message or a restart heals itself.
@@ -124,6 +155,7 @@ class SkResident {
   static ({Uint8List code, Uint8List pool, Uint8List table}) build({
     required bool gestures,
     int peer = peerNone,
+    bool micArm = false,
   }) {
     final a = SkAsm(codeAt: code, poolAt: pool, poolWords: poolWords);
     const r0 = SkW.r(0), r1 = SkW.r(1), r2 = SkW.r(2), r3 = SkW.r(3);
@@ -190,6 +222,11 @@ class SkResident {
     a.label('done');
     a.end();
 
+    // USER3: the microphone went on or off, or the app cleared the panel.
+    a.label('user3');
+    a.call('stand');
+    a.end();
+
     // USER2: Home Assistant became reachable or unreachable.
     a.label('user2');
     a.beq(shown, c0, 'done');
@@ -223,9 +260,14 @@ class SkResident {
     a.label('darken');
     a.bne(up, c0, 'ret');
     a.bne(busy, c0, 'ret');
+    // With the microphone on the panel stays on anyway: only an image to
+    // clear, then the stand again.
+    a.beq(micOn, c0, 'darkenOff');
+    a.beq(shown, c0, 'ret');
+    a.label('darkenOff');
     a.sysWrite(a.c(SkProp.panel), c0);
     a.mov(shown, c0);
-    a.ret();
+    a.jmp('stand');
 
     // watch: darken, and the right arm repeats its head state.
     a.label('watch');
@@ -329,6 +371,8 @@ class SkResident {
     a.add(r3, r3, c1);
     a.bltu(r3, rows, 'line');
     a.call('status');
+    a.call('label');
+    a.call('stand');
     a.mov(shown, c1);
     a.label('ret');
     a.ret();
@@ -376,6 +420,61 @@ class SkResident {
     a.draw(sBand, sStride, c0, c0, c0, statusY, a.c(SkPanel.width), lineHeight);
     a.ret();
 
+    // label: the recording label in the small font (e.g. on the frame's
+    // top line).
+    a.label('label');
+    a.beq(labelN, c0, 'ret');
+    final lb = a.c(band), ls = a.c(SkPanel.stride);
+    a.fill(lb, ls, c0, c0, labelW, a.c(labelH), c0);
+    a.glyphs(
+      a.c(SkArena.smallFont),
+      lb,
+      ls,
+      a.c(4),
+      labelBase,
+      a.c(2), // MASK
+      a.c(labelLevel),
+      a.c(labelText),
+      labelN,
+    );
+    a.draw(lb, ls, c0, c0, labelX, labelY, labelW, a.c(labelH));
+    a.ret();
+
+    // stand: the microphone's stand under the firmware's indicator (right
+    // arm), or its place cleared. Draws only on a panel that is on.
+    a.label('stand');
+    if (micArm) {
+      a.bne(micOn, c0, 'standDraw');
+      a.beq(shown, c0, 'ret');
+      a.label('standDraw');
+      final sb = a.c(band), ss = a.c(SkPanel.stride);
+      a.fill(sb, ss, c0, c0, a.c(standW), a.c(standH), c0);
+      a.beq(micOn, c0, 'standOut');
+      for (final (x, y, w, h) in standRects) {
+        a.fill(
+          sb,
+          ss,
+          a.c(x - standX),
+          a.c(y - standY),
+          a.c(w),
+          a.c(h),
+          a.c(standLevel),
+        );
+      }
+      a.label('standOut');
+      a.draw(
+        sb,
+        ss,
+        c0,
+        c0,
+        a.c(standX),
+        a.c(standY),
+        a.c(standW),
+        a.c(standH),
+      );
+    }
+    a.ret();
+
     // statusCheck: redraws the status line if it changed.
     a.label('statusCheck');
     a.call('statusId');
@@ -388,7 +487,8 @@ class SkResident {
     a.mov(shown, c0);
     a.bne(busy, c0, 'ret');
     a.sysWrite(a.c(SkProp.panel), c0);
-    a.ret();
+    // The microphone holds the panel on: its stand again.
+    a.jmp('stand');
 
     if (gestures) {
       // TIMER every 20 ms: the gyroscope's rates about x (nodding) and
@@ -490,6 +590,8 @@ class SkResident {
       a.end();
     }
 
+    // Everything drawn through the band must fit it (the code follows it).
+    assert(labelH <= bandRows && standH <= bandRows);
     final bytes = a.build();
     if (code + bytes.length > codeEnd) throw StateError('program too long');
     final t = ByteData(64);
@@ -502,6 +604,7 @@ class SkResident {
     entry(SkTrigger.timer, 'timer');
     entry(SkTrigger.user1, 'user1');
     entry(SkTrigger.user2, 'user2');
+    entry(SkTrigger.user3, 'user3');
     return (code: bytes, pool: a.pool(), table: t.buffer.asUint8List());
   }
 

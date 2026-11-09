@@ -59,6 +59,7 @@ class FakeGlasses extends G1Connection {
     String text, {
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
+    String? label,
   }) async {
     texts.add(text);
     return true;

@@ -77,7 +77,8 @@ class Bridge extends ChangeNotifier {
   Bridge(this.settings, {G1Connection? g1}) : g1 = g1 ?? ScouterConnection() {
     display = G1Display(this.g1);
     recorder = VoiceRecorder(this.g1, settings, _log)
-      ..addListener(notifyListeners);
+      ..addListener(notifyListeners)
+      ..addListener(_syncDashboardLabel);
     this.g1.addListener(_onGlassesChanged);
     this.g1.events.listen(_onGlassesEvent);
     this.g1.log.listen(_log);
@@ -140,6 +141,14 @@ class Bridge extends ChangeNotifier {
         : '$text\n${tr.skStatusHaOffline}';
   }
 
+  /// "BasaltNotes is recording" with the dashboard while a recording runs.
+  String? get _dashboardLabel =>
+      recorder.recording ? tr.coreRecordingLabel : null;
+
+  void _syncDashboardLabel() {
+    if (g1.connected) unawaited(g1.setDashboardLabel(_dashboardLabel));
+  }
+
   /// Home Assistant reachable or not; the glasses' own dashboard shows it.
   void _setHaConnected(bool connected) {
     haConnected = connected;
@@ -163,7 +172,11 @@ class Bridge extends ChangeNotifier {
     _clockTimer = Timer(next.difference(now), () {
       if (!_dashboardShown || !display.active || !g1.connected) return;
       unawaited(
-        display.showText(_dashboardNow, style: haConfig.dashboardStyle),
+        display.showText(
+          _dashboardNow,
+          style: haConfig.dashboardStyle,
+          label: _dashboardLabel,
+        ),
       );
       _scheduleClock();
     });
@@ -309,7 +322,11 @@ class Bridge extends ChangeNotifier {
         // Refresh only while it is on the display; otherwise the glasses
         // are not woken up for updates.
         if (_dashboardShown && display.active && g1.connected) {
-          await display.showText(_dashboardNow, style: haConfig.dashboardStyle);
+          await display.showText(
+            _dashboardNow,
+            style: haConfig.dashboardStyle,
+            label: _dashboardLabel,
+          );
         }
       case 'listening':
         final text = (event['text'] as String? ?? '').trim();
@@ -454,6 +471,7 @@ class Bridge extends ChangeNotifier {
     } else {
       unawaited(_applyGlassesSettings());
       unawaited(g1.setHomeAssistantOnline(haConnected));
+      _syncDashboardLabel();
       if (recorder.recording && !display.active) unawaited(display.showIdle());
     }
     unawaited(_reportState());
@@ -632,6 +650,7 @@ class Bridge extends ChangeNotifier {
       _dashboardNow,
       closeAfter: seconds > 0 ? Duration(seconds: seconds) : null,
       style: haConfig.dashboardStyle,
+      label: _dashboardLabel,
     );
     return true;
   }
@@ -665,7 +684,11 @@ class Bridge extends ChangeNotifier {
     // Do not cover a text or answer that is currently shown.
     if (display.active && !_dashboardShown) return;
     _dashboardShown = true;
-    await display.showText(_dashboardNow, style: haConfig.dashboardStyle);
+    await display.showText(
+      _dashboardNow,
+      style: haConfig.dashboardStyle,
+      label: _dashboardLabel,
+    );
     // The time moves on while the head stays up.
     if (_dashboardText.contains(clockToken)) _scheduleClock();
   }

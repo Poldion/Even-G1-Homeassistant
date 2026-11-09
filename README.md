@@ -206,8 +206,14 @@ The Assist pipeline needs speech recognition (e.g. *Home Assistant Cloud* or
 2. In WhisperNotes under *Settings → BasaltNotes* set up the connection and a
    **default vault**.
 3. Start a recording: on the app's overview with *Start* or in Home Assistant
-   with `switch.<name>_recording`. While the microphone is on, the glasses
-   show a small square in the top right corner of the right eye.
+   with `switch.<name>_recording`. While the microphone is on (recording or
+   Assist), a small microphone shows in the top right corner of the right
+   eye: its head is the square the firmware always draws while the
+   microphone listens, the app adds holder, stem and base. During a
+   recording the dashboard also says `BasaltNotes is recording` in small
+   letters on the top left of its frame.
+
+   ![Dashboard during a recording](docs/images/en/dashboard-recording.png)
 4. When you stop, the app sends the recording to WhisperNotes. There it is
    transcribed and summarized; the summary arrives as a note in the BasaltNotes
    inbox. Without a connection the recording stays in the app and is sent

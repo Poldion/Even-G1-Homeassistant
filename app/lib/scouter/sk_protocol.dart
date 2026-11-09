@@ -115,6 +115,7 @@ class SkTrigger {
   static const user0 = 12;
   static const user1 = 13;
   static const user2 = 14;
+  static const user3 = 15;
 }
 
 /// `TOUCH_GESTURE` values (VM.md §2.5).
@@ -167,7 +168,11 @@ class SkArena {
 
   /// The font blob.
   static const font = 0x1000;
-  static const fontMax = icons - font;
+  static const fontMax = smallFont - font;
+
+  /// The same font at its own size (labels), same glyph indices.
+  static const smallFont = 0x5000;
+  static const smallFontMax = icons - smallFont;
 
   /// Notification icons (50 × 50, 4 bpp, 1250 bytes each), uploaded when
   /// first used.

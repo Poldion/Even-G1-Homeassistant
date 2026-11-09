@@ -463,7 +463,8 @@ void main() {
     test('clearing switches the panels off', () async {
       g1.fakeReady(epoch: arms.epoch);
       expect(await g1.blankScreen(), isTrue);
-      expect(arms.ops[G1Side.left], [SkOp.sysWrite]);
+      // PANEL 0, then USER3: the program redraws the microphone's stand.
+      expect(arms.ops[G1Side.left], [SkOp.sysWrite, SkOp.raise]);
     });
 
     test('touch gestures become the Even events', () async {
@@ -515,15 +516,19 @@ void main() {
       await g1.setDashboard(onHeadUp: true, text: '12:00\nWohnzimmer: 21 °C');
       for (final side in G1Side.values) {
         final arena = arms.arenas[side]!;
-        final p = SkResident.build(gestures: false);
+        final p = SkResident.build(
+          gestures: false,
+          micArm: side == G1Side.right,
+        );
         expect(
           arena.sublist(SkResident.code, SkResident.code + p.code.length),
           p.code,
         );
         final d = ByteData.sublistView(arena);
-        // 11 bands: the 9 empty lines below first, then the 2 texts.
+        // 12 bands: the 9 empty lines below first, the label's place, then
+        // the 2 texts.
         final bands = d.getUint32(SkResident.count.address, Endian.little);
-        expect(bands, 11);
+        expect(bands, 12);
         expect(d.getUint32(SkResident.rows.address, Endian.little), bands);
         int entry(int i, int word) => d.getUint32(
           SkResident.lines + 4 * (SkResident.entryWords * i + word),
@@ -531,9 +536,9 @@ void main() {
         );
         expect(
           [for (var i = 0; i < bands; i++) entry(i, 3) > 0],
-          [...List.filled(9, false), true, true],
+          [...List.filled(10, false), true, true],
         );
-        expect(entry(9, 1), 140); // y of the first line
+        expect(entry(10, 1), 140); // y of the first line
         expect(d.getUint32(SkResident.angle.address, Endian.little), 30);
         expect(
           arms.ctrl[side]!.where((c) => c[0] == SkCtrl.vmStart),
@@ -583,14 +588,21 @@ void main() {
       expect(
         ByteData.sublistView(arms.arenas[G1Side.left]!)
             .getUint32(SkResident.count.address, Endian.little),
-        11, // one text band, ten empty ones
+        12, // one text band, ten empty ones, the label's place
       );
-      // Off again: the program stops.
+      // Off again: the program keeps running (clock, status line,
+      // microphone) and only stops showing the dashboard.
       await g1.setDashboard(onHeadUp: false, text: '');
       expect(g1.showsDashboardItself, isFalse);
       expect(
         arms.ctrl[G1Side.left]!.where((c) => c[0] == SkCtrl.vmStop),
-        hasLength(1),
+        isEmpty,
+      );
+      expect(
+        ByteData.sublistView(arms.arenas[G1Side.left]!)
+                .getUint32(SkResident.flags.address, Endian.little) &
+            SkResident.flagDashboard,
+        0,
       );
       await sub.cancel();
     });
@@ -598,7 +610,7 @@ void main() {
     test('head gestures load the detector on the right arm only', () async {
       g1.fakeReady(epoch: arms.epoch);
       await g1.setHeadGestures(true);
-      final right = SkResident.build(gestures: true).code;
+      final right = SkResident.build(gestures: true, micArm: true).code;
       expect(
         arms.arenas[G1Side.right]!.sublist(
           SkResident.code,

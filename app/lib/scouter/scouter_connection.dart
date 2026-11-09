@@ -109,6 +109,16 @@ class ScouterConnection extends G1Connection {
 
   /// Departure Mono, 11 px drawn ×2 (22 px, 28 px per line, 14 px per
   /// character), only the characters [SkFont.textCodepoint] needs.
+  /// The font at its own size (labels), the same glyph indices.
+  static Future<SkFont> loadSmallFont() => _smallFont ??= rootBundle
+      .load(fontAsset)
+      .then(
+        (d) =>
+            SkFont.parse(d.buffer.asUint8List(d.offsetInBytes, d.lengthInBytes))
+                .scaled(1, keep: SkFont.textCodepoint),
+      );
+  static Future<SkFont>? _smallFont;
+
   static Future<SkFont> loadFont() => _font ??= rootBundle
       .load(fontAsset)
       .then(
@@ -119,6 +129,10 @@ class ScouterConnection extends G1Connection {
 
   final Future<SkFont> Function() _fontLoader;
   SkFont? _loadedFont;
+  SkFont? _loadedSmall;
+
+  Future<SkFont> _small() async =>
+      _loadedSmall ??= _fake ? await _fontLoader() : await loadSmallFont();
   bool _fake = false;
   bool _disposed = false;
   final Map<G1Side, _SkArm> _arms = {};
@@ -445,6 +459,7 @@ class ScouterConnection extends G1Connection {
         final lib = SkLib.build();
         final ok = await arm.link.run([
           ...skUpload(SkArena.font, font.blob, maxPacket - 2),
+          ...skUpload(SkArena.smallFont, (await _small()).blob, maxPacket - 2),
           // Frames and animations (SkLib), called by later packets.
           ...skUpload(SkLib.pool, lib.pool, maxPacket - 2),
           ...skUpload(SkLib.code, lib.code, maxPacket - 2),
@@ -604,8 +619,9 @@ class ScouterConnection extends G1Connection {
     );
   }
 
-  bool _wantsResident(_SkArm arm) =>
-      _dashboardOnHeadUp || (_headGestures && arm.side == G1Side.right);
+  /// The program always runs: clock, status line, microphone stand,
+  /// keeping both eyes in step; the dashboard and the gestures are options.
+  bool _wantsResident(_SkArm arm) => true;
 
   @override
   Future<void> setDashboard({
@@ -660,7 +676,11 @@ class ScouterConnection extends G1Connection {
       return;
     }
     final font = _loadedFont ??= await _fontLoader();
-    final p = SkResident.build(gestures: gestures, peer: peer);
+    final p = SkResident.build(
+      gestures: gestures,
+      peer: peer,
+      micArm: arm.side == G1Side.right,
+    );
     final maxCode = arm.link.maxPacket - 2;
     final ok = await arm.link.run([
       ...skUpload(SkResident.pool, p.pool, maxCode),
@@ -820,6 +840,7 @@ class ScouterConnection extends G1Connection {
       ),
       _residentState(font),
       _clockCode(arm),
+      ...await _labelCode(arm),
       ...skUpload(
         SkResident.statusText,
         Uint8List.fromList([
@@ -881,6 +902,71 @@ class ScouterConnection extends G1Connection {
     }
   }
 
+  /// Where the dashboard's label goes (see [SkLayout.labelAt]).
+  static ({int x, int y}) dashboardLabelAt(
+    SkFont font,
+    String text,
+    G1TextStyle style, {
+    required int top,
+    required int rows,
+  }) => SkLayout.of(
+    font,
+    wrap(font, text, SkPanel.width - 2 * textLeft).take(rows).toList(),
+    style,
+    top: top,
+    left: textLeft,
+  ).labelAt(SkResident.labelH, left: textLeft, top: top);
+
+  /// The label shown with the dashboard (null: none).
+  String? _dashboardLabel;
+
+  @override
+  Future<void> setDashboardLabel(String? label) async {
+    if (label == _dashboardLabel) return;
+    _dashboardLabel = label;
+    for (final arm in _arms.values.where((a) => a.ready && a.resident)) {
+      await arm.link.run([
+        ...await _labelCode(arm),
+        (SkCode()..raise(SkTrigger.user0)).take(),
+      ]);
+    }
+  }
+
+  /// Host code for the program's label words and glyphs.
+  Future<List<Uint8List>> _labelCode(_SkArm arm) async {
+    final font = _loadedFont ??= await _fontLoader();
+    final small = await _small();
+    final label = _dashboardLabel;
+    final glyphs = label == null ? const <int>[] : small.encode(label);
+    final n = min(glyphs.length, SkResident.labelMax);
+    final at = dashboardLabelAt(
+      font,
+      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+      _dashboardStyle,
+      top: textTop,
+      rows: min(displayLines, SkResident.maxLines),
+    );
+    return [
+      if (n > 0)
+        ...skUpload(
+          SkResident.labelText,
+          Uint8List.fromList(glyphs.sublist(0, n)),
+          arm.link.maxPacket - 2,
+        ),
+      (SkCode()..write(
+            SkResident.labelN.address,
+            SkLib.u32s([
+              n,
+              at.x,
+              at.y,
+              label == null ? 0 : small.width(label) + 8,
+              labelBase(small),
+            ]),
+          ))
+          .take(),
+    ];
+  }
+
   /// Where the status line goes: below the dashboard, else above it, else
   /// nowhere (0).
   @visibleForTesting
@@ -940,6 +1026,8 @@ class ScouterConnection extends G1Connection {
       if (decor.isNotEmpty) decor.map((r) => r.bottom).reduce(max) - lh,
       // The gap below a title (card, title, lab).
       if (lines.length > 1 && lines[1].y > lines[0].y + lh) lines.first.y + lh,
+      // Where a label may stand: redrawn when it goes away.
+      layout.labelAt(SkResident.labelH, left: textLeft, top: top).y,
     };
     for (final e in extra) {
       if (e < 0 || lines.any((l) => l.y == e)) continue;
@@ -1364,8 +1452,11 @@ class ScouterConnection extends G1Connection {
     String text, {
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
+    String? label,
   }) async {
     final font = _loadedFont ??= await _fontLoader();
+    final small = await _small();
+    _appShowing = true;
     final arms = _targets().where((a) {
       if (a.inCase != 1) return true;
       if (!_caseNoted) {
@@ -1383,7 +1474,7 @@ class ScouterConnection extends G1Connection {
     }
     final iconAt = name == null ? null : SkIcons.slot(name, SkArena.icons);
     final synced = arms.length == 2 && arms.every((a) => a.clock.known);
-    final codes = textCode(
+    List<Uint8List> codes(_SkArm arm) => textCode(
       font,
       text,
       top: textTop,
@@ -1391,8 +1482,11 @@ class ScouterConnection extends G1Connection {
       icon: iconAt,
       draw: !synced,
       style: style,
+      label: label,
+      smallFont: small,
+      micStand: _micOn && arm.side == G1Side.right,
     );
-    final results = await Future.wait(arms.map((a) => a.link.run(codes)));
+    final results = await Future.wait(arms.map((a) => a.link.run(codes(a))));
     if (!synced || !results.every((r) => r)) return results.every((r) => r);
     // Both frames are ready: both eyes show them at the same moment.
     final at = SkClock.hostNow() + _drawLeadUs(arms);
@@ -1445,6 +1539,9 @@ class ScouterConnection extends G1Connection {
     int? icon,
     bool draw = true,
     G1TextStyle style = G1TextStyle.plain,
+    bool micStand = false,
+    String? label,
+    SkFont? smallFont,
   }) {
     final left = icon == null ? textLeft : iconTextLeft;
     final layout = SkLayout.of(
@@ -1495,9 +1592,26 @@ class ScouterConnection extends G1Connection {
       room(5 + 28 + 4);
       SkLib.drawBox(code, box);
     }
-    if (layout.extra.isNotEmpty) {
+    final small = smallFont ?? font;
+    final extra = [
+      ...layout.extra,
+      // The microphone's stand under the firmware's indicator (right arm).
+      if (micStand)
+        for (final (x, y, w, h) in SkResident.standRects)
+          SkRect(x, y, w, h, SkResident.standLevel),
+      // The label's background: it cuts the frame's line.
+      if (label != null)
+        SkRect(
+          layout.labelAt(SkResident.labelH, left: left, top: top).x,
+          layout.labelAt(SkResident.labelH, left: left, top: top).y,
+          small.width(label) + 8,
+          SkResident.labelH,
+          0,
+        ),
+    ];
+    if (extra.isNotEmpty) {
       // Rule, bars and brackets (lab design) with the library.
-      SkLib.drawRects(() => code, layout.extra, room);
+      SkLib.drawRects(() => code, extra, room);
     }
     var textAt = SkArena.text;
     for (final line in layout.lines) {
@@ -1520,6 +1634,24 @@ class ScouterConnection extends G1Connection {
       );
       textAt += chunk;
     }
+    if (label != null) {
+      final at = layout.labelAt(SkResident.labelH, left: left, top: top);
+      final glyphs = small.encode(label);
+      if (textAt + glyphs.length <= SkArena.text + SkArena.textSize) {
+        room(5 + glyphs.length + skOpSize(9));
+        code.write(textAt, glyphs);
+        code.glyphs(
+          smallFont == null ? SkArena.font : SkArena.smallFont,
+          SkArena.frame,
+          SkPanel.stride,
+          at.x + 4,
+          at.y + labelBase(small),
+          SkResident.labelLevel,
+          textAt,
+          glyphs.length,
+        );
+      }
+    }
     if (draw) {
       room(skOpSize(8));
       code.draw(
@@ -1536,6 +1668,10 @@ class ScouterConnection extends G1Connection {
     if (code.length > 0) packets.add(code.take());
     return packets;
   }
+
+  /// The baseline of a label of [SkResident.labelH] rows in [font].
+  static int labelBase(SkFont font) =>
+      (SkResident.labelH - font.ascent - font.descent) ~/ 2 + font.ascent;
 
   /// Splits [text] into lines at most [width] pixels wide (at spaces where
   /// possible). Empty lines are kept (vertical spacing).
@@ -1583,9 +1719,12 @@ class ScouterConnection extends G1Connection {
   /// (VM.md §6.6). The next text powers them on again (≈ 71 ms).
   @override
   Future<bool> blankScreen() {
+    _appShowing = false;
     final code = SkCode()
       ..write(SkResident.busy.address, const [0, 0, 0, 0])
-      ..sysWrite(SkProp.panel, 0);
+      ..sysWrite(SkProp.panel, 0)
+      // The microphone keeps the panel on: the program draws its stand.
+      ..raise(SkTrigger.user3);
     return _runOn([code.take()]);
   }
 
@@ -1790,16 +1929,52 @@ class ScouterConnection extends G1Connection {
       _micOn = false;
       final r = await _ctrl(arm, SkCtrl.mic, const [0, 0]);
       unawaited(_updatePriority());
+      unawaited(_micStand(arm, false));
       return r != null && r.status == 0;
     }
     _micOn = true;
     unawaited(_updatePriority());
     final ok = await _renewMic(arm);
+    unawaited(_micStand(arm, true));
     _micTimer?.cancel();
     _micTimer = Timer.periodic(const Duration(milliseconds: 800), (_) {
       if (_micOn && arm.ready) unawaited(_renewMic(arm));
     });
     return ok;
+  }
+
+  /// The app shows a text (its frame is on the panel).
+  bool _appShowing = false;
+
+  /// Tells the right arm's program about the microphone (it draws the
+  /// stand); over an app text the stand is cleared here.
+  Future<void> _micStand(_SkArm arm, bool on) async {
+    final code = SkCode()
+      ..write(SkResident.micOn.address, SkLib.u32s([on ? 1 : 0]))
+      ..raise(SkTrigger.user3);
+    if (!on && _appShowing) {
+      code
+        ..fill(
+          SkArena.frame,
+          SkPanel.stride,
+          SkResident.standX,
+          SkResident.standY,
+          SkResident.standW,
+          SkResident.standH,
+          0,
+        )
+        ..draw(
+          SkArena.frame,
+          SkPanel.stride,
+          SkResident.standX,
+          SkResident.standY,
+          SkResident.standX,
+          SkResident.standY,
+          SkResident.standW,
+          SkResident.standH,
+        );
+    }
+    await arm.link.run([code.take()]);
   }
 
   Future<bool> _renewMic(_SkArm arm) async {

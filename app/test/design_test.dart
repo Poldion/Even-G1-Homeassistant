@@ -303,6 +303,46 @@ void main() {
     expect(above + font.lineSpacing, lessThanOrEqualTo(128));
   });
 
+  test('recording: the microphone stand and the small label', () {
+    final ops = <int>[];
+    final arena = Uint8List(SkArena.size);
+    for (final code in ScouterConnection.textCode(
+      font,
+      text,
+      maxCode: 242,
+      style: G1TextStyle.card,
+      micStand: true,
+      label: 'BasaltNotes is recording',
+      smallFont: font,
+    )) {
+      expect(code.length, lessThanOrEqualTo(242));
+      execute(code, arena, ops);
+    }
+    // Box, then the rule, the stand and the label's background as one
+    // rectangle list; one more GLYPHS for the label.
+    expect(ops.where((o) => o == SkOp.call), hasLength(2));
+    final plain = <int>[];
+    for (final code in ScouterConnection.textCode(
+      font,
+      text,
+      maxCode: 242,
+      style: G1TextStyle.card,
+    )) {
+      execute(code, Uint8List(SkArena.size), plain);
+    }
+    expect(
+      ops.where((o) => o == SkOp.glyphs).length,
+      plain.where((o) => o == SkOp.glyphs).length + 1,
+    );
+    // The stand fits the band the program draws it through.
+    for (final (x, y, w, h) in SkResident.standRects) {
+      expect(x >= SkResident.standX && y >= SkResident.standY, isTrue);
+      expect(x + w <= SkResident.standX + SkResident.standW, isTrue);
+      expect(y + h <= SkResident.standY + SkResident.standH, isTrue);
+    }
+    expect(SkResident.standH, lessThanOrEqualTo(SkResident.bandRows));
+  });
+
   test('the library fits its area', () {
     final lib = SkLib.build();
     expect(SkLib.code + lib.code.length, lessThanOrEqualTo(SkLib.codeEnd));

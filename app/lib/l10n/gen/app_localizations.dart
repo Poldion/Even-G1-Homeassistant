@@ -428,6 +428,12 @@ abstract class AppLocalizations {
   /// **'Glasses note'**
   String get coreRecordingFileName;
 
+  /// No description provided for @coreRecordingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'BasaltNotes is recording'**
+  String get coreRecordingLabel;
+
   /// No description provided for @coreServiceText.
   ///
   /// In en, this message translates to:

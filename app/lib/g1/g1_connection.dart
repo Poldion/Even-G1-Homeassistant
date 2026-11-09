@@ -149,7 +149,12 @@ abstract class G1Connection extends ChangeNotifier {
     String text, {
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
+    String? label,
   });
+
+  /// A small label shown with the dashboard (e.g. while a recording runs),
+  /// null for none.
+  Future<void> setDashboardLabel(String? label) async {}
 
   /// Switches the display off.
   Future<bool> blankScreen();

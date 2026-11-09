@@ -213,8 +213,14 @@ Cloud* oder *Whisper*); *Speech-to-Phrase* versteht nur feste Befehle.
 2. In WhisperNotes unter *Einstellungen → BasaltNotes* die Verbindung und einen
    **Standard-Vault** einrichten.
 3. Aufnahme starten: auf der Übersicht der App mit *Start* oder in Home
-   Assistant mit `switch.<name>_aufnahme`. Solange das Mikrofon an ist, zeigt
-   die Brille oben rechts im rechten Auge ein kleines Quadrat.
+   Assistant mit `switch.<name>_aufnahme`. Solange das Mikrofon an ist
+   (Aufnahme oder Assist), steht oben rechts im rechten Auge ein kleines
+   Mikrofon: Sein Kopf ist das Quadrat, das die Firmware immer zeichnet,
+   solange das Mikrofon zuhört; Halterung, Stiel und Fuß ergänzt die App.
+   Während einer Aufnahme steht im Dashboard außerdem klein oben links im
+   Rahmen `BasaltNotes nimmt auf`.
+
+   ![Dashboard während einer Aufnahme](docs/images/de/dashboard-recording.png)
 4. Beim Stoppen schickt die App die Aufnahme an WhisperNotes. Dort wird sie
    transkribiert und zusammengefasst; die Zusammenfassung kommt als Notiz in
    den Eingang von BasaltNotes. Ohne Verbindung bleibt die Aufnahme in der App

@@ -9,6 +9,19 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-11-09
+
+### Added
+- Solange das Mikrofon an ist (Aufnahme oder Assist), steht oben rechts im
+  rechten Auge ein kleines Mikrofon: Das Quadrat der Firmware ist sein Kopf,
+  Halterung, Stiel und Fuß ergänzt die App.
+- Während einer Aufnahme steht im Dashboard klein oben links im Rahmen
+  `BasaltNotes nimmt auf`.
+
+### Changed
+- Das Programm auf den Bügeln läuft immer (Uhr, Statuszeile, Mikrofon),
+  auch ohne Dashboard beim Hochschauen.
+
 ## [0.25.0] - 2026-11-08
 
 ### Removed
@@ -411,7 +424,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...HEAD
+[0.26.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...v0.23.0

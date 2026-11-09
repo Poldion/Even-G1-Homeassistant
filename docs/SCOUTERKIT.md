@@ -172,6 +172,13 @@ gone, and the app loads it again.
   without the phone), writes the digits (glyphs 0–9) and redraws if the
   dashboard is shown. The app sets the time again after each clock sync
   (every 3 minutes).
+- **Microphone and label** (`USER3`, right arm): while the microphone is on
+  the program draws a stand (holder, stem, base) under the 16 × 16 square
+  that the firmware draws at (620, 4) (VM.md §6.5, it cannot be changed or
+  hidden), also after a `PANEL` = 0, which the microphone keeps from
+  switching the panel off. A label in the font at its own size (11 px,
+  uploaded with the 22-px font) stands on the frame's top line while a
+  recording runs.
 - **Status line**: below the dashboard (above it if there is no room) the
   program shows `! No connection to the phone` while its own `LINK` is 0,
   or `! Home Assistant unreachable` while the app says so (`USER2`). It

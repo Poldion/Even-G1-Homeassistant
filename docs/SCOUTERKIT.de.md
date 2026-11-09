@@ -175,6 +175,13 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   weiter (auch ohne Handy), schreibt die Ziffern (Glyphen 0–9) und zeichnet
   neu, wenn das Dashboard zu sehen ist. Die App stellt die Zeit nach jedem
   Uhrenabgleich (alle 3 Minuten) neu.
+- **Mikrofon und Hinweis** (`USER3`, rechter Bügel): Solange das Mikrofon
+  an ist, zeichnet das Programm einen Ständer (Halterung, Stiel, Fuß) unter
+  das 16 × 16 große Quadrat, das die Firmware bei (620, 4) zeichnet (VM.md
+  §6.5, es lässt sich weder ändern noch ausblenden), auch nach einem
+  `PANEL` = 0, das die Anzeige wegen des Mikrofons nicht ausschaltet. Ein
+  Hinweis in der Schrift in Originalgröße (11 px, mit der 22-px-Schrift
+  geladen) steht während einer Aufnahme auf der oberen Rahmenlinie.
 - **Statuszeile**: Unter dem Dashboard (darüber, wenn kein Platz ist)
   zeigt das Programm `! Keine Verbindung zum Handy`, solange sein eigenes
   `LINK` 0 ist, oder `! Home Assistant nicht erreichbar`, solange die App das

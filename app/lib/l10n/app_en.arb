@@ -208,6 +208,7 @@
   "coreLogWearOn": "Wear detection on",
   "coreNoHaConnection": "No connection to Home Assistant",
   "coreRecordingFileName": "Glasses note",
+  "coreRecordingLabel": "BasaltNotes is recording",
   "coreServiceText": "Connection active",
   "coreSttFailed": "Speech recognition failed.",
   "coreSttMissing": "No speech recognition configured in the Assist pipeline.",

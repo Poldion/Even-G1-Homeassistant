@@ -55,6 +55,7 @@
   "coreLogWearOn": "Trageerkennung an",
   "coreNoHaConnection": "Keine Verbindung zu Home Assistant",
   "coreRecordingFileName": "Brillen-Notiz",
+  "coreRecordingLabel": "BasaltNotes nimmt auf",
   "coreServiceText": "Verbindung aktiv",
   "coreSttFailed": "Spracherkennung fehlgeschlagen.",
   "coreSttMissing": "Keine Spracherkennung in der Assist-Pipeline konfiguriert.",

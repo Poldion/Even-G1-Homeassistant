@@ -220,6 +220,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coreRecordingFileName => 'Glasses note';
 
   @override
+  String get coreRecordingLabel => 'BasaltNotes is recording';
+
+  @override
   String get coreServiceText => 'Connection active';
 
   @override

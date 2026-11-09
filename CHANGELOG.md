@@ -9,6 +9,19 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-11-09
+
+### Added
+- While the microphone is on (recording or Assist) a small microphone shows
+  in the top right corner of the right eye: the firmware's square is its
+  head, the app adds holder, stem and base.
+- During a recording the dashboard says `BasaltNotes is recording` in small
+  letters on the top left of its frame.
+
+### Changed
+- The program on the arms always runs (clock, status line, microphone),
+  also without the dashboard on head up.
+
 ## [0.25.0] - 2026-11-08
 
 ### Removed
@@ -399,7 +412,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...HEAD
+[0.26.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.23.0...v0.24.0
 [0.23.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.22.1...v0.23.0

@@ -5,6 +5,7 @@ import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/l10n/l10n.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_anim.dart';
+import 'package:even_g1_ha/scouter/sk_asm.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
 import 'package:even_g1_ha/scouter/sk_lib.dart';
 import 'package:even_g1_ha/scouter/sk_program.dart';
@@ -219,6 +220,70 @@ void dumpDesigns() {
       w(SkResident.lineHeight.address, font.lineSpacing);
       w(SkResident.count.address, bands.length);
       save('resident_${style.id}', [], Uint8List.fromList(image));
+      if (style == G1TextStyle.card || style == G1TextStyle.lab) {
+        // Recording: the microphone's stand and the label (right arm).
+        final small = SkFont.parse(
+          File(ScouterConnection.fontAsset).readAsBytesSync(),
+        ).scaled(1, keep: SkFont.textCodepoint);
+        expect(
+          SkArena.smallFont + small.blob.length,
+          lessThanOrEqualTo(SkArena.icons),
+        );
+        expect(
+          SkArena.font + font.blob.length,
+          lessThanOrEqualTo(SkArena.smallFont),
+        );
+        final mic = SkResident.build(gestures: false, micArm: true);
+        final img = Uint8List.fromList(image);
+        final dm = ByteData.sublistView(img);
+        img.setRange(
+          SkResident.code,
+          SkResident.code + mic.code.length,
+          mic.code,
+        );
+        img.setRange(
+          SkResident.pool,
+          SkResident.pool + mic.pool.length,
+          mic.pool,
+        );
+        img.setRange(SkResident.table, SkResident.table + 64, mic.table);
+        img.setRange(
+          SkArena.smallFont,
+          SkArena.smallFont + small.blob.length,
+          small.blob,
+        );
+        for (final lang in ['en', 'de']) {
+          L10n.apply(lang);
+          final text = tr.coreRecordingLabel;
+          final g = small.encode(text);
+          img.setRange(
+            SkResident.labelText,
+            SkResident.labelText + g.length,
+            g,
+          );
+          final at = ScouterConnection.dashboardLabelAt(
+            font,
+            dashboard,
+            style,
+            top: 140,
+            rows: 11,
+          );
+          void wm(SkW word, int v) =>
+              dm.setUint32(word.address, v, Endian.little);
+          wm(SkResident.micOn, 1);
+          wm(SkResident.labelN, g.length);
+          wm(SkResident.labelX, at.x);
+          wm(SkResident.labelY, at.y);
+          wm(SkResident.labelW, small.width(text) + 8);
+          wm(SkResident.labelBase, ScouterConnection.labelBase(small));
+          save('resident_mic_${style.id}_$lang', [], Uint8List.fromList(img));
+          if (dir != null) {
+            File('$dir/label_${style.id}.txt')
+                .writeAsStringSync('${at.x} ${at.y}');
+          }
+        }
+        L10n.apply('en');
+      }
       if (style == G1TextStyle.card) {
         // The status line (Home Assistant unreachable / no phone).
         for (final lang in ['en', 'de']) {

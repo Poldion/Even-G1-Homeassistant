@@ -278,4 +278,18 @@ class SkLayout {
       ],
     );
   }
+
+  /// Where a small label goes for this layout: on the frame's top line
+  /// (after a bracket arm in the lab design), else above the first line.
+  /// [h] is the label's height.
+  ({int x, int y}) labelAt(int h, {required int left, required int top}) {
+    final frameTop =
+        box?.y ?? (fills.isEmpty ? null : fills.map((r) => r.y).reduce(min));
+    if (frameTop == null) return (x: left, y: max(0, top - h - 4));
+    final lab = box == null;
+    return (
+      x: lab ? frameX + bracketArm + 6 : frameX + 14,
+      y: max(0, frameTop - h ~/ 2 + 1),
+    );
+  }
 }

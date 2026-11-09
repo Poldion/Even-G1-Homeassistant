@@ -46,8 +46,10 @@ class G1Display {
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
     String? pageTitle,
+    String? label,
   }) async {
     _reset();
+    _label = label;
     _active = true;
     _icon = icon;
     _style = style;
@@ -125,6 +127,7 @@ class G1Display {
   /// App icon of the notification on the display.
   String? _icon;
   G1TextStyle _style = G1TextStyle.plain;
+  String? _label;
 
   /// Error message that closes itself after a few seconds.
   Future<bool> showAiError(String text) =>
@@ -161,7 +164,12 @@ class G1Display {
   Future<bool> _showPage(int generation) async {
     if (generation != _generation || !g1.connected) return false;
     screen.value = _screens[_page];
-    return g1.sendText(_screens[_page], icon: _icon, style: _style);
+    return g1.sendText(
+      _screens[_page],
+      icon: _icon,
+      style: _style,
+      label: _label,
+    );
   }
 
   void _scheduleClose() {
