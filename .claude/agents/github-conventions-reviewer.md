@@ -26,7 +26,10 @@ reads; do not push, tag or edit anything.
 
 ### Versioning and releases
 - Releases use **Semantic Versioning** tags of the form `vMAJOR.MINOR.PATCH`
-  (e.g. `v0.8.0`). No moving or ad-hoc tags such as `latest` or `app-latest`.
+  (e.g. `v0.8.0`) for releases with the integration, `app-vMAJOR.MINOR.PATCH`
+  GitHub pre-releases for app-only releases (HACS must not offer those) and
+  `sk-vMAJOR.MINOR.PATCH.N` pre-releases for preview builds. No moving or
+  ad-hoc tags such as `latest` or `app-latest`.
 - One project version: `app/pubspec.yaml` (`version: X.Y.Z+build`, build
   number increasing), `custom_components/even_g1/manifest.json` (`version`)
   and the newest `CHANGELOG.md` entry agree. A release tag `vX.Y.Z` matches

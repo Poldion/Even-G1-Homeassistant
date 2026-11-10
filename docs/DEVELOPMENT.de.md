@@ -75,8 +75,17 @@ Release erstellen:
 
 Der Workflow `.github/workflows/release.yml` prüft, dass Tag, App,
 Integration und Changelog übereinstimmen, baut die signierte APK und legt das
-Release mit `even-g1-ha-vX.Y.Z.apk`, `even_g1-vX.Y.Z.zip` und den Notizen aus
-dem (englischen) Changelog an.
+Release mit den Notizen aus dem (englischen) Changelog an, in einer von zwei
+Arten (Eingabe *kind*, Standard *auto*):
+
+- **integration** – `vX.Y.Z` mit `even-g1-ha-vX.Y.Z.apk` und
+  `even_g1-vX.Y.Z.zip`; HACS bietet es als Update an.
+- **app** – Pre-release `app-vX.Y.Z` nur mit `even-g1-ha-app-vX.Y.Z.apk`;
+  HACS ignoriert Pre-releases, der stabile Kanal der App installiert es.
+
+*auto* wählt *integration*, wenn sich unter `custom_components/` seit dem
+letzten Release `vX.Y.Z` etwas geändert hat (außer der Version in
+`manifest.json`), sonst *app*. Die Versionsnummer bleibt für beide eine.
 
 ## Signierung der APK
 

@@ -1,13 +1,24 @@
 name: Release
 
-# Creates a GitHub release (vX.Y.Z): signed APK, the integration as ZIP and
-# the notes from CHANGELOG.md. Runs for a pushed version tag, or manually:
-# then the version comes from the files and the tag is created on the
-# selected commit.
+# Creates a release from the notes in CHANGELOG.md, of one of two kinds:
+# - integration: a normal release vX.Y.Z with the signed APK and the
+#   integration as ZIP; HACS offers it as an update.
+# - app: a pre-release app-vX.Y.Z with the APK only; HACS ignores
+#   pre-releases, the app's stable channel installs it.
+# "auto" makes an integration release only if custom_components/ changed
+# since the last one (the version in manifest.json aside). Runs for a
+# pushed tag vX.Y.Z (integration), or manually: then the version comes from
+# the files and the tag is created on the selected commit.
 on:
   push:
     tags: ["v*.*.*"]
   workflow_dispatch:
+    inputs:
+      kind:
+        description: "auto, integration (vX.Y.Z, HACS) or app (app-vX.Y.Z pre-release)"
+        type: choice
+        options: [auto, integration, app]
+        default: auto
 
 permissions:
   contents: read
@@ -23,6 +34,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # History and tags: what changed since the last integration release.
+          fetch-depth: 0
 
       - name: Check that the tag matches all versions
         id: version
@@ -32,10 +46,12 @@ jobs:
             TAG="${GITHUB_REF_NAME#v}"
           else
             TAG="$APP"
-            if git ls-remote --exit-code --tags origin "refs/tags/v$TAG" >/dev/null; then
-              echo "::error::Release v$TAG already exists. Bump the version first."
-              exit 1
-            fi
+            for t in "v$TAG" "app-v$TAG"; do
+              if git ls-remote --exit-code --tags origin "refs/tags/$t" >/dev/null; then
+                echo "::error::Release $t already exists. Bump the version first."
+                exit 1
+              fi
+            done
           fi
           INTEGRATION=$(python3 -c "import json;print(json.load(open('custom_components/even_g1/manifest.json'))['version'])")
           CHANGELOG=$(grep -m1 -oP '^## \[\K[0-9]+\.[0-9]+\.[0-9]+' CHANGELOG.md)
@@ -46,6 +62,27 @@ jobs:
           fi
           echo "version=$TAG" >> "$GITHUB_OUTPUT"
 
+      - name: Integration or app release
+        id: kind
+        env:
+          KIND: ${{ inputs.kind || 'integration' }}
+        run: |
+          LAST=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+          if [ "$KIND" = "auto" ]; then
+            # The integration without the version line of its manifest.
+            if [ -z "$LAST" ] || ! git diff --quiet "$LAST" HEAD -- custom_components \
+                ':(exclude)custom_components/even_g1/manifest.json' \
+              || git diff "$LAST" HEAD -- custom_components/even_g1/manifest.json \
+                | grep '^[-+] ' | grep -vq '"version"'; then
+              KIND=integration
+            else
+              KIND=app
+            fi
+          fi
+          echo "Last integration release: ${LAST:-none}; this one: $KIND"
+          echo "kind=$KIND" >> "$GITHUB_OUTPUT"
+          echo "last=$LAST" >> "$GITHUB_OUTPUT"
+
       - name: Release notes from CHANGELOG.md
         run: |
           awk -v v="${{ steps.version.outputs.version }}" '
@@ -53,11 +90,19 @@ jobs:
             found && /^## \[/ {exit}
             found {print}
           ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
-          cat >> "$RUNNER_TEMP/notes.md" <<'EOF'
+          if [ "${{ steps.kind.outputs.kind }}" = "app" ]; then
+            cat >> "$RUNNER_TEMP/notes.md" <<EOF
 
           ---
-          **Installation:** `even-g1-ha-*.apk` auf dem Android-Handy installieren (Updates lassen sich über die vorherige Version installieren). Die Integration über HACS aktualisieren oder `even_g1-*.zip` nach `config/custom_components/even_g1/` entpacken.
+          **App only.** The Home Assistant integration is unchanged since ${{ steps.kind.outputs.last }} (this is a pre-release, so HACS offers no update). Install \`even-g1-ha-*.apk\` on the phone, or let the app update itself.
           EOF
+          else
+            cat >> "$RUNNER_TEMP/notes.md" <<'EOF'
+
+          ---
+          **Installation:** install `even-g1-ha-*.apk` on the Android phone (it installs over the previous version). Update the integration with HACS or unpack `even_g1-*.zip` to `config/custom_components/even_g1/`.
+          EOF
+          fi
           cat "$RUNNER_TEMP/notes.md"
 
       - uses: actions/setup-java@v4
@@ -119,7 +164,16 @@ jobs:
           V="${{ steps.version.outputs.version }}"
           # Remove the former rolling pre-release (replaced by versioned releases).
           gh release delete app-latest --cleanup-tag --yes 2>/dev/null || true
-          gh release create "v$V" "even-g1-ha-v$V.apk" "even_g1-v$V.zip" \
-            --target "$GITHUB_SHA" \
-            --title "v$V" \
-            --notes-file "$RUNNER_TEMP/notes.md"
+          if [ "${{ steps.kind.outputs.kind }}" = "app" ]; then
+            cp "even-g1-ha-v$V.apk" "even-g1-ha-app-v$V.apk"
+            gh release create "app-v$V" "even-g1-ha-app-v$V.apk" \
+              --prerelease \
+              --target "$GITHUB_SHA" \
+              --title "App v$V" \
+              --notes-file "$RUNNER_TEMP/notes.md"
+          else
+            gh release create "v$V" "even-g1-ha-v$V.apk" "even_g1-v$V.zip" \
+              --target "$GITHUB_SHA" \
+              --title "v$V" \
+              --notes-file "$RUNNER_TEMP/notes.md"
+          fi

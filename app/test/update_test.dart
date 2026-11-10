@@ -112,4 +112,32 @@ void main() {
     SharedPreferences.setMockInitialValues({'glasses_firmware': 'scouterkit'});
     expect(await AppUpdater.evenFirmware(), isFalse);
   });
+
+  test('stable: releases with the integration and app-only pre-releases', () {
+    const prefix = AppUpdater.downloadPrefix;
+    Map<String, dynamic> release(String tag, {required bool pre}) => {
+      'tag_name': tag,
+      'prerelease': pre,
+      'assets': [
+        {
+          'name': 'even-g1-ha-$tag.apk',
+          'browser_download_url': '$prefix$tag/even-g1-ha-$tag.apk',
+        },
+      ],
+    };
+    final releases = [
+      release('sk-v0.30.0.3', pre: true),
+      release('app-v0.29.1', pre: true),
+      release('v0.29.0', pre: false),
+      release('app-v0.28.5', pre: true),
+    ];
+    final stable = AppUpdater.newest(releases, channel: UpdateChannel.stable);
+    expect(stable?.version, '0.29.1');
+    expect(stable?.apkUrl, endsWith('even-g1-ha-app-v0.29.1.apk'));
+    final preview = AppUpdater.newest(releases, channel: UpdateChannel.preview);
+    expect(preview?.version, '0.30.0.3');
+    // An app-v tag that is not a pre-release, or a v tag that is: ignored.
+    expect(AppUpdater.parseRelease(release('app-v1.0.0', pre: false)), isNull);
+    expect(AppUpdater.parseRelease(release('v1.0.0', pre: true)), isNull);
+  });
 }

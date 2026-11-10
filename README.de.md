@@ -120,15 +120,21 @@ Danach *Einstellungen → Geräte & Dienste → Integration hinzufügen →
 
 ### App (Android)
 
-`even-g1-ha-vX.Y.Z.apk` von der
-[Releases-Seite](https://github.com/Poldion/Even-G1-Homeassistant/releases/latest)
+Die neueste `even-g1-ha-….apk` von der
+[Releases-Seite](https://github.com/Poldion/Even-G1-Homeassistant/releases)
 auf dem Handy herunterladen und installieren. Danach aktualisiert sich die
 App selbst: Sie sucht einmal am Tag nach einer neuen Version (oder unter
 *Einstellungen → App-Update*) und installiert sie auf Nachfrage. Beim ersten
 Update fragt Android einmalig, ob die App Apps installieren darf. Die
 Einstellungen bleiben erhalten.
 
-App und Integration sollten dieselbe Version haben.
+**Releases:** Ein Release `vX.Y.Z` enthält App und Integration, und HACS
+bietet es als Update an. Hat sich nur die App geändert, heißt das Release
+`app-vX.Y.Z` und ist auf GitHub als Pre-release markiert: HACS bietet es
+nicht an, Home Assistant muss nicht neu starten, und die App installiert es
+wie jede andere Version. Die Integration braucht also nur ein Update, wenn
+es ein Release `vX.Y.Z` gibt.
+
 
 Die Brille im offenen Ladeetui koppeln (Details in
 [docs/SCOUTERKIT.de.md](docs/SCOUTERKIT.de.md)).

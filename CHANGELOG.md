@@ -9,6 +9,17 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-11-10
+
+### Changed
+- Releases that only change the app are now published as GitHub
+  pre-releases `app-vX.Y.Z` with the APK only. HACS does not offer them, so
+  Home Assistant no longer needs an update and a restart for every app
+  update. Releases `vX.Y.Z` (app and integration) come only when the
+  integration changed. The app's stable channel installs both kinds.
+- This version itself is still a normal release, so that installed apps
+  find the new updater.
+
 ## [0.28.0] - 2026-11-10
 
 ### Added
@@ -428,7 +439,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...HEAD
+[0.29.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...v0.26.0

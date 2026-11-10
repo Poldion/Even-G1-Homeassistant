@@ -9,6 +9,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.29.0] - 2026-11-10
+
+### Changed
+- Releases, die nur die App ändern, erscheinen jetzt als GitHub-Pre-releases
+  `app-vX.Y.Z`, nur mit der APK. HACS bietet sie nicht an, Home Assistant
+  braucht also nicht mehr bei jedem App-Update ein Update und einen
+  Neustart. Releases `vX.Y.Z` (App und Integration) gibt es nur, wenn sich
+  die Integration geändert hat. Der stabile Kanal der App installiert beide.
+- Diese Version selbst ist noch ein normales Release, damit installierte Apps
+  den neuen Updater finden.
+
 ## [0.28.0] - 2026-11-10
 
 ### Added
@@ -441,7 +452,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...HEAD
+[0.29.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...v0.26.0

@@ -55,8 +55,6 @@ class AppUpdate {
 /// DownloadManager and handed to the system installer. Android only accepts
 /// it as an update if it is signed with the same key.
 class AppUpdater {
-  static const _latestRelease =
-      'https://api.github.com/repos/Poldion/Even-G1-Homeassistant/releases/latest';
   static const _releases =
       'https://api.github.com/repos/Poldion/Even-G1-Homeassistant/releases?per_page=30';
 
@@ -87,6 +85,10 @@ class AppUpdater {
 
   /// Tag prefix of the pre-releases.
   static const previewTagPrefix = 'sk-v';
+
+  /// Tag prefix of app-only stable releases (GitHub pre-releases, so HACS
+  /// does not offer an integration update for them).
+  static const appTagPrefix = 'app-v';
   static const _channelKey = 'update_channel';
   static const downloadPrefix =
       'https://github.com/Poldion/Even-G1-Homeassistant/releases/download/';
@@ -149,8 +151,15 @@ class AppUpdater {
     final prerelease = release['prerelease'] == true;
     final String version;
     if (channel == UpdateChannel.stable) {
-      if (prerelease || tag.startsWith(previewTagPrefix)) return null;
-      version = tag.replaceFirst(RegExp(r'^v'), '');
+      // Releases with the integration (vX.Y.Z) and app-only pre-releases
+      // (app-vX.Y.Z, which HACS does not offer).
+      if (!prerelease && RegExp(r'^v\d').hasMatch(tag)) {
+        version = tag.substring(1);
+      } else if (prerelease && tag.startsWith(appTagPrefix)) {
+        version = tag.substring(appTagPrefix.length);
+      } else {
+        return null;
+      }
     } else {
       if (!prerelease || !tag.startsWith(previewTagPrefix)) return null;
       version = tag.substring(previewTagPrefix.length);
@@ -173,18 +182,31 @@ class AppUpdater {
     return null;
   }
 
+  /// The highest version of [channel] among [releases].
+  static AppUpdate? newest(
+    Iterable<Map<String, dynamic>> releases, {
+    required UpdateChannel channel,
+    UpdateChannel installed = UpdateChannel.stable,
+  }) {
+    AppUpdate? best;
+    for (final r in releases) {
+      final u = parseRelease(r, channel: channel, installed: installed);
+      if (u != null && (best == null || isNewer(u.version, best.version))) {
+        best = u;
+      }
+    }
+    return best;
+  }
+
   /// Returns the latest release of the chosen channel if it is newer than
   /// the installed app, or any if the installed app is from another channel.
   static Future<AppUpdate?> check() async {
     final channel = await AppUpdater.channel();
     final current = await currentVersion();
     final installed = channelOf(current);
-    final stable = channel == UpdateChannel.stable;
     final client = HttpClient()..connectionTimeout = const Duration(seconds: 8);
     try {
-      final request = await client.getUrl(
-        Uri.parse(stable ? _latestRelease : _releases),
-      );
+      final request = await client.getUrl(Uri.parse(_releases));
       request.headers
         ..set(HttpHeaders.acceptHeader, 'application/vnd.github+json')
         ..set(HttpHeaders.userAgentHeader, 'EvenG1HA');
@@ -196,20 +218,15 @@ class AppUpdater {
         throw HttpException('HTTP ${response.statusCode}');
       }
       final json = jsonDecode(body);
-      AppUpdate? update;
-      if (json is Map<String, dynamic>) {
-        update = parseRelease(json, channel: channel, installed: installed);
-      } else if (json is List) {
-        // Newest first.
-        for (final r in json.whereType<Map<String, dynamic>>()) {
-          update = parseRelease(r, channel: channel, installed: installed);
-          if (update != null) break;
-        }
-      }
+      final update = newest(
+        json is List ? json.whereType<Map<String, dynamic>>() : const [],
+        channel: channel,
+        installed: installed,
+      );
       if (update == null) return null;
-      update = holdBackForEven(update, even: await evenFirmware());
-      if (update.switchesChannel) return update;
-      return isNewer(update.version, current) ? update : null;
+      final offered = holdBackForEven(update, even: await evenFirmware());
+      if (offered.switchesChannel) return offered;
+      return isNewer(offered.version, current) ? offered : null;
     } finally {
       client.close();
     }
