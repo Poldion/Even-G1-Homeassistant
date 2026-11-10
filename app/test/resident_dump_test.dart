@@ -6,6 +6,7 @@ import 'package:even_g1_ha/l10n/l10n.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_anim.dart';
 import 'package:even_g1_ha/scouter/sk_asm.dart';
+import 'package:even_g1_ha/scouter/sk_emoji.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
 import 'package:even_g1_ha/scouter/sk_lib.dart';
 import 'package:even_g1_ha/scouter/sk_program.dart';
@@ -227,11 +228,18 @@ void dumpDesigns() {
         ).scaled(1, keep: SkFont.textCodepoint);
         expect(
           SkArena.smallFont + small.blob.length,
-          lessThanOrEqualTo(SkArena.icons),
+          lessThanOrEqualTo(SkArena.smallFont + SkArena.smallFontMax),
         );
         expect(
-          SkArena.font + font.blob.length,
-          lessThanOrEqualTo(SkArena.smallFont),
+          font
+              .withSlots(
+                SkEmoji.slots,
+                advance: SkEmoji.advance,
+                slotBytes: SkEmoji.slotBytes,
+              )
+              .blob
+              .length,
+          lessThanOrEqualTo(SkArena.fontMax),
         );
         final mic = SkResident.build(gestures: false, micArm: true);
         final img = Uint8List.fromList(image);
@@ -311,6 +319,64 @@ void dumpDesigns() {
           w(SkResident.haOffline.address, 0);
         }
         L10n.apply('en');
+      }
+    }
+    // Emojis: the font with slots, the emojis of the examples copied in.
+    {
+      final emoji = SkFont.parse(File(SkEmoji.asset).readAsBytesSync());
+      final slotted = font.withSlots(
+        SkEmoji.slots,
+        advance: SkEmoji.advance,
+        slotBytes: SkEmoji.slotBytes,
+      );
+      final blob = Uint8List.fromList(slotted.blob);
+      final bd = ByteData.sublistView(blob);
+      var k = 0;
+      String fill(String text) {
+        final clean = SkEmoji.clean(text);
+        for (final cp in clean.runes) {
+          if (cp < 0x2190 || slotted.glyphOrNull(cp) != null) continue;
+          final g = emoji.glyphOrNull(cp);
+          if (g == null) continue;
+          final data = emoji.glyphData(g);
+          final at = slotted.slotAt(k);
+          blob.setRange(at.bitmap, at.bitmap + data.bits.length, data.bits);
+          bd
+            ..setUint32(at.entry, at.bitmap * 8, Endian.little)
+            ..setUint8(at.entry + 4, data.w)
+            ..setUint8(at.entry + 5, data.h)
+            ..setUint8(at.entry + 6, SkEmoji.advance)
+            ..setInt16(at.entry + 8, data.xOff, Endian.little)
+            ..setInt16(at.entry + 10, data.yOff, Endian.little);
+          slotted.map(cp, slotted.firstSlot + k++);
+        }
+        return clean;
+      }
+
+      final texts = {
+        'en':
+            '09:41  ·  Sat, Nov 7\n☀️ 8 °C  🌧 30 %\n🏠 Living room: 21.5 °C\n'
+            '🔋 Car: 80 %\n» today 18:00  🎉 Example event\n'
+            '[ ] 🛒 Example task · today',
+        'de':
+            '09:41  ·  Sa, 7. Nov\n☀️ 8 °C  🌧 30 %\n🏠 Wohnzimmer: 21,5 °C\n'
+            '🔋 Auto: 80 %\n» heute 18:00  🎉 Beispieltermin\n'
+            '[ ] 🛒 Beispiel-Aufgabe · heute',
+      };
+      for (final MapEntry(key: lang, value: t) in texts.entries) {
+        final text = fill(t);
+        final img = Uint8List.fromList(arena);
+        img.setRange(SkArena.font, SkArena.font + blob.length, blob);
+        save(
+          'emoji_$lang',
+          ScouterConnection.textCode(
+            slotted,
+            text,
+            maxCode: 242,
+            style: G1TextStyle.card,
+          ),
+          img,
+        );
       }
     }
     // Automatic brightness with an offset on the right arm.

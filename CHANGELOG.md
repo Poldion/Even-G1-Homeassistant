@@ -9,6 +9,13 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.28.0] - 2026-11-10
+
+### Added
+- Emojis on the glasses: texts, notifications, Assist answers and the
+  dashboard show about 1400 emojis (Noto Emoji, monochrome) in the line.
+  The app copies each emoji a text needs into the font on the arms once.
+
 ## [0.27.0] - 2026-11-10
 
 ### Changed
@@ -421,7 +428,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...HEAD
+[0.28.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...v0.25.0

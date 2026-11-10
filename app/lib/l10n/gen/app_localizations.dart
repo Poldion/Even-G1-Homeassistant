@@ -998,6 +998,12 @@ abstract class AppLocalizations {
   /// **'{arm}: display error at start'**
   String skLogDisplayError(String arm);
 
+  /// No description provided for @skLogEmojiReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji slots full: starting over'**
+  String get skLogEmojiReset;
+
   /// No description provided for @skLogEncrypted.
   ///
   /// In en, this message translates to:

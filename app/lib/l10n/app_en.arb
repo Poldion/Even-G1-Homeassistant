@@ -436,6 +436,7 @@
       }
     }
   },
+  "skLogEmojiReset": "Emoji slots full: starting over",
   "skLogEncrypted": "{arm}: connection encrypted",
   "@skLogEncrypted": {
     "placeholders": {

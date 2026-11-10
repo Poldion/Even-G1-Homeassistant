@@ -13,6 +13,7 @@ import '../l10n/l10n.dart';
 import 'sk_anim.dart';
 import 'sk_asm.dart';
 import 'sk_clock.dart';
+import 'sk_emoji.dart';
 import 'sk_font.dart';
 import 'sk_icons.dart';
 import 'sk_lib.dart';
@@ -66,6 +67,9 @@ class _SkArm {
 
   /// Icons in the arena of the current session.
   final Set<String> icons = {};
+
+  /// Emojis (codepoints) in this session's font slots.
+  final Set<int> emojis = {};
 
   int? battery;
   int? inCase;
@@ -129,6 +133,83 @@ class ScouterConnection extends G1Connection {
 
   final Future<SkFont> Function() _fontLoader;
   SkFont? _loadedFont;
+
+  /// The text font with empty slots for emojis (SkEmoji).
+  Future<SkFont> _textFont() async =>
+      _loadedFont ??= (await _fontLoader()).withSlots(
+        SkEmoji.slots,
+        advance: SkEmoji.advance,
+        slotBytes: SkEmoji.slotBytes,
+      );
+
+  /// Emoji codepoint → slot, the same on both arms.
+  final Map<int, int> _emojiSlots = {};
+
+  /// [text] ready to draw: emojis get a slot in the font (mapped for
+  /// [SkFont.encode] and the width) and are copied into the slots of
+  /// [arms] that miss them. When the slots run full they start over, and
+  /// the dashboard on the arms is written again.
+  Future<String> _emojify(String text, Iterable<_SkArm> arms) async {
+    final font = await _textFont();
+    final clean = SkEmoji.clean(text);
+    final wanted = <int>{};
+    SkFont? emoji;
+    for (final cp in clean.runes) {
+      // Text, and the private use area (the clock's placeholder).
+      if (cp < 0x2190 || (cp >= 0xE000 && cp <= 0xF8FF)) continue;
+      final g = font.glyphOrNull(cp);
+      if (g != null && g < font.firstSlot) continue; // the text font's own
+      emoji ??= await SkEmoji.load();
+      if (emoji.glyphOrNull(cp) != null) wanted.add(cp);
+    }
+    if (wanted.isEmpty) return clean;
+    final fresh = wanted.where((cp) => !_emojiSlots.containsKey(cp)).length;
+    if (_emojiSlots.length + fresh > font.slotCount) {
+      _emojiSlots.clear();
+      font.unmapFrom(font.firstSlot);
+      for (final a in _arms.values) {
+        a.emojis.clear();
+      }
+      _debug(tr.skLogEmojiReset);
+      for (final a in _arms.values.where((a) => a.ready && a.resident)) {
+        if (!arms.contains(a)) unawaited(_writeDashboard(a, redraw: true));
+      }
+    }
+    for (final cp in wanted) {
+      final k = _emojiSlots.putIfAbsent(cp, () => _emojiSlots.length);
+      font.map(cp, font.firstSlot + k);
+    }
+    for (final arm in arms) {
+      final missing = wanted.where((cp) => !arm.emojis.contains(cp)).toList();
+      if (missing.isEmpty) continue;
+      final maxCode = arm.link.maxPacket - 2;
+      final packets = <Uint8List>[];
+      var code = SkCode();
+      for (final cp in missing) {
+        final g = emoji!.glyphData(emoji.glyphOrNull(cp)!);
+        final at = font.slotAt(_emojiSlots[cp]!);
+        final entry = ByteData(12)
+          ..setUint32(0, at.bitmap * 8, Endian.little)
+          ..setUint8(4, g.w)
+          ..setUint8(5, g.h)
+          ..setUint8(6, SkEmoji.advance)
+          ..setInt16(8, g.xOff, Endian.little)
+          ..setInt16(10, g.yOff, Endian.little);
+        if (code.length + 10 + g.bits.length + 12 > maxCode) {
+          packets.add(code.take());
+          code = SkCode();
+        }
+        // The bitmap first, then the entry that points to it.
+        code
+          ..write(SkArena.font + at.bitmap, g.bits)
+          ..write(SkArena.font + at.entry, entry.buffer.asUint8List());
+      }
+      if (code.length > 0) packets.add(code.take());
+      if (await arm.link.run(packets)) arm.emojis.addAll(missing);
+    }
+    return clean;
+  }
+
   SkFont? _loadedSmall;
 
   Future<SkFont> _small() async =>
@@ -182,8 +263,9 @@ class ScouterConnection extends G1Connection {
 
   @override
   Future<List<String>> layoutPages(String text, {String? icon}) async {
-    final font = _loadedFont ??= await _fontLoader();
-    final lines = wrap(font, text, _textWidth(icon));
+    final font = await _textFont();
+    // Emojis need their slot (width) before the text is wrapped.
+    final lines = wrap(font, await _emojify(text, const []), _textWidth(icon));
     if (lines.isEmpty) return [''];
     final n = displayLines;
     return [
@@ -450,11 +532,12 @@ class ScouterConnection extends G1Connection {
         arm.epoch = reset.epoch;
         arm.fontLoaded = false;
         arm.icons.clear();
+        arm.emojis.clear();
         arm.clock.reset();
         arm.resident = false;
         arm.link.reset();
         arm.link.start(h.rxNext, h.execNext, h.credits, maxPacket);
-        final font = _loadedFont ??= await _fontLoader();
+        final font = await _textFont();
         final t0 = DateTime.now();
         final lib = SkLib.build();
         final ok = await arm.link.run([
@@ -592,7 +675,7 @@ class ScouterConnection extends G1Connection {
   /// (SkAnimation); the panels are off again at its end.
   @override
   Future<void> playSilentModeAnimation(bool on, {bool lab = false}) async {
-    final font = _loadedFont ??= await _fontLoader();
+    final font = await _textFont();
     final arms = _targets().where((a) => a.inCase != 1).toList();
     if (arms.isEmpty) return;
     final cx = SkPanel.width ~/ 2, cy = textTop + 2 * _lineHeight;
@@ -675,7 +758,7 @@ class ScouterConnection extends G1Connection {
       await _writeDashboard(arm, redraw: true);
       return;
     }
-    final font = _loadedFont ??= await _fontLoader();
+    final font = await _textFont();
     final p = SkResident.build(
       gestures: gestures,
       peer: peer,
@@ -757,11 +840,14 @@ class ScouterConnection extends G1Connection {
   /// Writes the dashboard's lines into the program's area; with [redraw]
   /// the program draws them again if they are shown (USER0).
   Future<bool> _writeDashboard(_SkArm arm, {bool redraw = false}) async {
-    final font = _loadedFont ??= await _fontLoader();
+    final font = await _textFont();
     final maxCode = arm.link.maxPacket - 2;
     // The program keeps the clock if this arm's time is known; "00:00"
     // holds the place of its digits.
-    final raw = _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText;
+    final raw = await _emojify(
+      _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
+      [arm],
+    );
     final ownClock = raw.contains(clockToken) && arm.clock.known;
     final bands = dashboardBands(
       font,
@@ -934,7 +1020,7 @@ class ScouterConnection extends G1Connection {
 
   /// Host code for the program's label words and glyphs.
   Future<List<Uint8List>> _labelCode(_SkArm arm) async {
-    final font = _loadedFont ??= await _fontLoader();
+    final font = await _textFont();
     final small = await _small();
     final label = _dashboardLabel;
     final glyphs = label == null ? const <int>[] : small.encode(label);
@@ -1454,7 +1540,7 @@ class ScouterConnection extends G1Connection {
     G1TextStyle style = G1TextStyle.plain,
     String? label,
   }) async {
-    final font = _loadedFont ??= await _fontLoader();
+    final font = await _textFont();
     final small = await _small();
     _appShowing = true;
     final arms = _targets().where((a) {
@@ -1473,6 +1559,8 @@ class ScouterConnection extends G1Connection {
       await Future.wait(arms.map((a) => _uploadIcon(a, name, data)));
     }
     final iconAt = name == null ? null : SkIcons.slot(name, SkArena.icons);
+    // Emojis into the arms' font slots first.
+    text = await _emojify(text, arms);
     final synced = arms.length == 2 && arms.every((a) => a.clock.known);
     List<Uint8List> codes(_SkArm arm) => textCode(
       font,
@@ -1939,7 +2027,7 @@ class ScouterConnection extends G1Connection {
   @override
   Future<bool> setHeadUpAngle(int angle) async {
     _headUpAngle = angle.clamp(0, 60);
-    final font = _loadedFont ??= await _fontLoader();
+    final font = await _textFont();
     for (final arm in _arms.values.where((a) => a.ready && a.resident)) {
       await arm.link.run([_residentState(font)]);
     }

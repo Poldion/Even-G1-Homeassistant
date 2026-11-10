@@ -75,6 +75,15 @@ eingefasst von Eckklammern.
 
 Die Entitäten-IDs in den Beispielen sind Platzhalter. Ersetze sie durch deine.
 
+## Emojis
+
+Texte und Dashboards dürfen Emojis enthalten (rund 1400, aus Noto Emoji),
+zum Beispiel `☀️ {{ states('sensor.aussen_temperatur') }} °C`. Auf der
+Brille stehen sie wie Buchstaben in der Zeile, etwas breiter als ein
+Zeichen.
+
+![Dashboard mit Emojis](images/de/dashboard-emoji.png)
+
 ## Verbindungsstatus
 
 Erreicht die App Home Assistant nicht, steht unter dem Dashboard die Zeile

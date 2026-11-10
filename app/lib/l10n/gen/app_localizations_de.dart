@@ -555,6 +555,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get skLogEmojiReset => 'Emoji-Plätze voll: neu belegt';
+
+  @override
   String skLogEncrypted(String arm) {
     return '$arm: Verbindung verschlüsselt';
   }

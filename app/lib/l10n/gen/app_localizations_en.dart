@@ -552,6 +552,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get skLogEmojiReset => 'Emoji slots full: starting over';
+
+  @override
   String skLogEncrypted(String arm) {
     return '$arm: connection encrypted';
   }

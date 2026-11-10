@@ -175,6 +175,12 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   weiter (auch ohne Handy), schreibt die Ziffern (Glyphen 0–9) und zeichnet
   neu, wenn das Dashboard zu sehen ist. Die App stellt die Zeit nach jedem
   Uhrenabgleich (alle 3 Minuten) neu.
+- **Emojis**: Die Schrift auf den Bügeln hat nach ihren eigenen Glyphen 160
+  leere Plätze. Enthält ein Text ein Emoji, kopiert die App dessen 1-Bit-Glyphe
+  (Noto Emoji, 22 px, aus `app/assets/scouter/emoji_22.skf`) in einen freien
+  Platz auf beiden Bügeln (rund 75 Byte) und kodiert das Emoji mit dieser
+  Glyphe. So zeichnet `GLYPHS` es in der Zeile, in den Texten der App wie im
+  Dashboard des Programms. Sind die Plätze voll, werden sie neu belegt.
 - **Mikrofon und Hinweis** (`USER3`, rechter Bügel): Solange das Mikrofon
   an ist, zeichnet das Programm einen Ständer (Halterung, Stiel, Fuß) unter
   das 16 × 16 große Quadrat, das die Firmware bei (620, 4) zeichnet (VM.md

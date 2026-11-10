@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'sk_asm.dart';
-import 'sk_lib.dart';
 import 'sk_protocol.dart';
 
 /// The program this app leaves running on each arm (VM.md §5): it shows the
@@ -46,7 +45,7 @@ class SkResident {
   static const band = 0x37000;
   static const bandRows = 32;
   static const code = 0x39800;
-  static const codeEnd = SkLib.code;
+  static const codeEnd = SkArena.smallFont;
 
   // State words (written by the app unless noted).
   static final busy = SkW.at(state); // 1 while the app shows something

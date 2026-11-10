@@ -172,6 +172,12 @@ gone, and the app loads it again.
   without the phone), writes the digits (glyphs 0–9) and redraws if the
   dashboard is shown. The app sets the time again after each clock sync
   (every 3 minutes).
+- **Emojis**: the font on the arms has 160 empty glyph slots after its own
+  glyphs. When a text contains an emoji, the app copies its 1-bit glyph
+  (Noto Emoji, 22 px, from `app/assets/scouter/emoji_22.skf`) into a free
+  slot on both arms (about 75 bytes) and encodes the emoji with that glyph,
+  so `GLYPHS` draws it in the line, in the app's texts and in the program's
+  dashboard alike. When the slots run full they are filled anew.
 - **Microphone and label** (`USER3`, right arm): while the microphone is on
   the program draws a stand (holder, stem, base) under the 16 × 16 square
   that the firmware draws at (620, 4) (VM.md §6.5, it cannot be changed or

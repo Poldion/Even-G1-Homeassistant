@@ -168,11 +168,14 @@ class SkArena {
 
   /// The font blob.
   static const font = 0x1000;
-  static const fontMax = smallFont - font;
 
-  /// The same font at its own size (labels), same glyph indices.
-  static const smallFont = 0x5000;
-  static const smallFontMax = icons - smallFont;
+  /// The font with its emoji slots (SkEmoji) fills the room up to the icons.
+  static const fontMax = icons - font;
+
+  /// The same font at its own size (labels), same glyph indices; after the
+  /// resident program's code, before the library (SkLib, 0x3E000).
+  static const smallFont = 0x3B000;
+  static const smallFontMax = 0x3E000 - smallFont;
 
   /// Notification icons (50 × 50, 4 bpp, 1250 bytes each), uploaded when
   /// first used.

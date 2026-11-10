@@ -30,7 +30,7 @@ the whole display and all sensors of the glasses (see
 - **Recordings** with the glasses' microphone, started in the app or in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transcribes and summarizes, the summary ends up in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
 - **Phone notifications** on the glasses, selectable per app
 - **Silent mode**, battery of glasses and case, wear state and gestures as entities
-- Texts on the whole display (11 lines of 42 characters), both eyes exactly in sync, app icons for notifications, dashboard on head up straight from the glasses (also without the phone, with its own clock), nodding and shaking the head as gestures, brightness offset on top of auto brightness, dashboard designs with frame and title, your own text while Assist listens and an animation for silent mode
+- Texts on the whole display (11 lines of 42 characters), both eyes exactly in sync, app icons for notifications, dashboard on head up straight from the glasses (also without the phone, with its own clock), nodding and shaking the head as gestures, brightness offset on top of auto brightness, emojis, dashboard designs with frame and title, your own text while Assist listens and an animation for silent mode
 
 ## Language
 
@@ -298,6 +298,7 @@ automation:
 - [ScouterKit](https://github.com/mafik/scouter_kit) (MIT): firmware g1v0, protocol 5 and VM, whose interpreter was used to check this app's programs locally.
 - Notification icons: Pebble's icons from [PebbleOS](https://github.com/coredevices/PebbleOS) and [pebble-dev/iconography](https://github.com/pebble-dev/iconography), as converted by ScouterKit (Apache License 2.0, see `app/assets/scouter/icons/NOTICE`).
 - Font [Departure Mono](https://departuremono.com/) by Helena Zhang (SIL Open Font License 1.1, `app/assets/scouter/DepartureMono-LICENSE.txt`).
+- Emojis: [Noto Emoji](https://github.com/googlefonts/noto-emoji) (monochrome) by Google, rasterised to 22-px glyphs (SIL Open Font License 1.1, `app/assets/scouter/LICENSE.noto-emoji`).
 - Protocol knowledge about Even's firmware (versions up to 0.24) from [MentraOS](https://github.com/Mentra-Community/MentraOS), [even-g1-companion](https://github.com/Cheddies1/even-g1-companion), [g1-reverse](https://github.com/FreedomCoder-dev/g1-reverse) and the [EvenDemoApp wiki](https://github.com/JohnRThomas/EvenDemoApp/wiki/Even-Realities-G1-BLE-Protocol).
 
 ## More documentation

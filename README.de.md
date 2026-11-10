@@ -32,7 +32,7 @@ Display und alle Sensoren der Brille freigibt (siehe
 - **Aufnahmen** mit dem Brillen-Mikrofon, gestartet in der App oder in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transkribiert und fasst zusammen, die Zusammenfassung landet in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
 - **Handy-Benachrichtigungen** auf der Brille, pro App wählbar
 - **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
-- Texte auf dem ganzen Display (11 Zeilen à 42 Zeichen), beide Augen exakt gleichzeitig, App-Symbole bei Benachrichtigungen, Dashboard beim Hochschauen direkt von der Brille (auch ohne Handy, mit eigener Uhr), Nicken und Kopfschütteln als Gesten, Helligkeits-Offset zur Automatik, Dashboard-Designs mit Rahmen und Titelzeile, ein eigener Text beim Zuhören von Assist und eine Animation beim Ruhemodus
+- Texte auf dem ganzen Display (11 Zeilen à 42 Zeichen), beide Augen exakt gleichzeitig, App-Symbole bei Benachrichtigungen, Dashboard beim Hochschauen direkt von der Brille (auch ohne Handy, mit eigener Uhr), Nicken und Kopfschütteln als Gesten, Helligkeits-Offset zur Automatik, Emojis, Dashboard-Designs mit Rahmen und Titelzeile, ein eigener Text beim Zuhören von Assist und eine Animation beim Ruhemodus
 
 ## Sprache
 
@@ -302,6 +302,7 @@ automation:
 - [ScouterKit](https://github.com/mafik/scouter_kit) (MIT): Firmware g1v0, Protokoll 5 und VM, deren Interpreter die Programme dieser App lokal geprüft hat.
 - Benachrichtigungssymbole: Pebbles Symbole aus [PebbleOS](https://github.com/coredevices/PebbleOS) und [pebble-dev/iconography](https://github.com/pebble-dev/iconography), wie ScouterKit sie umwandelt (Apache License 2.0, siehe `app/assets/scouter/icons/NOTICE`).
 - Schrift [Departure Mono](https://departuremono.com/) von Helena Zhang (SIL Open Font License 1.1, `app/assets/scouter/DepartureMono-LICENSE.txt`).
+- Emojis: [Noto Emoji](https://github.com/googlefonts/noto-emoji) (einfarbig) von Google, gerastert zu 22-px-Glyphen (SIL Open Font License 1.1, `app/assets/scouter/LICENSE.noto-emoji`).
 - Protokollwissen zur Even-Firmware (Versionen bis 0.24) aus [MentraOS](https://github.com/Mentra-Community/MentraOS), [even-g1-companion](https://github.com/Cheddies1/even-g1-companion), [g1-reverse](https://github.com/FreedomCoder-dev/g1-reverse) und dem [EvenDemoApp-Wiki](https://github.com/JohnRThomas/EvenDemoApp/wiki/Even-Realities-G1-BLE-Protocol).
 
 ## Weitere Dokumentation

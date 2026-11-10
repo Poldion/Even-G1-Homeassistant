@@ -72,6 +72,15 @@ stands dark on a light bar with hazard stripes, framed by corner brackets.
 
 The entity IDs in the examples are placeholders. Replace them with yours.
 
+## Emojis
+
+Texts and dashboards may contain emojis (about 1400, from Noto Emoji),
+for example `☀️ {{ states('sensor.outside_temperature') }} °C`. On the
+glasses they are drawn in the line like letters, a little wider than a
+character.
+
+![Dashboard with emojis](images/en/dashboard-emoji.png)
+
 ## Connection status
 
 If the app cannot reach Home Assistant, a line

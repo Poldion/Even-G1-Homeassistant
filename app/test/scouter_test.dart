@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_clock.dart';
+import 'package:even_g1_ha/scouter/sk_emoji.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
 import 'package:even_g1_ha/scouter/sk_icons.dart';
 import 'package:even_g1_ha/scouter/sk_link.dart';
@@ -145,8 +146,12 @@ class FakeArms {
   int micStatus = 0;
   bool acks = true;
 
+  /// CMD packets received (both arms).
+  int writes = 0;
+
   Future<void> write(G1Side side, int channel, Uint8List data) async {
     if (channel == 0) {
+      writes++;
       final seq = data[0] | data[1] << 8;
       execute(
         Uint8List.sublistView(data, 2),
@@ -330,7 +335,14 @@ void main() {
       arms.props[SkProp.worn] = 1;
       await g1.fakeSetup();
       expect(g1.connected, isTrue);
-      final font = loadTestFont().blob;
+      // The font with its empty emoji slots.
+      final font = loadTestFont()
+          .withSlots(
+            SkEmoji.slots,
+            advance: SkEmoji.advance,
+            slotBytes: SkEmoji.slotBytes,
+          )
+          .blob;
       for (final side in G1Side.values) {
         expect(
           arms.arenas[side]!.sublist(SkArena.font, SkArena.font + font.length),
@@ -605,6 +617,26 @@ void main() {
         0,
       );
       await sub.cancel();
+    });
+
+    test('emojis go into the font slots of both arms', () async {
+      g1.fakeReady(epoch: arms.epoch);
+      await g1.sendText('Sonne \u2600\uFE0F und Herz \u2764\uFE0F');
+      final font = loadTestFont();
+      for (final side in G1Side.values) {
+        final d = ByteData.sublistView(arms.arenas[side]!);
+        // Slot 0 and 1: entries with a bitmap, 24 pixels wide.
+        for (final k in [0, 1]) {
+          final e = SkArena.font + 16 + 12 * (font.glyphCount + k);
+          expect(d.getUint8(e + 4), greaterThan(0)); // width
+          expect(d.getUint8(e + 6), SkEmoji.advance);
+        }
+      }
+      // Sent again: nothing uploaded a second time.
+      arms.ops[G1Side.left]!.clear();
+      final before = arms.writes;
+      await g1.sendText('\u2600');
+      expect(arms.writes - before, lessThan(10));
     });
 
     test('head gestures load the detector on the right arm only', () async {

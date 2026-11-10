@@ -43,6 +43,91 @@ class SkFont {
 
   int get glyphCount => _advances.length;
 
+  /// Draws [codepoint] with [glyph] from now on (an emoji in a slot).
+  void map(int codepoint, int glyph) => _index[codepoint] = glyph;
+
+  /// Forgets the codepoints mapped to glyphs from [first] on.
+  void unmapFrom(int first) => _index.removeWhere((_, g) => g >= first);
+
+  /// The same font with [slots] empty glyphs after its own (each [advance]
+  /// wide, with room for [slotBytes] of bitmap): emojis are written into
+  /// them later without uploading the font again.
+  SkFont withSlots(int slots, {required int advance, required int slotBytes}) {
+    final src = ByteData.sublistView(blob);
+    final n = glyphCount;
+    final k = src.getUint16(10, Endian.little);
+    final m = n + slots;
+    final oldHeader = 16 + 16 * n + 5 * k;
+    final bitmaps = blob.length - oldHeader;
+    final header = 16 + 16 * m + 5 * k;
+    final size = header + bitmaps + slots * slotBytes;
+    final out = Uint8List(size);
+    final d = ByteData.sublistView(out);
+    out.setRange(0, 16, blob);
+    d.setUint32(4, size, Endian.little);
+    d.setUint16(8, m, Endian.little);
+    final shift = (header - oldHeader) * 8;
+    for (var i = 0; i < n; i++) {
+      final e = 16 + 12 * i;
+      out.setRange(e, e + 12, blob, e);
+      final bits = src.getUint32(e, Endian.little);
+      if (bits != 0) d.setUint32(e, bits + shift, Endian.little);
+      d.setUint32(
+        16 + 12 * m + 4 * i,
+        src.getUint32(16 + 12 * n + 4 * i, Endian.little),
+        Endian.little,
+      );
+    }
+    for (var j = 0; j < slots; j++) {
+      out[16 + 12 * (n + j) + 6] = advance;
+    }
+    // Kerning (keys reference the font's own glyphs only), then bitmaps.
+    out.setRange(16 + 16 * m, header, blob, 16 + 16 * n);
+    out.setRange(header, header + bitmaps, blob, oldHeader);
+    return SkFont.parse(out)
+      .._slotBase = header + bitmaps
+      .._slotBytes = slotBytes
+      .._firstSlot = n;
+  }
+
+  int _slotBase = 0, _slotBytes = 0, _firstSlot = 0;
+
+  /// The first slot's glyph index (see [withSlots]).
+  int get firstSlot => _firstSlot;
+  int get slotCount => _firstSlot == 0 ? 0 : glyphCount - _firstSlot;
+
+  /// Where slot [k]'s glyph entry and bitmap go, as offsets in the blob.
+  ({int entry, int bitmap}) slotAt(int k) =>
+      (entry: 16 + 12 * (_firstSlot + k), bitmap: _slotBase + k * _slotBytes);
+
+  /// A glyph's entry (12 bytes) and bitmap, to copy into a slot.
+  ({int w, int h, int advance, int xOff, int yOff, Uint8List bits}) glyphData(
+    int glyph,
+  ) {
+    final d = ByteData.sublistView(blob);
+    final e = 16 + 12 * glyph;
+    final bits = d.getUint32(e, Endian.little);
+    final w = blob[e + 4], h = blob[e + 5];
+    final out = Uint8List((w * h + 7) ~/ 8);
+    for (var i = 0; i < w * h; i++) {
+      final b = bits + i;
+      if (blob[b >> 3] & (0x80 >> (b & 7)) != 0) {
+        out[i >> 3] |= 0x80 >> (i & 7);
+      }
+    }
+    return (
+      w: w,
+      h: h,
+      advance: blob[e + 6],
+      xOff: d.getInt16(e + 8, Endian.little),
+      yOff: d.getInt16(e + 10, Endian.little),
+      bits: out,
+    );
+  }
+
+  /// The glyph of [codepoint] if this font has it (no replacement).
+  int? glyphOrNull(int codepoint) => _index[codepoint];
+
   /// Glyph index of a character: U+FFFD or '?' for a missing one.
   int glyphOf(int codepoint) =>
       _index[codepoint] ?? _index[0xFFFD] ?? _index[0x3F] ?? 0;

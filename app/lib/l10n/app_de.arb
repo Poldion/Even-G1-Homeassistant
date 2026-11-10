@@ -150,6 +150,7 @@
   "skLogBondFailed": "Koppeln {arm}: {error}",
   "skLogBonding": "{arm} arm wird gekoppelt (im Etui)",
   "skLogDisplayError": "{arm}: Anzeigefehler beim Start",
+  "skLogEmojiReset": "Emoji-Plätze voll: neu belegt",
   "skLogEncrypted": "{arm}: Verbindung verschlüsselt",
   "skLogEventsRejected": "{arm}: EVENTS abgelehnt",
   "skLogFontLoaded": "{arm}: Schrift geladen ({bytes} B, {ms} ms)",
