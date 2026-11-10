@@ -519,6 +519,14 @@
       }
     }
   },
+  "skLogOffsetOnArms": "Automatic brightness {offset} on the glasses",
+  "@skLogOffsetOnArms": {
+    "placeholders": {
+      "offset": {
+        "type": "String"
+      }
+    }
+  },
   "skLogOtherArm": "{arm} arm reports as the other arm",
   "@skLogOtherArm": {
     "placeholders": {

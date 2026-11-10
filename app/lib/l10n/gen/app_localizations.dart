@@ -1064,6 +1064,12 @@ abstract class AppLocalizations {
   /// **'{arm} arm not paired – put it into the open charging case to pair'**
   String skLogNotBonded(String arm);
 
+  /// No description provided for @skLogOffsetOnArms.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic brightness {offset} on the glasses'**
+  String skLogOffsetOnArms(String offset);
+
   /// No description provided for @skLogOtherArm.
   ///
   /// In en, this message translates to:

@@ -99,6 +99,15 @@ class SkResident {
   static final labelBase = SkW.at(state + 128);
   static const labelH = 14;
   static const labelLevel = 12;
+  static const maxLevel = 42;
+
+  // Automatic brightness with an offset (right arm, written by the app):
+  // on (1) or off, the offset in levels (signed); the program keeps the
+  // level it set. The left arm follows over the arm-to-arm link
+  // (AUTO_BRIGHTNESS 1 there, VM.md §6.9).
+  static final lightOn = SkW.at(state + 132);
+  static final lightOffset = SkW.at(state + 136);
+  static final lightLevel = SkW.at(state + 140);
 
   /// Region of the microphone's stand; the firmware draws its 16 × 16
   /// indicator at (620, 4) on the right arm (VM.md §6.5): the head.
@@ -279,10 +288,71 @@ class SkResident {
       a.label('beat');
       a.sysWrite(a.c(SkProp.peerSend), r0);
     }
+    // The light, in case a change was missed.
+    a.call('light');
     // The status line follows the connection while the dashboard shows.
     a.beq(shown, c0, 'ret');
     a.call('statusCheck');
     a.ret();
+
+    // light: stock's level for the measured light plus the offset, and a
+    // new range of ±25 % (at least ±2 lux) around the reading (LIGHT).
+    a.label('light');
+    if (micArm) {
+      a.beq(lightOn, c0, 'ret');
+      a.sysRead(r0, a.c(SkProp.light)); // 0.01 lux
+      a.beq(r0, a.c(SkProp.unknown), 'ret');
+      a.divu(r1, r0, a.c(100)); // lux
+      final c50 = a.c(50), c200 = a.c(200), c1000 = a.c(1000);
+      a.bgeu(r1, c50, 'l50');
+      a.divu(r2, r1, a.c(5));
+      a.jmp('lOff');
+      a.label('l50');
+      a.bgeu(r1, c200, 'l200');
+      a.sub(r2, r1, c50);
+      a.divu(r2, r2, a.c(10));
+      a.add(r2, r2, a.c(10));
+      a.jmp('lOff');
+      a.label('l200');
+      a.bgeu(r1, c1000, 'l1000');
+      a.sub(r2, r1, c200);
+      a.divu(r2, r2, c50);
+      a.add(r2, r2, a.c(25));
+      a.jmp('lOff');
+      a.label('l1000');
+      a.mov(r2, a.c(41));
+      a.bltu(r1, a.c(2000), 'lOff');
+      a.mov(r2, a.c(maxLevel));
+      a.label('lOff');
+      a.add(r2, r2, lightOffset);
+      a.bges(r2, c0, 'lMin');
+      a.mov(r2, c0);
+      a.label('lMin');
+      a.blts(r2, a.c(maxLevel + 1), 'lMax');
+      a.mov(r2, a.c(maxLevel));
+      a.label('lMax');
+      a.beq(r2, lightLevel, 'lRange');
+      a.mov(lightLevel, r2);
+      a.sysWrite(a.c(SkProp.brightness), r2);
+      a.label('lRange');
+      a.divu(r3, r0, a.c(4));
+      a.bgeu(r3, c200, 'lMargin');
+      a.mov(r3, c200);
+      a.label('lMargin');
+      a.sub(r4, r0, r3);
+      a.bges(r4, c0, 'lLo');
+      a.mov(r4, c0);
+      a.label('lLo');
+      a.add(r5, r0, r3);
+      a.sysWrite(a.c(SkProp.lightLo), r4);
+      a.sysWrite(a.c(SkProp.lightHi), r5);
+    }
+    a.ret();
+
+    // LIGHT: the light left its range.
+    a.label('lightTrigger');
+    a.call('light');
+    a.end();
 
     // tick: a new minute: count on, redraw if the dashboard is shown.
     a.label('tick');
@@ -605,6 +675,7 @@ class SkResident {
     entry(SkTrigger.user1, 'user1');
     entry(SkTrigger.user2, 'user2');
     entry(SkTrigger.user3, 'user3');
+    if (micArm) entry(SkTrigger.light, 'lightTrigger');
     return (code: bytes, pool: a.pool(), table: t.buffer.asUint8List());
   }
 

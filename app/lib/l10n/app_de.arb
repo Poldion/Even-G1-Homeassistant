@@ -161,6 +161,7 @@
   "skLogNoAnswerNotBonded": "{arm} arm antwortet nicht und ist nicht gekoppelt: Brille ins offene Ladeetui legen, dann wird gekoppelt",
   "skLogNoService": "{arm} arm: kein ScouterKit-Dienst – läuft g1v0 auf diesem Bügel?",
   "skLogNotBonded": "{arm} arm nicht gekoppelt – zum Koppeln ins offene Ladeetui legen",
+  "skLogOffsetOnArms": "Automatische Helligkeit {offset} auf der Brille",
   "skLogOtherArm": "{arm} arm meldet sich als anderer Bügel",
   "skLogPacketError": "{arm}: Fehler in Paket {seq}: {error} (op 0x{op}, Detail {detail})",
   "skLogProgramHalted": "{arm}: Programm angehalten: {error} (0x{address}, op 0x{op})",

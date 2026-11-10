@@ -248,8 +248,13 @@ The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
 - Both eyes at the same time: the app measures the clock offset of each arm
   with `PING` (every 3 minutes), prepares the image on both and then sends
   each `SLEEP_UNTIL T` + `DRAW`, with `T` in the arm's clock (VM.md §7).
-- Brightness with offset: `AUTO_BRIGHTNESS` = 0, the `LIGHT` bit in `EVENTS`.
-  If the light leaves the range ±25 % around the last measurement, the app
-  computes the level with the firmware's table and adds the offset.
+- Brightness with offset, on the glasses: the right arm's program handles
+  `LIGHT` itself. When the light leaves the range ±25 % (at least ±2 lux)
+  around the last reading, it computes stock's level from the firmware's
+  table, adds the offset, clamps it to 0–42, writes `BRIGHTNESS` and sets the
+  next range; the watch repeats it every 5 s. The left arm runs
+  `AUTO_BRIGHTNESS` = 1 and takes the right arm's level over their link
+  (VM.md §6.9). No phone is needed. Firmware without the link: the app does
+  it from the `LIGHT` events as before.
 - A new *epoch* means the arm restarted and its memory is empty. The app then
   sets it up again and loads the font again.

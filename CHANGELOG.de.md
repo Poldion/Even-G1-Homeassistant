@@ -9,6 +9,15 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-11-10
+
+### Changed
+- Die automatische Helligkeit mit Offset läuft auf der Brille: Das Programm
+  des rechten Bügels rechnet die Stufe aus seinem Lichtsensor und dem Offset
+  aus, der linke Bügel folgt über die Funkverbindung der Bügel. Das Handy ist
+  nicht mehr beteiligt, und die Helligkeit passt sich auch ohne es an.
+  Firmware ohne die Verbindung behält den bisherigen Weg über die App.
+
 ## [0.26.0] - 2026-11-09
 
 ### Added
@@ -424,7 +433,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...HEAD
+[0.27.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.23.0...v0.24.0

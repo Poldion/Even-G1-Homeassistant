@@ -343,6 +343,18 @@ void main() {
     expect(SkResident.standH, lessThanOrEqualTo(SkResident.bandRows));
   });
 
+  test('the right arm keeps the automatic brightness itself', () {
+    int entry(Uint8List table, int trigger) =>
+        ByteData.sublistView(table).getUint32(4 * trigger, Endian.little);
+    final right = SkResident.build(gestures: true, micArm: true);
+    final left = SkResident.build(gestures: false);
+    expect(entry(right.table, SkTrigger.light), isNot(0));
+    expect(entry(left.table, SkTrigger.light), 0);
+    // The app's fallback uses the same table.
+    expect(ScouterConnection.stockLevel(30), 6);
+    expect(ScouterConnection.stockLevel(300), 27);
+  });
+
   test('the library fits its area', () {
     final lib = SkLib.build();
     expect(SkLib.code + lib.code.length, lessThanOrEqualTo(SkLib.codeEnd));

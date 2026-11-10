@@ -9,6 +9,15 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.27.0] - 2026-11-10
+
+### Changed
+- The automatic brightness with an offset runs on the glasses: the right
+  arm's program computes the level from its light sensor and the offset, the
+  left arm follows over the arm-to-arm link. The phone no longer takes part,
+  and the brightness keeps adapting without it. Firmware without the link
+  keeps the previous way through the app.
+
 ## [0.26.0] - 2026-11-09
 
 ### Added
@@ -412,7 +421,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...HEAD
+[0.27.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...v0.27.0
 [0.26.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.25.0...v0.26.0
 [0.25.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.24.0...v0.25.0
 [0.24.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.23.0...v0.24.0

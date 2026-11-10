@@ -256,9 +256,15 @@ Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
 - Beide Augen gleichzeitig: Die App misst den Uhrenversatz jedes Bügels mit
   `PING` (alle 3 Minuten), bereitet das Bild auf beiden vor und schickt dann
   jedem `SLEEP_UNTIL T` + `DRAW`, mit `T` in der Uhr des Bügels (VM.md §7).
-- Helligkeit mit Offset: `AUTO_BRIGHTNESS` = 0, das `LIGHT`-Bit in `EVENTS`.
-  Verlässt das Licht den Bereich ±25 % um die letzte Messung, rechnet die App
-  die Stufe mit der Tabelle der Firmware aus und addiert den Offset.
+- Helligkeit mit Offset, auf der Brille: Das Programm des rechten Bügels
+  behandelt `LIGHT` selbst. Verlässt das Licht den Bereich ±25 % (mindestens
+  ±2 Lux) um die letzte Messung, rechnet es die Stufe mit der Tabelle der
+  Firmware aus, addiert den Offset, begrenzt auf 0–42, schreibt `BRIGHTNESS`
+  und setzt den nächsten Bereich; der Wachhund wiederholt das alle 5 s. Der
+  linke Bügel läuft mit `AUTO_BRIGHTNESS` = 1 und übernimmt die Stufe des
+  rechten über die Funkverbindung der Bügel (VM.md §6.9). Ein Handy braucht
+  es dafür nicht. Firmware ohne die Verbindung: Die App macht es wie bisher
+  aus den `LIGHT`-Ereignissen.
 - Eine neue *Epoche* bedeutet, dass der Bügel neu gestartet ist und sein
   Speicher leer ist. Die App richtet ihn dann neu ein und lädt die Schrift
   erneut.

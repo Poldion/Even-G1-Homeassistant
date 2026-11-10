@@ -527,7 +527,7 @@ class ScouterConnection extends G1Connection {
         1 << SkTrigger.battery |
         1 << SkTrigger.caseState;
     // The light sensor reports changes while the offset mode needs them.
-    if (arm.side == G1Side.right && _offsetLevels != null) {
+    if (arm.side == G1Side.right && _offsetLevels != null && !_offsetOnArms) {
       mask |= 1 << SkTrigger.light;
     }
     // With the resident program the right arm reports the head's moves
@@ -1761,6 +1761,10 @@ class ScouterConnection extends G1Connection {
     _offsetApplied = null;
     final right = _arms[G1Side.right];
     if (right == null || !right.ready) return;
+    if (_offsetOnArms) {
+      await _offsetToArms(levels);
+      return;
+    }
     if (starting) {
       final code = SkCode()
         ..sysWrite(SkProp.autoBrightness, 0)
@@ -1772,10 +1776,53 @@ class ScouterConnection extends G1Connection {
     _scheduleLightRead();
   }
 
+  /// The arms keep the offset themselves: the right arm's program sets the
+  /// level from its light sensor, the left arm follows over their link.
+  bool get _offsetOnArms {
+    final left = _arms[G1Side.left], right = _arms[G1Side.right];
+    return left != null &&
+        right != null &&
+        left.resident &&
+        right.resident &&
+        left.residentPeer == SkResident.peerFollower &&
+        right.residentPeer == SkResident.peerLeader;
+  }
+
+  Future<void> _offsetToArms(int levels) async {
+    _lightTimer?.cancel();
+    final right = _arms[G1Side.right]!, left = _arms[G1Side.left]!;
+    await right.link.run([
+      (SkCode()
+            ..sysWrite(SkProp.autoBrightness, 0)
+            // A first reading above 0 leaves this range: LIGHT fires.
+            ..sysWrite(SkProp.lightLo, 0)
+            ..sysWrite(SkProp.lightHi, 0)
+            ..write(
+              SkResident.lightOn.address,
+              SkLib.u32s([1, levels, 0xffffffff]),
+            ))
+          .take(),
+    ]);
+    await left.link.run([
+      (SkCode()
+            ..sysWrite(SkProp.peerLink, 1)
+            ..sysWrite(SkProp.autoBrightness, 1))
+          .take(),
+    ]);
+    await _reportEvents(right);
+    _debug(tr.skLogOffsetOnArms('${levels >= 0 ? '+' : ''}$levels'));
+  }
+
   Future<void> _stopOffset() async {
     if (_offsetLevels == null) return;
     _offsetLevels = null;
     _lightTimer?.cancel();
+    final r = _arms[G1Side.right];
+    if (r != null && r.ready && r.resident) {
+      await r.link.run([
+        (SkCode()..write(SkResident.lightOn.address, SkLib.u32s([0]))).take(),
+      ]);
+    }
     final right = _arms[G1Side.right];
     if (right != null && right.ready) await _reportEvents(right);
   }
@@ -1783,7 +1830,7 @@ class ScouterConnection extends G1Connection {
   /// The sensor converts every 800 ms once the panel is on: read it a
   /// moment after something was drawn.
   void _scheduleLightRead() {
-    if (_offsetLevels == null) return;
+    if (_offsetLevels == null || _offsetOnArms) return;
     _lightTimer?.cancel();
     _lightTimer = Timer(const Duration(milliseconds: 1200), () async {
       final right = _arms[G1Side.right];

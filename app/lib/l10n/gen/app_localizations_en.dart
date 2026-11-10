@@ -605,6 +605,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String skLogOffsetOnArms(String offset) {
+    return 'Automatic brightness $offset on the glasses';
+  }
+
+  @override
   String skLogOtherArm(String arm) {
     return '$arm arm reports as the other arm';
   }

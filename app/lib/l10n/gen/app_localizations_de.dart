@@ -608,6 +608,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String skLogOffsetOnArms(String offset) {
+    return 'Automatische Helligkeit $offset auf der Brille';
+  }
+
+  @override
   String skLogOtherArm(String arm) {
     return '$arm arm meldet sich als anderer Bügel';
   }

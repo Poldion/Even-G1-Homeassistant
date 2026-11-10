@@ -313,6 +313,19 @@ void dumpDesigns() {
         L10n.apply('en');
       }
     }
+    // Automatic brightness with an offset on the right arm.
+    {
+      final p = SkResident.build(gestures: false, micArm: true);
+      final img = Uint8List.fromList(image);
+      final d = ByteData.sublistView(img);
+      img.setRange(SkResident.code, SkResident.code + p.code.length, p.code);
+      img.setRange(SkResident.pool, SkResident.pool + p.pool.length, p.pool);
+      img.setRange(SkResident.table, SkResident.table + 64, p.table);
+      d.setUint32(SkResident.lightOn.address, 1, Endian.little);
+      d.setInt32(SkResident.lightOffset.address, 5, Endian.little);
+      d.setUint32(SkResident.lightLevel.address, 0xffffffff, Endian.little);
+      save('resident_light', [], img);
+    }
     // The clock: 14:59 at arm time 1.2 s, the digits in the first line.
     {
       final bands = ScouterConnection.dashboardBands(
