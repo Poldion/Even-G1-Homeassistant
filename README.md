@@ -131,8 +131,9 @@ release.
 Pair the glasses in the open charging case (details in
 [docs/SCOUTERKIT.md](docs/SCOUTERKIT.md)).
 
-**Previews:** every state of `main` is published as a pre-release
-`sk-vX.Y.Z.N`. If you want them, choose the channel **Preview** under
+**Beta builds:** every state of `main` is published as a beta build
+(GitHub pre-release `sk-vX.Y.Z.N`). If you want them, choose the channel
+**Beta** under
 *Settings → App update*.
 
 ## Setup

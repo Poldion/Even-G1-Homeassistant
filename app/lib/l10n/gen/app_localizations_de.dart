@@ -830,7 +830,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get updateChannel => 'Update-Kanal';
 
   @override
-  String get updateChannelPreview => 'Vorabversion';
+  String get updateChannelPreview => 'Beta-Version';
 
   @override
   String get updateChannelStable => 'Stabil';
@@ -885,16 +885,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get updateLater => 'Später';
 
   @override
-  String get updatePreviewQuestion => 'Vorabversionen installieren?';
+  String get updatePreviewQuestion => 'Beta-Builds installieren?';
 
   @override
   String updatePreviewVersion(String version) {
-    return 'Vorabversion $version';
+    return 'Beta-Build $version';
   }
 
   @override
   String get updatePreviewWarning =>
-      'Vorabversionen entstehen bei jeder Änderung am Projekt und sind weniger getestet als die stabilen Versionen.\n\nZurück zum stabilen Kanal geht es mit dem nächsten stabilen Release. Android installiert keine älteren Builds, sonst geht es nur über eine Neuinstallation.';
+      'Beta-Builds entstehen bei jeder Änderung am Projekt und sind weniger getestet als die stabilen Versionen.\n\nZurück zum stabilen Kanal geht es mit dem nächsten stabilen Release. Android installiert keine älteren Builds, sonst geht es nur über eine Neuinstallation.';
 
   @override
   String updateStableVersion(String version) {

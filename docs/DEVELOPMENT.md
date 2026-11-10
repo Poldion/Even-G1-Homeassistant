@@ -47,7 +47,7 @@ glasses in `lang.py`. Docs exist as `NAME.md` and `NAME.de.md`, images under
 | `docs/DASHBOARD.md` | Integration | test of the example templates |
 | `custom_components/`, `tests/` | Integration | tests, no release |
 | `app/test/` and other app files | App | analysis, tests, APK as artifact (no release) |
-| `app/lib/`, `app/assets/`, `app/android/`, `pubspec.*` on `main` | App, Preview build | additionally a pre-release `sk-vX.Y.Z.N` |
+| `app/lib/`, `app/assets/`, `app/android/`, `pubspec.*` on `main` | App, Beta build | additionally a beta build `sk-vX.Y.Z.N` (pre-release) |
 | – | Release | only by hand (*Actions → Release → Run workflow*) |
 
 If the commit message contains `[skip ci]`, no workflow runs for that push

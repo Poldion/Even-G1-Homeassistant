@@ -827,7 +827,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateChannel => 'Update channel';
 
   @override
-  String get updateChannelPreview => 'Preview';
+  String get updateChannelPreview => 'Beta';
 
   @override
   String get updateChannelStable => 'Stable';
@@ -882,16 +882,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get updateLater => 'Later';
 
   @override
-  String get updatePreviewQuestion => 'Install preview versions?';
+  String get updatePreviewQuestion => 'Install beta builds?';
 
   @override
   String updatePreviewVersion(String version) {
-    return 'Preview $version';
+    return 'Beta build $version';
   }
 
   @override
   String get updatePreviewWarning =>
-      'Preview versions are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.';
+      'Beta builds are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.';
 
   @override
   String updateStableVersion(String version) {

@@ -755,7 +755,7 @@
   },
   "updateCancel": "Cancel",
   "updateChannel": "Update channel",
-  "updateChannelPreview": "Preview",
+  "updateChannelPreview": "Beta",
   "updateChannelStable": "Stable",
   "updateCheck": "Check for updates",
   "updateCheckFailed": "Could not check for updates.",
@@ -785,8 +785,8 @@
     }
   },
   "updateLater": "Later",
-  "updatePreviewQuestion": "Install preview versions?",
-  "updatePreviewVersion": "Preview {version}",
+  "updatePreviewQuestion": "Install beta builds?",
+  "updatePreviewVersion": "Beta build {version}",
   "@updatePreviewVersion": {
     "placeholders": {
       "version": {
@@ -794,7 +794,7 @@
       }
     }
   },
-  "updatePreviewWarning": "Preview versions are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.",
+  "updatePreviewWarning": "Beta builds are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.",
   "updateStableVersion": "Stable version {version}",
   "@updateStableVersion": {
     "placeholders": {

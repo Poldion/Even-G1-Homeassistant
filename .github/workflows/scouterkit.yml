@@ -1,4 +1,4 @@
-name: Preview build
+name: Beta build
 
 # Builds the app on every push to main and publishes it as a pre-release
 # sk-vX.Y.Z.N (X.Y.Z from pubspec.yaml, N the run number; the prefix dates
@@ -89,17 +89,17 @@ jobs:
           V="$VERSION"
           cp app/build/app/outputs/flutter-apk/app-release.apk "even-g1-ha-sk-v$V.apk"
           {
-            echo "Vorabversion von main, Stand ${GITHUB_SHA::7}."
+            echo "Beta build from main, commit ${GITHUB_SHA::7}. / Beta-Build von main, Stand ${GITHUB_SHA::7}."
             echo
             awk '/^## \[Unreleased\]/{f=1; next} f && /^## \[/{exit} f{print}' CHANGELOG.md
             echo
             echo "---"
-            echo "**Installation:** über den Update-Kanal „Vorabversion“ in der App (Einstellungen → Updates)."
+            echo "**Install:** via the update channel “Beta” in the app (Settings → App update). / **Installation:** über den Update-Kanal „Beta-Version“ in der App (Einstellungen → App-Update)."
           } > "$RUNNER_TEMP/notes.md"
           gh release create "sk-v$V" "even-g1-ha-sk-v$V.apk" \
             --prerelease \
             --target "$GITHUB_SHA" \
-            --title "Vorabversion v$V" \
+            --title "Beta-Build v$V" \
             --notes-file "$RUNNER_TEMP/notes.md"
           # Keep the three newest pre-releases.
           gh release list --limit 100 --json tagName,isPrerelease \

@@ -1396,7 +1396,7 @@ abstract class AppLocalizations {
   /// No description provided for @updateChannelPreview.
   ///
   /// In en, this message translates to:
-  /// **'Preview'**
+  /// **'Beta'**
   String get updateChannelPreview;
 
   /// No description provided for @updateChannelStable.
@@ -1492,19 +1492,19 @@ abstract class AppLocalizations {
   /// No description provided for @updatePreviewQuestion.
   ///
   /// In en, this message translates to:
-  /// **'Install preview versions?'**
+  /// **'Install beta builds?'**
   String get updatePreviewQuestion;
 
   /// No description provided for @updatePreviewVersion.
   ///
   /// In en, this message translates to:
-  /// **'Preview {version}'**
+  /// **'Beta build {version}'**
   String updatePreviewVersion(String version);
 
   /// No description provided for @updatePreviewWarning.
   ///
   /// In en, this message translates to:
-  /// **'Preview versions are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.'**
+  /// **'Beta builds are built with every change to the project and are tested less than the stable versions.\n\nYou get back to the stable channel with the next stable release. Android does not install older builds; otherwise only a reinstall helps.'**
   String get updatePreviewWarning;
 
   /// No description provided for @updateStableVersion.

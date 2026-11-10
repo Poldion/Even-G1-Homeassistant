@@ -9,6 +9,10 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+### Changed
+- Der Update-Kanal „Vorabversion“ heißt jetzt „Beta-Version“, seine Builds
+  heißen Beta-Builds (Release-Titel auf GitHub „Beta-Build vX.Y.Z.N“).
+
 ## [0.29.0] - 2026-11-10
 
 ### Changed

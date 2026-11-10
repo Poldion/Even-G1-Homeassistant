@@ -9,6 +9,10 @@ integration share the same version number.
 
 ## [Unreleased]
 
+### Changed
+- The update channel "Preview" is now called "Beta"; its builds are
+  beta builds (GitHub release title "Beta-Build vX.Y.Z.N").
+
 ## [0.29.0] - 2026-11-10
 
 ### Changed

@@ -139,9 +139,9 @@ es ein Release `vX.Y.Z` gibt.
 Die Brille im offenen Ladeetui koppeln (Details in
 [docs/SCOUTERKIT.de.md](docs/SCOUTERKIT.de.md)).
 
-**Vorabversionen:** Jeder Stand von `main` erscheint als Vorabversion
-`sk-vX.Y.Z.N`. Wer sie haben will, wählt unter *Einstellungen → App-Update*
-den Kanal **Vorabversion**.
+**Beta-Builds:** Jeder Stand von `main` erscheint als Beta-Build
+(GitHub-Pre-release `sk-vX.Y.Z.N`). Wer sie haben will, wählt unter
+*Einstellungen → App-Update* den Kanal **Beta-Version**.
 
 ## Einrichtung
 

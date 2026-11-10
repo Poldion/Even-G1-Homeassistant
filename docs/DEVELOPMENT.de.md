@@ -47,7 +47,7 @@ sie für die Brille erzeugt, in `lang.py`. Die Doku gibt es als `NAME.md` und
 | `docs/DASHBOARD.md` | Integration | Test der Beispiel-Templates |
 | `custom_components/`, `tests/` | Integration | Tests, kein Release |
 | `app/test/` und andere App-Dateien | App | Analyse, Tests, APK als Artefakt (kein Release) |
-| `app/lib/`, `app/assets/`, `app/android/`, `pubspec.*` auf `main` | App, Preview build | zusätzlich Vorabversion `sk-vX.Y.Z.N` |
+| `app/lib/`, `app/assets/`, `app/android/`, `pubspec.*` auf `main` | App, Beta build | zusätzlich Beta-Build `sk-vX.Y.Z.N` (Pre-release) |
 | – | Release | nur von Hand (*Actions → Release → Run workflow*) |
 
 Steht `[skip ci]` in der Commit-Nachricht, läuft bei diesem Push gar kein
