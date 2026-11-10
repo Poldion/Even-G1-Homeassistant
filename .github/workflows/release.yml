@@ -85,11 +85,19 @@ jobs:
 
       - name: Release notes from CHANGELOG.md
         run: |
+          if [ "${{ steps.kind.outputs.kind }}" = "app" ]; then
+            # The badge "Pre-release" is GitHub's; the release is a normal
+            # app release (pre-release only so that HACS ignores it).
+            printf '%s\n\n' "**App release.** A regular release of the app, marked as pre-release on GitHub only so that HACS does not offer an integration update. / **App-Release.** Ein normales Release der App, auf GitHub nur als Pre-release markiert, damit HACS kein Integrations-Update anbietet." > "$RUNNER_TEMP/head.md"
+          else
+            : > "$RUNNER_TEMP/head.md"
+          fi
           awk -v v="${{ steps.version.outputs.version }}" '
             $0 ~ "^## \\[" v "\\]" {found=1; next}
             found && /^## \[/ {exit}
             found {print}
-          ' CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          ' CHANGELOG.md > "$RUNNER_TEMP/body.md"
+          cat "$RUNNER_TEMP/head.md" "$RUNNER_TEMP/body.md" > "$RUNNER_TEMP/notes.md"
           if [ "${{ steps.kind.outputs.kind }}" = "app" ]; then
             cat >> "$RUNNER_TEMP/notes.md" <<EOF
 
@@ -169,7 +177,7 @@ jobs:
             gh release create "app-v$V" "even-g1-ha-app-v$V.apk" \
               --prerelease \
               --target "$GITHUB_SHA" \
-              --title "App v$V" \
+              --title "App-Release v$V" \
               --notes-file "$RUNNER_TEMP/notes.md"
           else
             gh release create "v$V" "even-g1-ha-v$V.apk" "even_g1-v$V.zip" \
