@@ -9,6 +9,10 @@ class SkIcons {
   static const bytes = stride * size;
   static const generic = 'Generic_notification';
 
+  /// The navigation's arrow: not a bundled icon, its pixels come with the
+  /// text (ScouterConnection.setNavigationIcon).
+  static const navigation = 'navigation';
+
   /// Every bundled icon, in a fixed order (its slot in the arena).
   static const names = [
     'Alarm_clock',

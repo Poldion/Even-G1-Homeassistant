@@ -9,6 +9,7 @@ import 'g1/g1_connection.dart';
 import 'g1/protocol.dart';
 import 'ha/assist_session.dart';
 import 'ha/ha_client.dart';
+import 'navigation/navigation.dart';
 import 'notifications/phone_notifications.dart';
 import 'scouter/scouter_connection.dart';
 import 'scouter/sk_icons.dart';
@@ -86,6 +87,59 @@ class Bridge extends ChangeNotifier {
       _onPhoneNotification,
       onError: (Object e) => _log(tr.coreLogNotificationsError('$e')),
     );
+    PhoneNotifications.navigation.listen(
+      onNavigation,
+      onError: (Object e) => _log(tr.coreLogNotificationsError('$e')),
+    );
+  }
+
+  /// The turn-by-turn navigation running on the phone, if any.
+  final navigation = Navigation();
+
+  /// How long a navigation step stays on the display.
+  static const navigationDuration = Duration(seconds: 6);
+
+  /// A navigation step (null: the navigation ended): shown at a new step
+  /// and when the turn comes close; while it runs, the head-up dashboard
+  /// shows it instead of Home Assistant's.
+  @visibleForTesting
+  Future<void> onNavigation(NavUpdate? update) async {
+    if (update == null) {
+      if (!navigation.active) return;
+      navigation.end();
+      _log(tr.coreLogNavigationEnd);
+      g1.setNavigationIcon(null);
+      await _navigationChanged();
+      return;
+    }
+    if (!settings.forwardNavigation) {
+      if (navigation.active) await onNavigation(null);
+      return;
+    }
+    if (!navigation.active) _log(tr.coreLogNavigationStart);
+    final show = navigation.update(update);
+    g1.setNavigationIcon(navigation.icon);
+    await _navigationChanged();
+    if (!show || !g1.connected || silentMode == true || assistRunning) return;
+    _log(tr.coreLogNavigationStep(navigation.cardText.split('\n').first));
+    _dashboardShown = false;
+    await display.showText(
+      navigation.cardText,
+      closeAfter: navigationDuration,
+      icon: SkIcons.navigation,
+    );
+  }
+
+  /// The dashboard follows the navigation.
+  Future<void> _navigationChanged() async {
+    await _syncDashboard();
+    if (_dashboardShown && display.active && g1.connected) {
+      await display.showText(
+        _dashboardNow,
+        style: haConfig.dashboardStyle,
+        label: _dashboardLabel,
+      );
+    }
   }
 
   static const notificationAppId = 'io.github.poldion.even_g1_ha';
@@ -132,6 +186,7 @@ class Bridge extends ChangeNotifier {
 
   /// The dashboard as the app shows it, with the current time.
   String get _dashboardNow {
+    if (navigation.active) return navigation.dashboardText;
     final text = withClock(
       _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
     );
@@ -662,8 +717,10 @@ class Bridge extends ChangeNotifier {
   Future<void> _syncDashboard() async {
     if (!g1.connected) return;
     await g1.setDashboard(
-      onHeadUp: haConfig.dashboardOnHeadUp && silentMode != true,
-      text: _dashboardText,
+      onHeadUp:
+          (haConfig.dashboardOnHeadUp || navigation.active) &&
+          silentMode != true,
+      text: navigation.active ? navigation.dashboardText : _dashboardText,
       style: haConfig.dashboardStyle,
     );
   }
@@ -679,7 +736,9 @@ class Bridge extends ChangeNotifier {
   Future<void> _onHeadUp() async {
     // The glasses draw it themselves, without a round trip to the phone.
     if (g1.showsDashboardItself) return;
-    if (!haConfig.dashboardOnHeadUp || assistRunning) return;
+    if (!(haConfig.dashboardOnHeadUp || navigation.active) || assistRunning) {
+      return;
+    }
     if (silentMode == true) return;
     // Do not cover a text or answer that is currently shown.
     if (display.active && !_dashboardShown) return;

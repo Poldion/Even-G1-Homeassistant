@@ -122,6 +122,16 @@
   },
   "coreLogIntegrationReloaded": "Integration reloaded, reconnecting",
   "coreLogMicFailed": "Microphone could not be switched on",
+  "coreLogNavigationEnd": "Navigation ended",
+  "coreLogNavigationStart": "Navigation started",
+  "coreLogNavigationStep": "Navigation: {step}",
+  "@coreLogNavigationStep": {
+    "placeholders": {
+      "step": {
+        "type": "String"
+      }
+    }
+  },
   "coreLogNotification": "Notification: {app} – {title}",
   "@coreLogNotification": {
     "placeholders": {
@@ -328,6 +338,8 @@
   "notifSetAndroidOnly": "Forwarding phone notifications is only available on Android.",
   "notifSetApps": "Apps whose notifications arrive:",
   "notifSetForward": "Forward phone notifications",
+  "notifSetNavigation": "Google Maps navigation",
+  "notifSetNavigationHelp": "Arrow and distance on the glasses: at each new turn and at 500, 200 and 50 m; on head-up instead of the dashboard while you navigate.",
   "notifSetNoAccess": "Access to notifications missing",
   "notifSetNoAccessHelp": "Allow \"Even G1 HA\" to read notifications in the Android settings.\nIf Android reports \"App was denied access\": Settings → Apps → Even G1 HA → ⋮ → \"Allow restricted settings\", then tap Allow again.",
   "notifSetNoApps": "Apps appear here once they have sent a notification. New apps are forwarded by default.",

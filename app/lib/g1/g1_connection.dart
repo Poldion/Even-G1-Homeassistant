@@ -156,6 +156,10 @@ abstract class G1Connection extends ChangeNotifier {
   /// null for none.
   Future<void> setDashboardLabel(String? label) async {}
 
+  /// The arrow of the next turn while a navigation runs (50 × 50 pixels at
+  /// 4 bpp), shown with the icon name `navigation`; null when it ended.
+  void setNavigationIcon(Uint8List? icon) {}
+
   /// Switches the display off.
   Future<bool> blankScreen();
 

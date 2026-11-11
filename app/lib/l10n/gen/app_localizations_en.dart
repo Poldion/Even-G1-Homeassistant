@@ -130,6 +130,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coreLogMicFailed => 'Microphone could not be switched on';
 
   @override
+  String get coreLogNavigationEnd => 'Navigation ended';
+
+  @override
+  String get coreLogNavigationStart => 'Navigation started';
+
+  @override
+  String coreLogNavigationStep(String step) {
+    return 'Navigation: $step';
+  }
+
+  @override
   String coreLogNotification(String app, String title) {
     return 'Notification: $app – $title';
   }
@@ -407,6 +418,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notifSetForward => 'Forward phone notifications';
+
+  @override
+  String get notifSetNavigation => 'Google Maps navigation';
+
+  @override
+  String get notifSetNavigationHelp =>
+      'Arrow and distance on the glasses: at each new turn and at 500, 200 and 50 m; on head-up instead of the dashboard while you navigate.';
 
   @override
   String get notifSetNoAccess => 'Access to notifications missing';

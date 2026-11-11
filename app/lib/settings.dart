@@ -39,6 +39,10 @@ class Settings {
   set glassesFirmware(String v) => _prefs.setString('glasses_firmware', v);
 
   /// Forward phone notifications to the glasses.
+  /// Turn-by-turn navigation (Google Maps) on the glasses.
+  bool get forwardNavigation => _prefs.getBool('forward_navigation') ?? true;
+  set forwardNavigation(bool v) => _prefs.setBool('forward_navigation', v);
+
   bool get forwardNotifications =>
       _prefs.getBool('forward_notifications') ?? true;
   set forwardNotifications(bool v) =>

@@ -10,6 +10,9 @@ class FakeGlasses extends G1Connection {
 
   bool isConnected;
   final texts = <String>[];
+  final icons = <String?>[];
+  ({bool onHeadUp, String text})? dashboard;
+  Uint8List? navigationIcon;
   bool? mic;
 
   /// A gesture as if it came from the glasses.
@@ -62,8 +65,12 @@ class FakeGlasses extends G1Connection {
     String? label,
   }) async {
     texts.add(text);
+    icons.add(icon);
     return true;
   }
+
+  @override
+  void setNavigationIcon(Uint8List? icon) => navigationIcon = icon;
 
   @override
   Future<bool> blankScreen() async => true;
@@ -72,7 +79,7 @@ class FakeGlasses extends G1Connection {
     required bool onHeadUp,
     required String text,
     G1TextStyle style = G1TextStyle.plain,
-  }) async {}
+  }) async => dashboard = (onHeadUp: onHeadUp, text: text);
   @override
   Future<void> setHomeAssistantOnline(bool online) async {}
   @override

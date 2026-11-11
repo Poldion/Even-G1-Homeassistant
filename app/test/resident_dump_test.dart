@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/l10n/l10n.dart';
+import 'package:even_g1_ha/navigation/navigation.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_anim.dart';
 import 'package:even_g1_ha/scouter/sk_asm.dart';
@@ -372,6 +373,46 @@ void dumpDesigns() {
           ScouterConnection.textCode(
             slotted,
             text,
+            maxCode: 242,
+            style: G1TextStyle.card,
+          ),
+          img,
+        );
+      }
+      // Navigation (made-up streets): the step with its arrow, and the
+      // dashboard while navigating.
+      final steps = {
+        'en': NavUpdate(
+          title: '200 m',
+          text: 'Turn right onto Example Street',
+          subText: '12 min · 4.3 km · 14:32',
+        ),
+        'de': NavUpdate(
+          title: '200 m',
+          text: 'Rechts abbiegen auf Beispielstraße',
+          subText: '12 Min. · 4,3 km · 14:32',
+        ),
+      };
+      for (final MapEntry(key: lang, value: u) in steps.entries) {
+        final nav = Navigation()..update(u);
+        final dash = fill(nav.dashboardText);
+        final img = Uint8List.fromList(arena);
+        img.setRange(SkArena.font, SkArena.font + blob.length, blob);
+        save(
+          'nav_card_$lang',
+          ScouterConnection.textCode(
+            slotted,
+            nav.cardText,
+            maxCode: 242,
+            iconData: nav.icon,
+          ),
+          img,
+        );
+        save(
+          'nav_dash_$lang',
+          ScouterConnection.textCode(
+            slotted,
+            dash,
             maxCode: 242,
             style: G1TextStyle.card,
           ),

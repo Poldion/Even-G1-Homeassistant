@@ -284,6 +284,24 @@ abstract class AppLocalizations {
   /// **'Microphone could not be switched on'**
   String get coreLogMicFailed;
 
+  /// No description provided for @coreLogNavigationEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation ended'**
+  String get coreLogNavigationEnd;
+
+  /// No description provided for @coreLogNavigationStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation started'**
+  String get coreLogNavigationStart;
+
+  /// No description provided for @coreLogNavigationStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation: {step}'**
+  String coreLogNavigationStep(String step);
+
   /// No description provided for @coreLogNotification.
   ///
   /// In en, this message translates to:
@@ -751,6 +769,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Forward phone notifications'**
   String get notifSetForward;
+
+  /// No description provided for @notifSetNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps navigation'**
+  String get notifSetNavigation;
+
+  /// No description provided for @notifSetNavigationHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrow and distance on the glasses: at each new turn and at 500, 200 and 50 m; on head-up instead of the dashboard while you navigate.'**
+  String get notifSetNavigationHelp;
 
   /// No description provided for @notifSetNoAccess.
   ///

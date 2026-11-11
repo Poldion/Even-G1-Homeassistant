@@ -9,6 +9,16 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-11-11
+
+### Added
+- Navigation on the glasses: while Google Maps navigates, the next turn
+  appears with the Maps arrow, the distance and the instruction, at each
+  new turn and at 500, 200 and 50 m. When you look up, the turn replaces the
+  dashboard (arrow as emoji, distance, instruction, arrival) until the
+  navigation ends. Switch: *Settings → Notifications → Google Maps
+  navigation*. Without an arrow from Maps the app draws its own.
+
 ## [0.31.0] - 2026-11-11
 
 ### Added
@@ -458,7 +468,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.32.0...HEAD
+[0.32.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...app-v0.32.0
 [0.31.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...app-v0.31.0
 [0.30.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...app-v0.30.0
 [0.29.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...v0.29.0

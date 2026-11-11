@@ -31,6 +31,7 @@ Display und alle Sensoren der Brille freigibt (siehe
 - **Dashboard für die Brille** mit Uhrzeit, Datum, Entitäten, Terminen und To-dos auf einer Seite, auf Wunsch beim Hochschauen
 - **Aufnahmen** mit dem Brillen-Mikrofon, gestartet in der App oder in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transkribiert und fasst zusammen, die Zusammenfassung landet in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
 - **Handy-Benachrichtigungen** auf der Brille, pro App wählbar
+- **Navigation:** die nächste Abbiegung aus Google Maps mit Pfeil und Entfernung auf der Brille
 - **Ruhemodus**, Akku von Brille und Case, Trage-Zustand und Gesten als Entitäten
 - Texte auf dem ganzen Display (11 Zeilen à 42 Zeichen), beide Augen exakt gleichzeitig, App-Symbole bei Benachrichtigungen, Dashboard beim Hochschauen direkt von der Brille (auch ohne Handy, mit eigener Uhr), Nicken und Kopfschütteln als Gesten, Helligkeits-Offset zur Automatik, Emojis, Dashboard-Designs mit Rahmen und Titelzeile, ein eigener Text beim Zuhören von Assist und eine Animation beim Ruhemodus
 
@@ -161,7 +162,7 @@ Die Brille im offenen Ladeetui koppeln (Details in
 | Tippen links / rechts | Seite zurück / vor |
 | Doppeltippen | Anzeige schließen, Assist abbrechen |
 | Dreifachtippen | Ruhemodus an/aus |
-| Hochschauen | Home-Assistant-Dashboard (wenn als Dashboard-Geste gewählt) |
+| Hochschauen | Home-Assistant-Dashboard (wenn als Dashboard-Geste gewählt); beim Navigieren die nächste Abbiegung |
 | Rechte Touchbar gedrückt halten | Geste `long_press_right` für eigene Automationen |
 | Nicken / Kopfschütteln | Unter *Anzeige & Aktivierung → Kopfgesten*: Gesten `nod` / `head_shake` |
 
@@ -169,6 +170,20 @@ Die Brille im offenen Ladeetui koppeln (Details in
 
 - **Übersicht:** Verbindung, Akku links/rechts und Case, Trage-Zustand, Ruhemodus, Helligkeit (Regler, Automatik mit Offset), Home Assistant und Assistent, optionale Vorschau der Brillenanzeige.
 - **Einstellungen:** Home Assistant, Brille koppeln, *Anzeige & Aktivierung* (Aktivierungswinkel, Höhe, Kopfgesten), Benachrichtigungen, Sprache, Diagnose.
+
+### Navigation
+
+Navigiert Google Maps auf dem Handy, zeigt die Brille die nächste
+Abbiegung: mit dem Pfeil aus Maps, der Entfernung und der Anweisung bei
+jeder neuen Abbiegung und bei 500, 200 und 50 m (für 6 Sekunden); beim
+Hochschauen ersetzt die Abbiegung das Dashboard, bis die Navigation endet.
+Dafür braucht die App den Zugriff auf Benachrichtigungen (*Einstellungen →
+Benachrichtigungen*), dort schaltet *Google-Maps-Navigation* sie ab. Im
+Ruhemodus erscheint nichts.
+
+| Neue Abbiegung | Hochschauen beim Navigieren |
+| --- | --- |
+| ![Navigationsschritt](docs/images/de/navigation-step.png) | ![Dashboard beim Navigieren](docs/images/de/navigation-dashboard.png) |
 
 ### In Home Assistant
 

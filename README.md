@@ -29,6 +29,7 @@ the whole display and all sensors of the glasses (see
 - **Dashboard for the glasses** with time, date, entities, appointments and to-dos on one page, optionally when you look up
 - **Recordings** with the glasses' microphone, started in the app or in Home Assistant; [WhisperNotes](https://github.com/Poldion/WhisperNotes) transcribes and summarizes, the summary ends up in [BasaltNotes](https://github.com/Poldion/BasaltNotes)
 - **Phone notifications** on the glasses, selectable per app
+- **Navigation:** Google Maps' next turn with arrow and distance on the glasses
 - **Silent mode**, battery of glasses and case, wear state and gestures as entities
 - Texts on the whole display (11 lines of 42 characters), both eyes exactly in sync, app icons for notifications, dashboard on head up straight from the glasses (also without the phone, with its own clock), nodding and shaking the head as gestures, brightness offset on top of auto brightness, emojis, dashboard designs with frame and title, your own text while Assist listens and an animation for silent mode
 
@@ -154,7 +155,7 @@ Pair the glasses in the open charging case (details in
 | Tap left / right | Page back / forward |
 | Double tap | Close the display, cancel Assist |
 | Triple tap | Silent mode on/off |
-| Look up | Home Assistant dashboard (if chosen as dashboard gesture) |
+| Look up | Home Assistant dashboard (if chosen as dashboard gesture); while you navigate, the next turn |
 | Hold the right touch bar | Gesture `long_press_right` for your own automations |
 | Nod / shake the head | Under *Display & activation → Head gestures*: gestures `nod` / `head_shake` |
 
@@ -162,6 +163,19 @@ Pair the glasses in the open charging case (details in
 
 - **Overview:** connection, battery left/right and case, wear state, silent mode, brightness (slider, auto with offset), Home Assistant and assistant, optional preview of the glasses' display.
 - **Settings:** Home Assistant, pair glasses, *Display & activation* (activation angle, height, head gestures), notifications, language, diagnostics.
+
+### Navigation
+
+While Google Maps navigates on the phone, the glasses show the next turn:
+with the Maps arrow, the distance and the instruction at each new turn and
+at 500, 200 and 50 m (for 6 seconds); when you look up, the turn replaces
+the dashboard until the navigation ends. It needs the notification access
+(*Settings → Notifications*), where *Google Maps navigation* switches it
+off. Silent mode shows nothing.
+
+| New turn | Looking up while navigating |
+| --- | --- |
+| ![Navigation step](docs/images/en/navigation-step.png) | ![Dashboard while navigating](docs/images/en/navigation-dashboard.png) |
 
 ### In Home Assistant
 

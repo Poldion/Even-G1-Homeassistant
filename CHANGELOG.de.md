@@ -9,6 +9,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.32.0] - 2026-11-11
+
+### Added
+- Navigation auf der Brille: Navigiert Google Maps, erscheint die nächste
+  Abbiegung mit dem Pfeil aus Maps, der Entfernung und der Anweisung, bei
+  jeder neuen Abbiegung und bei 500, 200 und 50 m. Beim Hochschauen ersetzt
+  die Abbiegung das Dashboard (Pfeil als Emoji, Entfernung, Anweisung,
+  Ankunft), bis die Navigation endet. Schalter: *Einstellungen →
+  Benachrichtigungen → Google-Maps-Navigation*. Schickt Maps keinen Pfeil,
+  zeichnet die App einen eigenen.
+
 ## [0.31.0] - 2026-11-11
 
 ### Added
@@ -472,7 +483,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.32.0...HEAD
+[0.32.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...app-v0.32.0
 [0.31.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...app-v0.31.0
 [0.30.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...app-v0.30.0
 [0.29.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...v0.29.0

@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/services.dart';
 
+import '../navigation/navigation.dart';
+
 /// A notification posted on the phone (Android only).
 class PhoneNotification {
   PhoneNotification.fromMap(Map<dynamic, dynamic> map)
@@ -28,11 +30,19 @@ class PhoneNotifications {
 
   static bool get supported => Platform.isAndroid;
 
-  static Stream<PhoneNotification> get stream => supported
-      ? _events.receiveBroadcastStream().map(
-          (e) => PhoneNotification.fromMap(e as Map<dynamic, dynamic>),
-        )
+  /// One subscription to the listener, shared by both streams.
+  static final Stream<Map<dynamic, dynamic>> _raw = supported
+      ? _events.receiveBroadcastStream().map((e) => e as Map<dynamic, dynamic>)
       : const Stream.empty();
+
+  static Stream<PhoneNotification> get stream =>
+      _raw.where((e) => e['type'] == null).map(PhoneNotification.fromMap);
+
+  /// Turn-by-turn navigation (Google Maps): a step, or null when the
+  /// navigation ended.
+  static Stream<NavUpdate?> get navigation => _raw
+      .where((e) => '${e['type']}'.startsWith('navigation'))
+      .map((e) => e['type'] == 'navigation' ? NavUpdate.fromMap(e) : null);
 
   /// True if the user allowed the app to read notifications.
   static Future<bool> isGranted() async {

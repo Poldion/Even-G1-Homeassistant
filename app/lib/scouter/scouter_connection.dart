@@ -227,6 +227,13 @@ class ScouterConnection extends G1Connection {
   bool _micOn = false;
   bool _fast = false;
 
+  /// The navigation's arrow (SkIcons.navigation), sent with each text.
+  Uint8List? _navigationIcon;
+
+  @override
+  void setNavigationIcon(Uint8List? icon) => _navigationIcon =
+      icon != null && icon.length == SkIcons.bytes ? icon : null;
+
   /// A video plays (hidden player): nothing else draws meanwhile.
   bool _video = false;
   bool get videoPlaying => _video;
@@ -1720,6 +1727,9 @@ class ScouterConnection extends G1Connection {
     }).toList();
     if (arms.isEmpty) return _targets().isNotEmpty;
     final maxCode = arms.map((a) => a.link.maxPacket).reduce(min) - 2;
+    // The navigation's arrow goes with the text, the others from slots.
+    final iconData = icon == SkIcons.navigation ? _navigationIcon : null;
+    if (icon == SkIcons.navigation) icon = null;
     final name = icon == null ? null : _iconName(icon);
     if (name != null) {
       final data = await SkIcons.load(name);
@@ -1735,6 +1745,7 @@ class ScouterConnection extends G1Connection {
       top: textTop,
       maxCode: maxCode,
       icon: iconAt,
+      iconData: iconData,
       draw: !synced,
       style: style,
       label: label,
@@ -1792,17 +1803,19 @@ class ScouterConnection extends G1Connection {
     int top = 140,
     required int maxCode,
     int? icon,
+    Uint8List? iconData,
     bool draw = true,
     G1TextStyle style = G1TextStyle.plain,
     bool micStand = false,
     String? label,
     SkFont? smallFont,
   }) {
-    final left = icon == null ? textLeft : iconTextLeft;
+    final withIcon = icon != null || iconData != null;
+    final left = withIcon ? iconTextLeft : textLeft;
     final layout = SkLayout.of(
       font,
       wrap(font, text, SkPanel.width - textLeft - left),
-      icon == null ? style : G1TextStyle.plain,
+      withIcon ? G1TextStyle.plain : style,
       top: top,
       left: left,
     );
@@ -1828,7 +1841,17 @@ class ScouterConnection extends G1Connection {
       SkPanel.height,
       0,
     );
-    if (icon != null) {
+    if (iconData != null) {
+      // An icon that comes with the text (the navigation's arrow): its rows
+      // straight into the frame, beside the text.
+      for (var r = 0; r < SkIcons.size; r++) {
+        room(5 + SkIcons.stride);
+        code.write(
+          SkArena.frame + (top + r) * SkPanel.stride + textLeft ~/ 2,
+          iconData.sublist(r * SkIcons.stride, (r + 1) * SkIcons.stride),
+        );
+      }
+    } else if (icon != null) {
       // The app's icon beside the text, its top at the first line's top.
       room(skOpSize(12));
       code.blit(
