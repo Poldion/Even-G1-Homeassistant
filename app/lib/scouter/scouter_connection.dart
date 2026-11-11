@@ -1125,7 +1125,7 @@ class ScouterConnection extends G1Connection {
         y: line.y,
         text: line.text,
         rects: cut(line.y),
-        level: line.level,
+        level: line.level + (line.bold ? SkResident.bold : 0),
       ));
     }
     return bands;
@@ -1708,18 +1708,20 @@ class ScouterConnection extends G1Connection {
       if (textAt + glyphs.length > SkArena.text + SkArena.textSize) break;
       // The glyph indices and the GLYPHS that draws them, in one packet.
       final chunk = min(glyphs.length, maxCode - skOpSize(9) - 5);
-      room(5 + chunk + skOpSize(9));
+      room(5 + chunk + skOpSize(9) * (line.bold ? 2 : 1));
       code.write(textAt, glyphs.sublist(0, chunk));
-      code.glyphs(
-        SkArena.font,
-        SkArena.frame,
-        SkPanel.stride,
-        line.x,
-        line.y + font.ascent,
-        line.level,
-        textAt,
-        chunk,
-      );
+      for (final dx in [if (line.bold) 1, 0]) {
+        code.glyphs(
+          SkArena.font,
+          SkArena.frame,
+          SkPanel.stride,
+          line.x + dx,
+          line.y + font.ascent,
+          line.level,
+          textAt,
+          chunk,
+        );
+      }
       textAt += chunk;
     }
     if (label != null) {

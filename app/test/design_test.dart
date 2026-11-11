@@ -176,7 +176,11 @@ void main() {
       top: 140,
       rows: 11,
     );
-    expect(bands.firstWhere((b) => b.text == text.split('\n').first).level, 0);
+    // The title is bold: level 0 plus the bold flag.
+    expect(
+      bands.firstWhere((b) => b.text == text.split('\n').first).level,
+      SkResident.bold,
+    );
   });
 
   test('lab terminal: assistant on the bar, a cursor after the answer', () {
@@ -188,6 +192,7 @@ void main() {
       left: 24,
     );
     expect(layout.lines.first.level, 0);
+    expect(layout.lines.first.bold, isTrue);
     final cursor = layout.fills.last;
     final last = layout.lines.last;
     expect(cursor.x, last.x + font.width(last.text) + 4);

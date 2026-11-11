@@ -97,6 +97,9 @@ class SkResident {
   static final labelW = SkW.at(state + 124);
   static final labelBase = SkW.at(state + 128);
   static const labelH = 14;
+
+  /// Added to a band's text level: the text is drawn bold.
+  static const bold = 16;
   static const labelLevel = 12;
   static const maxLevel = 42;
 
@@ -424,6 +427,22 @@ class SkResident {
     a.jmp('rect');
     a.label('text');
     a.beq(r8, c0, 'blank');
+    // Bold: the glyphs once more, one pixel to the right.
+    a.bltu(r14, a.c(bold), 'glyphs');
+    a.sub(r14, r14, a.c(bold));
+    a.add(r12, r9, c1);
+    a.glyphs(
+      a.c(SkArena.font),
+      bandAt,
+      stride,
+      r12,
+      ascent,
+      a.c(2), // MASK
+      r14,
+      r7,
+      r8,
+    );
+    a.label('glyphs');
     a.glyphs(
       a.c(SkArena.font),
       bandAt,

@@ -9,7 +9,12 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-11-11
+
 ### Changed
+- Labor-Design: Der dunkle Text auf der Leiste (Uhrzeit und Datum des
+  Dashboards, Name des Assistenten) ist fett, damit er sich auf der hellen
+  Leiste besser lesen lässt.
 - Der Update-Kanal „Vorabversion“ heißt jetzt „Beta-Version“, seine Builds
   heißen Beta-Builds (Release-Titel auf GitHub „Beta-Build vX.Y.Z.N“).
 
@@ -456,7 +461,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...HEAD
+[0.30.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...app-v0.30.0
 [0.29.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...v0.27.0

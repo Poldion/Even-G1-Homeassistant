@@ -9,7 +9,12 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.30.0] - 2026-11-11
+
 ### Changed
+- Lab design: the dark text on the bar (time and date of the dashboard,
+  the assistant's name) is drawn bold, so it reads better on the light
+  bar.
 - The update channel "Preview" is now called "Beta"; its builds are
   beta builds (GitHub release title "Beta-Build vX.Y.Z.N").
 
@@ -443,7 +448,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...HEAD
+[0.30.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...app-v0.30.0
 [0.29.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...v0.28.0
 [0.27.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.26.0...v0.27.0

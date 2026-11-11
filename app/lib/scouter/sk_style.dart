@@ -90,11 +90,21 @@ class SkBox {
 /// A line of text: its glyphs start at [x], its band at [y] (the line's
 /// top; the baseline is y + ascent).
 class SkTextLine {
-  const SkTextLine(this.x, this.y, this.text, {this.level = 15});
+  const SkTextLine(
+    this.x,
+    this.y,
+    this.text, {
+    this.level = 15,
+    this.bold = false,
+  });
 
   final int x, y;
   final String text;
   final int level;
+
+  /// Drawn twice, the second time one pixel to the right (dark text on
+  /// the lab bar, which reads poorly in the thin font).
+  final bool bold;
 }
 
 /// Where the lines, the frame and the rule of a styled text go.
@@ -252,7 +262,11 @@ class SkLayout {
       final x = badge
           ? centre - font.width(line) ~/ 2 + (i == 0 ? 8 : 0)
           : (i == 0 ? left + 16 : left);
-      out.add(SkTextLine(x, y, line, level: i == 0 ? 0 : 15));
+      out.add(
+        i == 0
+            ? SkTextLine(x, y, line, level: 0, bold: true)
+            : SkTextLine(x, y, line),
+      );
       y += lh;
       if (i == 0) y += ruleGap;
     }
