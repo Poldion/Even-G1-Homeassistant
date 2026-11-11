@@ -674,6 +674,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String skLogVideo(String width, String height, String fps) {
+    return 'Video: $width×$height, $fps frames/s';
+  }
+
+  @override
+  String skLogVideoEnd(String end) {
+    return 'Video ended: $end';
+  }
+
+  @override
   String skLogVmStartRejected(String arm) {
     return '$arm: VM_START rejected';
   }
@@ -906,4 +916,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get updateVersionUnknown => 'Installed version unknown';
+
+  @override
+  String get videoDone => 'Done.';
+
+  @override
+  String get videoFailed =>
+      'The glasses could not play the video. Their ScouterKit firmware may be too old for videos.';
+
+  @override
+  String videoInfo(String width, String height, String fps, String duration) {
+    return '$width × $height px · $fps frames/s · $duration';
+  }
+
+  @override
+  String get videoIntro =>
+      'Plays a video from your phone on both eyes, in black and white; the sound comes from the phone. Videos with strong contrast work best, such as shadow animations.';
+
+  @override
+  String get videoInvert => 'Invert (a light background stays dark)';
+
+  @override
+  String get videoNone => 'No video chosen';
+
+  @override
+  String get videoNotConnected => 'Connect the glasses first.';
+
+  @override
+  String get videoOpenFailed => 'This video cannot be opened.';
+
+  @override
+  String get videoPick => 'Choose video';
+
+  @override
+  String get videoPlay => 'Play';
+
+  @override
+  String videoProgress(String time, String total, String skipped) {
+    return '$time / $total · $skipped frames skipped';
+  }
+
+  @override
+  String get videoStop => 'Stop';
+
+  @override
+  String get videoTitle => 'Video on the glasses';
+
+  @override
+  String get videoUnlocked => 'You found the video player.';
 }

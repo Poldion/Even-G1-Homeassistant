@@ -37,6 +37,7 @@ class SkOp {
   static const blit = 0x51;
   static const glyphs = 0x52;
   static const draw = 0x53;
+  static const video = 0x55;
   static const end = 0x33;
 }
 

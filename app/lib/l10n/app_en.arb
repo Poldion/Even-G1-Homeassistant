@@ -641,6 +641,28 @@
       }
     }
   },
+  "skLogVideo": "Video: {width}×{height}, {fps} frames/s",
+  "@skLogVideo": {
+    "placeholders": {
+      "width": {
+        "type": "String"
+      },
+      "height": {
+        "type": "String"
+      },
+      "fps": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogVideoEnd": "Video ended: {end}",
+  "@skLogVideoEnd": {
+    "placeholders": {
+      "end": {
+        "type": "String"
+      }
+    }
+  },
   "skLogVmStartRejected": "{arm}: VM_START rejected",
   "@skLogVmStartRejected": {
     "placeholders": {
@@ -805,5 +827,48 @@
   },
   "updateSwitch": "Switch",
   "updateUpToDate": "The app is up to date.",
-  "updateVersionUnknown": "Installed version unknown"
+  "updateVersionUnknown": "Installed version unknown",
+  "videoDone": "Done.",
+  "videoFailed": "The glasses could not play the video. Their ScouterKit firmware may be too old for videos.",
+  "videoInfo": "{width} × {height} px · {fps} frames/s · {duration}",
+  "@videoInfo": {
+    "placeholders": {
+      "width": {
+        "type": "String"
+      },
+      "height": {
+        "type": "String"
+      },
+      "fps": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "videoIntro": "Plays a video from your phone on both eyes, in black and white; the sound comes from the phone. Videos with strong contrast work best, such as shadow animations.",
+  "videoInvert": "Invert (a light background stays dark)",
+  "videoNone": "No video chosen",
+  "videoNotConnected": "Connect the glasses first.",
+  "videoOpenFailed": "This video cannot be opened.",
+  "videoPick": "Choose video",
+  "videoPlay": "Play",
+  "videoProgress": "{time} / {total} · {skipped} frames skipped",
+  "@videoProgress": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      },
+      "skipped": {
+        "type": "String"
+      }
+    }
+  },
+  "videoStop": "Stop",
+  "videoTitle": "Video on the glasses",
+  "videoUnlocked": "You found the video player."
 }

@@ -1147,6 +1147,18 @@ abstract class AppLocalizations {
   /// **'{arm} arm in safe mode (after start errors): no display'**
   String skLogSafeMode(String arm);
 
+  /// No description provided for @skLogVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Video: {width}×{height}, {fps} frames/s'**
+  String skLogVideo(String width, String height, String fps);
+
+  /// No description provided for @skLogVideoEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Video ended: {end}'**
+  String skLogVideoEnd(String end);
+
   /// No description provided for @skLogVmStartRejected.
   ///
   /// In en, this message translates to:
@@ -1530,6 +1542,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Installed version unknown'**
   String get updateVersionUnknown;
+
+  /// No description provided for @videoDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done.'**
+  String get videoDone;
+
+  /// No description provided for @videoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The glasses could not play the video. Their ScouterKit firmware may be too old for videos.'**
+  String get videoFailed;
+
+  /// No description provided for @videoInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'{width} × {height} px · {fps} frames/s · {duration}'**
+  String videoInfo(String width, String height, String fps, String duration);
+
+  /// No description provided for @videoIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Plays a video from your phone on both eyes, in black and white; the sound comes from the phone. Videos with strong contrast work best, such as shadow animations.'**
+  String get videoIntro;
+
+  /// No description provided for @videoInvert.
+  ///
+  /// In en, this message translates to:
+  /// **'Invert (a light background stays dark)'**
+  String get videoInvert;
+
+  /// No description provided for @videoNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No video chosen'**
+  String get videoNone;
+
+  /// No description provided for @videoNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect the glasses first.'**
+  String get videoNotConnected;
+
+  /// No description provided for @videoOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'This video cannot be opened.'**
+  String get videoOpenFailed;
+
+  /// No description provided for @videoPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose video'**
+  String get videoPick;
+
+  /// No description provided for @videoPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get videoPlay;
+
+  /// No description provided for @videoProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} / {total} · {skipped} frames skipped'**
+  String videoProgress(String time, String total, String skipped);
+
+  /// No description provided for @videoStop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get videoStop;
+
+  /// No description provided for @videoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Video on the glasses'**
+  String get videoTitle;
+
+  /// No description provided for @videoUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'You found the video player.'**
+  String get videoUnlocked;
 }
 
 class _AppLocalizationsDelegate

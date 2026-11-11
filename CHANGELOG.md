@@ -9,6 +9,16 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-11-11
+
+### Added
+- A hidden video player: tap the installed version under *Settings → App
+  update* seven times. It plays a video from the phone in black and white
+  on both eyes (up to 480 × 360, 15 frames/s), with the sound on the phone.
+  Each frame goes as a compressed `VIDEO` record that both arms decode and
+  show at the same moment; frames the link cannot deliver in time are
+  skipped. Needs a ScouterKit firmware with `VIDEO`.
+
 ## [0.30.0] - 2026-11-11
 
 ### Changed
@@ -448,7 +458,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...HEAD
+[0.31.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...app-v0.31.0
 [0.30.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...app-v0.30.0
 [0.29.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...v0.28.0

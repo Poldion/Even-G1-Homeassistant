@@ -73,7 +73,7 @@ class SettingsTab extends StatelessWidget {
             icon: Icons.system_update,
             title: tr.settingsAppUpdate,
             subtitle: tr.settingsAppUpdateSubtitle,
-            child: const UpdateSettings(),
+            child: UpdateSettings(bridge: bridge),
           ),
           _Section(
             icon: Icons.language,

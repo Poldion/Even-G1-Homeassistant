@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../bridge.dart';
 import '../update/app_update.dart';
 import '../l10n/l10n.dart';
+import 'video_player_page.dart';
 
 /// Releases page of the last version that supports Even's firmware.
 const evenFirmwareRelease =
@@ -139,7 +140,10 @@ Future<void> checkForAppUpdate(
 
 /// Settings section: installed version and manual update check.
 class UpdateSettings extends StatefulWidget {
-  const UpdateSettings({super.key});
+  const UpdateSettings({super.key, this.bridge});
+
+  /// For the hidden video player (seven taps on the version).
+  final Bridge? bridge;
 
   @override
   State<UpdateSettings> createState() => _UpdateSettingsState();
@@ -149,6 +153,28 @@ class _UpdateSettingsState extends State<UpdateSettings> {
   String _version = '';
   bool _checking = false;
   UpdateChannel _channel = UpdateChannel.stable;
+  int _taps = 0;
+  DateTime _lastTap = DateTime(0);
+
+  /// Seven quick taps on the version open the hidden video player.
+  void _tapVersion() {
+    final bridge = widget.bridge;
+    if (bridge == null) return;
+    final now = DateTime.now();
+    _taps = now.difference(_lastTap) < const Duration(seconds: 1)
+        ? _taps + 1
+        : 1;
+    _lastTap = now;
+    if (_taps < 7) return;
+    _taps = 0;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(tr.videoUnlocked)));
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(builder: (_) => VideoPlayerPage(bridge: bridge)),
+    );
+  }
 
   @override
   void initState() {
@@ -205,10 +231,14 @@ class _UpdateSettingsState extends State<UpdateSettings> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          _version.isEmpty
-              ? tr.updateVersionUnknown
-              : tr.updateInstalled(_version),
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _tapVersion,
+          child: Text(
+            _version.isEmpty
+                ? tr.updateVersionUnknown
+                : tr.updateInstalled(_version),
+          ),
         ),
         const SizedBox(height: 4),
         Text(tr.updateDailyCheck, style: Theme.of(context).textTheme.bodySmall),

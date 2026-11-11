@@ -9,6 +9,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.31.0] - 2026-11-11
+
+### Added
+- Ein versteckter Videoplayer: unter *Einstellungen → App-Update* sieben Mal
+  auf die installierte Version tippen. Er spielt ein Video vom Handy in
+  Schwarz-Weiß auf beiden Augen ab (bis 480 × 360, 15 Bilder/s), der Ton
+  kommt vom Handy. Jedes Bild geht als komprimierter `VIDEO`-Record auf
+  beide Bügel, die es gleichzeitig dekodieren und zeigen; Bilder, die die
+  Verbindung nicht rechtzeitig schafft, werden übersprungen. Braucht eine
+  ScouterKit-Firmware mit `VIDEO`.
+
 ## [0.30.0] - 2026-11-11
 
 ### Changed
@@ -461,7 +472,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...HEAD
+[0.31.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...app-v0.31.0
 [0.30.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.29.0...app-v0.30.0
 [0.29.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.28.0...v0.29.0
 [0.28.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/v0.27.0...v0.28.0

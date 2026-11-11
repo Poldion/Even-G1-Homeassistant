@@ -21,6 +21,7 @@ import 'sk_link.dart';
 import 'sk_program.dart';
 import 'sk_protocol.dart';
 import 'sk_style.dart';
+import 'sk_video.dart';
 
 /// One arm running g1v0.
 class _SkArm {
@@ -225,6 +226,10 @@ class ScouterConnection extends G1Connection {
   Timer? _clockTimer;
   bool _micOn = false;
   bool _fast = false;
+
+  /// A video plays (hidden player): nothing else draws meanwhile.
+  bool _video = false;
+  bool get videoPlaying => _video;
   bool _silent = false;
   bool _headUp = false;
   int _headUpAngle = 30;
@@ -475,7 +480,7 @@ class ScouterConnection extends G1Connection {
   }
 
   ConnectionPriority _priority(_SkArm arm) =>
-      _fast || (_micOn && arm.side == G1Side.right)
+      _fast || _video || (_micOn && arm.side == G1Side.right)
       ? ConnectionPriority.high
       : ConnectionPriority.balanced;
 
@@ -675,6 +680,7 @@ class ScouterConnection extends G1Connection {
   /// (SkAnimation); the panels are off again at its end.
   @override
   Future<void> playSilentModeAnimation(bool on, {bool lab = false}) async {
+    if (_video) return;
     final font = await _textFont();
     final arms = _targets().where((a) => a.inCase != 1).toList();
     if (arms.isEmpty) return;
@@ -700,6 +706,166 @@ class ScouterConnection extends G1Connection {
         ),
       ),
     );
+  }
+
+  /// Plays a video on both eyes (the hidden player): [frames] frames of
+  /// [width] × [height] at [fps], 1 bit per pixel ([SkVideoEncoder]),
+  /// [read] gives [count] of them from [start] on. Each frame goes as a
+  /// `VIDEO` record (VM.md §3.7) that both arms decode and show at the same
+  /// moment; a frame the link cannot deliver in time is skipped.
+  /// [onStart] runs when the first frame shows (the sound), [onProgress]
+  /// after each frame, [stopped] ends the video early.
+  Future<SkVideoEnd> playVideo({
+    required int width,
+    required int height,
+    required double fps,
+    required int frames,
+    required Future<Uint8List> Function(int start, int count) read,
+    void Function()? onStart,
+    void Function(int frame, int skipped)? onProgress,
+    bool Function()? stopped,
+  }) async {
+    final arms = _targets().where((a) => a.inCase != 1).toList();
+    if (arms.isEmpty || _video) return SkVideoEnd.unavailable;
+    if (arms.length == 2 && !arms.every((a) => a.clock.known)) {
+      await _syncClocks();
+    }
+    if (!arms.every((a) => a.clock.known)) return SkVideoEnd.unavailable;
+    _video = true;
+    await _updatePriority();
+    final layout = SkVideoLayout(width, height);
+    final encoder = SkVideoEncoder(width, height);
+    final maxCode = arms.map((a) => a.link.maxPacket).reduce(min) - 2;
+    final frameBytes = encoder.stride * height;
+    var end = SkVideoEnd.done;
+    final inFlight = {for (final a in arms) a: 0};
+    var failed = false;
+    Timer? startTimer;
+    try {
+      // The app shows something (busy = 1, shown = 0): a black panel.
+      final start =
+          (SkCode()..write(SkResident.busy.address, const [
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+              ]))
+              .take();
+      final ok = await Future.wait(
+        arms.map((a) => a.link.run([start, layout.startCode()])),
+      );
+      if (!ok.every((r) => r)) return end = SkVideoEnd.failed;
+      _debug(tr.skLogVideo('$width', '$height', fps.toStringAsFixed(1)));
+
+      // Frames in batches, one batch ahead.
+      const batch = 6;
+      final pending = <int, Future<Uint8List>>{};
+      Future<Uint8List> frameAt(int k) async {
+        final first = k - k % batch;
+        pending.removeWhere((b, _) => b < first);
+        Future<Uint8List> load(int b) =>
+            pending[b] ??= read(b, min(batch, frames - b));
+        final data = load(first);
+        if (first + batch < frames) load(first + batch);
+        final bytes = await data;
+        final o = (k - first) * frameBytes;
+        if (bytes.length < o + frameBytes) return Uint8List(frameBytes);
+        return Uint8List.sublistView(bytes, o, o + frameBytes);
+      }
+
+      final periodUs = 1e6 / fps;
+      final leadUs = 400000 + _drawLeadUs(arms);
+      final ahead = leadUs ~/ periodUs + 2;
+      final t0 = SkClock.hostNow() + leadUs + 300000;
+      int untilUs(int hostUs) =>
+          ((hostUs - SkClock.hostNow()) & 0xffffffff).toSigned(32);
+      Uint8List? shown;
+      var skipped = 0, lastDue = t0;
+      for (var k = 0; k < frames; k++) {
+        if (failed) return end = SkVideoEnd.failed;
+        if (stopped?.call() == true) return end = SkVideoEnd.stopped;
+        final due = (t0 + (k * periodUs).round()) & 0xffffffff;
+        final wait = untilUs(due) - leadUs;
+        if (wait > 0) await Future.delayed(Duration(microseconds: wait));
+        final waited = Stopwatch()..start();
+        while (inFlight.values.any((n) => n >= ahead)) {
+          if (failed) return end = SkVideoEnd.failed;
+          if (waited.elapsed > const Duration(seconds: 10)) {
+            return end = SkVideoEnd.failed;
+          }
+          await Future.delayed(const Duration(milliseconds: 3));
+        }
+        if (k == 0 && onStart != null) {
+          startTimer = Timer(
+            Duration(microseconds: max(0, untilUs(t0))),
+            onStart,
+          );
+        }
+        // Behind: on to the frame that is due now.
+        if (shown != null && untilUs(due) < leadUs ~/ 2) {
+          skipped++;
+          onProgress?.call(k, skipped);
+          continue;
+        }
+        final frame = await frameAt(k);
+        if (shown != null && untilUs(due) < 0) {
+          // Decoded too late.
+          skipped++;
+          onProgress?.call(k, skipped);
+          continue;
+        }
+        if (shown != null && listEquals(frame, shown)) {
+          onProgress?.call(k, skipped);
+          continue;
+        }
+        final record = encoder.encode(
+          frame,
+          redraw: shown == null,
+          maxBytes: SkVideoLayout.recordMax,
+        );
+        if (record == null) {
+          skipped++;
+          continue;
+        }
+        shown = frame;
+        lastDue = due;
+        for (final arm in arms) {
+          inFlight[arm] = inFlight[arm]! + 1;
+          arm.link
+              .run(
+                layout.frameCode(
+                  record,
+                  arm.clock.toArm(due),
+                  maxCode: maxCode,
+                ),
+              )
+              .then((ok) {
+                inFlight[arm] = inFlight[arm]! - 1;
+                if (!ok) failed = true;
+              });
+        }
+        onProgress?.call(k, skipped);
+      }
+      // Until the last frame shows, and its packets are done.
+      final left = untilUs(lastDue);
+      if (left > 0) await Future.delayed(Duration(microseconds: left));
+      final waited = Stopwatch()..start();
+      while (inFlight.values.any((n) => n > 0) &&
+          waited.elapsed < const Duration(seconds: 5)) {
+        await Future.delayed(const Duration(milliseconds: 10));
+      }
+      return end;
+    } finally {
+      if (end != SkVideoEnd.done) startTimer?.cancel();
+      _video = false;
+      _debug(tr.skLogVideoEnd(end.name));
+      await _updatePriority();
+      await blankScreen();
+    }
   }
 
   /// The program always runs: clock, status line, microphone stand,
@@ -1259,7 +1425,7 @@ class ScouterConnection extends G1Connection {
   /// When both arms should draw: two connection intervals, the clocks'
   /// error and 15 ms for the arm (VM.md §7), at least 40 ms.
   int _drawLeadUs(Iterable<_SkArm> arms) {
-    final interval = (_fast || _micOn) ? 15000 : 50000;
+    final interval = (_fast || _video || _micOn) ? 15000 : 50000;
     final error = arms.map((a) => a.clock.errorUs).fold(0, max);
     return max(40000, 2 * interval + error + 15000);
   }
@@ -1540,6 +1706,7 @@ class ScouterConnection extends G1Connection {
     G1TextStyle style = G1TextStyle.plain,
     String? label,
   }) async {
+    if (_video) return true;
     final font = await _textFont();
     final small = await _small();
     _appShowing = true;
@@ -1809,6 +1976,7 @@ class ScouterConnection extends G1Connection {
   /// (VM.md §6.6). The next text powers them on again (≈ 71 ms).
   @override
   Future<bool> blankScreen() {
+    if (_video) return Future.value(true);
     _appShowing = false;
     final code = SkCode()
       ..write(SkResident.busy.address, const [0, 0, 0, 0])

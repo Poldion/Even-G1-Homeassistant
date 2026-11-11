@@ -11,6 +11,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
 
     private val updater by lazy { AppUpdater(this) }
+    private val video by lazy { VideoSource(this) }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -49,6 +50,10 @@ class MainActivity : FlutterActivity() {
                 else -> result.notImplemented()
             }
         }
+
+        MethodChannel(messenger, "even_g1/video").setMethodCallHandler { call, result ->
+            video.handle(call, result)
+        }
     }
 
     override fun onResume() {
@@ -56,7 +61,15 @@ class MainActivity : FlutterActivity() {
         updater.onResume()
     }
 
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (!video.onActivityResult(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
     override fun onDestroy() {
+        video.dispose()
         updater.onDestroy()
         super.onDestroy()
     }
