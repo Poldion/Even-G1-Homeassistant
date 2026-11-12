@@ -89,7 +89,8 @@ since the last `vX.Y.Z` release (the version in `manifest.json` aside), else
 
 ## App icon
 
-The icon (green glasses with display lines on a near-black ground, the
+The icon (green glasses on a near-black ground, a house in the left lens,
+display lines in the right one; the
 status bar icon in white) is generated: change `scripts/make_app_icon.py`,
 then run `python3 scripts/make_app_icon.py app/android/app/src/main/res
 preview.png` (needs Pillow) and commit the files in `res/`.

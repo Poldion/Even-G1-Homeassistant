@@ -89,7 +89,8 @@ letzten Release `vX.Y.Z` etwas geändert hat (außer der Version in
 
 ## App-Symbol
 
-Das Symbol (grüne Brille mit Displayzeilen auf fast schwarzem Grund, das
+Das Symbol (grüne Brille auf fast schwarzem Grund, ein Haus im linken Glas,
+Displayzeilen im rechten; das
 Statusleisten-Symbol in Weiß) wird erzeugt: `scripts/make_app_icon.py`
 ändern, dann `python3 scripts/make_app_icon.py app/android/app/src/main/res
 preview.png` ausführen (braucht Pillow) und die Dateien in `res/`
