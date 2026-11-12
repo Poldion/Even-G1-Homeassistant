@@ -9,6 +9,16 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-11-12
+
+### Changed
+- Ruhigere automatische Helligkeit: Die Brille misst das Licht alle 0,4 s,
+  solange die Anzeige an ist, glättet die Messungen (der Sensor am Bügel
+  springt bei jeder Kopfbewegung), übergeht eine Stufe Unterschied und
+  blendet höchstens 2 Stufen pro Messung über, statt zu springen. Mit
+  verrauschtem Sensor im Interpreter: 10 statt 43 Änderungen in 10 s, der
+  größte Schritt 2 statt 21 Stufen.
+
 ## [0.39.0] - 2026-11-12
 
 ### Fixed
@@ -542,7 +552,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.40.0...HEAD
+[0.40.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...app-v0.40.0
 [0.39.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.38.0...app-v0.39.0
 [0.38.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.37.0...app-v0.38.0
 [0.37.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.36.0...app-v0.37.0

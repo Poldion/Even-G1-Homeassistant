@@ -9,6 +9,16 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.40.0] - 2026-11-12
+
+### Changed
+- Calmer automatic brightness: the glasses read the light every 0.4 s
+  while the display is on, smooth the readings (the sensor on the arm jumps
+  with every turn of the head), ignore a difference of one level and fade
+  by at most 2 levels per reading instead of jumping. With a noisy sensor
+  in the interpreter: 10 instead of 43 changes in 10 s, the largest step 2
+  instead of 21 levels.
+
 ## [0.39.0] - 2026-11-12
 
 ### Fixed
@@ -526,7 +536,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.40.0...HEAD
+[0.40.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...app-v0.40.0
 [0.39.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.38.0...app-v0.39.0
 [0.38.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.37.0...app-v0.38.0
 [0.37.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.36.0...app-v0.37.0

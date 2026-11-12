@@ -83,6 +83,10 @@ class SkResident {
   // times; the left arm's time of the last message from the right one.
   static final _downBeats = SkW.at(state + 164);
   static final _lastBeat = SkW.at(state + 168);
+  // Automatic brightness (right arm, program): the smoothed level (× 16)
+  // and the time of the last reading.
+  static final _lightAvg = SkW.at(state + 172);
+  static final _lightAt = SkW.at(state + 176);
 
   // Connection symbols at the dashboard's top right (written by the app):
   // Home Assistant unreachable, where they go (y 0: nowhere); the program
@@ -147,6 +151,13 @@ class SkResident {
   /// left arm switches off when it heard nothing for this long (the right
   /// arm gone). After "down" the right arm repeats it [downBeats] times.
   static const followerTimeoutUs = 1500000;
+
+  /// Automatic brightness: each reading moves the smoothed level a quarter
+  /// of the way; the panel's level moves at most [lightStep] per reading
+  /// (every [headCheckUs] while the panel is on). After [lightFreshUs]
+  /// without a reading the first one counts at once.
+  static const lightStep = 2;
+  static const lightFreshUs = 2000000;
   static const downBeats = 3;
 
   static const flagDashboard = 1;
@@ -324,6 +335,11 @@ class SkResident {
       if (peer == peerLeader) {
         a.bne(_downBeats, c0, 'armSoon');
       }
+      // The panel is on for the app: the light is read often then too.
+      if (micArm) {
+        a.beq(lightOn, c0, 'armClock');
+        a.bne(busy, c0, 'armSoon');
+      }
       a.jmp('armClock');
       a.label('armSoon');
       a.sub(r0, r0, a.c(watchUs - headCheckUs));
@@ -405,9 +421,52 @@ class SkResident {
       a.blts(r2, a.c(maxLevel + 1), 'lMax');
       a.mov(r2, a.c(maxLevel));
       a.label('lMax');
-      a.beq(r2, lightLevel, 'lRange');
-      a.mov(lightLevel, r2);
-      a.sysWrite(a.c(SkProp.brightness), r2);
+      // Smoothing: the sensor sits on the arm and jumps with every turn of
+      // the head. r2 = this reading's level, r8 = it × 16.
+      a.mul(r8, r2, a.c(16));
+      a.sysRead(r6, a.c(SkProp.timeUs));
+      a.sub(r7, r6, _lightAt);
+      a.mov(_lightAt, r6);
+      a.bltu(r7, a.c(lightFreshUs), 'lSmooth');
+      // The first reading after a pause counts at once.
+      a.mov(_lightAvg, r8);
+      a.mov(r9, r2);
+      a.jmp('lSet');
+      a.label('lSmooth');
+      a.bltu(r8, _lightAvg, 'lFall');
+      a.sub(r9, r8, _lightAvg);
+      a.add(r9, r9, a.c(3));
+      a.divu(r9, r9, a.c(4));
+      a.add(_lightAvg, _lightAvg, r9);
+      a.jmp('lLevel');
+      a.label('lFall');
+      a.sub(r9, _lightAvg, r8);
+      a.add(r9, r9, a.c(3));
+      a.divu(r9, r9, a.c(4));
+      a.sub(_lightAvg, _lightAvg, r9);
+      a.label('lLevel');
+      a.add(r9, _lightAvg, a.c(8));
+      a.divu(r9, r9, a.c(16));
+      // A dead band: one level off is no reason to change.
+      a.add(r7, lightLevel, c1);
+      a.bltu(r7, r9, 'lMove');
+      a.add(r7, r9, c1);
+      a.bltu(r7, lightLevel, 'lMove');
+      a.jmp('lRange');
+      a.label('lMove');
+      // At most lightStep levels per reading: a fade, not a jump.
+      a.add(r7, lightLevel, a.c(lightStep));
+      a.bgeu(r7, r9, 'lUp');
+      a.mov(r9, r7);
+      a.label('lUp');
+      a.blts(lightLevel, a.c(lightStep), 'lSet');
+      a.sub(r7, lightLevel, a.c(lightStep));
+      a.bgeu(r9, r7, 'lSet');
+      a.mov(r9, r7);
+      a.label('lSet');
+      a.beq(r9, lightLevel, 'lRange');
+      a.mov(lightLevel, r9);
+      a.sysWrite(a.c(SkProp.brightness), r9);
       a.label('lRange');
       a.divu(r3, r0, a.c(4));
       a.bgeu(r3, c200, 'lMargin');
@@ -692,6 +751,7 @@ class SkResident {
       a.bltu(_headBeat, a.c(headCheckUs ~/ periodUs), 'noHead');
       a.mov(_headBeat, c0);
       a.call('headCheck');
+      a.call('light');
       a.label('noHead');
       a.add(_tick, _tick, c1);
       a.beq(_cool, c0, 'sample');

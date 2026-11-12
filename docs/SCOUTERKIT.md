@@ -271,8 +271,13 @@ The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
 - Brightness with offset, on the glasses: the right arm's program handles
   `LIGHT` itself. When the light leaves the range ±25 % (at least ±2 lux)
   around the last reading, it computes stock's level from the firmware's
-  table, adds the offset, clamps it to 0–42, writes `BRIGHTNESS` and sets the
-  next range; the watch repeats it every 5 s. The left arm runs
+  table, adds the offset, clamps it to 0–42 and sets the next range; the
+  watch repeats it every 5 s, and every 0.4 s while the panel is on. The
+  sensor sits on the arm and jumps with every turn of the head, so each
+  reading moves a smoothed level only a quarter of the way; a difference of
+  one level changes nothing, and `BRIGHTNESS` moves at most 2 levels per
+  reading (a fade of about 2 s from dim to bright). The first reading after
+  2 s without one counts at once. The left arm runs
   `AUTO_BRIGHTNESS` = 1 and takes the right arm's level over their link
   (VM.md §6.9). No phone is needed. Firmware without the link: the app does
   it from the `LIGHT` events as before.

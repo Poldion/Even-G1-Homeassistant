@@ -281,8 +281,14 @@ Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
 - Helligkeit mit Offset, auf der Brille: Das Programm des rechten Bügels
   behandelt `LIGHT` selbst. Verlässt das Licht den Bereich ±25 % (mindestens
   ±2 Lux) um die letzte Messung, rechnet es die Stufe mit der Tabelle der
-  Firmware aus, addiert den Offset, begrenzt auf 0–42, schreibt `BRIGHTNESS`
-  und setzt den nächsten Bereich; der Wachhund wiederholt das alle 5 s. Der
+  Firmware aus, addiert den Offset, begrenzt auf 0–42 und setzt den nächsten
+  Bereich; der Wachhund wiederholt das alle 5 s, und alle 0,4 s, solange die
+  Anzeige an ist. Der Sensor sitzt am Bügel und springt bei jeder
+  Kopfbewegung, darum bewegt jede Messung eine geglättete Stufe nur ein
+  Viertel des Wegs; eine Stufe Unterschied ändert nichts, und
+  `BRIGHTNESS` ändert sich höchstens um 2 Stufen pro Messung (ein Übergang
+  von etwa 2 s von dunkel nach hell). Die erste Messung nach 2 s ohne eine
+  zählt sofort. Der
   linke Bügel läuft mit `AUTO_BRIGHTNESS` = 1 und übernimmt die Stufe des
   rechten über die Funkverbindung der Bügel (VM.md §6.9). Ein Handy braucht
   es dafür nicht. Firmware ohne die Verbindung: Die App macht es wie bisher
