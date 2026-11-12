@@ -73,6 +73,7 @@ class SkResident {
   static final _countY = SkW.at(state + 88);
   static final _timeY = SkW.at(state + 92);
   static final _beat = SkW.at(state + 96);
+  static final _headBeat = SkW.at(state + 148);
 
   // Connection symbols at the dashboard's top right (written by the app):
   // Home Assistant unreachable, where they go (y 0: nowhere); the program
@@ -128,6 +129,14 @@ class SkResident {
   /// down and the app shows nothing, and the right arm repeats its head
   /// state to the left one, so a missed message or a restart heals itself.
   static const watchUs = 5000000;
+
+  /// While the dashboard shows, each arm checks the pitch itself this
+  /// often: a missed or late TILT never leaves the panel on.
+  static const headCheckUs = 400000;
+
+  /// The left arm's own check allows this much more than the hysteresis,
+  /// so the eyes do not part at the edge (the right arm decides).
+  static const followerMargin = 10;
 
   static const flagDashboard = 1;
   static const flagGestures = 2;
@@ -190,6 +199,11 @@ class SkResident {
 
     // TILT: the pitch left its range.
     a.label('tilt');
+    a.call('head');
+    a.end();
+
+    // head: up or down by the pitch, then a new range around the state.
+    a.label('head');
     a.sysRead(r0, a.c(SkProp.pitch));
     a.beq(r0, a.c(SkProp.unknown), 'range');
     a.mov(r1, angle);
@@ -201,6 +215,8 @@ class SkResident {
     a.notify(a.c(notifyHead), c1);
     if (peer == peerLeader) _tell(a, peerUp);
     a.call('show');
+    // Checks the pitch again soon (TIMER).
+    a.call('armTimer');
     a.jmp('range');
     a.label('isUp');
     a.sub(r2, r1, a.c(10));
@@ -211,17 +227,42 @@ class SkResident {
     a.notify(a.c(notifyHead), c0);
     if (peer == peerLeader) _tell(a, peerDown);
     a.call('hide');
-    // A new range around the state, 10° hysteresis.
+    // A new range around the state, 10° hysteresis. TILT fires only when
+    // the pitch leaves the range: if it is outside already (the head moved
+    // while the dashboard was drawn), decide again now.
     a.label('range');
     a.bne(up, c0, 'rangeUp');
     a.sysWrite(a.c(SkProp.pitchLo), a.c(-90));
     a.sysWrite(a.c(SkProp.pitchHi), angle);
-    a.end();
+    a.sysRead(r0, a.c(SkProp.pitch));
+    a.beq(r0, a.c(SkProp.unknown), 'ret');
+    a.blts(angle, r0, 'head'); // angle < pitch: up after all
+    a.ret();
     a.label('rangeUp');
     a.sub(r2, angle, a.c(10));
     a.sysWrite(a.c(SkProp.pitchLo), r2);
     a.sysWrite(a.c(SkProp.pitchHi), a.c(90));
-    a.end();
+    a.sysRead(r0, a.c(SkProp.pitch));
+    a.beq(r0, a.c(SkProp.unknown), 'ret');
+    a.blts(r0, r2, 'head'); // pitch < angle - 10: down after all
+    a.ret();
+
+    // headCheck: while up, the pitch itself; the head went down without a
+    // TILT (or the right arm's message got lost): down now.
+    a.label('headCheck');
+    a.beq(up, c0, 'ret');
+    a.sysRead(r0, a.c(SkProp.pitch));
+    a.beq(r0, a.c(SkProp.unknown), 'ret');
+    if (peer == peerFollower) {
+      a.sub(r2, angle, a.c(10 + followerMargin));
+      a.bges(r0, r2, 'ret');
+      a.mov(up, c0);
+      a.jmp('hide');
+    } else {
+      a.sub(r2, angle, a.c(10));
+      a.bges(r0, r2, 'ret');
+      a.jmp('head');
+    }
 
     // USER0: the app changed the dashboard; redraw it while it is shown.
     a.label('user0');
@@ -250,9 +291,13 @@ class SkResident {
     // minute begins (the detector's timer ticks every 20 ms anyway).
     a.label('armTimer');
     if (!gestures) {
-      // The next check, or the next minute if that comes first.
+      // The next check (soon while the head is up), or the next minute if
+      // that comes first.
       a.sysRead(r0, a.c(SkProp.timeUs));
       a.add(r0, r0, a.c(watchUs));
+      a.beq(up, c0, 'armClock');
+      a.sub(r0, r0, a.c(watchUs - headCheckUs));
+      a.label('armClock');
       a.beq(clockAt, c0, 'armSet');
       a.add(r1, clockRef, a.c(minuteUs));
       a.sub(r2, r1, r0);
@@ -597,6 +642,11 @@ class SkResident {
       a.mov(_beat, c0);
       a.call('watch');
       a.label('noWatch');
+      a.add(_headBeat, _headBeat, c1);
+      a.bltu(_headBeat, a.c(headCheckUs ~/ periodUs), 'noHead');
+      a.mov(_headBeat, c0);
+      a.call('headCheck');
+      a.label('noHead');
       a.add(_tick, _tick, c1);
       a.beq(_cool, c0, 'sample');
       a.sub(_cool, _cool, c1);
@@ -652,8 +702,10 @@ class SkResident {
     }
 
     if (!gestures) {
-      // TIMER: a new minute (the clock).
+      // TIMER: a new minute (the clock), the watch, and while the head is
+      // up its check.
       a.label('timer');
+      a.call('headCheck');
       a.call('tick');
       a.call('watch');
       a.call('armTimer');
@@ -674,6 +726,7 @@ class SkResident {
       a.mov(up, c1);
       a.sleepUntil(r1);
       a.call('show');
+      a.call('armTimer');
       a.end();
       a.label('peerDown');
       a.beq(up, c0, 'peerDone');

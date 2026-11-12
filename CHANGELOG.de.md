@@ -9,6 +9,16 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-11-12
+
+### Fixed
+- Das Dashboard blieb nach schnellem Hoch- und Runterschauen (ein Hubbel im
+  Auto) manchmal an: Die Brille meldet nur, wenn der Kopf seinen Bereich
+  verlässt, und ein Kopf, der schon wieder unten war, während das Dashboard
+  gezeichnet wurde, wurde nie gemeldet. Das Programm prüft die Neigung jetzt
+  gleich nach jedem Wechsel noch einmal und alle 0,4 s, solange das
+  Dashboard zu sehen ist, auf beiden Bügeln.
+
 ## [0.34.0] - 2026-11-12
 
 ### Changed
@@ -497,7 +507,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...HEAD
+[0.35.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...app-v0.35.0
 [0.34.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.33.0...app-v0.34.0
 [0.33.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.32.0...app-v0.33.0
 [0.32.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...app-v0.32.0

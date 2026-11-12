@@ -198,6 +198,14 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   Neustart, der das Bild der Anzeige stehen lässt), und der rechte Bügel
   wiederholt dem linken seinen Kopfzustand. Eine verlorene Nachricht oder ein
   Neustart heilt sich so binnen 5 Sekunden.
+- **Kopfprüfung** (alle 0,4 s, solange das Dashboard zu sehen ist): `TILT`
+  löst nur aus, wenn die Neigung ihren Bereich *verlässt*; ging der Kopf
+  schon wieder runter, während das Dashboard gezeichnet wurde, käme nie ein
+  Ereignis. Darum liest das Programm nach dem Setzen eines neuen Bereichs
+  die Neigung gleich noch einmal und entscheidet sofort, und solange der
+  Kopf oben ist, liest jeder Bügel die Neigung selbst; unter dem Winkel
+  minus der Hysterese (linker Bügel: 10° mehr, der rechte entscheidet) geht
+  das Dashboard aus.
 - **Beide Augen zusammen** (Funkverbindung der Bügel, VM.md §6.9): Nur der
   rechte Bügel folgt der Neigung. Bei einem Wechsel schickt er dem linken
   `PEER_SEND` 1 (hoch) oder 2 (runter) und schaltet 150 ms später; der

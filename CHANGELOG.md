@@ -9,6 +9,15 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-11-12
+
+### Fixed
+- The dashboard sometimes stayed on after a quick look up and down (a bump
+  in the car): the glasses only report the head leaving its range, and a
+  head that went down again while the dashboard was being drawn was never
+  reported. The program now checks the pitch again right after each change
+  and every 0.4 s while the dashboard shows, on both arms.
+
 ## [0.34.0] - 2026-11-12
 
 ### Changed
@@ -482,7 +491,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...HEAD
+[0.35.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...app-v0.35.0
 [0.34.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.33.0...app-v0.34.0
 [0.33.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.32.0...app-v0.33.0
 [0.32.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...app-v0.32.0
