@@ -87,6 +87,14 @@ Arten (Eingabe *kind*, Standard *auto*):
 letzten Release `vX.Y.Z` etwas geändert hat (außer der Version in
 `manifest.json`), sonst *app*. Die Versionsnummer bleibt für beide eine.
 
+## App-Symbol
+
+Das Symbol (grüne Brille mit Displayzeilen auf fast schwarzem Grund, das
+Statusleisten-Symbol in Weiß) wird erzeugt: `scripts/make_app_icon.py`
+ändern, dann `python3 scripts/make_app_icon.py app/android/app/src/main/res
+preview.png` ausführen (braucht Pillow) und die Dateien in `res/`
+committen.
+
 ## Signierung der APK
 
 Android installiert ein Update nur, wenn es mit demselben Schlüssel signiert

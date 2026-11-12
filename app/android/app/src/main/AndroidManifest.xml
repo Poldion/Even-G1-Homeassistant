@@ -21,6 +21,10 @@
         android:usesCleartextTraffic="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- The status bar icon of the background service (white glasses). -->
+        <meta-data
+            android:name="io.github.poldion.even_g1_ha.NOTIFICATION_ICON"
+            android:resource="@drawable/ic_notification" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

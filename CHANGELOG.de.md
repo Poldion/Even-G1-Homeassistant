@@ -9,6 +9,13 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-11-12
+
+### Changed
+- Die App hat ein eigenes Symbol statt des Flutter-Logos: eine grüne Brille
+  mit Displayzeilen auf fast schwarzem Grund (Themen-Symbol ab Android 13),
+  und der Hintergrunddienst zeigt in der Statusleiste eine weiße Brille.
+
 ## [0.35.0] - 2026-11-12
 
 ### Fixed
@@ -507,7 +514,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.36.0...HEAD
+[0.36.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...app-v0.36.0
 [0.35.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...app-v0.35.0
 [0.34.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.33.0...app-v0.34.0
 [0.33.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.32.0...app-v0.33.0

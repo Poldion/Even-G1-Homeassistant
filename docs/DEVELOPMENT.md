@@ -87,6 +87,13 @@ release with the notes from the (English) changelog, of one of two kinds
 since the last `vX.Y.Z` release (the version in `manifest.json` aside), else
 *app*. The version stays one number for both.
 
+## App icon
+
+The icon (green glasses with display lines on a near-black ground, the
+status bar icon in white) is generated: change `scripts/make_app_icon.py`,
+then run `python3 scripts/make_app_icon.py app/android/app/src/main/res
+preview.png` (needs Pillow) and commit the files in `res/`.
+
 ## Signing the APK
 
 Android only installs an update if it is signed with the same key. The key

@@ -9,6 +9,14 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.36.0] - 2026-11-12
+
+### Changed
+- The app has its own icon instead of Flutter's: green glasses with
+  display lines on a near-black ground (themed icon on Android 13 and
+  later), and the background service shows white glasses in the status
+  bar.
+
 ## [0.35.0] - 2026-11-12
 
 ### Fixed
@@ -491,7 +499,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.36.0...HEAD
+[0.36.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...app-v0.36.0
 [0.35.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...app-v0.35.0
 [0.34.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.33.0...app-v0.34.0
 [0.33.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.32.0...app-v0.33.0

@@ -49,6 +49,10 @@ Future<void> ensureBackgroundOperation() async {
         serviceTypes: [ForegroundServiceTypes.connectedDevice],
         notificationTitle: 'Even G1 ↔ Home Assistant',
         notificationText: tr.coreServiceText,
+        notificationIcon: const NotificationIcon(
+          metaDataName: 'io.github.poldion.even_g1_ha.NOTIFICATION_ICON',
+          backgroundColor: Color(0xFF46E678),
+        ),
       );
       if (result is ServiceRequestFailure) {
         debugPrint('Foreground service not started: ${result.error}');

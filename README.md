@@ -1,3 +1,5 @@
+<img src="docs/images/app-icon.png" alt="App icon" width="96" align="right">
+
 # Even Realities G1 for Home Assistant
 
 **English** | [Deutsch](README.de.md)
