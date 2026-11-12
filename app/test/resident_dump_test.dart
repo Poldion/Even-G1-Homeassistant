@@ -241,6 +241,8 @@ void dumpDesigns() {
         );
         w(SkResident.statusX.address, status.x);
         w(SkResident.statusY.address, status.y);
+        w(SkResident.statusGround.address, status.ground);
+        w(SkResident.statusInk.address, status.ink);
       }
 
       put(dashboard);
@@ -316,7 +318,7 @@ void dumpDesigns() {
         }
         L10n.apply('en');
       }
-      if (style == G1TextStyle.card) {
+      if (style == G1TextStyle.card || style == G1TextStyle.lab) {
         // The connection symbols: Home Assistant unreachable, then no
         // phone (scratchpad vmtest/status.c), with made-up dashboards.
         const examples = {
@@ -331,7 +333,13 @@ void dumpDesigns() {
           L10n.apply(lang);
           put(examples[lang]!);
           w(SkResident.haOffline.address, 1);
-          save('resident_status_$lang', [], Uint8List.fromList(image));
+          save(
+            style == G1TextStyle.card
+                ? 'resident_status_$lang'
+                : 'resident_status_${style.id}_$lang',
+            [],
+            Uint8List.fromList(image),
+          );
           w(SkResident.haOffline.address, 0);
         }
         L10n.apply('en');

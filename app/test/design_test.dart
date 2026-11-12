@@ -280,20 +280,49 @@ void main() {
   });
 
   test('the connection symbols sit at the top right of the frame', () {
-    for (final style in [G1TextStyle.card, G1TextStyle.lab]) {
-      final layout = SkLayout.of(
-        font,
-        text.split('\n'),
-        style,
-        top: 140,
-        left: 24,
-      );
-      final label = layout.labelAt(SkResident.labelH, left: 24, top: 140);
-      final at = layout.statusAt(left: 24, top: 140);
-      // Mirrored from the recording label, on the frame's top line.
-      expect(at.x + SkStatusIcons.width, SkPanel.width - label.x);
-      expect(at.y, lessThan(140));
+    final card = SkLayout.of(
+      font,
+      text.split('\n'),
+      G1TextStyle.card,
+      top: 140,
+      left: 24,
+    );
+    final label = card.labelAt(SkResident.labelH, left: 24, top: 140);
+    final at = card.statusAt(left: 24, top: 140);
+    // Mirrored from the recording label, on the frame's top line.
+    expect(at.x + SkStatusIcons.width, SkPanel.width - label.x);
+    expect(at.y, lessThan(140));
+    expect(card.statusLevels, (ground: 0, ink: SkStatusIcons.level));
+    // Lab: dark on the bar, at its end, the hazard stripes before them.
+    final lab = SkLayout.of(
+      font,
+      text.split('\n'),
+      G1TextStyle.lab,
+      top: 140,
+      left: 24,
+    );
+    final spot = lab.statusAt(left: 24, top: 140);
+    final bar = lab.fills.firstWhere((r) => r.level == SkLayout.barLevel);
+    expect(spot.x + SkStatusIcons.width, lessThanOrEqualTo(bar.x + bar.w));
+    expect(spot.y, greaterThanOrEqualTo(bar.y));
+    expect(spot.y + SkStatusIcons.height, lessThanOrEqualTo(bar.y + bar.h));
+    final stripes = lab.fills.where(
+      (r) => r.level == 0 && r.h == bar.h && r.w == 4,
+    );
+    expect(stripes, hasLength(5));
+    for (final r in stripes) {
+      expect(r.x + r.w, lessThan(spot.x));
     }
+    expect(lab.statusLevels, (ground: SkLayout.barLevel, ink: 0));
+    // Answers in the terminal keep their stripes at the end.
+    final terminal = SkLayout.of(
+      font,
+      ['Jarvis', 'Done.'],
+      G1TextStyle.labTerminal,
+      top: 140,
+      left: 24,
+    );
+    expect(terminal.statusSpot, isNull);
     // Every stroke stays inside the symbols' area.
     for (final (x0, y0, x1, y1, _) in [
       ...SkStatusIcons.phoneStrike,

@@ -87,7 +87,8 @@ Zeichen.
 ## Verbindungsstatus
 
 Zwei kleine Symbole oben rechts am Dashboard zeigen die Verbindungen: ein
-Handy und ein Server (Home Assistant). Erreicht die App Home Assistant
+Handy und ein Server (Home Assistant); im Labor-Design stehen sie dunkel in
+der Leiste, hinter den Warnstreifen. Erreicht die App Home Assistant
 nicht, ist der Server durchgestrichen: Was das Dashboard zeigt, ist so alt
 wie die letzte Verbindung. Die Brille merkt außerdem selbst, wenn das Handy
 weg ist, und streicht dann beide durch (die Uhr läuft weiter). Der Strich

@@ -9,6 +9,12 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-11-12
+
+### Changed
+- Lab design: the connection symbols stand dark on the bar at its end, the
+  hazard stripes before them.
+
 ## [0.33.0] - 2026-11-12
 
 ### Changed
@@ -476,7 +482,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.33.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...HEAD
+[0.34.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.33.0...app-v0.34.0
 [0.33.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.32.0...app-v0.33.0
 [0.32.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.31.0...app-v0.32.0
 [0.31.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.30.0...app-v0.31.0

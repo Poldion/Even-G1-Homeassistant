@@ -84,7 +84,8 @@ character.
 ## Connection status
 
 Two small symbols at the dashboard's top right show the connections: a
-phone and a server (Home Assistant). If the app cannot reach Home Assistant,
+phone and a server (Home Assistant); in the lab design they stand dark on
+the bar, after the hazard stripes. If the app cannot reach Home Assistant,
 the server is struck through: what the dashboard shows is as old as the
 last connection. The glasses also notice by themselves when the phone is
 gone and then strike through both (the clock keeps running). The stroke

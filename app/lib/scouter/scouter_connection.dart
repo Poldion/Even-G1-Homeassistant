@@ -1107,7 +1107,11 @@ class ScouterConnection extends G1Connection {
               // y 0 means none: the symbols need a row at least.
               SkLib.u32s([_haOnline ? 0 : 1, max(1, status.y), 0]),
             )
-            ..write(SkResident.statusX.address, SkLib.u32s([status.x])))
+            ..write(
+              SkResident.statusX.address,
+              SkLib.u32s([status.x, status.ground]),
+            )
+            ..write(SkResident.statusInk.address, SkLib.u32s([status.ink])))
           .take(),
     ];
     final last = SkCode()..write(SkResident.count.address, u32(_residentRows));
@@ -1168,19 +1172,24 @@ class ScouterConnection extends G1Connection {
 
   /// Where the connection symbols go with the dashboard: its top right.
   @visibleForTesting
-  static ({int x, int y}) dashboardStatusAt(
+  static ({int x, int y, int ground, int ink}) dashboardStatusAt(
     SkFont font,
     String text,
     G1TextStyle style, {
     required int top,
     required int rows,
-  }) => SkLayout.of(
-    font,
-    wrap(font, text, SkPanel.width - 2 * textLeft).take(rows).toList(),
-    style,
-    top: top,
-    left: textLeft,
-  ).statusAt(left: textLeft, top: top);
+  }) {
+    final layout = SkLayout.of(
+      font,
+      wrap(font, text, SkPanel.width - 2 * textLeft).take(rows).toList(),
+      style,
+      top: top,
+      left: textLeft,
+    );
+    final at = layout.statusAt(left: textLeft, top: top);
+    final levels = layout.statusLevels;
+    return (x: at.x, y: at.y, ground: levels.ground, ink: levels.ink);
+  }
 
   /// The label shown with the dashboard (null: none).
   String? _dashboardLabel;
@@ -1923,6 +1932,7 @@ class ScouterConnection extends G1Connection {
       // A dashboard: the connection symbols (the phone is there, it sends
       // this), the server struck through while Home Assistant is away.
       final at = layout.statusAt(left: left, top: top);
+      final levels = layout.statusLevels;
       final rects = [
         (0, 0, SkStatusIcons.width, SkStatusIcons.height, false),
         ...SkStatusIcons.phone,
@@ -1937,7 +1947,7 @@ class ScouterConnection extends G1Connection {
           at.y + y,
           w,
           h,
-          on ? SkStatusIcons.level : 0,
+          on ? levels.ink : levels.ground,
         );
       }
       if (!serverOnline) {
@@ -1950,7 +1960,7 @@ class ScouterConnection extends G1Connection {
             at.y + y0,
             at.x + x1,
             at.y + y1,
-            on ? SkStatusIcons.level : 0,
+            on ? levels.ink : levels.ground,
           );
         }
       }

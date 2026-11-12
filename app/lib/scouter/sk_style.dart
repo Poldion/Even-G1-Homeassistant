@@ -109,7 +109,17 @@ class SkTextLine {
 
 /// Where the lines, the frame and the rule of a styled text go.
 class SkLayout {
-  SkLayout(this.lines, {this.box, this.rule, this.fills = const []});
+  SkLayout(
+    this.lines, {
+    this.box,
+    this.rule,
+    this.fills = const [],
+    this.statusSpot,
+  });
+
+  /// Where the connection symbols go when the layout has a place for them
+  /// (the lab bar: dark on its light ground).
+  final ({int x, int y})? statusSpot;
 
   final List<SkTextLine> lines;
   final SkBox? box;
@@ -151,14 +161,25 @@ class SkLayout {
   ];
 
   /// A bar of level [barLevel] with a dark square at its left and, if
-  /// [stripes], five dark slots at its right (hazard stripes).
-  static List<SkRect> bar(int x, int y, int w, int h, {bool stripes = true}) =>
-      [
-        SkRect(x, y, w, h, barLevel),
-        SkRect(x + 6, y + (h - 8) ~/ 2, 8, 8, 0),
-        if (stripes)
-          for (var i = 0; i < 5; i++) SkRect(x + w - 10 - 9 * i, y, 4, h, 0),
-      ];
+  /// [stripes], five dark slots at its right (hazard stripes), [reserve]
+  /// pixels left of its end (room for the connection symbols).
+  static List<SkRect> bar(
+    int x,
+    int y,
+    int w,
+    int h, {
+    bool stripes = true,
+    int reserve = 0,
+  }) => [
+    SkRect(x, y, w, h, barLevel),
+    SkRect(x + 6, y + (h - 8) ~/ 2, 8, 8, 0),
+    if (stripes)
+      for (var i = 0; i < 5; i++)
+        SkRect(x + w - 10 - reserve - 9 * i, y, 4, h, 0),
+  ];
+
+  /// Room the connection symbols take at the bar's end.
+  static const statusReserve = SkStatusIcons.width + 4;
 
   // Frame and rule around the text column (textLeft 24 … 616).
   static const frameX = 8;
@@ -275,10 +296,27 @@ class SkLayout {
     final boxTop = max(0, top - pad);
     final inset = badge ? 8 : 10;
     final last = out.last;
+    // The dashboard: the connection symbols at the bar's end, the stripes
+    // before them.
+    final status = style == G1TextStyle.lab;
+    final barX = x0 + inset, barW = w - 2 * inset;
     return SkLayout(
       out,
+      statusSpot: status
+          ? (
+              x: barX + barW - 4 - SkStatusIcons.width,
+              y: top - 1 + (lh + 2 - SkStatusIcons.height) ~/ 2,
+            )
+          : null,
       fills: [
-        ...bar(x0 + inset, top - 1, w - 2 * inset, lh + 2, stripes: !badge),
+        ...bar(
+          barX,
+          top - 1,
+          barW,
+          lh + 2,
+          stripes: !badge,
+          reserve: status ? statusReserve : 0,
+        ),
         ...brackets(x0, boxTop, w, end - boxTop),
         // The terminal's block cursor after the last line.
         if (style == G1TextStyle.labTerminal && out.length > 1)
@@ -293,16 +331,23 @@ class SkLayout {
     );
   }
 
-  /// Where a small label goes for this layout: on the frame's top line
-  /// (after a bracket arm in the lab design), else above the first line.
-  /// [h] is the label's height.
-  /// Where the connection symbols go: mirrored from [labelAt], at the
-  /// top right.
+  /// Where the connection symbols go: on the lab bar, else mirrored from
+  /// [labelAt], at the top right.
   ({int x, int y}) statusAt({required int left, required int top}) {
+    final spot = statusSpot;
+    if (spot != null) return spot;
     final at = labelAt(SkStatusIcons.height, left: left, top: top);
     return (x: SkPanel.width - at.x - SkStatusIcons.width, y: at.y);
   }
 
+  /// The symbols' ground and ink: dark on the lab bar, else light on black.
+  ({int ground, int ink}) get statusLevels => statusSpot != null
+      ? (ground: barLevel, ink: 0)
+      : (ground: 0, ink: SkStatusIcons.level);
+
+  /// Where a small label goes for this layout: on the frame's top line
+  /// (after a bracket arm in the lab design), else above the first line.
+  /// [h] is the label's height.
   ({int x, int y}) labelAt(int h, {required int left, required int top}) {
     final frameTop =
         box?.y ?? (fills.isEmpty ? null : fills.map((r) => r.y).reduce(min));

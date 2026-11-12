@@ -82,6 +82,8 @@ class SkResident {
   static final statusY = SkW.at(state + 56);
   static final statusShown = SkW.at(state + 60);
   static final statusX = SkW.at(state + 100);
+  static final statusGround = SkW.at(state + 104); // the symbols' ground level
+  static final statusInk = SkW.at(state + 144); // and their ink
 
   // The microphone (right arm, written by the app): its stand under the
   // firmware's indicator. The recording label (small font): glyph count (0:
@@ -481,13 +483,13 @@ class SkResident {
     a.beq(statusY, c0, 'ret');
     final sBand = a.c(band), sStride = a.c(SkPanel.stride);
     final sw = a.c(SkStatusIcons.width), sh = a.c(SkStatusIcons.height);
-    final ink = a.c(SkStatusIcons.level);
-    a.fill(sBand, sStride, c0, c0, sw, sh, c0);
+    final ink = statusInk, ground = statusGround;
+    a.fill(sBand, sStride, c0, c0, sw, sh, ground);
     for (final (x, y, w, h, on) in [
       ...SkStatusIcons.phone,
       ...SkStatusIcons.server,
     ]) {
-      a.fill(sBand, sStride, a.c(x), a.c(y), a.c(w), a.c(h), on ? ink : c0);
+      a.fill(sBand, sStride, a.c(x), a.c(y), a.c(w), a.c(h), on ? ink : ground);
     }
     void strike(List<(int, int, int, int, bool)> lines) {
       for (final (x0, y0, x1, y1, on) in lines) {
@@ -498,7 +500,7 @@ class SkResident {
           a.c(y0),
           a.c(x1),
           a.c(y1),
-          on ? ink : c0,
+          on ? ink : ground,
         );
       }
     }
