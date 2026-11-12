@@ -248,14 +248,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get coreSttNothing => 'Ich habe nichts verstanden.';
 
   @override
-  String get coreThinking => 'Home Assistant\nEinen Moment …';
+  String coreThinking(String assistant) {
+    return '$assistant\nEinen Moment …';
+  }
 
   @override
   String get coreTimeout => 'Zeitüberschreitung';
 
   @override
-  String coreTranscript(String text) {
-    return '» $text «\nEinen Moment …';
+  String coreTranscript(String assistant, String text) {
+    return '$assistant\n» $text «\nEinen Moment …';
   }
 
   @override

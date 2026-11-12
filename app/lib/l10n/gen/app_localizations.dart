@@ -479,8 +479,8 @@ abstract class AppLocalizations {
   /// No description provided for @coreThinking.
   ///
   /// In en, this message translates to:
-  /// **'Home Assistant\nOne moment …'**
-  String get coreThinking;
+  /// **'{assistant}\nOne moment …'**
+  String coreThinking(String assistant);
 
   /// No description provided for @coreTimeout.
   ///
@@ -491,8 +491,8 @@ abstract class AppLocalizations {
   /// No description provided for @coreTranscript.
   ///
   /// In en, this message translates to:
-  /// **'» {text} «\nOne moment …'**
-  String coreTranscript(String text);
+  /// **'{assistant}\n» {text} «\nOne moment …'**
+  String coreTranscript(String assistant, String text);
 
   /// No description provided for @coreUnknownError.
   ///

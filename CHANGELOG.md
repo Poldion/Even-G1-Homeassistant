@@ -9,6 +9,13 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.39.0] - 2026-11-12
+
+### Fixed
+- Assist: your recognised question no longer stands on the lab design's
+  title bar. The bar shows the assistant's name, the question and "One
+  moment …" follow below; the same while Assist works.
+
 ## [0.38.0] - 2026-11-12
 
 ### Fixed
@@ -519,7 +526,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.38.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...HEAD
+[0.39.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.38.0...app-v0.39.0
 [0.38.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.37.0...app-v0.38.0
 [0.37.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.36.0...app-v0.37.0
 [0.36.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...app-v0.36.0

@@ -151,7 +151,10 @@ class Bridge extends ChangeNotifier {
   static const maxRecording = Duration(seconds: 30);
 
   /// Shown after the touch bar was released, while Assist works.
-  static String get thinkingText => tr.coreThinking;
+  /// The assistant's name first: in the lab design the first line stands on
+  /// the bar, as a title (not the question).
+  String get thinkingText =>
+      tr.coreThinking(haConfig.assistName ?? 'Home Assistant');
 
   final Settings settings;
   final G1Connection g1;
@@ -842,7 +845,9 @@ class Bridge extends ChangeNotifier {
         lastQuery = text;
         notifyListeners();
         if (haConfig.showTranscript && text.isNotEmpty) {
-          display.showAiStatus(tr.coreTranscript(text));
+          display.showAiStatus(
+            tr.coreTranscript(haConfig.assistName ?? 'Home Assistant', text),
+          );
         }
       },
     );

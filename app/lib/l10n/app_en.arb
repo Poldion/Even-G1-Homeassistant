@@ -223,11 +223,21 @@
   "coreSttFailed": "Speech recognition failed.",
   "coreSttMissing": "No speech recognition configured in the Assist pipeline.",
   "coreSttNothing": "I didn't catch that.",
-  "coreThinking": "Home Assistant\nOne moment …",
+  "coreThinking": "{assistant}\nOne moment …",
+  "@coreThinking": {
+    "placeholders": {
+      "assistant": {
+        "type": "String"
+      }
+    }
+  },
   "coreTimeout": "Timeout",
-  "coreTranscript": "» {text} «\nOne moment …",
+  "coreTranscript": "{assistant}\n» {text} «\nOne moment …",
   "@coreTranscript": {
     "placeholders": {
+      "assistant": {
+        "type": "String"
+      },
       "text": {
         "type": "String"
       }
