@@ -126,6 +126,13 @@ void dumpDesigns() {
     };
     for (final MapEntry(key: lang, value: example) in examples.entries) {
       L10n.apply(lang);
+      const dashboards = {
+        G1TextStyle.plain,
+        G1TextStyle.frame,
+        G1TextStyle.card,
+        G1TextStyle.title,
+        G1TextStyle.lab,
+      };
       for (final style in G1TextStyle.values) {
         save(
           'readme_${lang}_${style.id}',
@@ -136,6 +143,8 @@ void dumpDesigns() {
                 : example,
             maxCode: 242,
             style: style,
+            // Dashboards carry the connection symbols.
+            serverOnline: dashboards.contains(style) ? true : null,
           ),
         );
       }
@@ -183,44 +192,58 @@ void dumpDesigns() {
       G1TextStyle.frame,
       G1TextStyle.lab,
     ]) {
-      final bands = ScouterConnection.dashboardBands(
-        font,
-        dashboard,
-        style,
-        top: 140,
-        rows: 11,
-      );
-      var at = SkResident.text, ri = 0;
-      for (var i = 0; i < bands.length; i++) {
-        final band = bands[i];
-        final g = band.text == null ? <int>[] : font.encode(band.text!);
-        image.setRange(at, at + g.length, g);
-        final e = SkResident.lines + 4 * SkResident.entryWords * i;
-        w(e, band.x);
-        w(e + 4, band.y);
-        w(e + 8, g.isEmpty ? 0 : at);
-        w(e + 12, g.length);
-        w(e + 16, ri);
-        w(e + 20, band.rects.length);
-        w(e + 24, band.level);
-        for (final r in band.rects) {
-          final ra = SkResident.rects + 20 * ri++;
-          w(ra, r.x);
-          w(ra + 4, r.y);
-          w(ra + 8, r.w);
-          w(ra + 12, r.h);
-          w(ra + 16, r.level);
+      void put(String text) {
+        final bands = ScouterConnection.dashboardBands(
+          font,
+          text,
+          style,
+          top: 140,
+          rows: 11,
+        );
+        var at = SkResident.text, ri = 0;
+        for (var i = 0; i < bands.length; i++) {
+          final band = bands[i];
+          final g = band.text == null ? <int>[] : font.encode(band.text!);
+          image.setRange(at, at + g.length, g);
+          final e = SkResident.lines + 4 * SkResident.entryWords * i;
+          w(e, band.x);
+          w(e + 4, band.y);
+          w(e + 8, g.isEmpty ? 0 : at);
+          w(e + 12, g.length);
+          w(e + 16, ri);
+          w(e + 20, band.rects.length);
+          w(e + 24, band.level);
+          for (final r in band.rects) {
+            final ra = SkResident.rects + 20 * ri++;
+            w(ra, r.x);
+            w(ra + 4, r.y);
+            w(ra + 8, r.w);
+            w(ra + 12, r.h);
+            w(ra + 16, r.level);
+          }
+          at += g.length;
         }
-        at += g.length;
+        expect(ri, lessThanOrEqualTo(SkResident.maxRects));
+        expect(bands.length, lessThanOrEqualTo(SkResident.maxEntries));
+        w(SkResident.angle.address, 30);
+        w(SkResident.flags.address, 1);
+        w(SkResident.ascent.address, font.ascent);
+        w(SkResident.rows.address, bands.length);
+        w(SkResident.lineHeight.address, font.lineSpacing);
+        w(SkResident.count.address, bands.length);
+        // The connection symbols at the top right.
+        final status = ScouterConnection.dashboardStatusAt(
+          font,
+          text,
+          style,
+          top: 140,
+          rows: 11,
+        );
+        w(SkResident.statusX.address, status.x);
+        w(SkResident.statusY.address, status.y);
       }
-      expect(ri, lessThanOrEqualTo(SkResident.maxRects));
-      expect(bands.length, lessThanOrEqualTo(SkResident.maxEntries));
-      w(SkResident.angle.address, 30);
-      w(SkResident.flags.address, 1);
-      w(SkResident.ascent.address, font.ascent);
-      w(SkResident.rows.address, bands.length);
-      w(SkResident.lineHeight.address, font.lineSpacing);
-      w(SkResident.count.address, bands.length);
+
+      put(dashboard);
       save('resident_${style.id}', [], Uint8List.fromList(image));
       if (style == G1TextStyle.card || style == G1TextStyle.lab) {
         // Recording: the microphone's stand and the label (right arm).
@@ -294,27 +317,19 @@ void dumpDesigns() {
         L10n.apply('en');
       }
       if (style == G1TextStyle.card) {
-        // The status line (Home Assistant unreachable / no phone).
+        // The connection symbols: Home Assistant unreachable, then no
+        // phone (scratchpad vmtest/status.c), with made-up dashboards.
+        const examples = {
+          'en':
+              '09:41  ·  Sat, Nov 7\nLiving room: 21.5 °C\nOutside: 8 °C, '
+              'cloudy\nWashing machine: done\n» today 18:00  Example event',
+          'de':
+              '09:41  ·  Sa, 7. Nov\nWohnzimmer: 21,5 °C\nAußen: 8 °C, '
+              'bewölkt\nWaschmaschine: fertig\n» heute 18:00  Beispieltermin',
+        };
         for (final lang in ['en', 'de']) {
           L10n.apply(lang);
-          final noPhone = font.encode(tr.skStatusNoPhone);
-          final noHa = font.encode(tr.skStatusHaOffline);
-          image.setRange(
-            SkResident.statusText,
-            SkResident.statusText + noPhone.length,
-            noPhone,
-          );
-          image.setRange(
-            SkResident.statusText + SkResident.statusMax,
-            SkResident.statusText + SkResident.statusMax + noHa.length,
-            noHa,
-          );
-          w(SkResident.statusN1.address, noPhone.length);
-          w(SkResident.statusN2.address, noHa.length);
-          w(
-            SkResident.statusY.address,
-            ScouterConnection.statusLineY(bands, font.lineSpacing, 140),
-          );
+          put(examples[lang]!);
           w(SkResident.haOffline.address, 1);
           save('resident_status_$lang', [], Uint8List.fromList(image));
           w(SkResident.haOffline.address, 0);
@@ -375,6 +390,7 @@ void dumpDesigns() {
             text,
             maxCode: 242,
             style: G1TextStyle.card,
+            serverOnline: true,
           ),
           img,
         );
@@ -415,6 +431,7 @@ void dumpDesigns() {
             dash,
             maxCode: 242,
             style: G1TextStyle.card,
+            serverOnline: true,
           ),
           img,
         );

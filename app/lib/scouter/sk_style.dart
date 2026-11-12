@@ -296,6 +296,13 @@ class SkLayout {
   /// Where a small label goes for this layout: on the frame's top line
   /// (after a bracket arm in the lab design), else above the first line.
   /// [h] is the label's height.
+  /// Where the connection symbols go: mirrored from [labelAt], at the
+  /// top right.
+  ({int x, int y}) statusAt({required int left, required int top}) {
+    final at = labelAt(SkStatusIcons.height, left: left, top: top);
+    return (x: SkPanel.width - at.x - SkStatusIcons.width, y: at.y);
+  }
+
   ({int x, int y}) labelAt(int h, {required int left, required int top}) {
     final frameTop =
         box?.y ?? (fills.isEmpty ? null : fills.map((r) => r.y).reduce(min));
@@ -306,4 +313,38 @@ class SkLayout {
       y: max(0, frameTop - h ~/ 2 + 1),
     );
   }
+}
+
+/// The connection symbols at the dashboard's top right: a phone and a
+/// server (Home Assistant), each struck through while its connection is
+/// down. Drawn by the glasses' program and, for a dashboard the app shows,
+/// by the app.
+class SkStatusIcons {
+  static const width = 38, height = 18;
+  static const level = 11;
+
+  /// Filled rectangles relative to the area: x, y, w, h, ink (else a hole).
+  static const phone = [
+    (4, 1, 10, 16, true),
+    (6, 3, 6, 10, false),
+    (8, 14, 2, 2, false),
+  ];
+  static const server = [
+    (20, 1, 14, 7, true),
+    (22, 3, 10, 3, false),
+    (29, 4, 2, 1, true),
+    (20, 10, 14, 7, true),
+    (22, 12, 10, 3, false),
+    (29, 13, 2, 1, true),
+  ];
+
+  /// The stroke through a symbol from x to x + w: dark edges, then the ink
+  /// (x0, y0, x1, y1, ink).
+  static List<(int, int, int, int, bool)> strike(int x, int w) => [
+    for (final (d, ink) in [(1, false), (-2, false), (0, true), (-1, true)])
+      (x - 1 + d, height - 1, x + w + d, 0, ink),
+  ];
+
+  static final phoneStrike = strike(4, 10);
+  static final serverStrike = strike(20, 14);
 }

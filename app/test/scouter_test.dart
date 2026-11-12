@@ -120,6 +120,7 @@ void execute(
         SkOp.blit => 12,
         SkOp.glyphs => 9,
         SkOp.draw => 8,
+        SkOp.line => 7,
         SkOp.video => 10,
         _ => throw StateError('op 0x${op.toRadixString(16)}'),
       };

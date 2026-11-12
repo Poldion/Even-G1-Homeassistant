@@ -707,12 +707,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get skStatusHaOffline => '! Home Assistant unreachable';
-
-  @override
-  String get skStatusNoPhone => '! No connection to the phone';
-
-  @override
   String uiAnswer(String text) {
     return 'Answer: $text';
   }

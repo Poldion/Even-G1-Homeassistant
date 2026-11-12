@@ -83,14 +83,14 @@ character.
 
 ## Connection status
 
-If the app cannot reach Home Assistant, a line
-`! Home Assistant unreachable` appears below the dashboard: what it shows is
-as old as the last connection. The glasses also notice by themselves when
-the phone is gone and show `! No connection to the phone` (the clock keeps
-running). The line disappears as soon as the connection is back (within 5
-seconds).
+Two small symbols at the dashboard's top right show the connections: a
+phone and a server (Home Assistant). If the app cannot reach Home Assistant,
+the server is struck through: what the dashboard shows is as old as the
+last connection. The glasses also notice by themselves when the phone is
+gone and then strike through both (the clock keeps running). The stroke
+disappears as soon as the connection is back (within 5 seconds).
 
-![Dashboard with status line](images/en/dashboard-status.png)
+![Dashboard with Home Assistant unreachable](images/en/dashboard-status.png)
 
 ## Examples
 

@@ -145,11 +145,14 @@ abstract class G1Connection extends ChangeNotifier {
 
   /// Shows one page of text on both eyes, with [icon] beside it and in
   /// [style].
+  /// [serverOnline] non-null: [text] is the dashboard, shown with the
+  /// connection symbols (the server struck through if false).
   Future<bool> sendText(
     String text, {
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
     String? label,
+    bool? serverOnline,
   });
 
   /// A small label shown with the dashboard (e.g. while a recording runs),

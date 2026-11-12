@@ -37,6 +37,7 @@ class SkOp {
   static const blit = 0x51;
   static const glyphs = 0x52;
   static const draw = 0x53;
+  static const line = 0x54;
   static const video = 0x55;
   static const end = 0x33;
 }
@@ -300,6 +301,10 @@ class SkCode {
     0,
     15,
   ]);
+
+  /// `LINE` from (x0, y0) to (x1, y1) at [level].
+  void line(int dst, int stride, int x0, int y0, int x1, int y1, int level) =>
+      op(SkOp.line, [dst, stride, x0, y0, x1, y1, level]);
 
   void draw(
     int src,

@@ -683,8 +683,6 @@
       }
     }
   },
-  "skStatusHaOffline": "! Home Assistant unreachable",
-  "skStatusNoPhone": "! No connection to the phone",
   "uiAnswer": "Answer: {text}",
   "@uiAnswer": {
     "placeholders": {

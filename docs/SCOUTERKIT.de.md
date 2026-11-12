@@ -188,10 +188,11 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   `PANEL` = 0, das die Anzeige wegen des Mikrofons nicht ausschaltet. Ein
   Hinweis in der Schrift in Originalgröße (11 px, mit der 22-px-Schrift
   geladen) steht während einer Aufnahme auf der oberen Rahmenlinie.
-- **Statuszeile**: Unter dem Dashboard (darüber, wenn kein Platz ist)
-  zeigt das Programm `! Keine Verbindung zum Handy`, solange sein eigenes
-  `LINK` 0 ist, oder `! Home Assistant nicht erreichbar`, solange die App das
-  meldet (`USER2`). Es prüft alle 5 s erneut.
+- **Verbindungssymbole**: ein Handy und ein Server oben rechts am
+  Dashboard (spiegelbildlich zum Aufnahme-Hinweis), mit `FILL` gezeichnet;
+  `LINE` streicht den Server durch, solange die App Home Assistant als
+  unerreichbar meldet (`USER2`), und beide, solange das eigene `LINK` des
+  Bügels 0 ist. Es prüft alle 5 s erneut.
 - **Wachhund** (alle 5 s): Jeder Bügel schaltet seine Anzeige ab, solange
   der Kopf unten ist und die App nichts zeigt (auch gleich nach einem
   Neustart, der das Bild der Anzeige stehen lässt), und der rechte Bügel

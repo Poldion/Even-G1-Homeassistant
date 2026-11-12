@@ -47,9 +47,11 @@ class G1Display {
     G1TextStyle style = G1TextStyle.plain,
     String? pageTitle,
     String? label,
+    bool? serverOnline,
   }) async {
     _reset();
     _label = label;
+    _serverOnline = serverOnline;
     _active = true;
     _icon = icon;
     _style = style;
@@ -128,6 +130,7 @@ class G1Display {
   String? _icon;
   G1TextStyle _style = G1TextStyle.plain;
   String? _label;
+  bool? _serverOnline;
 
   /// Error message that closes itself after a few seconds.
   Future<bool> showAiError(String text) =>
@@ -169,6 +172,7 @@ class G1Display {
       icon: _icon,
       style: _style,
       label: _label,
+      serverOnline: _serverOnline,
     );
   }
 

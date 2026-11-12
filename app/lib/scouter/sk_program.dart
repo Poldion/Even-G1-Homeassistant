@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'sk_asm.dart';
 import 'sk_protocol.dart';
+import 'sk_style.dart';
 
 /// The program this app leaves running on each arm (VM.md §5): it shows the
 /// Home Assistant dashboard when the head is raised, without the phone, and
@@ -35,13 +36,9 @@ class SkResident {
   static const textEnd = labelText;
 
   /// The recording label's glyphs (small font).
-  static const labelText = statusText - labelMax;
+  static const labelText = band - labelMax;
   static const labelMax = 64;
 
-  /// The two status lines (no phone, no Home Assistant), [statusMax]
-  /// glyph bytes each, at the end of the text area.
-  static const statusText = band - 2 * statusMax;
-  static const statusMax = 64;
   static const band = 0x37000;
   static const bandRows = 32;
   static const code = 0x39800;
@@ -77,15 +74,14 @@ class SkResident {
   static final _timeY = SkW.at(state + 92);
   static final _beat = SkW.at(state + 96);
 
-  // Status line below the dashboard (written by the app): Home Assistant
-  // unreachable, the line's y (0: no room), the glyph counts of the two
-  // texts; the program keeps which one it shows (0 none, 1 no phone, 2 no
-  // Home Assistant).
+  // Connection symbols at the dashboard's top right (written by the app):
+  // Home Assistant unreachable, where they go (y 0: nowhere); the program
+  // keeps which state it shows (0 both connected, 1 no phone, 2 no Home
+  // Assistant).
   static final haOffline = SkW.at(state + 52);
   static final statusY = SkW.at(state + 56);
   static final statusShown = SkW.at(state + 60);
-  static final statusN1 = SkW.at(state + 100);
-  static final statusN2 = SkW.at(state + 104);
+  static final statusX = SkW.at(state + 100);
 
   // The microphone (right arm, written by the app): its stand under the
   // firmware's indicator. The recording label (small font): glyph count (0:
@@ -130,7 +126,6 @@ class SkResident {
   /// down and the app shows nothing, and the right arm repeats its head
   /// state to the left one, so a missed message or a restart heals itself.
   static const watchUs = 5000000;
-  static const statusLevel = 11;
 
   static const flagDashboard = 1;
   static const flagGestures = 2;
@@ -485,27 +480,36 @@ class SkResident {
     a.mov(statusShown, r1);
     a.beq(statusY, c0, 'ret');
     final sBand = a.c(band), sStride = a.c(SkPanel.stride);
-    a.fill(sBand, sStride, c0, c0, a.c(SkPanel.width), lineHeight, c0);
+    final sw = a.c(SkStatusIcons.width), sh = a.c(SkStatusIcons.height);
+    final ink = a.c(SkStatusIcons.level);
+    a.fill(sBand, sStride, c0, c0, sw, sh, c0);
+    for (final (x, y, w, h, on) in [
+      ...SkStatusIcons.phone,
+      ...SkStatusIcons.server,
+    ]) {
+      a.fill(sBand, sStride, a.c(x), a.c(y), a.c(w), a.c(h), on ? ink : c0);
+    }
+    void strike(List<(int, int, int, int, bool)> lines) {
+      for (final (x0, y0, x1, y1, on) in lines) {
+        a.line(
+          sBand,
+          sStride,
+          a.c(x0),
+          a.c(y0),
+          a.c(x1),
+          a.c(y1),
+          on ? ink : c0,
+        );
+      }
+    }
+
+    // No phone: both struck through (Home Assistant is out of reach too).
     a.beq(r1, c0, 'stOut');
-    a.mov(r2, a.c(statusText));
-    a.mov(r3, statusN1);
-    a.beq(r1, c1, 'stText');
-    a.mov(r2, a.c(statusText + statusMax));
-    a.mov(r3, statusN2);
-    a.label('stText');
-    a.glyphs(
-      a.c(SkArena.font),
-      sBand,
-      sStride,
-      left,
-      ascent,
-      a.c(2), // MASK
-      a.c(statusLevel),
-      r2,
-      r3,
-    );
+    strike(SkStatusIcons.serverStrike);
+    a.bne(r1, c1, 'stOut');
+    strike(SkStatusIcons.phoneStrike);
     a.label('stOut');
-    a.draw(sBand, sStride, c0, c0, c0, statusY, a.c(SkPanel.width), lineHeight);
+    a.draw(sBand, sStride, c0, c0, statusX, statusY, sw, sh);
     a.ret();
 
     // label: the recording label in the small font (e.g. on the frame's

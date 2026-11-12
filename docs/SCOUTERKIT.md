@@ -185,9 +185,10 @@ gone, and the app loads it again.
   switching the panel off. A label in the font at its own size (11 px,
   uploaded with the 22-px font) stands on the frame's top line while a
   recording runs.
-- **Status line**: below the dashboard (above it if there is no room) the
-  program shows `! No connection to the phone` while its own `LINK` is 0,
-  or `! Home Assistant unreachable` while the app says so (`USER2`). It
+- **Connection symbols**: a phone and a server at the dashboard's top
+  right (mirrored from the recording label), drawn with `FILL`; `LINE`
+  strikes the server through while the app reports Home Assistant
+  unreachable (`USER2`), and both while the arm's own `LINK` is 0. It
   checks again every 5 s.
 - **Watch** (every 5 s): each arm switches its panel off while the head is
   down and the app shows nothing (also right after a restart, which keeps

@@ -1195,18 +1195,6 @@ abstract class AppLocalizations {
   /// **'{arm}: VM_START rejected'**
   String skLogVmStartRejected(String arm);
 
-  /// No description provided for @skStatusHaOffline.
-  ///
-  /// In en, this message translates to:
-  /// **'! Home Assistant unreachable'**
-  String get skStatusHaOffline;
-
-  /// No description provided for @skStatusNoPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'! No connection to the phone'**
-  String get skStatusNoPhone;
-
   /// No description provided for @uiAnswer.
   ///
   /// In en, this message translates to:

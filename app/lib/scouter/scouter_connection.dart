@@ -1076,12 +1076,13 @@ class ScouterConnection extends G1Connection {
       }
     }
     arm.clockAt = clockAt;
-    final statusY = statusLineY(bands, font.lineSpacing, textTop);
-    final noPhone = font.encode(tr.skStatusNoPhone);
-    final noHa = font.encode(tr.skStatusHaOffline);
-    List<int> fit(List<int> g) => g.length <= SkResident.statusMax
-        ? g
-        : g.sublist(0, SkResident.statusMax);
+    final status = dashboardStatusAt(
+      font,
+      raw,
+      _dashboardStyle,
+      top: textTop,
+      rows: min(displayLines, SkResident.maxLines),
+    );
     List<int> u32(int v) => [v & 0xff, v >> 8 & 0xff, v >> 16 & 0xff, v >> 24];
     final codes = <Uint8List>[
       // No lines while they change, so the program never draws half of them.
@@ -1100,24 +1101,13 @@ class ScouterConnection extends G1Connection {
       _residentState(font),
       _clockCode(arm),
       ...await _labelCode(arm),
-      ...skUpload(
-        SkResident.statusText,
-        Uint8List.fromList([
-          ...fit(noPhone),
-          ...List.filled(SkResident.statusMax - fit(noPhone).length, 0),
-          ...fit(noHa),
-        ]),
-        maxCode,
-      ),
       (SkCode()
             ..write(
               SkResident.haOffline.address,
-              SkLib.u32s([_haOnline ? 0 : 1, statusY, 0]),
+              // y 0 means none: the symbols need a row at least.
+              SkLib.u32s([_haOnline ? 0 : 1, max(1, status.y), 0]),
             )
-            ..write(
-              SkResident.statusN1.address,
-              SkLib.u32s([fit(noPhone).length, fit(noHa).length]),
-            ))
+            ..write(SkResident.statusX.address, SkLib.u32s([status.x])))
           .take(),
     ];
     final last = SkCode()..write(SkResident.count.address, u32(_residentRows));
@@ -1176,6 +1166,22 @@ class ScouterConnection extends G1Connection {
     left: textLeft,
   ).labelAt(SkResident.labelH, left: textLeft, top: top);
 
+  /// Where the connection symbols go with the dashboard: its top right.
+  @visibleForTesting
+  static ({int x, int y}) dashboardStatusAt(
+    SkFont font,
+    String text,
+    G1TextStyle style, {
+    required int top,
+    required int rows,
+  }) => SkLayout.of(
+    font,
+    wrap(font, text, SkPanel.width - 2 * textLeft).take(rows).toList(),
+    style,
+    top: top,
+    left: textLeft,
+  ).statusAt(left: textLeft, top: top);
+
   /// The label shown with the dashboard (null: none).
   String? _dashboardLabel;
 
@@ -1224,28 +1230,6 @@ class ScouterConnection extends G1Connection {
           ))
           .take(),
     ];
-  }
-
-  /// Where the status line goes: below the dashboard, else above it, else
-  /// nowhere (0).
-  @visibleForTesting
-  static int statusLineY(
-    List<({int x, int y, String? text, List<SkRect> rects, int level})> bands,
-    int lh,
-    int textTop,
-  ) {
-    var bottom = 0, top = textTop;
-    for (final band in bands) {
-      if (band.text != null) bottom = max(bottom, band.y + lh);
-      for (final r in band.rects) {
-        if (r.level > 0) bottom = max(bottom, band.y + r.y + r.h);
-      }
-      if (band.text == null && band.rects.isEmpty) continue;
-      top = min(top, band.y + band.rects.fold<int>(0, (m, r) => min(m, r.y)));
-    }
-    var y = bottom + 6;
-    if (y + lh > SkPanel.height) y = top - lh - 6;
-    return max(0, y);
   }
 
   /// The dashboard as the resident program draws it: bands of one line's
@@ -1712,6 +1696,7 @@ class ScouterConnection extends G1Connection {
     String? icon,
     G1TextStyle style = G1TextStyle.plain,
     String? label,
+    bool? serverOnline,
   }) async {
     if (_video) return true;
     final font = await _textFont();
@@ -1746,6 +1731,7 @@ class ScouterConnection extends G1Connection {
       maxCode: maxCode,
       icon: iconAt,
       iconData: iconData,
+      serverOnline: serverOnline,
       draw: !synced,
       style: style,
       label: label,
@@ -1809,6 +1795,7 @@ class ScouterConnection extends G1Connection {
     bool micStand = false,
     String? label,
     SkFont? smallFont,
+    bool? serverOnline,
   }) {
     final withIcon = icon != null || iconData != null;
     final left = withIcon ? iconTextLeft : textLeft;
@@ -1930,6 +1917,42 @@ class ScouterConnection extends G1Connection {
           textAt,
           glyphs.length,
         );
+      }
+    }
+    if (serverOnline != null) {
+      // A dashboard: the connection symbols (the phone is there, it sends
+      // this), the server struck through while Home Assistant is away.
+      final at = layout.statusAt(left: left, top: top);
+      final rects = [
+        (0, 0, SkStatusIcons.width, SkStatusIcons.height, false),
+        ...SkStatusIcons.phone,
+        ...SkStatusIcons.server,
+      ];
+      for (final (x, y, w, h, on) in rects) {
+        room(skOpSize(7));
+        code.fill(
+          SkArena.frame,
+          SkPanel.stride,
+          at.x + x,
+          at.y + y,
+          w,
+          h,
+          on ? SkStatusIcons.level : 0,
+        );
+      }
+      if (!serverOnline) {
+        for (final (x0, y0, x1, y1, on) in SkStatusIcons.serverStrike) {
+          room(skOpSize(7));
+          code.line(
+            SkArena.frame,
+            SkPanel.stride,
+            at.x + x0,
+            at.y + y0,
+            at.x + x1,
+            at.y + y1,
+            on ? SkStatusIcons.level : 0,
+          );
+        }
       }
     }
     if (draw) {

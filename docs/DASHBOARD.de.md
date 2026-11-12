@@ -86,13 +86,14 @@ Zeichen.
 
 ## Verbindungsstatus
 
-Erreicht die App Home Assistant nicht, steht unter dem Dashboard die Zeile
-`! Home Assistant nicht erreichbar`: Was es zeigt, ist so alt wie die letzte
-Verbindung. Die Brille merkt außerdem selbst, wenn das Handy weg ist, und
-zeigt `! Keine Verbindung zum Handy` (die Uhr läuft weiter). Die Zeile
+Zwei kleine Symbole oben rechts am Dashboard zeigen die Verbindungen: ein
+Handy und ein Server (Home Assistant). Erreicht die App Home Assistant
+nicht, ist der Server durchgestrichen: Was das Dashboard zeigt, ist so alt
+wie die letzte Verbindung. Die Brille merkt außerdem selbst, wenn das Handy
+weg ist, und streicht dann beide durch (die Uhr läuft weiter). Der Strich
 verschwindet, sobald die Verbindung wieder steht (binnen 5 Sekunden).
 
-![Dashboard mit Statuszeile](images/de/dashboard-status.png)
+![Dashboard, Home Assistant nicht erreichbar](images/de/dashboard-status.png)
 
 ## Beispiele
 

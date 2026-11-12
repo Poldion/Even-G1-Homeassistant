@@ -279,33 +279,59 @@ void main() {
     g1.dispose();
   });
 
-  test('the status line goes below the dashboard, else above it', () {
-    final bands = ScouterConnection.dashboardBands(
+  test('the connection symbols sit at the top right of the frame', () {
+    for (final style in [G1TextStyle.card, G1TextStyle.lab]) {
+      final layout = SkLayout.of(
+        font,
+        text.split('\n'),
+        style,
+        top: 140,
+        left: 24,
+      );
+      final label = layout.labelAt(SkResident.labelH, left: 24, top: 140);
+      final at = layout.statusAt(left: 24, top: 140);
+      // Mirrored from the recording label, on the frame's top line.
+      expect(at.x + SkStatusIcons.width, SkPanel.width - label.x);
+      expect(at.y, lessThan(140));
+    }
+    // Every stroke stays inside the symbols' area.
+    for (final (x0, y0, x1, y1, _) in [
+      ...SkStatusIcons.phoneStrike,
+      ...SkStatusIcons.serverStrike,
+    ]) {
+      for (final x in [x0, x1]) {
+        expect(x, inInclusiveRange(0, SkStatusIcons.width - 1));
+      }
+      for (final y in [y0, y1]) {
+        expect(y, inInclusiveRange(0, SkStatusIcons.height - 1));
+      }
+    }
+  });
+
+  test('a dashboard the app shows has the symbols too', () {
+    final ops = <int>[];
+    for (final code in ScouterConnection.textCode(
       font,
       text,
-      G1TextStyle.card,
-      top: 140,
-      rows: 11,
-    );
-    final y = ScouterConnection.statusLineY(bands, font.lineSpacing, 140);
-    final box = SkLayout.of(
+      maxCode: 242,
+      style: G1TextStyle.card,
+      serverOnline: false,
+    )) {
+      execute(code, Uint8List(SkArena.size), ops);
+    }
+    // The server struck through: four strokes.
+    expect(ops.where((o) => o == SkOp.line), hasLength(4));
+    final online = <int>[];
+    for (final code in ScouterConnection.textCode(
       font,
-      text.split('\n'),
-      G1TextStyle.card,
-      top: 140,
-      left: 24,
-    ).box!;
-    expect(y, box.bottom + 6);
-    // A full display: above the dashboard.
-    final full = ScouterConnection.dashboardBands(
-      font,
-      List.generate(11, (i) => 'Line $i').join('\n'),
-      G1TextStyle.card,
-      top: 140,
-      rows: 11,
-    );
-    final above = ScouterConnection.statusLineY(full, font.lineSpacing, 140);
-    expect(above + font.lineSpacing, lessThanOrEqualTo(128));
+      text,
+      maxCode: 242,
+      style: G1TextStyle.card,
+      serverOnline: true,
+    )) {
+      execute(code, Uint8List(SkArena.size), online);
+    }
+    expect(online.where((o) => o == SkOp.line), isEmpty);
   });
 
   test('recording: the microphone stand and the small label', () {

@@ -136,6 +136,7 @@ class Bridge extends ChangeNotifier {
     if (_dashboardShown && display.active && g1.connected) {
       await display.showText(
         _dashboardNow,
+        serverOnline: _serverOnline,
         style: haConfig.dashboardStyle,
         label: _dashboardLabel,
       );
@@ -187,14 +188,14 @@ class Bridge extends ChangeNotifier {
   /// The dashboard as the app shows it, with the current time.
   String get _dashboardNow {
     if (navigation.active) return navigation.dashboardText;
-    final text = withClock(
+    return withClock(
       _dashboardText.isEmpty ? 'Home Assistant' : _dashboardText,
     );
-    // The dashboard is as old as the last connection: say so.
-    return haConnected || !settings.haConfigured
-        ? text
-        : '$text\n${tr.skStatusHaOffline}';
   }
+
+  /// The dashboard is as old as the last connection: its server symbol
+  /// says so.
+  bool get _serverOnline => haConnected || !settings.haConfigured;
 
   /// "BasaltNotes is recording" with the dashboard while a recording runs.
   String? get _dashboardLabel =>
@@ -229,6 +230,7 @@ class Bridge extends ChangeNotifier {
       unawaited(
         display.showText(
           _dashboardNow,
+          serverOnline: _serverOnline,
           style: haConfig.dashboardStyle,
           label: _dashboardLabel,
         ),
@@ -379,6 +381,7 @@ class Bridge extends ChangeNotifier {
         if (_dashboardShown && display.active && g1.connected) {
           await display.showText(
             _dashboardNow,
+            serverOnline: _serverOnline,
             style: haConfig.dashboardStyle,
             label: _dashboardLabel,
           );
@@ -703,6 +706,7 @@ class Bridge extends ChangeNotifier {
     final seconds = haConfig.displayDuration;
     await display.showText(
       _dashboardNow,
+      serverOnline: _serverOnline,
       closeAfter: seconds > 0 ? Duration(seconds: seconds) : null,
       style: haConfig.dashboardStyle,
       label: _dashboardLabel,
@@ -745,6 +749,7 @@ class Bridge extends ChangeNotifier {
     _dashboardShown = true;
     await display.showText(
       _dashboardNow,
+      serverOnline: _serverOnline,
       style: haConfig.dashboardStyle,
       label: _dashboardLabel,
     );

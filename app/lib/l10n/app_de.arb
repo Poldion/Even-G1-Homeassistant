@@ -181,8 +181,6 @@
   "skLogVideo": "Video: {width}×{height}, {fps} Bilder/s",
   "skLogVideoEnd": "Video beendet: {end}",
   "skLogVmStartRejected": "{arm}: VM_START abgelehnt",
-  "skStatusHaOffline": "! Home Assistant nicht erreichbar",
-  "skStatusNoPhone": "! Keine Verbindung zum Handy",
   "uiAnswer": "Antwort: {text}",
   "uiAssistHint": "Linke Touchbar gedrückt halten, sprechen, loslassen.",
   "uiAssistant": "Assistent: {name}",
