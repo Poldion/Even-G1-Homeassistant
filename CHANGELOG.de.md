@@ -9,6 +9,21 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-11-12
+
+### Fixed
+- Das linke Auge flackerte beim Hochschauen aus und an (seit 0.35.0): Es
+  prüfte seine eigene Neigung, und sein Sensor kann deutlich anders messen
+  als der rechte. Jetzt entscheidet nur der rechte Bügel; er wiederholt dem
+  linken seinen Zustand alle 0,4 s, solange der Kopf oben ist (und
+  „runter“ noch dreimal), und der linke schaltet ab, wenn er 1,5 s nichts
+  gehört hat.
+
+### Changed
+- Das Dashboard beim Hochschauen erscheint auf einmal, statt sich von oben
+  nach unten aufzubauen: Das Programm setzt es zu einem Bild zusammen und
+  zeigt es mit einem einzigen Zeichenbefehl.
+
 ## [0.37.0] - 2026-11-12
 
 ### Changed
@@ -520,7 +535,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.37.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.38.0...HEAD
+[0.38.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.37.0...app-v0.38.0
 [0.37.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.36.0...app-v0.37.0
 [0.36.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...app-v0.36.0
 [0.35.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...app-v0.35.0

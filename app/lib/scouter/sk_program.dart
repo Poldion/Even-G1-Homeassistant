@@ -74,6 +74,15 @@ class SkResident {
   static final _timeY = SkW.at(state + 92);
   static final _beat = SkW.at(state + 96);
   static final _headBeat = SkW.at(state + 148);
+  // Composing the dashboard in the frame (program): a band's address and
+  // the rows drawn.
+  static final _dst = SkW.at(state + 152);
+  static final _minY = SkW.at(state + 156);
+  static final _maxY = SkW.at(state + 160);
+  // Both eyes (program): the right arm repeats "down" this many more
+  // times; the left arm's time of the last message from the right one.
+  static final _downBeats = SkW.at(state + 164);
+  static final _lastBeat = SkW.at(state + 168);
 
   // Connection symbols at the dashboard's top right (written by the app):
   // Home Assistant unreachable, where they go (y 0: nowhere); the program
@@ -134,9 +143,11 @@ class SkResident {
   /// often: a missed or late TILT never leaves the panel on.
   static const headCheckUs = 400000;
 
-  /// The left arm's own check allows this much more than the hysteresis,
-  /// so the eyes do not part at the edge (the right arm decides).
-  static const followerMargin = 10;
+  /// While the head is up the right arm repeats "up" at every check; the
+  /// left arm switches off when it heard nothing for this long (the right
+  /// arm gone). After "down" the right arm repeats it [downBeats] times.
+  static const followerTimeoutUs = 1500000;
+  static const downBeats = 3;
 
   static const flagDashboard = 1;
   static const flagGestures = 2;
@@ -224,6 +235,7 @@ class SkResident {
     a.jmp('range');
     a.label('goDown');
     a.mov(up, c0);
+    if (peer == peerLeader) a.mov(_downBeats, a.c(downBeats));
     a.notify(a.c(notifyHead), c0);
     if (peer == peerLeader) _tell(a, peerDown);
     a.call('hide');
@@ -248,17 +260,30 @@ class SkResident {
     a.ret();
 
     // headCheck: while up, the pitch itself; the head went down without a
-    // TILT (or the right arm's message got lost): down now.
+    // TILT: down now. The right arm repeats its state to the left one; the
+    // left arm switches off when the right one went silent.
     a.label('headCheck');
-    a.beq(up, c0, 'ret');
-    a.sysRead(r0, a.c(SkProp.pitch));
-    a.beq(r0, a.c(SkProp.unknown), 'ret');
     if (peer == peerFollower) {
-      a.sub(r2, angle, a.c(10 + followerMargin));
-      a.bges(r0, r2, 'ret');
+      a.beq(up, c0, 'ret');
+      a.sysRead(r0, a.c(SkProp.timeUs));
+      a.sub(r0, r0, _lastBeat);
+      a.bltu(r0, a.c(followerTimeoutUs), 'ret');
       a.mov(up, c0);
       a.jmp('hide');
     } else {
+      if (peer == peerLeader) {
+        a.bne(up, c0, 'hcBeat');
+        a.beq(_downBeats, c0, 'ret');
+        a.sub(_downBeats, _downBeats, c1);
+        a.sysWrite(a.c(SkProp.peerSend), a.c(peerDown));
+        a.ret();
+        a.label('hcBeat');
+        a.sysWrite(a.c(SkProp.peerSend), a.c(peerUp));
+      } else {
+        a.beq(up, c0, 'ret');
+      }
+      a.sysRead(r0, a.c(SkProp.pitch));
+      a.beq(r0, a.c(SkProp.unknown), 'ret');
       a.sub(r2, angle, a.c(10));
       a.bges(r0, r2, 'ret');
       a.jmp('head');
@@ -295,7 +320,12 @@ class SkResident {
       // that comes first.
       a.sysRead(r0, a.c(SkProp.timeUs));
       a.add(r0, r0, a.c(watchUs));
-      a.beq(up, c0, 'armClock');
+      a.bne(up, c0, 'armSoon');
+      if (peer == peerLeader) {
+        a.bne(_downBeats, c0, 'armSoon');
+      }
+      a.jmp('armClock');
+      a.label('armSoon');
       a.sub(r0, r0, a.c(watchUs - headCheckUs));
       a.label('armClock');
       a.beq(clockAt, c0, 'armSet');
@@ -436,6 +466,10 @@ class SkResident {
     a.bne(busy, c0, 'ret');
     a.beq(count, c0, 'ret');
     a.call('digits');
+    // All bands into the app's frame (free while the app shows nothing),
+    // then one DRAW: the dashboard appears at once, not band by band.
+    a.mov(_minY, a.c(SkPanel.height));
+    a.mov(_maxY, c0);
     a.mov(r3, c0); // band i
     a.label('line');
     a.mul(r4, r3, a.c(entryWords));
@@ -453,7 +487,16 @@ class SkResident {
     next(r11); // rectangles
     next(r14); // text level
     final bandW = a.c(SkPanel.width), stride = a.c(SkPanel.stride);
-    final bandAt = a.c(band);
+    final bandAt = _dst;
+    a.mul(_dst, r5, stride);
+    a.add(_dst, _dst, a.c(SkArena.frame));
+    a.bgeu(r5, _minY, 'minOk');
+    a.mov(_minY, r5);
+    a.label('minOk');
+    a.add(r0, r5, lineHeight);
+    a.bgeu(_maxY, r0, 'maxOk');
+    a.mov(_maxY, r0);
+    a.label('maxOk');
     a.fill(bandAt, stride, c0, c0, bandW, lineHeight, c0);
     a.label('rect');
     a.beq(r11, c0, 'text');
@@ -497,9 +540,12 @@ class SkResident {
       r8,
     );
     a.label('blank');
-    a.draw(bandAt, stride, c0, c0, c0, r5, bandW, lineHeight);
     a.add(r3, r3, c1);
     a.bltu(r3, rows, 'line');
+    a.bgeu(_minY, _maxY, 'drawn');
+    a.sub(r0, _maxY, _minY);
+    a.draw(a.c(SkArena.frame), stride, c0, _minY, c0, _minY, bandW, r0);
+    a.label('drawn');
     a.call('status');
     a.call('label');
     a.call('stand');
@@ -715,6 +761,8 @@ class SkResident {
     if (peer == peerFollower) {
       // PEER: the right arm decided; switch at the same moment.
       a.label('peer');
+      a.sysRead(r0, a.c(SkProp.timeUs));
+      a.mov(_lastBeat, r0);
       a.sysRead(r0, a.c(SkProp.peerMsg));
       a.sysRead(r1, a.c(SkProp.peerTUs));
       a.add(r1, r1, a.c(peerLeadUs));

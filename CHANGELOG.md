@@ -9,6 +9,20 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-11-12
+
+### Fixed
+- The left eye flickered off and on while looking up (since 0.35.0): it
+  checked its own pitch, and its sensor may read quite differently from
+  the right one's. Now only the right arm decides; it repeats its state to
+  the left arm every 0.4 s while the head is up (and "down" three more
+  times), and the left arm switches off when it heard nothing for 1.5 s.
+
+### Changed
+- The dashboard on head up appears at once instead of building up from top
+  to bottom: the program composes it in one image and shows it with a
+  single draw.
+
 ## [0.37.0] - 2026-11-12
 
 ### Changed
@@ -505,7 +519,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.37.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.38.0...HEAD
+[0.38.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.37.0...app-v0.38.0
 [0.37.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.36.0...app-v0.37.0
 [0.36.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.35.0...app-v0.36.0
 [0.35.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.34.0...app-v0.35.0

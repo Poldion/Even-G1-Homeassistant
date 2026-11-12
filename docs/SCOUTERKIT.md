@@ -198,9 +198,15 @@ gone, and the app loads it again.
   when the pitch *leaves* its range, so a head that went down while the
   dashboard was being drawn would never fire. After setting a new range the
   program therefore reads the pitch again and decides at once, and while
-  the head is up each arm reads the pitch itself; below the angle minus the
-  hysteresis (left arm: 10° more, the right one decides) the dashboard goes
-  off.
+  the head is up the right arm reads the pitch itself; below the angle minus
+  the hysteresis the dashboard goes off. At each check it also repeats its
+  state to the left arm (after "down" three more times), and the left arm
+  switches off when it heard nothing for 1.5 s. The left arm does not use
+  its own pitch: its sensor may read quite differently.
+- **At once**: the program composes all bands of the dashboard in the app's
+  frame (free while the app shows nothing) and shows them with one `DRAW`,
+  instead of one `DRAW` per band, which built the page up visibly from top
+  to bottom.
 - **Both eyes together** (arm-to-arm link, VM.md §6.9): only the right arm
   follows the tilt. On a change it sends `PEER_SEND` 1 (up) or 2 (down) to
   the left arm and switches 150 ms later; the left arm's `PEER` handler

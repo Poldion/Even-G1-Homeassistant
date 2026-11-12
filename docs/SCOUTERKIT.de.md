@@ -203,9 +203,16 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   schon wieder runter, während das Dashboard gezeichnet wurde, käme nie ein
   Ereignis. Darum liest das Programm nach dem Setzen eines neuen Bereichs
   die Neigung gleich noch einmal und entscheidet sofort, und solange der
-  Kopf oben ist, liest jeder Bügel die Neigung selbst; unter dem Winkel
-  minus der Hysterese (linker Bügel: 10° mehr, der rechte entscheidet) geht
-  das Dashboard aus.
+  Kopf oben ist, liest der rechte Bügel die Neigung selbst; unter dem Winkel
+  minus der Hysterese geht das Dashboard aus. Bei jeder Prüfung wiederholt
+  er dem linken Bügel seinen Zustand (nach „runter“ noch dreimal), und der
+  linke Bügel schaltet ab, wenn er 1,5 s nichts gehört hat. Seine eigene
+  Neigung nutzt der linke Bügel nicht: Sein Sensor kann deutlich anders
+  messen.
+- **Auf einmal**: Das Programm setzt alle Streifen des Dashboards im Bild
+  der App zusammen (frei, solange die App nichts zeigt) und zeigt sie mit
+  einem `DRAW`, statt mit einem `DRAW` pro Streifen, bei dem sich die Seite
+  sichtbar von oben nach unten aufbaute.
 - **Beide Augen zusammen** (Funkverbindung der Bügel, VM.md §6.9): Nur der
   rechte Bügel folgt der Neigung. Bei einem Wechsel schickt er dem linken
   `PEER_SEND` 1 (hoch) oder 2 (runter) und schaltet 150 ms später; der

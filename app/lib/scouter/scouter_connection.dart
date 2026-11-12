@@ -1294,7 +1294,11 @@ class ScouterConnection extends G1Connection {
         level: line.level + (line.bold ? SkResident.bold : 0),
       ));
     }
-    return bands;
+    // The program composes the bands in the frame: each inside the panel.
+    return [
+      for (final b in bands)
+        if (b.y >= 0 && b.y + lh <= SkPanel.height) b,
+    ];
   }
 
   void _onNotify(_SkArm arm, int a, int b) {
