@@ -9,6 +9,20 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.41.0] - 2026-11-12
+
+### Fixed
+- Automatic brightness after looking up: the light sensor runs only while
+  the display is on and may first deliver the value from the last time
+  (e.g. a bright room before a dark walk). The glasses now drop the readings
+  of the first 0.9 s and then take the first good one at once.
+
+### Changed
+- Faster but still calm fades: a third of the way per reading, at most 3
+  levels.
+- *Diagnostics → Log* shows each brightness change with the light it came
+  from ("Light 3 lux → brightness level 5"), to check the sensor.
+
 ## [0.40.0] - 2026-11-12
 
 ### Changed
@@ -536,7 +550,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.40.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.41.0...HEAD
+[0.41.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.40.0...app-v0.41.0
 [0.40.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...app-v0.40.0
 [0.39.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.38.0...app-v0.39.0
 [0.38.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.37.0...app-v0.38.0

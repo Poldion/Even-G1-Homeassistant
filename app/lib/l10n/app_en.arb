@@ -490,6 +490,17 @@
     }
   },
   "skLogInCase": "Glasses in the charging case – display stays off (disturbs charging)",
+  "skLogLight": "Light {lux} lux → brightness level {level}",
+  "@skLogLight": {
+    "placeholders": {
+      "lux": {
+        "type": "String"
+      },
+      "level": {
+        "type": "String"
+      }
+    }
+  },
   "skLogMic": "Microphone: {error}",
   "@skLogMic": {
     "placeholders": {

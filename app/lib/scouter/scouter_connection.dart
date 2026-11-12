@@ -1312,6 +1312,15 @@ class ScouterConnection extends G1Connection {
     } else if (a == SkResident.notifyGesture) {
       if (b == SkResident.nod) _emit(arm.side, G1Event.nod);
       if (b == SkResident.shake) _emit(arm.side, G1Event.headShake);
+    } else if (a == SkResident.notifyLight) {
+      // The program set a new brightness from its light sensor.
+      final lux = (b & 0xffffff) / 100;
+      _debug(
+        tr.skLogLight(
+          lux < 10 ? lux.toStringAsFixed(1) : '${lux.round()}',
+          '${b >> 24}',
+        ),
+      );
     }
   }
 

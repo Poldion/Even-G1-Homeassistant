@@ -1058,6 +1058,12 @@ abstract class AppLocalizations {
   /// **'Glasses in the charging case – display stays off (disturbs charging)'**
   String get skLogInCase;
 
+  /// No description provided for @skLogLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light {lux} lux → brightness level {level}'**
+  String skLogLight(String lux, String level);
+
   /// No description provided for @skLogMic.
   ///
   /// In en, this message translates to:

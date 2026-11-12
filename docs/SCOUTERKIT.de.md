@@ -285,10 +285,13 @@ Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
   Bereich; der Wachhund wiederholt das alle 5 s, und alle 0,4 s, solange die
   Anzeige an ist. Der Sensor sitzt am Bügel und springt bei jeder
   Kopfbewegung, darum bewegt jede Messung eine geglättete Stufe nur ein
-  Viertel des Wegs; eine Stufe Unterschied ändert nichts, und
-  `BRIGHTNESS` ändert sich höchstens um 2 Stufen pro Messung (ein Übergang
-  von etwa 2 s von dunkel nach hell). Die erste Messung nach 2 s ohne eine
-  zählt sofort. Der
+  Drittel des Wegs; eine Stufe Unterschied ändert nichts, und
+  `BRIGHTNESS` ändert sich höchstens um 3 Stufen pro Messung (ein Übergang
+  von etwa 2–3 s von dunkel nach hell). Der Sensor läuft nur, solange die
+  Anzeige an ist, und misst alle 800 ms: Messungen in den 0,9 s nach der
+  ersten werden verworfen (er kann noch den Wert vom letzten Mal halten),
+  die erste danach zählt sofort. Jede neue Stufe kommt mit dem Licht, aus dem
+  sie stammt, ins Protokoll der App (`NOTIFY` 3). Der
   linke Bügel läuft mit `AUTO_BRIGHTNESS` = 1 und übernimmt die Stufe des
   rechten über die Funkverbindung der Bügel (VM.md §6.9). Ein Handy braucht
   es dafür nicht. Firmware ohne die Verbindung: Die App macht es wie bisher

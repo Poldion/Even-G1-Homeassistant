@@ -594,6 +594,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Glasses in the charging case – display stays off (disturbs charging)';
 
   @override
+  String skLogLight(String lux, String level) {
+    return 'Light $lux lux → brightness level $level';
+  }
+
+  @override
   String skLogMic(String error) {
     return 'Microphone: $error';
   }

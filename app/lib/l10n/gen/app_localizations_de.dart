@@ -597,6 +597,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Brille im Ladeetui – Anzeige bleibt aus (stört das Laden)';
 
   @override
+  String skLogLight(String lux, String level) {
+    return 'Licht $lux Lux → Helligkeitsstufe $level';
+  }
+
+  @override
   String skLogMic(String error) {
     return 'Mikrofon: $error';
   }

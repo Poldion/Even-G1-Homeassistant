@@ -274,10 +274,13 @@ The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
   table, adds the offset, clamps it to 0–42 and sets the next range; the
   watch repeats it every 5 s, and every 0.4 s while the panel is on. The
   sensor sits on the arm and jumps with every turn of the head, so each
-  reading moves a smoothed level only a quarter of the way; a difference of
-  one level changes nothing, and `BRIGHTNESS` moves at most 2 levels per
-  reading (a fade of about 2 s from dim to bright). The first reading after
-  2 s without one counts at once. The left arm runs
+  reading moves a smoothed level only a third of the way; a difference of
+  one level changes nothing, and `BRIGHTNESS` moves at most 3 levels per
+  reading (a fade of about 2–3 s from dim to bright). The sensor runs only
+  while the panel is on and converts every 800 ms: readings within 0.9 s
+  after the first one are dropped (it may still hold the value from the last
+  time the panel was on), the first one after that counts at once. Each new
+  level goes to the app's log with the light it came from (`NOTIFY` 3). The left arm runs
   `AUTO_BRIGHTNESS` = 1 and takes the right arm's level over their link
   (VM.md §6.9). No phone is needed. Firmware without the link: the app does
   it from the `LIGHT` events as before.

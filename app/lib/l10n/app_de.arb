@@ -160,6 +160,7 @@
   "skLogEventsRejected": "{arm}: EVENTS abgelehnt",
   "skLogFontLoaded": "{arm}: Schrift geladen ({bytes} B, {ms} ms)",
   "skLogInCase": "Brille im Ladeetui – Anzeige bleibt aus (stört das Laden)",
+  "skLogLight": "Licht {lux} Lux → Helligkeitsstufe {level}",
   "skLogMic": "Mikrofon: {error}",
   "skLogMicNeedsEncryption": "Mikrofon braucht eine verschlüsselte (gekoppelte) Verbindung",
   "skLogMicStopped": "{arm}: Mikrofon von der Brille beendet ({reason})",

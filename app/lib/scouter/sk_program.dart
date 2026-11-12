@@ -87,6 +87,9 @@ class SkResident {
   // and the time of the last reading.
   static final _lightAvg = SkW.at(state + 172);
   static final _lightAt = SkW.at(state + 176);
+  // When the sensor's first reading after the panel came on arrived (0:
+  // the panel was off).
+  static final _lightWarm = SkW.at(state + 180);
 
   // Connection symbols at the dashboard's top right (written by the app):
   // Home Assistant unreachable, where they go (y 0: nowhere); the program
@@ -152,12 +155,17 @@ class SkResident {
   /// arm gone). After "down" the right arm repeats it [downBeats] times.
   static const followerTimeoutUs = 1500000;
 
-  /// Automatic brightness: each reading moves the smoothed level a quarter
+  /// Automatic brightness: each reading moves the smoothed level a third
   /// of the way; the panel's level moves at most [lightStep] per reading
   /// (every [headCheckUs] while the panel is on). After [lightFreshUs]
   /// without a reading the first one counts at once.
-  static const lightStep = 2;
+  static const lightStep = 3;
   static const lightFreshUs = 2000000;
+
+  /// The sensor runs only while the panel is on (VM.md §6.7) and converts
+  /// every 800 ms: readings within this time after the first one are
+  /// dropped (an old value or a conversion that started dark).
+  static const lightWarmUs = 900000;
   static const downBeats = 3;
 
   static const flagDashboard = 1;
@@ -165,6 +173,10 @@ class SkResident {
 
   static const notifyHead = 1;
   static const notifyGesture = 2;
+
+  /// A new brightness: b = the light (0.01 lux, low 24 bits) and the level
+  /// (high 8 bits), for the app's log.
+  static const notifyLight = 3;
   static const nod = 1;
   static const shake = 2;
 
@@ -391,7 +403,17 @@ class SkResident {
     if (micArm) {
       a.beq(lightOn, c0, 'ret');
       a.sysRead(r0, a.c(SkProp.light)); // 0.01 lux
-      a.beq(r0, a.c(SkProp.unknown), 'ret');
+      a.beq(r0, a.c(SkProp.unknown), 'lCold');
+      // Warming up: the first readings after the panel came on are dropped.
+      a.sysRead(r6, a.c(SkProp.timeUs));
+      a.bne(_lightWarm, c0, 'lWarm');
+      a.mov(_lightWarm, r6);
+      a.bne(_lightWarm, c0, 'ret');
+      a.mov(_lightWarm, c1);
+      a.ret();
+      a.label('lWarm');
+      a.sub(r7, r6, _lightWarm);
+      a.bltu(r7, a.c(lightWarmUs), 'ret');
       a.divu(r1, r0, a.c(100)); // lux
       final c50 = a.c(50), c200 = a.c(200), c1000 = a.c(1000);
       a.bgeu(r1, c50, 'l50');
@@ -435,14 +457,14 @@ class SkResident {
       a.label('lSmooth');
       a.bltu(r8, _lightAvg, 'lFall');
       a.sub(r9, r8, _lightAvg);
-      a.add(r9, r9, a.c(3));
-      a.divu(r9, r9, a.c(4));
+      a.add(r9, r9, a.c(2));
+      a.divu(r9, r9, a.c(3));
       a.add(_lightAvg, _lightAvg, r9);
       a.jmp('lLevel');
       a.label('lFall');
       a.sub(r9, _lightAvg, r8);
-      a.add(r9, r9, a.c(3));
-      a.divu(r9, r9, a.c(4));
+      a.add(r9, r9, a.c(2));
+      a.divu(r9, r9, a.c(3));
       a.sub(_lightAvg, _lightAvg, r9);
       a.label('lLevel');
       a.add(r9, _lightAvg, a.c(8));
@@ -467,6 +489,11 @@ class SkResident {
       a.beq(r9, lightLevel, 'lRange');
       a.mov(lightLevel, r9);
       a.sysWrite(a.c(SkProp.brightness), r9);
+      // For the app's log: the light that led to it.
+      a.and(r7, r0, a.c(0xffffff));
+      a.mul(r8, r9, a.c(0x1000000));
+      a.or(r7, r7, r8);
+      a.notify(a.c(notifyLight), r7);
       a.label('lRange');
       a.divu(r3, r0, a.c(4));
       a.bgeu(r3, c200, 'lMargin');
@@ -481,6 +508,12 @@ class SkResident {
       a.sysWrite(a.c(SkProp.lightHi), r5);
     }
     a.ret();
+    if (micArm) {
+      // The panel is off: the sensor too.
+      a.label('lCold');
+      a.mov(_lightWarm, c0);
+      a.ret();
+    }
 
     // LIGHT: the light left its range.
     a.label('lightTrigger');
