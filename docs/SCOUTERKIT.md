@@ -18,7 +18,7 @@ last version for it; it is no longer developed further.
 | Official Even app | yes | **no** |
 | Even dashboard, Even AI, translation, navigation | yes | no |
 | Notifications | the glasses' own display | as a text of the app, with the app's icon |
-| Display | 576 × 136 px, 5 lines of ~30 characters | 640 × 480 px, text drawn by the app, 11 lines of 42 characters (default height) |
+| Display | 576 × 136 px, 5 lines of ~30 characters | 640 × 480 px, text drawn by the app, 11 lines of 42 characters |
 | Both eyes at the same time | not guaranteed | yes, both draw at the same moment |
 | Assist (hold the touch bar), microphone | yes | yes (right arm, LC3 16 kbit/s as before) |
 | Tap, double tap | yes | yes |

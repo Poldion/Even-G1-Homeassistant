@@ -19,7 +19,7 @@ letzte Version dafür; sie wird nicht mehr weiterentwickelt.
 | Offizielle Even-App | ja | **nein** |
 | Even-Dashboard, Even AI, Übersetzung, Navigation | ja | nein |
 | Benachrichtigungen | eigene Anzeige der Brille | als Text der App, mit dem Symbol der App |
-| Anzeige | 576 × 136 px, 5 Zeilen à ~30 Zeichen | 640 × 480 px, Text zeichnet die App, 11 Zeilen à 42 Zeichen (Standardhöhe) |
+| Anzeige | 576 × 136 px, 5 Zeilen à ~30 Zeichen | 640 × 480 px, Text zeichnet die App, 11 Zeilen à 42 Zeichen |
 | Beide Augen gleichzeitig | nicht garantiert | ja, beide zeichnen im selben Moment |
 | Assist (Touchbar halten), Mikrofon | ja | ja (rechter Bügel, LC3 16 kbit/s wie bisher) |
 | Tippen, Doppeltippen | ja | ja |
