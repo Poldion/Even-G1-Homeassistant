@@ -9,6 +9,13 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.45.0] - 2026-11-13
+
+### Changed
+- Die logarithmische Helligkeitskurve ist jetzt Standard; die
+  Original-Tabelle der Brille bleibt wählbar (*Gleichmäßige Kurve*
+  ausschalten).
+
 ## [0.44.0] - 2026-11-13
 
 ### Added
@@ -606,7 +613,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.44.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.45.0...HEAD
+[0.45.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.44.0...app-v0.45.0
 [0.44.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.43.0...app-v0.44.0
 [0.43.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.42.0...app-v0.43.0
 [0.42.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.41.0...app-v0.42.0
