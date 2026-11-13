@@ -630,6 +630,13 @@ class Bridge extends ChangeNotifier {
   /// Offset of the automatic brightness in percent (-50..50).
   late int brightnessOffset = settings.brightnessOffset;
 
+  /// The automatic brightness with the logarithmic curve.
+  Future<void> setLogBrightness(bool enabled) async {
+    settings.logBrightness = enabled;
+    notifyListeners();
+    if ((autoBrightness ?? false) && g1.connected) await _sendBrightness();
+  }
+
   /// Sets the offset of the automatic brightness (the glasses apply it from
   /// their light sensor).
   void setBrightnessOffset(int percent) {
@@ -646,13 +653,18 @@ class Bridge extends ChangeNotifier {
   Future<void> _sendBrightness() async {
     final auto = autoBrightness ?? false;
     if (!g1.connected) return;
-    if (auto && brightnessOffset != 0) {
+    if (auto) {
+      // Always the glasses' program (smoothing, warm-up, the curve), also
+      // without an offset.
       final levels = (brightnessOffset * G1Brightness.max / 100).round();
       _log(
-        tr.coreLogBrightnessOffset(
-          '${brightnessOffset > 0 ? '+' : ''}$brightnessOffset',
-        ),
+        brightnessOffset == 0
+            ? tr.coreLogBrightnessAuto
+            : tr.coreLogBrightnessOffset(
+                '${brightnessOffset > 0 ? '+' : ''}$brightnessOffset',
+              ),
       );
+      await g1.setBrightnessCurve(settings.logBrightness);
       await g1.setAutoBrightnessOffset(levels);
       return;
     }

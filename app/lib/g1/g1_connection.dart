@@ -189,6 +189,10 @@ abstract class G1Connection extends ChangeNotifier {
   /// while the panel is on).
   Future<void> setAutoBrightnessOffset(int levels);
 
+  /// The automatic brightness's curve: logarithmic (the same step for every
+  /// tenfold light) or the glasses' original table.
+  Future<void> setBrightnessCurve(bool logarithmic) async {}
+
   /// Nodding and shaking the head as gestures.
   Future<void> setHeadGestures(bool enabled);
 

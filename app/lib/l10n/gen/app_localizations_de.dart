@@ -743,13 +743,20 @@ class AppLocalizationsDe extends AppLocalizations {
       'Die Brille regelt die Helligkeit über ihren Lichtsensor. Der Regler verschiebt sie heller oder dunkler.';
 
   @override
+  String get uiBrightnessLog => 'Gleichmäßige Kurve (logarithmisch)';
+
+  @override
+  String get uiBrightnessLogHint =>
+      'Jede Verzehnfachung des Lichts ergibt den gleichen Schritt in der Helligkeit, nah daran, wie das Auge sie empfindet. Aus: die Original-Kurve der Brille.';
+
+  @override
   String uiBrightnessNow(int percent) {
     return ' (gerade $percent %)';
   }
 
   @override
   String uiBrightnessOffsetScouter(String offset, String current) {
-    return 'Der Lichtsensor meldet sich, sobald sich die Helligkeit deutlich ändert, solange etwas angezeigt wird; die App stellt dann $offset % gegenüber der Automatik ein$current.';
+    return 'Die Brille stellt $offset % gegenüber der Automatik ein$current.';
   }
 
   @override

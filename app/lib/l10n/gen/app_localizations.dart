@@ -1243,6 +1243,18 @@ abstract class AppLocalizations {
   /// **'The glasses set the brightness with their light sensor. The slider makes it brighter or darker.'**
   String get uiBrightnessAutoHint;
 
+  /// No description provided for @uiBrightnessLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Even curve (logarithmic)'**
+  String get uiBrightnessLog;
+
+  /// No description provided for @uiBrightnessLogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every tenfold change of the light gives the same step in brightness, close to how the eye sees it. Off: the original curve of the glasses.'**
+  String get uiBrightnessLogHint;
+
   /// No description provided for @uiBrightnessNow.
   ///
   /// In en, this message translates to:
@@ -1252,7 +1264,7 @@ abstract class AppLocalizations {
   /// No description provided for @uiBrightnessOffsetScouter.
   ///
   /// In en, this message translates to:
-  /// **'The light sensor reports whenever the brightness changes noticeably while something is shown; the app then sets {offset} % relative to the automatic level{current}.'**
+  /// **'The glasses set {offset} % relative to the automatic level{current}.'**
   String uiBrightnessOffsetScouter(String offset, String current);
 
   /// No description provided for @uiConnect.

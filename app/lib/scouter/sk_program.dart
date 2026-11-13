@@ -163,6 +163,10 @@ class SkResident {
   /// (every [headCheckUs] while the panel is on). After [lightFreshUs]
   /// without a reading the first one counts at once.
   static const lightStep = 3;
+
+  /// The logarithmic curve's slope: 9 levels per decade over 8 eighths of
+  /// log2 per doubling, × 256 (9 · log10(2) / 8 · 256 ≈ 87).
+  static const logScale = 87;
   static const lightFreshUs = 2000000;
 
   /// The sensor runs only while the panel is on (VM.md §6.7) and converts
@@ -466,6 +470,7 @@ class SkResident {
       a.sub(r7, r6, _lightWarm);
       a.bltu(r7, a.c(lightWarmUs), 'ret');
       a.divu(r1, r0, a.c(100)); // lux
+      a.bne(lightOn, c1, 'lLog');
       final c50 = a.c(50), c200 = a.c(200), c1000 = a.c(1000);
       a.bgeu(r1, c50, 'l50');
       a.divu(r2, r1, a.c(5));
@@ -486,6 +491,29 @@ class SkResident {
       a.mov(r2, a.c(41));
       a.bltu(r1, a.c(2000), 'lOff');
       a.mov(r2, a.c(maxLevel));
+      a.jmp('lOff');
+      // lightOn 2: the logarithmic curve, the same step for every tenfold
+      // light: level = 4 + 9 · log10(lux) (1 lux 4, 10 lux 13, 100 lux 22,
+      // 1000 lux 31). log2 of the reading (0.01 lux) in eighths: halve it to
+      // 8…15, count the halvings.
+      a.label('lLog');
+      a.mov(r3, r0);
+      a.mov(r4, c0);
+      a.label('lLog2');
+      a.bltu(r3, a.c(16), 'lLog3');
+      a.divu(r3, r3, a.c(2));
+      a.add(r4, r4, c1);
+      a.jmp('lLog2');
+      a.label('lLog3');
+      // r2 = 8 · log2(reading) = 8 · (r4 + 3) + (r3 − 8)
+      a.mul(r2, r4, a.c(8));
+      a.add(r2, r2, r3);
+      a.add(r2, r2, a.c(16));
+      // level = 9 · log10(reading / 100) + 4 = r2 · 0.3386 − 14
+      a.mul(r2, r2, a.c(logScale));
+      a.add(r2, r2, a.c(128));
+      a.divu(r2, r2, a.c(256));
+      a.sub(r2, r2, a.c(14));
       a.label('lOff');
       a.add(r2, r2, lightOffset);
       a.bges(r2, c0, 'lMin');

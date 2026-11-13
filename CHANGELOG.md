@@ -9,6 +9,19 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.44.0] - 2026-11-13
+
+### Added
+- *Even curve (logarithmic)* for the automatic brightness (overview, under
+  the brightness): every tenfold change of the light gives the same step
+  (1 lux level 4, 10 lux 13, 100 lux 22, 1000 lux 31, 10,000 lux 40),
+  close to how the eye sees it. Off: the glasses' original table.
+
+### Changed
+- The automatic brightness always runs in the glasses' program, also
+  without an offset; before, an offset of 0 used the firmware's own
+  automatic, without the smoothing and the warm-up of 0.40 and 0.41.
+
 ## [0.43.0] - 2026-11-13
 
 ### Changed
@@ -573,7 +586,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.43.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.44.0...HEAD
+[0.44.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.43.0...app-v0.44.0
 [0.43.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.42.0...app-v0.43.0
 [0.42.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.41.0...app-v0.42.0
 [0.41.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.40.0...app-v0.41.0

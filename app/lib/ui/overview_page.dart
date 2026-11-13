@@ -343,6 +343,15 @@ class _Brightness extends StatelessWidget {
                 style: small,
               ),
             ),
+          if (auto)
+            SwitchListTile(
+              contentPadding: const EdgeInsets.only(right: 8),
+              dense: true,
+              title: Text(tr.uiBrightnessLog),
+              subtitle: Text(tr.uiBrightnessLogHint),
+              value: bridge.settings.logBrightness,
+              onChanged: connected ? bridge.setLogBrightness : null,
+            ),
         ],
       ),
     );

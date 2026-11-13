@@ -103,6 +103,10 @@ class Settings {
       _setOptInt('wear_detection', v == null ? null : (v ? 1 : 0));
 
   /// Offset of the automatic brightness in percent (-50..50, 0 = off).
+  /// The automatic brightness with the logarithmic curve.
+  bool get logBrightness => _prefs.getBool('log_brightness') ?? false;
+  set logBrightness(bool v) => _prefs.setBool('log_brightness', v);
+
   int get brightnessOffset => _prefs.getInt('brightness_offset') ?? 0;
   set brightnessOffset(int v) => _prefs.setInt('brightness_offset', v);
 

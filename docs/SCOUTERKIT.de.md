@@ -289,8 +289,10 @@ Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
   jedem `SLEEP_UNTIL T` + `DRAW`, mit `T` in der Uhr des Bügels (VM.md §7).
 - Helligkeit mit Offset, auf der Brille: Das Programm des rechten Bügels
   behandelt `LIGHT` selbst. Verlässt das Licht den Bereich ±25 % (mindestens
-  ±2 Lux) um die letzte Messung, rechnet es die Stufe mit der Tabelle der
-  Firmware aus, addiert den Offset, begrenzt auf 0–42 und setzt den nächsten
+  ±2 Lux) um die letzte Messung, rechnet es die Stufe aus, mit der Tabelle
+  der Firmware oder, mit *Gleichmäßige Kurve (logarithmisch)*, als
+  4 + 9 · log10(Lux) (1 Lux 4, 10 Lux 13, 100 Lux 22, 1000 Lux 31; log2 in
+  Achteln durch Halbieren der Messung), addiert den Offset, begrenzt auf 0–42 und setzt den nächsten
   Bereich; der Wachhund wiederholt das alle 5 s, und alle 0,4 s, solange die
   Anzeige an ist. Der Sensor sitzt am Bügel und springt bei jeder
   Kopfbewegung, darum bewegt jede Messung eine geglättete Stufe nur ein

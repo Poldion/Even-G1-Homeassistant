@@ -737,13 +737,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'The glasses set the brightness with their light sensor. The slider makes it brighter or darker.';
 
   @override
+  String get uiBrightnessLog => 'Even curve (logarithmic)';
+
+  @override
+  String get uiBrightnessLogHint =>
+      'Every tenfold change of the light gives the same step in brightness, close to how the eye sees it. Off: the original curve of the glasses.';
+
+  @override
   String uiBrightnessNow(int percent) {
     return ' (currently $percent %)';
   }
 
   @override
   String uiBrightnessOffsetScouter(String offset, String current) {
-    return 'The light sensor reports whenever the brightness changes noticeably while something is shown; the app then sets $offset % relative to the automatic level$current.';
+    return 'The glasses set $offset % relative to the automatic level$current.';
   }
 
   @override

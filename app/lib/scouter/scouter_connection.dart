@@ -2087,6 +2087,32 @@ class ScouterConnection extends G1Connection {
 
   /// Offset in levels while the app runs the automatic brightness itself.
   int? _offsetLevels;
+
+  /// The logarithmic curve instead of stock's table.
+  bool _logCurve = false;
+
+  @override
+  Future<void> setBrightnessCurve(bool logarithmic) async {
+    if (logarithmic == _logCurve) return;
+    _logCurve = logarithmic;
+    _offsetApplied = null;
+    final levels = _offsetLevels;
+    if (levels != null && _offsetOnArms) await _offsetToArms(levels);
+  }
+
+  /// The logarithmic curve's level for [light] in 0.01 lux, as the program
+  /// computes it: 4 + 9 · log10(lux), in eighths of log2.
+  @visibleForTesting
+  static int logLevel(int light) {
+    var r3 = light, r4 = 0;
+    while (r3 >= 16) {
+      r3 ~/= 2;
+      r4++;
+    }
+    final eighths = 8 * r4 + r3 + 16;
+    return (eighths * SkResident.logScale + 128) ~/ 256 - 14;
+  }
+
   int? _offsetApplied;
   Timer? _lightTimer;
 
@@ -2139,7 +2165,7 @@ class ScouterConnection extends G1Connection {
             ..sysWrite(SkProp.lightHi, 0)
             ..write(
               SkResident.lightOn.address,
-              SkLib.u32s([1, levels, 0xffffffff]),
+              SkLib.u32s([_logCurve ? 2 : 1, levels, 0xffffffff]),
             ))
           .take(),
     ]);
@@ -2194,10 +2220,8 @@ class ScouterConnection extends G1Connection {
   Future<void> _applyLight(int light) async {
     final offset = _offsetLevels;
     if (offset == null) return;
-    final level = (stockLevel(light ~/ 100) + offset).clamp(
-      0,
-      SkPanel.maxBrightness,
-    );
+    final base = _logCurve ? logLevel(light) : stockLevel(light ~/ 100);
+    final level = (base + offset).clamp(0, SkPanel.maxBrightness);
     // A range around the reading: ±25 %, at least ±2 lux.
     final margin = max(light ~/ 4, 200);
     final range = SkCode()
