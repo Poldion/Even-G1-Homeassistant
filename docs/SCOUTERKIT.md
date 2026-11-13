@@ -279,7 +279,7 @@ The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
 - Brightness with offset, on the glasses: the right arm's program handles
   `LIGHT` itself. When the light leaves the range ±25 % (at least ±2 lux)
   around the last reading, it computes the level, from the firmware's table
-  or, with *Even curve (logarithmic)*, as 4 + 9 · log10(lux) (1 lux 4,
+  or, with *Even curve (logarithmic)* (the default), as 4 + 9 · log10(lux) (1 lux 4,
   10 lux 13, 100 lux 22, 1000 lux 31; log2 in eighths by halving the
   reading), adds the offset, clamps it to 0–42 and sets the next range; the
   watch repeats it every 5 s, and every 0.4 s while the panel is on. The
