@@ -9,6 +9,13 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.46.0] - 2026-11-13
+
+### Changed
+- The logarithmic brightness curve reaches further down in the dark and
+  all the way up outside: 2 + 10 · log10(lux) (1 lux level 2, 10 lux 12,
+  100 lux 22, 1000 lux 32, 10,000 lux 42) instead of 4 + 9 · log10(lux).
+
 ## [0.45.0] - 2026-11-13
 
 ### Changed
@@ -592,7 +599,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.45.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.46.0...HEAD
+[0.46.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.45.0...app-v0.46.0
 [0.45.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.44.0...app-v0.45.0
 [0.44.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.43.0...app-v0.44.0
 [0.43.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.42.0...app-v0.43.0

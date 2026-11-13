@@ -2101,7 +2101,7 @@ class ScouterConnection extends G1Connection {
   }
 
   /// The logarithmic curve's level for [light] in 0.01 lux, as the program
-  /// computes it: 4 + 9 · log10(lux), in eighths of log2.
+  /// computes it: 2 + 10 · log10(lux), in eighths of log2.
   @visibleForTesting
   static int logLevel(int light) {
     var r3 = light, r4 = 0;
@@ -2110,7 +2110,7 @@ class ScouterConnection extends G1Connection {
       r4++;
     }
     final eighths = 8 * r4 + r3 + 16;
-    return (eighths * SkResident.logScale + 128) ~/ 256 - 14;
+    return (eighths * SkResident.logScale + 128) ~/ 256 - SkResident.logShift;
   }
 
   int? _offsetApplied;
