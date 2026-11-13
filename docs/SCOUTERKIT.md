@@ -29,7 +29,7 @@ last version for it; it is no longer developed further.
 | Wear detection | can be switched on/off | always on |
 | Brightness, auto brightness | yes | yes (left follows the right light sensor), with an offset |
 | Recording | no indicator | the firmware's square top right in the right eye while the microphone is on |
-| Display height and distance | both | height (moves the text block) |
+| Display height and distance | both | neither: the text uses the whole display |
 | Updates | via the Even app | only via ScouterKit's tools |
 
 While an arm lies in the charging case the app draws nothing on it: lit

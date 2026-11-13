@@ -106,6 +106,4 @@ class FakeGlasses extends G1Connection {
   Future<bool> setSilentMode(bool enabled) async => true;
   @override
   Future<bool> setHeadUpAngle(int angle) async => true;
-  @override
-  Future<bool> setDisplayHeight(int height) async => true;
 }

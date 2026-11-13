@@ -84,8 +84,6 @@ class Settings {
   set headUpAngle(int? v) => _setOptInt('head_up_angle', v);
 
   /// Height (0–8) of the display content.
-  int? get displayHeight => _optInt('display_height');
-  set displayHeight(int? v) => _setOptInt('display_height', v);
 
   /// Display brightness in percent.
   int? get brightness => _optInt('brightness');

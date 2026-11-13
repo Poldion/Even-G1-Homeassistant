@@ -107,7 +107,7 @@ class _GlassesPairingState extends State<GlassesPairing> {
   }
 }
 
-/// Activation angle and height of the display content, head gestures.
+/// Activation angle and head gestures.
 class DisplaySettings extends StatefulWidget {
   const DisplaySettings({super.key, required this.bridge});
 
@@ -119,14 +119,12 @@ class DisplaySettings extends StatefulWidget {
 
 class _DisplaySettingsState extends State<DisplaySettings> {
   late double _angle;
-  late double _height;
 
   @override
   void initState() {
     super.initState();
     final s = widget.bridge.settings;
     _angle = (s.headUpAngle ?? Bridge.defaultHeadUpAngle).toDouble();
-    _height = (s.displayHeight ?? Bridge.defaultDisplayHeight).toDouble();
   }
 
   @override
@@ -152,16 +150,6 @@ class _DisplaySettingsState extends State<DisplaySettings> {
           notSet: s.headUpAngle == null,
           onChanged: (v) => setState(() => _angle = v),
           onChangeEnd: (v) => bridge.setHeadUpAngle(v.round()),
-        ),
-        _SliderRow(
-          label: tr.glassesSetHeight,
-          help: tr.glassesSetHeightHelp,
-          value: _height,
-          min: 0,
-          max: 8,
-          notSet: s.displayHeight == null,
-          onChanged: (v) => setState(() => _height = v),
-          onChangeEnd: (v) => bridge.setDisplayHeight(v.round()),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,

@@ -248,12 +248,6 @@ abstract class AppLocalizations {
   /// **'Dashboard (tap)'**
   String get coreLogDashboardTap;
 
-  /// No description provided for @coreLogDisplayHeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Display height {height}'**
-  String coreLogDisplayHeight(int height);
-
   /// No description provided for @coreLogHeadGesturesOff.
   ///
   /// In en, this message translates to:
@@ -626,18 +620,6 @@ abstract class AppLocalizations {
   /// **'Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.'**
   String get glassesSetHeadGesturesHelp;
 
-  /// No description provided for @glassesSetHeight.
-  ///
-  /// In en, this message translates to:
-  /// **'Height'**
-  String get glassesSetHeight;
-
-  /// No description provided for @glassesSetHeightHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'How high the text sits in your field of view. When you let go, the glasses briefly show the new position and apply it.'**
-  String get glassesSetHeightHelp;
-
   /// No description provided for @glassesSetNonePaired.
   ///
   /// In en, this message translates to:
@@ -881,7 +863,7 @@ abstract class AppLocalizations {
   /// No description provided for @settingsDisplaySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Activation angle, height, head gestures'**
+  /// **'Activation angle, head gestures'**
   String get settingsDisplaySubtitle;
 
   /// No description provided for @settingsNoGlassesPaired.

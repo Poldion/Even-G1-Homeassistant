@@ -47,7 +47,7 @@ erste).
 
 | Zeilen | Zeichen pro Zeile |
 | --- | --- |
-| 11 (je nach Höhe 8–14) | 42 |
+| 11 | 42 |
 
 Längere Zeilen bricht die App um. Mehr Zeilen als eine Seite erscheinen beim
 Tippen auf mehreren Seiten; das Dashboard beim Hochschauen zeigt nur die erste.

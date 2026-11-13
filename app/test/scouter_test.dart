@@ -382,9 +382,6 @@ void main() {
       expect(pages, hasLength(3));
       expect(pages.first.split('\n'), hasLength(11));
       expect(pages.last.split('\n'), ['Zeile 23', 'Zeile 24', 'Zeile 25']);
-      // A higher text block leaves room for more lines.
-      await g1.setDisplayHeight(0);
-      expect(g1.displayLines, 14);
     });
 
     test('a notification shows its app icon beside the text', () async {

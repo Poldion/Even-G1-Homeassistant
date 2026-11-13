@@ -30,7 +30,7 @@ letzte Version dafür; sie wird nicht mehr weiterentwickelt.
 | Trageerkennung | an-/abschaltbar | immer an |
 | Helligkeit, automatische Helligkeit | ja | ja (links folgt dem rechten Lichtsensor), mit Offset |
 | Aufnahme | keine Anzeige | Quadrat der Firmware oben rechts im rechten Auge, solange das Mikrofon an ist |
-| Anzeigehöhe und -distanz | beides | Höhe (verschiebt den Textblock) |
+| Anzeigehöhe und -distanz | beides | keins: der Text nutzt das ganze Display |
 | Updates | über die Even-App | nur über ScouterKits Werkzeuge |
 
 Liegt ein Bügel im Ladeetui, zeichnet die App auf ihm nichts: Leuchtende

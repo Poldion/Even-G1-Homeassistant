@@ -108,11 +108,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coreLogDashboardTap => 'Dashboard (tap)';
 
   @override
-  String coreLogDisplayHeight(int height) {
-    return 'Display height $height';
-  }
-
-  @override
   String get coreLogHeadGesturesOff => 'Head gestures off';
 
   @override
@@ -338,13 +333,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.';
 
   @override
-  String get glassesSetHeight => 'Height';
-
-  @override
-  String get glassesSetHeightHelp =>
-      'How high the text sits in your field of view. When you let go, the glasses briefly show the new position and apply it.';
-
-  @override
   String get glassesSetNonePaired => 'No glasses paired yet.';
 
   @override
@@ -484,8 +472,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsDisplay => 'Display & activation';
 
   @override
-  String get settingsDisplaySubtitle =>
-      'Activation angle, height, head gestures';
+  String get settingsDisplaySubtitle => 'Activation angle, head gestures';
 
   @override
   String get settingsNoGlassesPaired => 'No glasses paired yet';

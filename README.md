@@ -164,7 +164,7 @@ Pair the glasses in the open charging case (details in
 ### In the app
 
 - **Overview:** connection, battery left/right and case, wear state, silent mode, brightness (slider, auto with offset), Home Assistant and assistant, optional preview of the glasses' display.
-- **Settings:** Home Assistant, pair glasses, *Display & activation* (activation angle, height, head gestures), notifications, language, diagnostics.
+- **Settings:** Home Assistant, pair glasses, *Display & activation* (activation angle, head gestures), notifications, language, diagnostics.
 
 ### Navigation
 

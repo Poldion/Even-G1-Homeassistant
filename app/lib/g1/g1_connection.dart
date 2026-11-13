@@ -208,9 +208,6 @@ abstract class G1Connection extends ChangeNotifier {
   /// Pitch from which the head counts as raised, degrees.
   Future<bool> setHeadUpAngle(int angle);
 
-  /// Height of the text on the display (0–8).
-  Future<bool> setDisplayHeight(int height);
-
   @override
   void dispose() {
     _events.close();

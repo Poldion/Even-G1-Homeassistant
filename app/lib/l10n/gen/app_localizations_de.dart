@@ -108,11 +108,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get coreLogDashboardTap => 'Dashboard (Tippen)';
 
   @override
-  String coreLogDisplayHeight(int height) {
-    return 'Anzeigehöhe $height';
-  }
-
-  @override
   String get coreLogHeadGesturesOff => 'Kopfgesten aus';
 
   @override
@@ -339,13 +334,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Nicken und Kopfschütteln als Gesten für Home Assistant. Der Gyrosensor des rechten Bügels läuft dann ständig und braucht etwas mehr Akku.';
 
   @override
-  String get glassesSetHeight => 'Höhe';
-
-  @override
-  String get glassesSetHeightHelp =>
-      'Wie hoch der Text im Sichtfeld steht. Beim Loslassen zeigt die Brille die neue Position kurz an und übernimmt sie.';
-
-  @override
   String get glassesSetNonePaired => 'Noch keine Brille gekoppelt.';
 
   @override
@@ -487,7 +475,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settingsDisplay => 'Anzeige & Aktivierung';
 
   @override
-  String get settingsDisplaySubtitle => 'Aktivierungswinkel, Höhe, Kopfgesten';
+  String get settingsDisplaySubtitle => 'Aktivierungswinkel, Kopfgesten';
 
   @override
   String get settingsNoGlassesPaired => 'Noch keine Brille gekoppelt';

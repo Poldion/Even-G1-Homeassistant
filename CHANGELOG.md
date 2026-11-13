@@ -9,6 +9,13 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.42.0] - 2026-11-13
+
+### Removed
+- The *Height* setting under *Display & activation*: texts and the
+  dashboard use the whole display (11 lines), so moving the text block no
+  longer helps.
+
 ## [0.41.0] - 2026-11-12
 
 ### Fixed
@@ -550,7 +557,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.41.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.42.0...HEAD
+[0.42.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.41.0...app-v0.42.0
 [0.41.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.40.0...app-v0.41.0
 [0.40.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...app-v0.40.0
 [0.39.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.38.0...app-v0.39.0

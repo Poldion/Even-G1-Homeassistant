@@ -547,7 +547,6 @@ class Bridge extends ChangeNotifier {
     await _syncDashboard();
     final angle = settings.headUpAngle;
     if (angle != null) await _sendHeadUpAngle(angle);
-    if (settings.displayHeight != null) await _sendDisplayHeight();
     final wear = settings.wearDetection;
     if (wear != null) {
       await g1.setWearDetection(wear);
@@ -666,27 +665,13 @@ class Bridge extends ChangeNotifier {
     await g1.setHeadUpAngle(angle);
   }
 
-  Future<void> _sendDisplayHeight() async {
-    final height = settings.displayHeight ?? defaultDisplayHeight;
-    _log(tr.coreLogDisplayHeight(height));
-    await g1.setDisplayHeight(height);
-  }
-
   static const defaultHeadUpAngle = 30;
-  static const defaultDisplayHeight = 4;
 
   /// Changes the activation angle (stored in the app, sent to the glasses).
   Future<void> setHeadUpAngle(int angle) async {
     settings.headUpAngle = angle;
     notifyListeners();
     if (g1.connected) await _sendHeadUpAngle(angle);
-  }
-
-  /// Changes the height of the display content (0–8).
-  Future<void> setDisplayHeight(int height) async {
-    settings.displayHeight = height;
-    notifyListeners();
-    if (g1.connected) await _sendDisplayHeight();
   }
 
   /// Single tap configured as dashboard gesture: show the dashboard, or

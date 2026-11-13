@@ -243,7 +243,7 @@ class ScouterConnection extends G1Connection {
   bool _caseNoted = false;
 
   /// Top of the text block on the panel, from the display height (0–8).
-  int textTop = 140;
+  static const textTop = 140;
 
   static const textLeft = 24;
   static const textLevel = 15;
@@ -2273,18 +2273,6 @@ class ScouterConnection extends G1Connection {
     final arm = _arms[G1Side.right];
     if (arm == null || !arm.ready || arm.resident) return true;
     return _setTiltRange(arm);
-  }
-
-  /// The height (0–8) moves the text block.
-  @override
-  Future<bool> setDisplayHeight(int height) async {
-    textTop = 60 + height.clamp(0, 8) * 20;
-    // Fewer or more lines fit now (Home Assistant's dashboard follows).
-    notifyListeners();
-    for (final arm in _arms.values.where((a) => a.ready && a.resident)) {
-      await _writeDashboard(arm);
-    }
-    return true;
   }
 
   // ---------------------------------------------------------------------------

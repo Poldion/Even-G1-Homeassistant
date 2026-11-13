@@ -171,7 +171,7 @@ Die Brille im offenen Ladeetui koppeln (Details in
 ### In der App
 
 - **Übersicht:** Verbindung, Akku links/rechts und Case, Trage-Zustand, Ruhemodus, Helligkeit (Regler, Automatik mit Offset), Home Assistant und Assistent, optionale Vorschau der Brillenanzeige.
-- **Einstellungen:** Home Assistant, Brille koppeln, *Anzeige & Aktivierung* (Aktivierungswinkel, Höhe, Kopfgesten), Benachrichtigungen, Sprache, Diagnose.
+- **Einstellungen:** Home Assistant, Brille koppeln, *Anzeige & Aktivierung* (Aktivierungswinkel, Kopfgesten), Benachrichtigungen, Sprache, Diagnose.
 
 ### Navigation
 

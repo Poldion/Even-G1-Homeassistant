@@ -102,14 +102,6 @@
     }
   },
   "coreLogDashboardTap": "Dashboard (tap)",
-  "coreLogDisplayHeight": "Display height {height}",
-  "@coreLogDisplayHeight": {
-    "placeholders": {
-      "height": {
-        "type": "int"
-      }
-    }
-  },
   "coreLogHeadGesturesOff": "Head gestures off",
   "coreLogHeadGesturesOn": "Head gestures on",
   "coreLogHeadUpAngle": "Activation angle: {angle}°",
@@ -303,8 +295,6 @@
   },
   "glassesSetHeadGestures": "Head gestures",
   "glassesSetHeadGesturesHelp": "Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.",
-  "glassesSetHeight": "Height",
-  "glassesSetHeightHelp": "How high the text sits in your field of view. When you let go, the glasses briefly show the new position and apply it.",
   "glassesSetNonePaired": "No glasses paired yet.",
   "glassesSetNotConnected": "The glasses are not connected. Changes are sent the next time they connect.",
   "glassesSetNotSet": "not set",
@@ -373,7 +363,7 @@
   "settingsDiagnostics": "Diagnostics",
   "settingsDiagnosticsSubtitle": "Test text, check display, log",
   "settingsDisplay": "Display & activation",
-  "settingsDisplaySubtitle": "Activation angle, height, head gestures",
+  "settingsDisplaySubtitle": "Activation angle, head gestures",
   "settingsNoGlassesPaired": "No glasses paired yet",
   "settingsNotSetUp": "Not set up",
   "settingsNotifications": "Notifications",

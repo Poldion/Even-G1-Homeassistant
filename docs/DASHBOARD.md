@@ -46,7 +46,7 @@ the glasses keep one clock per dashboard (the first one).
 
 | Lines | Characters per line |
 | --- | --- |
-| 11 (8–14 depending on the height) | 42 |
+| 11 | 42 |
 
 The app wraps longer lines. More lines than one page appear on several pages
 when you tap; the dashboard on head up shows only the first one. Empty lines
