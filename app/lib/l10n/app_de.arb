@@ -85,6 +85,8 @@
   "glassesSetAngle": "Aktivierungswinkel",
   "glassesSetAngleHelp": "Ab dieser Kopfneigung schaltet die Brille beim Hochschauen die Anzeige ein.",
   "glassesSetArms": "Links: {left}\nRechts: {right}",
+  "glassesSetGyroCheck": "Erschütterungen beim Hochschauen ignorieren",
+  "glassesSetGyroCheckHelp": "Nur mit Kopfgesten: Das Dashboard kommt nur, wenn der Gyrosensor gesehen hat, dass sich dein Kopf bewegt, nicht wenn das Auto bremst oder über einen Hubbel fährt. Ein sehr langsames Hochschauen zählt dann eventuell nicht.",
   "glassesSetHeadGestures": "Kopfgesten",
   "glassesSetHeadGesturesHelp": "Nicken und Kopfschütteln als Gesten für Home Assistant. Der Gyrosensor des rechten Bügels läuft dann ständig und braucht etwas mehr Akku.",
   "glassesSetNonePaired": "Noch keine Brille gekoppelt.",

@@ -158,6 +158,15 @@ class _DisplaySettingsState extends State<DisplaySettings> {
           value: bridge.settings.headGestures,
           onChanged: bridge.setHeadGestures,
         ),
+        SwitchListTile(
+          contentPadding: const EdgeInsets.only(left: 16),
+          title: Text(tr.glassesSetGyroCheck),
+          subtitle: Text(tr.glassesSetGyroCheckHelp),
+          value: bridge.settings.headUpGyroCheck,
+          onChanged: bridge.settings.headGestures
+              ? bridge.setHeadUpGyroCheck
+              : null,
+        ),
       ],
     );
   }

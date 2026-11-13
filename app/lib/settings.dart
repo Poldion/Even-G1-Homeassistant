@@ -39,6 +39,11 @@ class Settings {
   set glassesFirmware(String v) => _prefs.setString('glasses_firmware', v);
 
   /// Forward phone notifications to the glasses.
+  /// With the head gestures: head up counts only if the gyroscope saw the
+  /// head turn.
+  bool get headUpGyroCheck => _prefs.getBool('head_up_gyro_check') ?? true;
+  set headUpGyroCheck(bool v) => _prefs.setBool('head_up_gyro_check', v);
+
   /// Turn-by-turn navigation (Google Maps) on the glasses.
   bool get forwardNavigation => _prefs.getBool('forward_navigation') ?? true;
   set forwardNavigation(bool v) => _prefs.setBool('forward_navigation', v);

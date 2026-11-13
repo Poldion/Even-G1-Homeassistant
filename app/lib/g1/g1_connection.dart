@@ -192,6 +192,9 @@ abstract class G1Connection extends ChangeNotifier {
   /// Nodding and shaking the head as gestures.
   Future<void> setHeadGestures(bool enabled);
 
+  /// With the head gestures: head up counts only if the head turned.
+  Future<void> setHeadUpGyroCheck(bool enabled) async {}
+
   /// Brightness in percent and auto mode, null if the glasses do not
   /// answer.
   Future<({int percent, bool auto})?> readBrightness();

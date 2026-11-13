@@ -608,6 +608,18 @@ abstract class AppLocalizations {
   /// **'Left: {left}\nRight: {right}'**
   String glassesSetArms(String left, String right);
 
+  /// No description provided for @glassesSetGyroCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore jolts when looking up'**
+  String get glassesSetGyroCheck;
+
+  /// No description provided for @glassesSetGyroCheckHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only with head gestures: the dashboard comes only when the gyroscope saw your head turn, not when the car brakes or goes over a bump. A very slow look up may then not count.'**
+  String get glassesSetGyroCheckHelp;
+
   /// No description provided for @glassesSetHeadGestures.
   ///
   /// In en, this message translates to:

@@ -293,6 +293,8 @@
       }
     }
   },
+  "glassesSetGyroCheck": "Ignore jolts when looking up",
+  "glassesSetGyroCheckHelp": "Only with head gestures: the dashboard comes only when the gyroscope saw your head turn, not when the car brakes or goes over a bump. A very slow look up may then not count.",
   "glassesSetHeadGestures": "Head gestures",
   "glassesSetHeadGesturesHelp": "Nodding and shaking the head as gestures for Home Assistant. The gyroscope of the right arm then runs all the time and needs a bit more battery.",
   "glassesSetNonePaired": "No glasses paired yet.",

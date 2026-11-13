@@ -327,6 +327,14 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get glassesSetGyroCheck =>
+      'Erschütterungen beim Hochschauen ignorieren';
+
+  @override
+  String get glassesSetGyroCheckHelp =>
+      'Nur mit Kopfgesten: Das Dashboard kommt nur, wenn der Gyrosensor gesehen hat, dass sich dein Kopf bewegt, nicht wenn das Auto bremst oder über einen Hubbel fährt. Ein sehr langsames Hochschauen zählt dann eventuell nicht.';
+
+  @override
   String get glassesSetHeadGestures => 'Kopfgesten';
 
   @override

@@ -543,6 +543,7 @@ class Bridge extends ChangeNotifier {
   Future<void> _applyGlassesSettings() async {
     if (!g1.connected || _glassesSettingsApplied) return;
     _glassesSettingsApplied = true;
+    await g1.setHeadUpGyroCheck(settings.headUpGyroCheck);
     await g1.setHeadGestures(settings.headGestures);
     await _syncDashboard();
     final angle = settings.headUpAngle;
@@ -715,6 +716,13 @@ class Bridge extends ChangeNotifier {
       text: navigation.active ? navigation.dashboardText : _dashboardText,
       style: haConfig.dashboardStyle,
     );
+  }
+
+  /// With the head gestures: head up counts only if the head turned.
+  Future<void> setHeadUpGyroCheck(bool enabled) async {
+    settings.headUpGyroCheck = enabled;
+    notifyListeners();
+    if (g1.connected) await g1.setHeadUpGyroCheck(enabled);
   }
 
   /// Nodding and shaking the head as gestures (ScouterKit).

@@ -209,6 +209,15 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   linke Bügel schaltet ab, wenn er 1,5 s nichts gehört hat. Seine eigene
   Neigung nutzt der linke Bügel nicht: Sein Sensor kann deutlich anders
   messen.
+- **Hochschauen, kein Ruck**: Die Neigung kommt aus dem
+  Beschleunigungssensor gegenüber der Schwerkraft (kein kalibrierter
+  Nullpunkt), darum kippt sie auch beim Bremsen, in Kurven oder bei einem
+  Hubbel. Der Kopf gilt erst als oben, wenn die Neigung 0,25 s über dem
+  Winkel bleibt (`TILT` schweigt so lange, der Timer prüft). Mit den
+  Kopfgesten läuft der Gyrosensor ohnehin: Das Programm summiert die
+  Drehung um die Nick-Achse über etwa die letzte Sekunde, und mit
+  *Erschütterungen beim Hochschauen ignorieren* (standardmäßig an) zählt
+  der Kopf nur als oben, wenn er sich um mindestens 5° gedreht hat.
 - **Auf einmal**: Das Programm setzt alle Streifen des Dashboards im Bild
   der App zusammen (frei, solange die App nichts zeigt) und zeigt sie mit
   einem `DRAW`, statt mit einem `DRAW` pro Streifen, bei dem sich die Seite

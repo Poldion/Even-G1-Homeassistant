@@ -90,6 +90,9 @@ class SkResident {
   // When the sensor's first reading after the panel came on arrived (0:
   // the panel was off).
   static final _lightWarm = SkW.at(state + 180);
+  // Head up pending since (0: none) and the recent rotation (program).
+  static final _pendingUp = SkW.at(state + 184);
+  static final _rotation = SkW.at(state + 188);
 
   // Connection symbols at the dashboard's top right (written by the app):
   // Home Assistant unreachable, where they go (y 0: nowhere); the program
@@ -171,6 +174,18 @@ class SkResident {
   static const flagDashboard = 1;
   static const flagGestures = 2;
 
+  /// With the head gestures (gyroscope on): the dashboard comes only if
+  /// the head really turned.
+  static const flagGyroCheck = 4;
+
+  /// The head must stay up this long before the dashboard comes: a bump or
+  /// braking tilts the measured pitch only briefly.
+  static const upDelayUs = 250000;
+
+  /// Gyroscope check: the rotation about the nodding axis in about the last
+  /// second (millidegrees, decaying) must reach this.
+  static const rotationMdeg = 5000;
+
   static const notifyHead = 1;
   static const notifyGesture = 2;
 
@@ -242,9 +257,36 @@ class SkResident {
     a.beq(r0, a.c(SkProp.unknown), 'range');
     a.mov(r1, angle);
     a.bne(up, c0, 'isUp');
-    a.blts(r1, r0, 'goUp'); // angle < pitch
+    a.blts(r1, r0, 'upMaybe'); // angle < pitch
+    // Below again: no head up pending.
+    a.mov(_pendingUp, c0);
     a.jmp('range');
+    // Up only if it stays up for upDelayUs (and, with the gyroscope check,
+    // the head turned); meanwhile TILT is silent and the timer checks.
+    a.label('upMaybe');
+    a.sysRead(r6, a.c(SkProp.timeUs));
+    a.bne(_pendingUp, c0, 'upPending');
+    a.mov(_pendingUp, r6);
+    a.bne(_pendingUp, c0, 'upWait');
+    a.mov(_pendingUp, c1);
+    a.label('upWait');
+    a.sysWrite(a.c(SkProp.pitchLo), a.c(-90));
+    a.sysWrite(a.c(SkProp.pitchHi), a.c(90));
+    a.call('armTimer');
+    a.ret();
+    a.label('upPending');
+    a.sub(r7, r6, _pendingUp);
+    a.bltu(r7, a.c(upDelayUs), 'ret');
+    if (gestures) {
+      a.and(r7, flags, a.c(flagGyroCheck));
+      a.beq(r7, c0, 'goUp');
+      a.bgeu(_rotation, a.c(rotationMdeg), 'goUp');
+      // Tilted, but the head did not turn (braking, a bump): wait on.
+      a.mov(_pendingUp, r6);
+      a.ret();
+    }
     a.label('goUp');
+    a.mov(_pendingUp, c0);
     a.mov(up, c1);
     a.notify(a.c(notifyHead), c1);
     if (peer == peerLeader) _tell(a, peerUp);
@@ -294,6 +336,10 @@ class SkResident {
       a.mov(up, c0);
       a.jmp('hide');
     } else {
+      // A head up pending: decide now (the delay may be over).
+      a.bne(up, c0, 'hcIsUp');
+      a.bne(_pendingUp, c0, 'head');
+      a.label('hcIsUp');
       if (peer == peerLeader) {
         a.bne(up, c0, 'hcBeat');
         a.beq(_downBeats, c0, 'ret');
@@ -342,6 +388,11 @@ class SkResident {
       // The next check (soon while the head is up), or the next minute if
       // that comes first.
       a.sysRead(r0, a.c(SkProp.timeUs));
+      a.beq(_pendingUp, c0, 'armNoPend');
+      // Head up pending: check again right after the delay.
+      a.add(r0, r0, a.c(upDelayUs ~/ 4));
+      a.jmp('armSet');
+      a.label('armNoPend');
       a.add(r0, r0, a.c(watchUs));
       a.bne(up, c0, 'armSoon');
       if (peer == peerLeader) {
@@ -525,7 +576,8 @@ class SkResident {
     a.beq(clockAt, c0, 'ret');
     a.sysRead(r9, a.c(SkProp.timeUs));
     a.sub(r10, r9, clockRef);
-    a.bltu(r10, a.c(minuteUs), 'ret');
+    // Signed: a minute start a little ahead (clock error) is no minute.
+    a.blts(r10, a.c(minuteUs), 'ret');
     a.add(clockRef, clockRef, a.c(minuteUs));
     a.add(clockMinute, clockMinute, c1);
     a.bltu(clockMinute, a.c(1440), 'tickShow');
@@ -775,6 +827,21 @@ class SkResident {
       a.add(r0, r0, a.c(periodUs));
       a.sysWrite(a.c(SkProp.timer), r0);
       a.call('tick');
+      // The rotation about the nodding axis: + |gx| × 20 ms, decaying by a
+      // fiftieth per tick (about one second).
+      a.sysRead(r1, a.c(SkProp.gyrX));
+      a.beq(r1, a.c(SkProp.unknown), 'rotDone');
+      a.bges(r1, c0, 'rotAbs');
+      a.sub(r1, c0, r1);
+      a.label('rotAbs');
+      a.divu(r1, r1, a.c(1000 ~/ (periodUs ~/ 1000)));
+      a.divu(r2, _rotation, a.c(50));
+      a.sub(_rotation, _rotation, r2);
+      a.add(_rotation, _rotation, r1);
+      a.label('rotDone');
+      a.beq(_pendingUp, c0, 'noPend');
+      a.call('head');
+      a.label('noPend');
       a.add(_beat, _beat, c1);
       a.bltu(_beat, a.c(watchUs ~/ periodUs), 'noWatch');
       a.mov(_beat, c0);

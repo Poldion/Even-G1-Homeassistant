@@ -9,6 +9,22 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.43.0] - 2026-11-13
+
+### Changed
+- Fewer false head-ups (bumps, braking): the head has to stay up for
+  0.25 s before the dashboard comes.
+
+### Added
+- *Ignore jolts when looking up* under *Display & activation* (with the
+  head gestures, on by default): the dashboard comes only if the gyroscope
+  saw the head turn, not when the car brakes or goes over a bump. It costs
+  no extra battery, the gyroscope runs for the gestures anyway.
+
+### Fixed
+- The glasses' clock could count on several minutes at once when the
+  minute's start lay a moment ahead in the arm's time.
+
 ## [0.42.0] - 2026-11-13
 
 ### Removed
@@ -557,7 +573,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.42.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.43.0...HEAD
+[0.43.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.42.0...app-v0.43.0
 [0.42.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.41.0...app-v0.42.0
 [0.41.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.40.0...app-v0.41.0
 [0.40.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...app-v0.40.0

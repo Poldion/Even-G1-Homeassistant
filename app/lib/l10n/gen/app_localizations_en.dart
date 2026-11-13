@@ -326,6 +326,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get glassesSetGyroCheck => 'Ignore jolts when looking up';
+
+  @override
+  String get glassesSetGyroCheckHelp =>
+      'Only with head gestures: the dashboard comes only when the gyroscope saw your head turn, not when the car brakes or goes over a bump. A very slow look up may then not count.';
+
+  @override
   String get glassesSetHeadGestures => 'Head gestures';
 
   @override

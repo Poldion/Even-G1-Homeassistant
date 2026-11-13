@@ -9,6 +9,23 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.43.0] - 2026-11-13
+
+### Changed
+- Weniger falsches Hochschauen (Hubbel, Bremsen): Der Kopf muss 0,25 s oben
+  bleiben, bevor das Dashboard kommt.
+
+### Added
+- *Erschütterungen beim Hochschauen ignorieren* unter *Anzeige &
+  Aktivierung* (mit Kopfgesten, standardmäßig an): Das Dashboard kommt nur,
+  wenn der Gyrosensor gesehen hat, dass sich der Kopf bewegt, nicht wenn das
+  Auto bremst oder über einen Hubbel fährt. Kostet keinen zusätzlichen Akku,
+  der Gyrosensor läuft für die Gesten ohnehin.
+
+### Fixed
+- Die Uhr der Brille konnte mehrere Minuten auf einmal weiterzählen, wenn
+  der Minutenanfang in der Zeit des Bügels einen Moment voraus lag.
+
 ## [0.42.0] - 2026-11-13
 
 ### Removed
@@ -575,7 +592,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.42.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.43.0...HEAD
+[0.43.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.42.0...app-v0.43.0
 [0.42.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.41.0...app-v0.42.0
 [0.41.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.40.0...app-v0.41.0
 [0.40.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.39.0...app-v0.40.0

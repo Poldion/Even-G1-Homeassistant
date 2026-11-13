@@ -203,6 +203,14 @@ gone, and the app loads it again.
   state to the left arm (after "down" three more times), and the left arm
   switches off when it heard nothing for 1.5 s. The left arm does not use
   its own pitch: its sensor may read quite differently.
+- **Look up, not a jolt**: the pitch comes from the accelerometer against
+  gravity (no calibrated zero), so braking, a curve or a bump tilts it
+  too. The head counts as up only when the pitch stays above the angle for
+  0.25 s (`TILT` is silent meanwhile, the timer checks). With the head
+  gestures the gyroscope runs anyway: the program sums the rotation about
+  the nodding axis over about the last second, and with *Ignore jolts when
+  looking up* (on by default) the head counts as up only if it turned by at
+  least 5°.
 - **At once**: the program composes all bands of the dashboard in the app's
   frame (free while the app shows nothing) and shows them with one `DRAW`,
   instead of one `DRAW` per band, which built the page up visibly from top

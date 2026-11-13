@@ -653,6 +653,18 @@ class ScouterConnection extends G1Connection {
   String _dashboardText = '';
   G1TextStyle _dashboardStyle = G1TextStyle.plain;
   bool _headGestures = false;
+  bool _gyroCheck = true;
+
+  /// With the head gestures: the dashboard comes only if the gyroscope saw
+  /// the head turn (not braking or a bump).
+  @override
+  Future<void> setHeadUpGyroCheck(bool enabled) async {
+    if (enabled == _gyroCheck) return;
+    _gyroCheck = enabled;
+    for (final arm in _arms.values.where((a) => a.ready && a.resident)) {
+      await arm.link.run([_residentState(await _textFont())]);
+    }
+  }
 
   /// Bands of the dashboard as last written (SkResident.rows).
   int _residentRows = 0;
@@ -998,7 +1010,8 @@ class ScouterConnection extends G1Connection {
     w(
       SkResident.flags,
       (_dashboardOnHeadUp ? SkResident.flagDashboard : 0) |
-          (_headGestures ? SkResident.flagGestures : 0),
+          (_headGestures ? SkResident.flagGestures : 0) |
+          (_gyroCheck ? SkResident.flagGyroCheck : 0),
     );
     w(SkResident.left, textLeft);
     w(SkResident.ascent, font.ascent);
