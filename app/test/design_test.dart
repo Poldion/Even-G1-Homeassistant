@@ -348,8 +348,8 @@ void main() {
     )) {
       execute(code, Uint8List(SkArena.size), ops);
     }
-    // The server struck through: four strokes.
-    expect(ops.where((o) => o == SkOp.line), hasLength(4));
+    // The server struck through: seven strokes (edges and ink).
+    expect(ops.where((o) => o == SkOp.line), hasLength(7));
     final online = <int>[];
     for (final code in ScouterConnection.textCode(
       font,

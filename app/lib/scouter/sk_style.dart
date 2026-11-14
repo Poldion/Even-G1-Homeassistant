@@ -383,10 +383,19 @@ class SkStatusIcons {
     (29, 13, 2, 1, true),
   ];
 
-  /// The stroke through a symbol from x to x + w: dark edges, then the ink
-  /// (x0, y0, x1, y1, ink).
+  /// The stroke through a symbol from x to x + w: dark edges, then five
+  /// lines of ink side by side (about 4 px thick), so a struck symbol stands
+  /// out clearly (x0, y0, x1, y1, ink).
   static List<(int, int, int, int, bool)> strike(int x, int w) => [
-    for (final (d, ink) in [(1, false), (-2, false), (0, true), (-1, true)])
+    for (final (d, ink) in [
+      (-3, false),
+      (3, false),
+      (-2, true),
+      (-1, true),
+      (0, true),
+      (1, true),
+      (2, true),
+    ])
       (x - 1 + d, height - 1, x + w + d, 0, ink),
   ];
 

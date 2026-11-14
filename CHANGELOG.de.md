@@ -9,6 +9,13 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.52.0] - 2026-11-14
+
+### Changed
+- Der Strich durch das Handy- und Server-Symbol ist etwa doppelt so dick
+  (fünf Linien mit dunklen Rändern), damit eine fehlende Verbindung gut zu
+  sehen ist.
+
 ## [0.51.0] - 2026-11-14
 
 ### Fixed
@@ -672,7 +679,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...HEAD
+[0.52.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...app-v0.52.0
 [0.51.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...app-v0.51.0
 [0.50.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...app-v0.50.0
 [0.49.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...app-v0.49.0
