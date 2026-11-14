@@ -425,6 +425,14 @@
       }
     }
   },
+  "skLogArmWaiting": "{arm} arm: waiting in the background until it is in reach",
+  "@skLogArmWaiting": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
   "skLogAssetLoadFailed": "{arm}: loading from the glasses' memory failed, uploading instead",
   "@skLogAssetLoadFailed": {
     "placeholders": {

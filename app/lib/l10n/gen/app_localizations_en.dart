@@ -556,6 +556,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String skLogArmWaiting(String arm) {
+    return '$arm arm: waiting in the background until it is in reach';
+  }
+
+  @override
   String skLogAssetLoadFailed(String arm) {
     return '$arm: loading from the glasses\' memory failed, uploading instead';
   }

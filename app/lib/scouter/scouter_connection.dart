@@ -244,9 +244,9 @@ class ScouterConnection extends G1Connection {
   /// them may then hang until its timeout.
   Future<void> _linkQueue = Future.value();
 
-  /// Android keeps a background connection (autoConnect): after a lost link
-  /// the system connects again by itself as soon as the arm advertises,
-  /// with its own low-duty scan, without a timeout or timers in the app.
+  /// Android keeps a background connection (autoConnect) besides the direct
+  /// one: after a lost link the system connects again as soon as the arm
+  /// advertises, with its own low-duty scan.
   bool get _autoReconnect => Platform.isAndroid && !_fake;
   Timer? _probeTimer;
   Timer? _batteryTimer;
@@ -472,7 +472,7 @@ class ScouterConnection extends G1Connection {
     if (device == null) return;
     arm.stateSub ??= device.connectionState.listen((state) {
       if (state == BluetoothConnectionState.connected) {
-        // The system connected (again): set the arm up.
+        // The system connected (again, in the background): set the arm up.
         if (_wanted && _autoReconnect && !arm.ready && !arm.linking) {
           unawaited(_linkArm(arm));
         }
@@ -481,24 +481,20 @@ class ScouterConnection extends G1Connection {
         _debug(tr.skLogArmLost(arm.side.name));
         _armDown(arm);
         notifyListeners();
-        // With autoConnect the system reconnects by itself.
-        if (!_autoReconnect) _scheduleReconnect();
+        if (_autoReconnect) {
+          unawaited(_waitInBackground(arm));
+        } else {
+          _scheduleReconnect();
+        }
       }
     });
     try {
+      // Directly first: fast, and Android may not connect in the background
+      // to an arm it has not seen lately (after an app or phone restart).
       _debug('connecting ${arm.side.name} arm (${device.remoteId})');
-      if (_autoReconnect) {
-        // Returns at once; the link comes through connectionState.
-        await device.connect(
-          license: License.nonprofit,
-          autoConnect: true,
-          mtu: null,
-        );
-        return;
-      }
       await device.connect(
         license: License.nonprofit,
-        timeout: const Duration(seconds: 20),
+        timeout: const Duration(seconds: 12),
         mtu: null,
       );
       await _linkArm(arm);
@@ -506,8 +502,29 @@ class ScouterConnection extends G1Connection {
       _debug('connecting ${arm.side.name} arm failed: $e');
       _armDown(arm);
       notifyListeners();
+      if (_autoReconnect) unawaited(_waitInBackground(arm));
+      // And directly again later, in case the background never connects.
       _scheduleReconnect();
     }
+  }
+
+  /// Android's background connection (autoConnect): the system connects as
+  /// soon as the arm advertises, with its own low-duty scan.
+  Future<void> _waitInBackground(_SkArm arm) async {
+    final device = arm.device;
+    if (device == null || !_wanted || arm.ready || arm.linking) return;
+    try {
+      await device.connect(
+        license: License.nonprofit,
+        autoConnect: true,
+        mtu: null,
+      );
+      _debug(tr.skLogArmWaiting(arm.side.name));
+    } catch (e) {
+      _debug('connecting ${arm.side.name} arm failed: $e');
+    }
+    // Directly again later if the background did not connect by then.
+    _scheduleReconnect();
   }
 
   /// After the link came up: MTU, priority, services, events, setup.
@@ -520,8 +537,9 @@ class ScouterConnection extends G1Connection {
     final turn = Completer<void>();
     _linkQueue = turn.future;
     try {
-      // The other arm first, if it is being set up.
-      await previous;
+      // The other arm first, if it is being set up (but never stuck behind
+      // it).
+      await previous.timeout(const Duration(seconds: 40), onTimeout: () {});
       if (!_wanted || arm.ready || !device.isConnected) return;
       if (Platform.isAndroid) {
         // An MTU exchange that got lost does not come back: ask again soon.

@@ -9,6 +9,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.50.0] - 2026-11-14
+
+### Fixed
+- Die Brille verband sich nach einem App-Start manchmal gar nicht (im
+  Protokoll nur „connecting“): Die Hintergrundverbindung von Android
+  verbindet zu einem Bügel, den sie länger nicht gesehen hat, eventuell nie.
+  Die App verbindet wieder zuerst direkt, nutzt die Hintergrundverbindung
+  nach einem Fehlschlag oder Abbruch und versucht es spätestens alle 30 s
+  wieder direkt. Ein Bügel, der beim Einrichten hängt, hält den anderen
+  höchstens 40 s auf.
+
 ## [0.49.0] - 2026-11-14
 
 ### Added
@@ -652,7 +663,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...HEAD
+[0.50.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...app-v0.50.0
 [0.49.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...app-v0.49.0
 [0.48.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...app-v0.48.0
 [0.47.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.46.0...app-v0.47.0

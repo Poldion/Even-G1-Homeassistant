@@ -1010,6 +1010,12 @@ abstract class AppLocalizations {
   /// **'{arm} arm ready (g1v0 {version}, encrypted)'**
   String skLogArmReadyEncrypted(String arm, String version);
 
+  /// No description provided for @skLogArmWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm: waiting in the background until it is in reach'**
+  String skLogArmWaiting(String arm);
+
   /// No description provided for @skLogAssetLoadFailed.
   ///
   /// In en, this message translates to:

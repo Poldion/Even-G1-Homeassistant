@@ -294,11 +294,13 @@ The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
   `AUTO_BRIGHTNESS` = 1 and takes the right arm's level over their link
   (VM.md §6.9). No phone is needed. Firmware without the link: the app does
   it from the `LIGHT` events as before.
-- Connection: on Android each arm has a background connection
-  (`autoConnect`): after a lost link the system connects again by itself as
-  soon as the arm advertises (100–150 ms after a disconnection), with its
-  own low-duty scan, no timeout and no timer in the app. Only a failed setup
-  is retried by the app, after 2 s, then 4, 8, 16 and at most 30 s. The
+- Connection: the app connects each arm directly first (12 s timeout).
+  If that fails or a link is lost, Android's background connection
+  (`autoConnect`) takes over: the system connects as soon as the arm
+  advertises (100–150 ms after a disconnection), with its own low-duty
+  scan. Android may not connect in the background to an arm it has not seen
+  lately (after an app or phone restart), so the app also tries directly
+  again, after 2 s, then 4, 8, 16 and at most every 30 s. The
   arms are set up one after the other (MTU, services, HELLO, a font upload):
   Android handles two GATT setups at once badly, one may hang until its
   timeout. The MTU request waits 5 s and is asked once more. The same

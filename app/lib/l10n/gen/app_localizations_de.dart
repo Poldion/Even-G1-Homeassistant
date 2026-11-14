@@ -561,6 +561,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String skLogArmWaiting(String arm) {
+    return 'Bügel $arm: warte im Hintergrund, bis er in Reichweite ist';
+  }
+
+  @override
   String skLogAssetLoadFailed(String arm) {
     return '$arm: Laden aus dem Speicher der Brille fehlgeschlagen, lade stattdessen hoch';
   }

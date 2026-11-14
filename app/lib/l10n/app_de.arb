@@ -152,6 +152,7 @@
   "skLogArmLost": "Bügel {arm} hat die Verbindung verloren; das Handy verbindet neu, sobald er in Reichweite ist",
   "skLogArmReady": "{arm} arm bereit (g1v0 {version})",
   "skLogArmReadyEncrypted": "{arm} arm bereit (g1v0 {version}, verschlüsselt)",
+  "skLogArmWaiting": "Bügel {arm}: warte im Hintergrund, bis er in Reichweite ist",
   "skLogAssetLoadFailed": "{arm}: Laden aus dem Speicher der Brille fehlgeschlagen, lade stattdessen hoch",
   "skLogAssetPutFailed": "{arm}: Ablegen im Speicher der Brille fehlgeschlagen (Fehler {code})",
   "skLogAssetPutRefused": "{arm}: Der Speicher der Brille hat nichts übernommen (Status {status})",
