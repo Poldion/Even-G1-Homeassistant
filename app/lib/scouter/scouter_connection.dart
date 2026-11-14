@@ -850,7 +850,27 @@ class ScouterConnection extends G1Connection {
     }
     final prefs = await SharedPreferences.getInstance();
     final mine = (prefs.getStringList(_assetKey(arm)) ?? []).toSet();
-    for (final hex in mine.difference(arm.assetsInUse).toList()) {
+    // Every variant of this app's program stays: which one runs changes with
+    // the other arm and the head gestures (a variant deleted now may be
+    // loaded a moment later).
+    final keep = {...arm.assetsInUse};
+    for (final gestures in [false, true]) {
+      for (final peer in [
+        SkResident.peerNone,
+        SkResident.peerLeader,
+        SkResident.peerFollower,
+      ]) {
+        final p = SkResident.build(
+          gestures: gestures,
+          peer: peer,
+          micArm: arm.side == G1Side.right,
+        );
+        keep
+          ..add(SkAssets.hex(SkAssets.id(p.code)))
+          ..add(SkAssets.hex(SkAssets.id(p.pool)));
+      }
+    }
+    for (final hex in mine.difference(keep).toList()) {
       if (!store.containsKey(hex)) {
         mine.remove(hex);
         continue;

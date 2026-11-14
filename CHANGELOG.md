@@ -9,6 +9,15 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.51.0] - 2026-11-14
+
+### Fixed
+- The glasses' memory: the app deleted a variant of the glasses' program
+  that it did not use at that moment and loaded it a moment later (when the
+  other arm came in), so the load failed and the program was uploaded
+  again. Every variant of the current program now stays; only versions of
+  older app releases are removed.
+
 ## [0.50.0] - 2026-11-14
 
 ### Fixed
@@ -639,7 +648,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...HEAD
+[0.51.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...app-v0.51.0
 [0.50.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...app-v0.50.0
 [0.49.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...app-v0.49.0
 [0.48.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...app-v0.48.0

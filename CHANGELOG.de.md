@@ -9,6 +9,15 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.51.0] - 2026-11-14
+
+### Fixed
+- Speicher der Brille: Die App löschte eine Variante des Brillenprogramms,
+  die sie gerade nicht nutzte, und lud sie kurz darauf (als der andere Bügel
+  dazukam), sodass das Laden fehlschlug und das Programm erneut hochgeladen
+  wurde. Jetzt bleiben alle Varianten des aktuellen Programms; nur Versionen
+  älterer App-Stände werden entfernt.
+
 ## [0.50.0] - 2026-11-14
 
 ### Fixed
@@ -663,7 +672,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...HEAD
+[0.51.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...app-v0.51.0
 [0.50.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...app-v0.50.0
 [0.49.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...app-v0.49.0
 [0.48.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...app-v0.48.0
