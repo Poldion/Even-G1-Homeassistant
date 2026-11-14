@@ -45,6 +45,10 @@ class _SkArm {
   /// null without a store; the running store job; the IDs this session
   /// uses (older ones of the app's are deleted).
   Map<String, int>? assets;
+
+  /// When the program was restarted after a halt or a check (at most a
+  /// few times in 10 minutes).
+  final restarts = <DateTime>[];
   Completer<Uint8List>? assetJob;
   final assetsInUse = <String>{};
   Future<void> assetQueue = Future.value();
@@ -235,6 +239,7 @@ class ScouterConnection extends G1Connection {
   final Map<G1Side, _SkArm> _arms = {};
   bool _wanted = false;
   Timer? _reconnectTimer;
+  Timer? _healthTimer;
 
   /// Failed setups in a row (the next retry waits longer).
   int _reconnectFailures = 0;
@@ -440,6 +445,7 @@ class ScouterConnection extends G1Connection {
     _reconnectTimer?.cancel();
     _probeTimer?.cancel();
     _batteryTimer?.cancel();
+    _healthTimer?.cancel();
     _micTimer?.cancel();
     _clockTimer?.cancel();
     _micOn = false;
@@ -1728,6 +1734,44 @@ class ScouterConnection extends G1Connection {
     notifyListeners();
   }
 
+  /// The program on each arm: running, with its timer armed (it re-arms it
+  /// at every TIMER)? Else it is started again.
+  Future<void> _checkPrograms() async {
+    for (final arm in _arms.values.toList()) {
+      if (!arm.ready || !arm.resident || arm.settingUp || arm.linking) {
+        continue;
+      }
+      final r = await _ctrl(arm, SkCtrl.vmStatus, const [], tries: 1);
+      if (r == null || r.status != 0 || r.body.length < 29) continue;
+      final state = r.body[0];
+      final timerArmed = r.body[28] & 1 != 0;
+      if (state == 1 && timerArmed) continue;
+      _debug(
+        tr.skLogProgramCheck(arm.side.code, switch (state) {
+          1 => 'timer',
+          2 => 'halted ${skErrorName(r.body[15])}',
+          _ => 'stopped',
+        }),
+      );
+      arm.resident = false;
+      await _revive(arm);
+    }
+  }
+
+  /// Starts the program again after it halted or stopped, at most three
+  /// times in 10 minutes (a program that keeps failing stays off).
+  Future<void> _revive(_SkArm arm) async {
+    if (!arm.ready || arm.resident || !_wantsResident(arm)) return;
+    final now = DateTime.now();
+    arm.restarts.removeWhere(
+      (t) => now.difference(t) > const Duration(minutes: 10),
+    );
+    if (arm.restarts.length >= 3) return;
+    arm.restarts.add(now);
+    _debug(tr.skLogProgramRestart(arm.side.code));
+    await _updateResident(arm);
+  }
+
   void _onBothConnected() {
     _probeTimer?.cancel();
     _probeTimer = Timer.periodic(
@@ -1738,6 +1782,12 @@ class ScouterConnection extends G1Connection {
     _batteryTimer = Timer.periodic(
       const Duration(minutes: 5),
       (_) => refreshBattery(),
+    );
+    // Is the glasses' program still alive?
+    _healthTimer?.cancel();
+    _healthTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => unawaited(_checkPrograms()),
     );
     // The arms' clocks drift by up to ~130 ppm (VM.md §7).
     unawaited(_syncClocks());
@@ -1935,6 +1985,8 @@ class ScouterConnection extends G1Connection {
         arm.resident = false;
         unawaited(_reportEvents(arm));
         notifyListeners();
+        // Start it again (the dashboard on head up depends on it).
+        Timer(const Duration(seconds: 2), () => unawaited(_revive(arm)));
       case SkEvt.input when data.length >= 16:
         _onInput(arm, e.u8(11), e.u32(12));
     }
@@ -2768,6 +2820,10 @@ class ScouterConnection extends G1Connection {
   @visibleForTesting
   Future<void> fakeSetup() => Future.wait(_arms.values.map((a) => _setup(a)));
 
+  /// The minute's check of the programs (tests).
+  @visibleForTesting
+  Future<void> fakeCheckPrograms() => _checkPrograms();
+
   /// Async work (a disconnect, a setup) may finish after [dispose].
   @override
   void notifyListeners() {
@@ -2780,6 +2836,7 @@ class ScouterConnection extends G1Connection {
     _wanted = false;
     _probeTimer?.cancel();
     _batteryTimer?.cancel();
+    _healthTimer?.cancel();
     _micTimer?.cancel();
     _clockTimer?.cancel();
     _lightTimer?.cancel();

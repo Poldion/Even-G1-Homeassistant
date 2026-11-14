@@ -668,6 +668,17 @@
       }
     }
   },
+  "skLogProgramCheck": "{arm}: the program does not run as it should ({reason})",
+  "@skLogProgramCheck": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "skLogProgramHalted": "{arm}: program halted: {error} (0x{address}, op 0x{op})",
   "@skLogProgramHalted": {
     "placeholders": {
@@ -687,6 +698,14 @@
   },
   "skLogProgramNotLoaded": "{arm}: program not loaded",
   "@skLogProgramNotLoaded": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogProgramRestart": "{arm}: starting the program again",
+  "@skLogProgramRestart": {
     "placeholders": {
       "arm": {
         "type": "String"

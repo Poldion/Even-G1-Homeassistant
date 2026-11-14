@@ -167,6 +167,10 @@ class FakeArms {
   /// CMD packets received (both arms).
   int writes = 0;
 
+  /// VM_STATUS: the program's state (1 running) and its timer.
+  int vmState = 1;
+  bool timerArmed = true;
+
   /// The asset store (VM.md §6.10), off unless a test turns it on.
   bool storeOn = false;
   final stored = {for (final s in G1Side.values) s: <String, Uint8List>{}};
@@ -223,6 +227,15 @@ class FakeArms {
           0,
           0,
         ],
+      ],
+      SkCtrl.vmStatus => [
+        vmState,
+        0xff,
+        ...List.filled(26, 0),
+        timerArmed ? 1 : 0,
+        0,
+        0,
+        0,
       ],
       SkCtrl.assetPut => _put(side, data),
       SkCtrl.assetDelete => _delete(side, data),
@@ -485,6 +498,30 @@ void main() {
       // The big font is not sent again.
       expect(again.writes, lessThan(first * 2 ~/ 3));
       g2.dispose();
+    });
+
+    test('a program that stopped is started again', () async {
+      arms.props[SkProp.inCase] = 0;
+      await g1.fakeSetup();
+      int starts(G1Side side) =>
+          arms.ctrl[side]!.where((c) => c[0] == SkCtrl.vmStart).length;
+      final before = starts(G1Side.right);
+      expect(before, greaterThan(0));
+      // Running with its timer armed: nothing happens.
+      await g1.fakeCheckPrograms();
+      expect(starts(G1Side.right), before);
+      // Halted (or its timer gone): started again, both arms.
+      arms.vmState = 2;
+      await g1.fakeCheckPrograms();
+      expect(starts(G1Side.right), before + 1);
+      arms.vmState = 1;
+      arms.timerArmed = false;
+      await g1.fakeCheckPrograms();
+      expect(starts(G1Side.right), before + 2);
+      // A program that keeps failing is left alone after three restarts.
+      await g1.fakeCheckPrograms();
+      await g1.fakeCheckPrograms();
+      expect(starts(G1Side.right), before + 3);
     });
 
     test('a text is drawn on both arms', () async {

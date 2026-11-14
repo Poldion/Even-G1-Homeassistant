@@ -693,6 +693,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String skLogProgramCheck(String arm, String reason) {
+    return '$arm: the program does not run as it should ($reason)';
+  }
+
+  @override
   String skLogProgramHalted(
     String arm,
     String error,
@@ -705,6 +710,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String skLogProgramNotLoaded(String arm) {
     return '$arm: program not loaded';
+  }
+
+  @override
+  String skLogProgramRestart(String arm) {
+    return '$arm: starting the program again';
   }
 
   @override

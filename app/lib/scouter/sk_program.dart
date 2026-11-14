@@ -93,6 +93,8 @@ class SkResident {
   // Head up pending since (0: none) and the recent rotation (program).
   static final _pendingUp = SkW.at(state + 184);
   static final _rotation = SkW.at(state + 188);
+  // When the gyroscope last gave a sample (program).
+  static final _gyroAt = SkW.at(state + 192);
 
   // Connection symbols at the dashboard's top right (written by the app):
   // Home Assistant unreachable, where they go (y 0: nowhere); the program
@@ -192,6 +194,9 @@ class SkResident {
   /// second (millidegrees, decaying) must reach this.
   static const rotationMdeg = 5000;
 
+  /// Older gyroscope samples do not count: the check lets the head up.
+  static const gyroStaleUs = 500000;
+
   static const notifyHead = 1;
   static const notifyGesture = 2;
 
@@ -286,6 +291,9 @@ class SkResident {
     if (gestures) {
       a.and(r7, flags, a.c(flagGyroCheck));
       a.beq(r7, c0, 'goUp');
+      // Without recent samples the check cannot judge: never block then.
+      a.sub(r7, r6, _gyroAt);
+      a.bgeu(r7, a.c(gyroStaleUs), 'goUp');
       a.bgeu(_rotation, a.c(rotationMdeg), 'goUp');
       // Tilted, but the head did not turn (braking, a bump): wait on.
       a.mov(_pendingUp, r6);
@@ -345,17 +353,21 @@ class SkResident {
       // A head up pending: decide now (the delay may be over).
       a.bne(up, c0, 'hcIsUp');
       a.bne(_pendingUp, c0, 'head');
-      a.label('hcIsUp');
+      // Down: the pitch itself too, so a TILT that never came (an edge
+      // missed while a range changed) cannot keep the dashboard away.
+      a.sysRead(r0, a.c(SkProp.pitch));
+      a.beq(r0, a.c(SkProp.unknown), 'hcDown');
+      a.blts(angle, r0, 'head'); // angle < pitch: up after all
+      a.label('hcDown');
       if (peer == peerLeader) {
-        a.bne(up, c0, 'hcBeat');
         a.beq(_downBeats, c0, 'ret');
         a.sub(_downBeats, _downBeats, c1);
         a.sysWrite(a.c(SkProp.peerSend), a.c(peerDown));
-        a.ret();
-        a.label('hcBeat');
+      }
+      a.ret();
+      a.label('hcIsUp');
+      if (peer == peerLeader) {
         a.sysWrite(a.c(SkProp.peerSend), a.c(peerUp));
-      } else {
-        a.beq(up, c0, 'ret');
       }
       a.sysRead(r0, a.c(SkProp.pitch));
       a.beq(r0, a.c(SkProp.unknown), 'ret');
@@ -860,7 +872,14 @@ class SkResident {
       // The rotation about the nodding axis: + |gx| × 20 ms, decaying by a
       // fiftieth per tick (about one second).
       a.sysRead(r1, a.c(SkProp.gyrX));
-      a.beq(r1, a.c(SkProp.unknown), 'rotDone');
+      a.bne(r1, a.c(SkProp.unknown), 'rotSample');
+      // No sample: the gyroscope is off; on again (the check lets the head
+      // up meanwhile, see upPending).
+      a.sysWrite(a.c(SkProp.gyroRate), a.c(52));
+      a.jmp('rotDone');
+      a.label('rotSample');
+      a.sysRead(r2, a.c(SkProp.timeUs));
+      a.mov(_gyroAt, r2);
       a.bges(r1, c0, 'rotAbs');
       a.sub(r1, c0, r1);
       a.label('rotAbs');

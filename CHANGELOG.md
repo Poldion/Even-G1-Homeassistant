@@ -9,6 +9,18 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.53.0] - 2026-11-14
+
+### Fixed
+- After a longer time the dashboard sometimes no longer came on head up,
+  while the app still showed the glasses as connected; only restarting the
+  app helped. Three safeguards: the gyroscope check no longer blocks when
+  the gyroscope gives no samples (and switches it on again); the glasses
+  also check the pitch themselves while the head is down, so a missed tilt
+  event cannot keep the dashboard away; and the app checks every minute
+  that the glasses' program runs and starts it again if not (also after a
+  halt, which before stayed off until the app was restarted).
+
 ## [0.52.0] - 2026-11-14
 
 ### Changed
@@ -654,7 +666,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...HEAD
+[0.53.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...app-v0.53.0
 [0.52.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...app-v0.52.0
 [0.51.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...app-v0.51.0
 [0.50.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...app-v0.50.0

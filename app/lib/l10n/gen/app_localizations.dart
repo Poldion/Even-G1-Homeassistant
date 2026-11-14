@@ -1178,6 +1178,12 @@ abstract class AppLocalizations {
     int detail,
   );
 
+  /// No description provided for @skLogProgramCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: the program does not run as it should ({reason})'**
+  String skLogProgramCheck(String arm, String reason);
+
   /// No description provided for @skLogProgramHalted.
   ///
   /// In en, this message translates to:
@@ -1194,6 +1200,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{arm}: program not loaded'**
   String skLogProgramNotLoaded(String arm);
+
+  /// No description provided for @skLogProgramRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: starting the program again'**
+  String skLogProgramRestart(String arm);
 
   /// No description provided for @skLogProgramRunning.
   ///

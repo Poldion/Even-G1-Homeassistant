@@ -217,7 +217,16 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   Kopfgesten läuft der Gyrosensor ohnehin: Das Programm summiert die
   Drehung um die Nick-Achse über etwa die letzte Sekunde, und mit
   *Erschütterungen beim Hochschauen ignorieren* (standardmäßig an) zählt
-  der Kopf nur als oben, wenn er sich um mindestens 5° gedreht hat.
+  der Kopf nur als oben, wenn er sich um mindestens 5° gedreht hat. Kommen
+  0,5 s lang keine Gyro-Werte, blockiert die Prüfung nicht (und das Programm
+  schaltet den Gyrosensor wieder ein). Solange der Kopf unten ist, liest das
+  Programm die Neigung außerdem bei jeder Prüfung (0,4 s mit den Kopfgesten,
+  sonst alle 5 s), sodass ein `TILT`, das nie kam, das Dashboard nicht
+  fernhalten kann.
+- **Wächter in der App**: Jede Minute fragt die App jeden Bügel nach
+  `VM_STATUS`; ein Programm, das nicht läuft oder dessen Timer nicht
+  gestellt ist (es stellt ihn bei jedem `TIMER` neu), wird neu gestartet,
+  wie nach einem `HALT`, höchstens dreimal in 10 Minuten.
 - **Auf einmal**: Das Programm setzt alle Streifen des Dashboards im Bild
   der App zusammen (frei, solange die App nichts zeigt) und zeigt sie mit
   einem `DRAW`, statt mit einem `DRAW` pro Streifen, bei dem sich die Seite

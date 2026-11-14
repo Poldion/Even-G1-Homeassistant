@@ -9,6 +9,19 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.53.0] - 2026-11-14
+
+### Fixed
+- Nach längerer Zeit kam das Dashboard beim Hochschauen manchmal nicht
+  mehr, obwohl die App die Brille als verbunden zeigte; nur ein Neustart
+  der App half. Drei Sicherungen: Die Gyro-Prüfung blockiert nicht mehr,
+  wenn der Gyrosensor keine Werte liefert (und schaltet ihn wieder ein);
+  die Brille prüft die Neigung auch selbst, solange der Kopf unten ist,
+  sodass ein verpasstes Neigungsereignis das Dashboard nicht fernhalten
+  kann; und die App prüft jede Minute, ob das Programm der Brille läuft,
+  und startet es sonst neu (auch nach einem Anhalten, das bisher bis zum
+  App-Neustart aus blieb).
+
 ## [0.52.0] - 2026-11-14
 
 ### Changed
@@ -679,7 +692,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...HEAD
+[0.53.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...app-v0.53.0
 [0.52.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...app-v0.52.0
 [0.51.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...app-v0.51.0
 [0.50.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...app-v0.50.0
