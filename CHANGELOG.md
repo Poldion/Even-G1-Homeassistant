@@ -9,6 +9,17 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-11-14
+
+### Added
+- The glasses keep the fonts, the drawing library and their program in
+  their own memory (the firmware's asset store, 0.5.56 and later). After
+  an app start or a restart of the glasses these come from there in
+  milliseconds instead of over Bluetooth (the font alone took about 6 s per
+  arm). They are stored once, the first time and after an app update that
+  changes them; the app removes its older versions. The log says what came
+  from the glasses' memory.
+
 ## [0.48.0] - 2026-11-14
 
 ### Fixed
@@ -618,7 +629,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...HEAD
+[0.49.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...app-v0.49.0
 [0.48.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...app-v0.48.0
 [0.47.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.46.0...app-v0.47.0
 [0.46.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.45.0...app-v0.46.0

@@ -556,6 +556,26 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String skLogAssetLoadFailed(String arm) {
+    return '$arm: loading from the glasses\' memory failed, uploading instead';
+  }
+
+  @override
+  String skLogAssetPutFailed(String arm, int code) {
+    return '$arm: keeping in the glasses\' memory failed (error $code)';
+  }
+
+  @override
+  String skLogAssetPutRefused(String arm, int status) {
+    return '$arm: the glasses\' memory took nothing (status $status)';
+  }
+
+  @override
+  String skLogAssetStored(String arm, int bytes) {
+    return '$arm: $bytes B kept in the glasses\' memory';
+  }
+
+  @override
   String skLogAutoBrightness(int lux, int stock, String offset, int level) {
     return 'Auto brightness: $lux lx, level $stock $offset → $level';
   }
@@ -586,6 +606,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String skLogEventsRejected(String arm) {
     return '$arm: EVENTS rejected';
+  }
+
+  @override
+  String skLogFontFromStore(String arm, int ms) {
+    return '$arm: font, library and program from the glasses\' memory ($ms ms)';
   }
 
   @override

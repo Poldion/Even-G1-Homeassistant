@@ -303,5 +303,14 @@ The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
   Android handles two GATT setups at once badly, one may hang until its
   timeout. The MTU request waits 5 s and is asked once more. The same
   epoch resumes the session: no font upload after a reconnection.
+- Asset store (firmware 0.5.56 and later, VM.md §6.10): the app keeps the
+  fonts, the drawing library and the resident program in each arm's flash
+  store, named by their SHA-256. On a new session it loads them with
+  `ASSET_LOAD` in milliseconds instead of uploading them (the 28 KB font
+  took about 6 s); what the arm does not hold yet is uploaded and stored
+  with `ASSET_PUT` once (each job ends with `NOTICE` 8). The app deletes
+  what it stored earlier and no longer uses (an older font or program);
+  assets of other tools stay. The store is a data partition above the
+  firmware: nothing runs from it, and it never writes below 0x140000.
 - A new *epoch* means the arm restarted and its memory is empty. The app then
   sets it up again and loads the font again.

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
+import 'package:even_g1_ha/scouter/sk_assets.dart';
 import 'package:even_g1_ha/scouter/sk_clock.dart';
 import 'package:even_g1_ha/scouter/sk_emoji.dart';
 import 'package:even_g1_ha/scouter/sk_font.dart';
@@ -81,6 +82,7 @@ void execute(
   Uint8List arena,
   List<int> ops, [
   List<int>? sleeps,
+  Map<String, Uint8List>? store,
 ]) {
   var i = 0;
   int u24(int at) => code[at] | code[at + 1] << 8 | code[at + 2] << 16;
@@ -103,6 +105,19 @@ void execute(
       ops.add(op);
       i += 4;
     } else {
+      if (op == SkOp.assetLoad) {
+        // id, dst, off, n from the scratch words; copies the stored asset.
+        final d = ByteData.sublistView(arena);
+        int word(int k) => d.getUint32(
+          (code[i + 3 + 2 * k] | code[i + 4 + 2 * k] << 8) * 4,
+          Endian.little,
+        );
+        final id = SkAssets.hex(arena.sublist(word(0), word(0) + 16));
+        final body = store?[id];
+        if (body == null) throw StateError('asset $id not stored');
+        final dst = word(1), off = word(2), n = word(3);
+        arena.setRange(dst, dst + n, body.sublist(off, off + n));
+      }
       if (op == SkOp.sleepUntil) {
         // One escaped operand: the word that holds the time.
         final word = code[i + 2] | code[i + 3] << 8;
@@ -122,6 +137,7 @@ void execute(
         SkOp.draw => 8,
         SkOp.line => 7,
         SkOp.video => 10,
+        SkOp.assetLoad => 4,
         _ => throw StateError('op 0x${op.toRadixString(16)}'),
       };
       ops.add(op);
@@ -151,6 +167,10 @@ class FakeArms {
   /// CMD packets received (both arms).
   int writes = 0;
 
+  /// The asset store (VM.md §6.10), off unless a test turns it on.
+  bool storeOn = false;
+  final stored = {for (final s in G1Side.values) s: <String, Uint8List>{}};
+
   Future<void> write(G1Side side, int channel, Uint8List data) async {
     if (channel == 0) {
       writes++;
@@ -160,6 +180,7 @@ class FakeArms {
         arenas[side]!,
         ops[side]!,
         sleeps[side],
+        stored[side],
       );
       if (acks) {
         scheduleMicrotask(
@@ -180,6 +201,31 @@ class FakeArms {
         for (final id in data.sublist(2)) ..._u32(props[id] ?? SkProp.unknown),
       ],
       SkCtrl.mic => [data[2], 20, 5, ..._u16(16000), 10, ..._u16(2000)],
+      SkCtrl.assetInfo => [
+        ...List.filled(12, 0),
+        stored[side]!.length,
+        0,
+        0,
+        storeOn ? 1 : 0,
+        ..._u32(0),
+      ],
+      SkCtrl.assetList => [
+        stored[side]!.length,
+        data[2],
+        for (final e in stored[side]!.entries.skip(data[2]).take(7)) ...[
+          for (var i = 0; i < 32; i += 2)
+            int.parse(e.key.substring(i, i + 2), radix: 16),
+          ..._u32(0),
+          ..._u32(e.value.length),
+          ..._u32(0),
+          4,
+          0,
+          0,
+          0,
+        ],
+      ],
+      SkCtrl.assetPut => _put(side, data),
+      SkCtrl.assetDelete => _delete(side, data),
       SkCtrl.ping => [
         ...data.sublist(2, 6),
         ..._u32(SkClock.hostNow() + clockOffset[side]!),
@@ -188,10 +234,42 @@ class FakeArms {
       _ => <int>[],
     };
     if (op == SkCtrl.ping && !answerPing) return;
+    final notice = _job.remove(side);
+    if (notice != null) {
+      scheduleMicrotask(
+        () => connection.receive(side, event(SkEvt.notice, epoch, notice)),
+      );
+    }
     final status = op == SkCtrl.mic ? micStatus : 0;
     scheduleMicrotask(
       () => connection.receive(side, reply(epoch, op, tag, status, body)),
     );
+  }
+
+  /// The NOTICE 8 of the job just started on each arm.
+  final _job = <G1Side, List<int>>{};
+
+  List<int> _put(G1Side side, Uint8List data) {
+    final id = data.sublist(2, 18);
+    final d = ByteData.sublistView(data);
+    final address = d.getUint32(18, Endian.little);
+    final size = d.getUint32(22, Endian.little);
+    final hex = SkAssets.hex(id);
+    if (stored[side]!.containsKey(hex)) return [1];
+    final body = Uint8List.fromList(
+      arenas[side]!.sublist(address, address + size),
+    );
+    final ok = SkAssets.hex(SkAssets.id(body)) == hex;
+    if (ok) stored[side]![hex] = body;
+    _job[side] = [8, 1, ok ? 0 : 13, ...id];
+    return [0];
+  }
+
+  List<int> _delete(G1Side side, Uint8List data) {
+    final id = data.sublist(2, 18);
+    stored[side]!.remove(SkAssets.hex(id));
+    _job[side] = [8, 2, 0, ...id];
+    return [];
   }
 }
 
@@ -356,6 +434,57 @@ void main() {
       expect(g1.batteryLeft, 80);
       expect(g1.firmwareVersion, 'ScouterKit g1v0 0.5.60');
       expect(g1.wearState, 'worn');
+    });
+
+    test('the glasses keep font and library in their store', () async {
+      arms.storeOn = true;
+      for (final s in [arms]) {
+        s.props[SkProp.battPct] = 80;
+        s.props[SkProp.inCase] = 0;
+        s.props[SkProp.worn] = 1;
+      }
+      await g1.fakeSetup();
+      expect(g1.connected, isTrue);
+      final first = arms.writes;
+      // Font, library pool and code on each arm (the tests' small font is
+      // the big one and overlaps the library: it cannot be kept).
+      for (final side in G1Side.values) {
+        expect(arms.stored[side]!.length, greaterThanOrEqualTo(3));
+      }
+      // The arms restart (a new epoch): everything comes from the store.
+      final again = FakeArms(epoch: 9)..storeOn = true;
+      for (final side in G1Side.values) {
+        again.stored[side]!.addAll(arms.stored[side]!);
+      }
+      again.props.addAll(arms.props);
+      final g2 = ScouterConnection.fake(again.write, font: loadTestFont());
+      again.connection = g2;
+      await g2.fakeSetup();
+      expect(g2.connected, isTrue);
+      final font = loadTestFont()
+          .withSlots(
+            SkEmoji.slots,
+            advance: SkEmoji.advance,
+            slotBytes: SkEmoji.slotBytes,
+          )
+          .blob;
+      for (final side in G1Side.values) {
+        expect(
+          again.arenas[side]!.sublist(SkArena.font, SkArena.font + font.length),
+          font,
+        );
+        expect(again.ops[side], contains(SkOp.assetLoad));
+        // The font is not stored a second time.
+        for (final put in again.ctrl[side]!.where(
+          (c) => c[0] == SkCtrl.assetPut,
+        )) {
+          final size = ByteData.sublistView(put).getUint32(22, Endian.little);
+          expect(size, isNot(font.length));
+        }
+      }
+      // The big font is not sent again.
+      expect(again.writes, lessThan(first * 2 ~/ 3));
+      g2.dispose();
     });
 
     test('a text is drawn on both arms', () async {

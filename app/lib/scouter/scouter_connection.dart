@@ -10,7 +10,11 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../g1/g1_connection.dart';
 import '../g1/protocol.dart';
 import '../l10n/l10n.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'sk_anim.dart';
+import 'sk_assets.dart';
 import 'sk_asm.dart';
 import 'sk_clock.dart';
 import 'sk_emoji.dart';
@@ -36,6 +40,14 @@ class _SkArm {
   late final SkLink link;
   bool ready = false;
   bool settingUp = false;
+
+  /// The asset store (VM.md §6.10): ID (hex) → size of what the arm holds,
+  /// null without a store; the running store job; the IDs this session
+  /// uses (older ones of the app's are deleted).
+  Map<String, int>? assets;
+  Completer<Uint8List>? assetJob;
+  final assetsInUse = <String>{};
+  Future<void> assetQueue = Future.value();
 
   /// MTU, services and setup run after the link came up.
   bool linking = false;
@@ -331,7 +343,10 @@ class ScouterConnection extends G1Connection {
     return tr.g1StatusConnecting;
   }
 
-  void _debug(String message) => note(message);
+  void _debug(String message) {
+    // Background work (the asset store) may end after dispose.
+    if (!_disposed) note(message);
+  }
 
   _SkArm _newArm(G1Side side, BluetoothDevice? device) {
     final arm = _SkArm(side, device);
@@ -627,22 +642,31 @@ class ScouterConnection extends G1Connection {
         final font = await _textFont();
         final t0 = DateTime.now();
         final lib = SkLib.build();
-        final ok = await arm.link.run([
-          ...skUpload(SkArena.font, font.blob, maxPacket - 2),
-          ...skUpload(SkArena.smallFont, (await _small()).blob, maxPacket - 2),
-          // Frames and animations (SkLib), called by later packets.
-          ...skUpload(SkLib.pool, lib.pool, maxPacket - 2),
-          ...skUpload(SkLib.code, lib.code, maxPacket - 2),
-        ]);
-        if (!ok) throw StateError('font upload failed');
-        arm.fontLoaded = true;
-        _debug(
-          tr.skLogFontLoaded(
-            arm.side.code,
-            font.blob.length,
-            DateTime.now().difference(t0).inMilliseconds,
+        final blobs = [
+          (body: font.blob, dst: SkArena.font, type: SkAssets.typeFont),
+          (
+            body: (await _small()).blob,
+            dst: SkArena.smallFont,
+            type: SkAssets.typeFont,
           ),
+          // Frames and animations (SkLib), called by later packets.
+          (body: lib.pool, dst: SkLib.pool, type: SkAssets.typeRaw),
+          (body: lib.code, dst: SkLib.code, type: SkAssets.typeRaw),
+        ];
+        arm.assets = await _assetStore(arm);
+        arm.assetsInUse.clear();
+        final fromStore = await _place(arm, blobs, maxPacket - 2);
+        if (fromStore == null) throw StateError('font upload failed');
+        arm.fontLoaded = true;
+        final ms = DateTime.now().difference(t0).inMilliseconds;
+        _debug(
+          fromStore
+              ? tr.skLogFontFromStore(arm.side.code, ms)
+              : tr.skLogFontLoaded(arm.side.code, font.blob.length, ms),
         );
+        // Kept on the arm for next time (before anything else changes the
+        // font's emoji slots: the store reads the staged range).
+        if (!fromStore) await _storeAssets(arm, blobs);
       }
       await _reportEvents(arm);
       await _readState(arm);
@@ -658,6 +682,185 @@ class ScouterConnection extends G1Connection {
     } finally {
       arm.settingUp = false;
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Asset store (VM.md §6.10)
+  // ---------------------------------------------------------------------------
+
+  /// What the arm keeps in its store (ID → size), null without one.
+  Future<Map<String, int>?> _assetStore(_SkArm arm) async {
+    final hello = arm.hello;
+    if (hello == null || !SkAssets.supported(hello.version)) {
+      return null;
+    }
+    final info = await _ctrl(arm, SkCtrl.assetInfo, const []);
+    if (info == null ||
+        info.status != 0 ||
+        info.body.length < 16 ||
+        info.body[15] & 1 == 0) {
+      return null;
+    }
+    final out = <String, int>{};
+    var first = 0;
+    while (true) {
+      final r = await _ctrl(arm, SkCtrl.assetList, [first]);
+      if (r == null || r.status != 0) return null;
+      final list = SkAssets.parseList(r.body);
+      for (final e in list.entries) {
+        out[e.id] = e.size;
+      }
+      first += list.entries.length;
+      if (list.entries.isEmpty || first >= list.total) break;
+    }
+    return out;
+  }
+
+  /// Puts [blobs] into the arena: each from the arm's store when it holds
+  /// it, else uploaded. True if all came from the store, false if some were
+  /// uploaded, null when that failed.
+  Future<bool?> _place(
+    _SkArm arm,
+    List<({Uint8List body, int dst, int type})> blobs,
+    int maxCode,
+  ) async {
+    final store = arm.assets;
+    final ids = [for (final b in blobs) SkAssets.hex(SkAssets.id(b.body))];
+    arm.assetsInUse.addAll(ids);
+    bool held(int i) => store?[ids[i]] == blobs[i].body.length;
+    final fromStore = [
+      for (var i = 0; i < blobs.length; i++)
+        if (held(i)) blobs[i],
+    ];
+    final upload = [
+      for (var i = 0; i < blobs.length; i++)
+        if (!held(i)) blobs[i],
+    ];
+    if (fromStore.isNotEmpty) {
+      final ok = await arm.link.run([
+        for (final b in fromStore)
+          SkAssets.loadCode(SkAssets.id(b.body), b.dst, b.body.length),
+      ]);
+      if (!ok) {
+        // A corrupt asset (error 13): upload those as well.
+        _debug(tr.skLogAssetLoadFailed(arm.side.code));
+        for (final b in fromStore) {
+          store?.remove(SkAssets.hex(SkAssets.id(b.body)));
+        }
+        upload.insertAll(0, fromStore);
+      }
+    }
+    if (upload.isEmpty) return true;
+    final ok = await arm.link.run([
+      for (final b in upload) ...skUpload(b.dst, b.body, maxCode),
+    ]);
+    return ok ? false : null;
+  }
+
+  /// Stores [blobs], staged in the arena at their places, one job after the
+  /// other (each ends with NOTICE 8).
+  Future<void> _storeAssets(
+    _SkArm arm,
+    List<({Uint8List body, int dst, int type})> blobs,
+  ) async {
+    final store = arm.assets;
+    if (store == null) return;
+    for (final b in blobs) {
+      if (_disposed || !arm.ready && !arm.settingUp) return;
+      final id = SkAssets.id(b.body);
+      final hex = SkAssets.hex(id);
+      if (store[hex] == b.body.length || b.body.length > SkAssets.maxSize) {
+        continue;
+      }
+      final job = Completer<Uint8List>();
+      arm.assetJob = job;
+      final r = await _ctrl(
+        arm,
+        SkCtrl.assetPut,
+        SkAssets.putBody(id, b.dst, b.body.length, b.type),
+      );
+      if (r == null || r.status != 0) {
+        // No space, a job of someone else, safe mode: next time.
+        _debug(tr.skLogAssetPutRefused(arm.side.code, r?.status ?? -1));
+        arm.assetJob = null;
+        return;
+      }
+      if (r.body.isNotEmpty && r.body[0] == 1) {
+        store[hex] = b.body.length;
+        arm.assetJob = null;
+        continue;
+      }
+      final notice = await job.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => Uint8List(0),
+      );
+      arm.assetJob = null;
+      if (notice.length >= 2 && notice[1] == 0) {
+        store[hex] = b.body.length;
+        await _rememberAsset(arm, hex);
+        _debug(tr.skLogAssetStored(arm.side.code, b.body.length));
+      } else {
+        _debug(
+          tr.skLogAssetPutFailed(
+            arm.side.code,
+            notice.length >= 2 ? notice[1] : -1,
+          ),
+        );
+        // The others may still go in.
+        continue;
+      }
+    }
+  }
+
+  String _assetKey(_SkArm arm) => 'sk_assets_${arm.device?.remoteId.str}';
+
+  Future<void> _rememberAsset(_SkArm arm, String hex) async {
+    if (arm.device == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    final mine = prefs.getStringList(_assetKey(arm)) ?? [];
+    if (!mine.contains(hex)) {
+      await prefs.setStringList(_assetKey(arm), [...mine, hex]);
+    }
+  }
+
+  /// Deletes what the app stored earlier and no longer uses (an older font
+  /// or program); assets of other tools stay.
+  Future<void> _cleanAssets(_SkArm arm) async {
+    final store = arm.assets;
+    if (_disposed || store == null || arm.device == null || !arm.ready) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final mine = (prefs.getStringList(_assetKey(arm)) ?? []).toSet();
+    for (final hex in mine.difference(arm.assetsInUse).toList()) {
+      if (!store.containsKey(hex)) {
+        mine.remove(hex);
+        continue;
+      }
+      final id = Uint8List.fromList([
+        for (var i = 0; i < 32; i += 2)
+          int.parse(hex.substring(i, i + 2), radix: 16),
+      ]);
+      final job = Completer<Uint8List>();
+      arm.assetJob = job;
+      final r = await _ctrl(arm, SkCtrl.assetDelete, id);
+      if (r == null || r.status != 0) {
+        arm.assetJob = null;
+        break;
+      }
+      final notice = await job.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () => Uint8List(0),
+      );
+      arm.assetJob = null;
+      if (notice.length >= 2 && notice[1] == 0) {
+        store.remove(hex);
+        mine.remove(hex);
+      } else {
+        break;
+      }
+    }
+    await prefs.setStringList(_assetKey(arm), mine.toList());
   }
 
   /// Out of the case an arm obeys only a bonded, encrypted host and ignores
@@ -1025,16 +1228,21 @@ class ScouterConnection extends G1Connection {
       micArm: arm.side == G1Side.right,
     );
     final maxCode = arm.link.maxPacket - 2;
-    final ok = await arm.link.run([
-      ...skUpload(SkResident.pool, p.pool, maxCode),
-      ...skUpload(SkResident.code, p.code, maxCode),
-      ...skUpload(SkResident.table, p.table, maxCode),
-      _residentState(font),
-      // The arms agree on the head over their own link (kept across
-      // VM_START).
-      if (peer != SkResident.peerNone)
-        (SkCode()..sysWrite(SkProp.peerLink, 1)).take(),
-    ]);
+    final program = [
+      (body: p.pool, dst: SkResident.pool, type: SkAssets.typeRaw),
+      (body: p.code, dst: SkResident.code, type: SkAssets.typeRaw),
+    ];
+    final fromStore = await _place(arm, program, maxCode);
+    final ok =
+        fromStore != null &&
+        await arm.link.run([
+          ...skUpload(SkResident.table, p.table, maxCode),
+          _residentState(font),
+          // The arms agree on the head over their own link (kept across
+          // VM_START).
+          if (peer != SkResident.peerNone)
+            (SkCode()..sysWrite(SkProp.peerLink, 1)).take(),
+        ]);
     if (!ok || !await _writeDashboard(arm)) {
       _debug(tr.skLogProgramNotLoaded(arm.side.code));
       return;
@@ -1053,6 +1261,12 @@ class ScouterConnection extends G1Connection {
     arm.resident = true;
     arm.residentGestures = gestures;
     arm.residentPeer = peer;
+    // The program's code does not change while it runs: kept on the arm
+    // for next time, and older versions of the app's removed.
+    arm.assetQueue = arm.assetQueue.then((_) async {
+      if (fromStore == false) await _storeAssets(arm, program);
+      await _cleanAssets(arm);
+    });
     _debug(
       gestures
           ? tr.skLogProgramRunningGestures(arm.side.code, p.code.length)
@@ -1697,6 +1911,10 @@ class ScouterConnection extends G1Connection {
         _debug(tr.skLogMicStopped(arm.side.code, reason));
       case 3:
         _debug(tr.skLogDisplayError(arm.side.code));
+      case 8:
+        // A store job ended: u8 job, u8 result, the ID.
+        final job = arm.assetJob;
+        if (job != null && !job.isCompleted) job.complete(body);
     }
   }
 

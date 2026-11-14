@@ -561,6 +561,26 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String skLogAssetLoadFailed(String arm) {
+    return '$arm: Laden aus dem Speicher der Brille fehlgeschlagen, lade stattdessen hoch';
+  }
+
+  @override
+  String skLogAssetPutFailed(String arm, int code) {
+    return '$arm: Ablegen im Speicher der Brille fehlgeschlagen (Fehler $code)';
+  }
+
+  @override
+  String skLogAssetPutRefused(String arm, int status) {
+    return '$arm: Der Speicher der Brille hat nichts übernommen (Status $status)';
+  }
+
+  @override
+  String skLogAssetStored(String arm, int bytes) {
+    return '$arm: $bytes B im Speicher der Brille abgelegt';
+  }
+
+  @override
   String skLogAutoBrightness(int lux, int stock, String offset, int level) {
     return 'Auto-Helligkeit: $lux lx, Stufe $stock $offset → $level';
   }
@@ -591,6 +611,11 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String skLogEventsRejected(String arm) {
     return '$arm: EVENTS abgelehnt';
+  }
+
+  @override
+  String skLogFontFromStore(String arm, int ms) {
+    return '$arm: Schrift, Bibliothek und Programm aus dem Speicher der Brille ($ms ms)';
   }
 
   @override

@@ -317,6 +317,16 @@ Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
   GATT-Einrichtungen gleichzeitig schlecht, eine kann bis zu ihrem Zeitlimit
   hängen. Die MTU-Anfrage wartet 5 s und wird einmal wiederholt. Dieselbe Epoche setzt die Sitzung fort: kein
   Laden der Schrift nach einem Wiederverbinden.
+- Asset-Speicher (Firmware ab 0.5.56, VM.md §6.10): Die App legt die
+  Schriften, die Zeichenbibliothek und das Programm im Flash-Speicher jedes
+  Bügels ab, benannt nach ihrem SHA-256. Bei einer neuen Sitzung lädt sie
+  sie mit `ASSET_LOAD` in Millisekunden, statt sie hochzuladen (die
+  28-KB-Schrift brauchte etwa 6 s); was der Bügel noch nicht hat, wird
+  hochgeladen und einmal mit `ASSET_PUT` abgelegt (jeder Auftrag endet mit
+  `NOTICE` 8). Was die App früher abgelegt hat und nicht mehr nutzt (eine
+  ältere Schrift oder ein älteres Programm), löscht sie; Daten anderer
+  Werkzeuge bleiben. Der Speicher ist ein Datenbereich oberhalb der
+  Firmware: Daraus läuft nichts, und er schreibt nie unter 0x140000.
 - Eine neue *Epoche* bedeutet, dass der Bügel neu gestartet ist und sein
   Speicher leer ist. Die App richtet ihn dann neu ein und lädt die Schrift
   erneut.

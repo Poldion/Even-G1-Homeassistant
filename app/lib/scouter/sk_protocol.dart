@@ -39,6 +39,7 @@ class SkOp {
   static const draw = 0x53;
   static const line = 0x54;
   static const video = 0x55;
+  static const assetLoad = 0x56;
   static const end = 0x33;
 }
 
@@ -55,6 +56,10 @@ class SkCtrl {
   static const vmStatus = 0x12;
   static const mic = 0x13;
   static const events = 0x14;
+  static const assetInfo = 0x17;
+  static const assetList = 0x18;
+  static const assetPut = 0x19;
+  static const assetDelete = 0x1A;
 }
 
 /// Event types (VM.md §6.3).

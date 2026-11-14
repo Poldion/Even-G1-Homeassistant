@@ -425,6 +425,47 @@
       }
     }
   },
+  "skLogAssetLoadFailed": "{arm}: loading from the glasses' memory failed, uploading instead",
+  "@skLogAssetLoadFailed": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogAssetPutFailed": "{arm}: keeping in the glasses' memory failed (error {code})",
+  "@skLogAssetPutFailed": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "code": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogAssetPutRefused": "{arm}: the glasses' memory took nothing (status {status})",
+  "@skLogAssetPutRefused": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "status": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogAssetStored": "{arm}: {bytes} B kept in the glasses' memory",
+  "@skLogAssetStored": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "bytes": {
+        "type": "int"
+      }
+    }
+  },
   "skLogAutoBrightness": "Auto brightness: {lux} lx, level {stock} {offset} → {level}",
   "@skLogAutoBrightness": {
     "placeholders": {
@@ -483,6 +524,17 @@
     "placeholders": {
       "arm": {
         "type": "String"
+      }
+    }
+  },
+  "skLogFontFromStore": "{arm}: font, library and program from the glasses' memory ({ms} ms)",
+  "@skLogFontFromStore": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "ms": {
+        "type": "int"
       }
     }
   },

@@ -9,6 +9,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.49.0] - 2026-11-14
+
+### Added
+- Die Brille behält Schriften, Zeichenbibliothek und ihr Programm in ihrem
+  eigenen Speicher (dem Asset-Speicher der Firmware, ab 0.5.56). Nach einem
+  App-Start oder einem Neustart der Brille kommen sie von dort in
+  Millisekunden statt über Bluetooth (allein die Schrift brauchte etwa 6 s
+  pro Bügel). Abgelegt werden sie einmal, beim ersten Mal und nach einem
+  App-Update, das sie ändert; ältere Versionen entfernt die App. Das
+  Protokoll zeigt, was aus dem Speicher der Brille kam.
+
 ## [0.48.0] - 2026-11-14
 
 ### Fixed
@@ -641,7 +652,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.49.0...HEAD
+[0.49.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...app-v0.49.0
 [0.48.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...app-v0.48.0
 [0.47.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.46.0...app-v0.47.0
 [0.46.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.45.0...app-v0.46.0

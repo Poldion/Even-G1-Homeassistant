@@ -1010,6 +1010,30 @@ abstract class AppLocalizations {
   /// **'{arm} arm ready (g1v0 {version}, encrypted)'**
   String skLogArmReadyEncrypted(String arm, String version);
 
+  /// No description provided for @skLogAssetLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: loading from the glasses\' memory failed, uploading instead'**
+  String skLogAssetLoadFailed(String arm);
+
+  /// No description provided for @skLogAssetPutFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: keeping in the glasses\' memory failed (error {code})'**
+  String skLogAssetPutFailed(String arm, int code);
+
+  /// No description provided for @skLogAssetPutRefused.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: the glasses\' memory took nothing (status {status})'**
+  String skLogAssetPutRefused(String arm, int status);
+
+  /// No description provided for @skLogAssetStored.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: {bytes} B kept in the glasses\' memory'**
+  String skLogAssetStored(String arm, int bytes);
+
   /// No description provided for @skLogAutoBrightness.
   ///
   /// In en, this message translates to:
@@ -1051,6 +1075,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{arm}: EVENTS rejected'**
   String skLogEventsRejected(String arm);
+
+  /// No description provided for @skLogFontFromStore.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: font, library and program from the glasses\' memory ({ms} ms)'**
+  String skLogFontFromStore(String arm, int ms);
 
   /// No description provided for @skLogFontLoaded.
   ///
