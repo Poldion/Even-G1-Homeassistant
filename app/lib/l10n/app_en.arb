@@ -384,6 +384,25 @@
   "skLabWakeTitle": "SYSTEM ONLINE",
   "skLogAnimationOff": "Animation: silent mode off",
   "skLogAnimationOn": "Animation: silent mode on",
+  "skLogArmLinked": "{arm} arm connected and set up in {ms} ms",
+  "@skLogArmLinked": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      },
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "skLogArmLost": "{arm} arm lost the connection; the phone reconnects as soon as it is in reach",
+  "@skLogArmLost": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
   "skLogArmReady": "{arm} arm ready (g1v0 {version})",
   "@skLogArmReady": {
     "placeholders": {

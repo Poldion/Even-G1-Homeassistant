@@ -536,6 +536,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get skLogAnimationOn => 'Animation: silent mode on';
 
   @override
+  String skLogArmLinked(String arm, int ms) {
+    return '$arm arm connected and set up in $ms ms';
+  }
+
+  @override
+  String skLogArmLost(String arm) {
+    return '$arm arm lost the connection; the phone reconnects as soon as it is in reach';
+  }
+
+  @override
   String skLogArmReady(String arm, String version) {
     return '$arm arm ready (g1v0 $version)';
   }

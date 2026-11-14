@@ -986,6 +986,18 @@ abstract class AppLocalizations {
   /// **'Animation: silent mode on'**
   String get skLogAnimationOn;
 
+  /// No description provided for @skLogArmLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm connected and set up in {ms} ms'**
+  String skLogArmLinked(String arm, int ms);
+
+  /// No description provided for @skLogArmLost.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm lost the connection; the phone reconnects as soon as it is in reach'**
+  String skLogArmLost(String arm);
+
   /// No description provided for @skLogArmReady.
   ///
   /// In en, this message translates to:

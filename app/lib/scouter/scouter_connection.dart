@@ -36,6 +36,9 @@ class _SkArm {
   late final SkLink link;
   bool ready = false;
   bool settingUp = false;
+
+  /// MTU, services and setup run after the link came up.
+  bool linking = false;
   bool probing = false;
   int mtu = 23;
 
@@ -220,6 +223,14 @@ class ScouterConnection extends G1Connection {
   final Map<G1Side, _SkArm> _arms = {};
   bool _wanted = false;
   Timer? _reconnectTimer;
+
+  /// Failed setups in a row (the next retry waits longer).
+  int _reconnectFailures = 0;
+
+  /// Android keeps a background connection (autoConnect): after a lost link
+  /// the system connects again by itself as soon as the arm advertises,
+  /// with its own low-duty scan, without a timeout or timers in the app.
+  bool get _autoReconnect => Platform.isAndroid && !_fake;
   Timer? _probeTimer;
   Timer? _batteryTimer;
   Timer? _micTimer;
@@ -440,21 +451,52 @@ class ScouterConnection extends G1Connection {
     final device = arm.device;
     if (device == null) return;
     arm.stateSub ??= device.connectionState.listen((state) {
-      if (state == BluetoothConnectionState.disconnected &&
-          (arm.ready || arm.settingUp)) {
-        _debug('${arm.side.name} arm disconnected');
+      if (state == BluetoothConnectionState.connected) {
+        // The system connected (again): set the arm up.
+        if (_wanted && _autoReconnect && !arm.ready && !arm.linking) {
+          unawaited(_linkArm(arm));
+        }
+      } else if (state == BluetoothConnectionState.disconnected &&
+          (arm.ready || arm.settingUp || arm.linking)) {
+        _debug(tr.skLogArmLost(arm.side.name));
         _armDown(arm);
         notifyListeners();
-        _scheduleReconnect();
+        // With autoConnect the system reconnects by itself.
+        if (!_autoReconnect) _scheduleReconnect();
       }
     });
     try {
       _debug('connecting ${arm.side.name} arm (${device.remoteId})');
+      if (_autoReconnect) {
+        // Returns at once; the link comes through connectionState.
+        await device.connect(
+          license: License.nonprofit,
+          autoConnect: true,
+          mtu: null,
+        );
+        return;
+      }
       await device.connect(
         license: License.nonprofit,
         timeout: const Duration(seconds: 20),
         mtu: null,
       );
+      await _linkArm(arm);
+    } catch (e) {
+      _debug('connecting ${arm.side.name} arm failed: $e');
+      _armDown(arm);
+      notifyListeners();
+      _scheduleReconnect();
+    }
+  }
+
+  /// After the link came up: MTU, priority, services, events, setup.
+  Future<void> _linkArm(_SkArm arm) async {
+    final device = arm.device;
+    if (device == null || arm.linking) return;
+    arm.linking = true;
+    final t0 = DateTime.now();
+    try {
       if (Platform.isAndroid) {
         await device.requestMtu(247);
         await device.requestConnectionPriority(
@@ -478,11 +520,20 @@ class ScouterConnection extends G1Connection {
       );
       await evt.setNotifyValue(true);
       await _setup(arm);
+      _reconnectFailures = 0;
+      _debug(
+        tr.skLogArmLinked(
+          arm.side.name,
+          DateTime.now().difference(t0).inMilliseconds,
+        ),
+      );
     } catch (e) {
-      _debug('connecting ${arm.side.name} arm failed: $e');
+      _debug('setting up ${arm.side.name} arm failed: $e');
       _armDown(arm);
       notifyListeners();
       _scheduleReconnect();
+    } finally {
+      arm.linking = false;
     }
   }
 
@@ -491,11 +542,15 @@ class ScouterConnection extends G1Connection {
       ? ConnectionPriority.high
       : ConnectionPriority.balanced;
 
+  /// A connection or setup failed: try again, 2 s after the first
+  /// failure, then longer (up to 30 s), so a missing arm costs little.
   void _scheduleReconnect() {
     if (!_wanted || _reconnectTimer?.isActive == true) return;
-    _reconnectTimer = Timer(const Duration(seconds: 5), () async {
+    final wait = Duration(seconds: min(30, 2 << min(_reconnectFailures, 4)));
+    _reconnectFailures++;
+    _reconnectTimer = Timer(wait, () async {
       for (final arm in _arms.values) {
-        if (!arm.ready && !arm.settingUp && _wanted) {
+        if (!arm.ready && !arm.settingUp && !arm.linking && _wanted) {
           try {
             await arm.device?.disconnect();
           } catch (_) {}

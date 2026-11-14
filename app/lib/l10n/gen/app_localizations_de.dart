@@ -541,6 +541,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get skLogAnimationOn => 'Animation: Ruhemodus an';
 
   @override
+  String skLogArmLinked(String arm, int ms) {
+    return 'Bügel $arm verbunden und eingerichtet in $ms ms';
+  }
+
+  @override
+  String skLogArmLost(String arm) {
+    return 'Bügel $arm hat die Verbindung verloren; das Handy verbindet neu, sobald er in Reichweite ist';
+  }
+
+  @override
   String skLogArmReady(String arm, String version) {
     return '$arm arm bereit (g1v0 $version)';
   }

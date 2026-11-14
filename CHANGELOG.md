@@ -9,6 +9,16 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.47.0] - 2026-11-14
+
+### Changed
+- Faster, steadier reconnection: each arm keeps a background connection on
+  Android (autoConnect). After a lost link the phone connects again by
+  itself as soon as the glasses are in reach, with the system's low-power
+  scan, instead of the app retrying every 5 s with a 20-s timeout (up to
+  25 s until the glasses were back). A failed setup is retried after 2 s,
+  then less and less often. The log shows how long each arm took.
+
 ## [0.46.0] - 2026-11-13
 
 ### Changed
@@ -599,7 +609,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.46.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...HEAD
+[0.47.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.46.0...app-v0.47.0
 [0.46.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.45.0...app-v0.46.0
 [0.45.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.44.0...app-v0.45.0
 [0.44.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.43.0...app-v0.44.0

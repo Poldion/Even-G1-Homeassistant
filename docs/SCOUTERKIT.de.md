@@ -307,6 +307,13 @@ Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
   rechten über die Funkverbindung der Bügel (VM.md §6.9). Ein Handy braucht
   es dafür nicht. Firmware ohne die Verbindung: Die App macht es wie bisher
   aus den `LIGHT`-Ereignissen.
+- Verbindung: Unter Android hat jeder Bügel eine Hintergrundverbindung
+  (`autoConnect`): Nach einem Verbindungsabbruch verbindet das System von
+  selbst neu, sobald der Bügel funkt (100–150 ms nach einer Trennung), mit
+  seiner eigenen sparsamen Suche, ohne Zeitlimit und ohne Timer in der App.
+  Nur eine fehlgeschlagene Einrichtung wiederholt die App, nach 2 s, dann
+  4, 8, 16 und höchstens 30 s. Dieselbe Epoche setzt die Sitzung fort: kein
+  Laden der Schrift nach einem Wiederverbinden.
 - Eine neue *Epoche* bedeutet, dass der Bügel neu gestartet ist und sein
   Speicher leer ist. Die App richtet ihn dann neu ein und lädt die Schrift
   erneut.

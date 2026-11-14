@@ -148,6 +148,8 @@
   "skLabWakeTitle": "SYSTEM BEREIT",
   "skLogAnimationOff": "Animation: Ruhemodus aus",
   "skLogAnimationOn": "Animation: Ruhemodus an",
+  "skLogArmLinked": "Bügel {arm} verbunden und eingerichtet in {ms} ms",
+  "skLogArmLost": "Bügel {arm} hat die Verbindung verloren; das Handy verbindet neu, sobald er in Reichweite ist",
   "skLogArmReady": "{arm} arm bereit (g1v0 {version})",
   "skLogArmReadyEncrypted": "{arm} arm bereit (g1v0 {version}, verschlüsselt)",
   "skLogAutoBrightness": "Auto-Helligkeit: {lux} lx, Stufe {stock} {offset} → {level}",

@@ -294,5 +294,11 @@ The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
   `AUTO_BRIGHTNESS` = 1 and takes the right arm's level over their link
   (VM.md §6.9). No phone is needed. Firmware without the link: the app does
   it from the `LIGHT` events as before.
+- Connection: on Android each arm has a background connection
+  (`autoConnect`): after a lost link the system connects again by itself as
+  soon as the arm advertises (100–150 ms after a disconnection), with its
+  own low-duty scan, no timeout and no timer in the app. Only a failed setup
+  is retried by the app, after 2 s, then 4, 8, 16 and at most 30 s. The same
+  epoch resumes the session: no font upload after a reconnection.
 - A new *epoch* means the arm restarted and its memory is empty. The app then
   sets it up again and loads the font again.
