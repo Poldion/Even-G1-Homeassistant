@@ -9,6 +9,15 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-11-14
+
+### Fixed
+- Connecting sometimes took 20–30 s: both arms were set up at once while
+  one uploaded the font, and Android left the other's MTU request
+  unanswered until its 15-s timeout. The arms are now set up one after the
+  other, the MTU request waits 5 s and asks once more, and the first HELLO
+  after a new link gets more tries (the encryption may still be starting).
+
 ## [0.47.0] - 2026-11-14
 
 ### Changed
@@ -609,7 +618,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...HEAD
+[0.48.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...app-v0.48.0
 [0.47.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.46.0...app-v0.47.0
 [0.46.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.45.0...app-v0.46.0
 [0.45.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.44.0...app-v0.45.0

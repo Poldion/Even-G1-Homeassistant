@@ -9,6 +9,16 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.48.0] - 2026-11-14
+
+### Fixed
+- Das Verbinden dauerte manchmal 20–30 s: Beide Bügel wurden gleichzeitig
+  eingerichtet, während einer die Schrift hochlud, und Android ließ die
+  MTU-Anfrage des anderen bis zu ihrem Zeitlimit von 15 s unbeantwortet.
+  Die Bügel werden jetzt nacheinander eingerichtet, die MTU-Anfrage wartet
+  5 s und fragt einmal erneut, und das erste HELLO nach einer neuen
+  Verbindung bekommt mehr Versuche (die Verschlüsselung kann noch anlaufen).
+
 ## [0.47.0] - 2026-11-14
 
 ### Changed
@@ -631,7 +641,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.48.0...HEAD
+[0.48.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.47.0...app-v0.48.0
 [0.47.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.46.0...app-v0.47.0
 [0.46.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.45.0...app-v0.46.0
 [0.45.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.44.0...app-v0.45.0

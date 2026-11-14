@@ -165,6 +165,7 @@
   "skLogMic": "Mikrofon: {error}",
   "skLogMicNeedsEncryption": "Mikrofon braucht eine verschlüsselte (gekoppelte) Verbindung",
   "skLogMicStopped": "{arm}: Mikrofon von der Brille beendet ({reason})",
+  "skLogMtuRetry": "Bügel {arm}: keine Antwort zur Paketgröße, frage erneut",
   "skLogNewSession": "{arm} arm: neue Sitzung (Neustart?), richte neu ein",
   "skLogNoAnswerNotBonded": "{arm} arm antwortet nicht und ist nicht gekoppelt: Brille ins offene Ladeetui legen, dann wird gekoppelt",
   "skLogNoService": "{arm} arm: kein ScouterKit-Dienst – läuft g1v0 auf diesem Bügel?",

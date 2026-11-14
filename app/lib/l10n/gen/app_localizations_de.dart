@@ -622,6 +622,11 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String skLogMtuRetry(String arm) {
+    return 'Bügel $arm: keine Antwort zur Paketgröße, frage erneut';
+  }
+
+  @override
   String skLogNewSession(String arm) {
     return '$arm arm: neue Sitzung (Neustart?), richte neu ein';
   }

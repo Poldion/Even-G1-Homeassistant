@@ -1088,6 +1088,12 @@ abstract class AppLocalizations {
   /// **'{arm}: microphone stopped by the glasses ({reason})'**
   String skLogMicStopped(String arm, int reason);
 
+  /// No description provided for @skLogMtuRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm} arm: no answer to the packet size, asking again'**
+  String skLogMtuRetry(String arm);
+
   /// No description provided for @skLogNewSession.
   ///
   /// In en, this message translates to:

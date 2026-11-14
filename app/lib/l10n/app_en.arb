@@ -532,6 +532,14 @@
       }
     }
   },
+  "skLogMtuRetry": "{arm} arm: no answer to the packet size, asking again",
+  "@skLogMtuRetry": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
   "skLogNewSession": "{arm} arm: new session (restart?), setting up again",
   "@skLogNewSession": {
     "placeholders": {

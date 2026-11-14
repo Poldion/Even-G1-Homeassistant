@@ -312,7 +312,10 @@ Die App spricht Protokoll 5 von ScouterKit (`g1_firmware/docs/VM.md`):
   selbst neu, sobald der Bügel funkt (100–150 ms nach einer Trennung), mit
   seiner eigenen sparsamen Suche, ohne Zeitlimit und ohne Timer in der App.
   Nur eine fehlgeschlagene Einrichtung wiederholt die App, nach 2 s, dann
-  4, 8, 16 und höchstens 30 s. Dieselbe Epoche setzt die Sitzung fort: kein
+  4, 8, 16 und höchstens 30 s. Die Bügel werden nacheinander eingerichtet
+  (MTU, Dienste, HELLO, Laden der Schrift): Android verträgt zwei
+  GATT-Einrichtungen gleichzeitig schlecht, eine kann bis zu ihrem Zeitlimit
+  hängen. Die MTU-Anfrage wartet 5 s und wird einmal wiederholt. Dieselbe Epoche setzt die Sitzung fort: kein
   Laden der Schrift nach einem Wiederverbinden.
 - Eine neue *Epoche* bedeutet, dass der Bügel neu gestartet ist und sein
   Speicher leer ist. Die App richtet ihn dann neu ein und lädt die Schrift

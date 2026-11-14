@@ -227,6 +227,11 @@ class ScouterConnection extends G1Connection {
   /// Failed setups in a row (the next retry waits longer).
   int _reconnectFailures = 0;
 
+  /// One arm is set up at a time: Android handles GATT setups (MTU,
+  /// services, the font upload) on two devices at once badly, and one of
+  /// them may then hang until its timeout.
+  Future<void> _linkQueue = Future.value();
+
   /// Android keeps a background connection (autoConnect): after a lost link
   /// the system connects again by itself as soon as the arm advertises,
   /// with its own low-duty scan, without a timeout or timers in the app.
@@ -496,9 +501,21 @@ class ScouterConnection extends G1Connection {
     if (device == null || arm.linking) return;
     arm.linking = true;
     final t0 = DateTime.now();
+    final previous = _linkQueue;
+    final turn = Completer<void>();
+    _linkQueue = turn.future;
     try {
+      // The other arm first, if it is being set up.
+      await previous;
+      if (!_wanted || arm.ready || !device.isConnected) return;
       if (Platform.isAndroid) {
-        await device.requestMtu(247);
+        // An MTU exchange that got lost does not come back: ask again soon.
+        try {
+          await device.requestMtu(247, timeout: 5);
+        } on FlutterBluePlusException {
+          _debug(tr.skLogMtuRetry(arm.side.name));
+          await device.requestMtu(247, timeout: 5);
+        }
         await device.requestConnectionPriority(
           connectionPriorityRequest: _priority(arm),
         );
@@ -534,6 +551,7 @@ class ScouterConnection extends G1Connection {
       _scheduleReconnect();
     } finally {
       arm.linking = false;
+      turn.complete();
     }
   }
 
@@ -566,7 +584,9 @@ class ScouterConnection extends G1Connection {
     if (arm.settingUp) return;
     arm.settingUp = true;
     try {
-      final reply = await _ctrl(arm, SkCtrl.hello, const []);
+      // Right after the link came up the encryption may still be starting
+      // (an arm out of the case ignores an unencrypted host): more tries.
+      final reply = await _ctrl(arm, SkCtrl.hello, const [], tries: 6);
       if (reply == null || reply.status != 0 || reply.body.length < 35) {
         await _explainNoAnswer(arm);
         throw StateError('no HELLO');

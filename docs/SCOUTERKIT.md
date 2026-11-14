@@ -298,7 +298,10 @@ The app speaks ScouterKit's protocol 5 (`g1_firmware/docs/VM.md`):
   (`autoConnect`): after a lost link the system connects again by itself as
   soon as the arm advertises (100–150 ms after a disconnection), with its
   own low-duty scan, no timeout and no timer in the app. Only a failed setup
-  is retried by the app, after 2 s, then 4, 8, 16 and at most 30 s. The same
+  is retried by the app, after 2 s, then 4, 8, 16 and at most 30 s. The
+  arms are set up one after the other (MTU, services, HELLO, a font upload):
+  Android handles two GATT setups at once badly, one may hang until its
+  timeout. The MTU request waits 5 s and is asked once more. The same
   epoch resumes the session: no font upload after a reconnection.
 - A new *epoch* means the arm restarted and its memory is empty. The app then
   sets it up again and loads the font again.

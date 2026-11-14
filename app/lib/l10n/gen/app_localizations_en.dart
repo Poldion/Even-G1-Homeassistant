@@ -617,6 +617,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String skLogMtuRetry(String arm) {
+    return '$arm arm: no answer to the packet size, asking again';
+  }
+
+  @override
   String skLogNewSession(String arm) {
     return '$arm arm: new session (restart?), setting up again';
   }
