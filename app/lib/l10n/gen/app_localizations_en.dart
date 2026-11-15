@@ -277,6 +277,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get diagLog => 'Log';
 
   @override
+  String diagLogCopied(int lines) {
+    return 'Log copied ($lines lines)';
+  }
+
+  @override
+  String get diagLogCopy => 'Copy the whole log';
+
+  @override
+  String get diagLogShare => 'Share the whole log';
+
+  @override
+  String get diagLogSubject => 'Even G1 HA log';
+
+  @override
   String get diagShowOnGlasses => 'Show on glasses';
 
   @override

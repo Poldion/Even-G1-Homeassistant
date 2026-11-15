@@ -524,6 +524,30 @@ abstract class AppLocalizations {
   /// **'Log'**
   String get diagLog;
 
+  /// No description provided for @diagLogCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Log copied ({lines} lines)'**
+  String diagLogCopied(int lines);
+
+  /// No description provided for @diagLogCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the whole log'**
+  String get diagLogCopy;
+
+  /// No description provided for @diagLogShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share the whole log'**
+  String get diagLogShare;
+
+  /// No description provided for @diagLogSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Even G1 HA log'**
+  String get diagLogSubject;
+
   /// No description provided for @diagShowOnGlasses.
   ///
   /// In en, this message translates to:

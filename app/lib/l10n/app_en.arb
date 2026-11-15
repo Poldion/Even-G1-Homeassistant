@@ -255,6 +255,17 @@
   },
   "diagClose": "Close",
   "diagLog": "Log",
+  "diagLogCopied": "Log copied ({lines} lines)",
+  "@diagLogCopied": {
+    "placeholders": {
+      "lines": {
+        "type": "int"
+      }
+    }
+  },
+  "diagLogCopy": "Copy the whole log",
+  "diagLogShare": "Share the whole log",
+  "diagLogSubject": "Even G1 HA log",
   "diagShowOnGlasses": "Show on glasses",
   "diagTestText": "Test text",
   "diagTestTextDefault": "Hello from Home Assistant!",

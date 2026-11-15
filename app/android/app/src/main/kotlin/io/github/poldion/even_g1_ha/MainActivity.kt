@@ -54,6 +54,21 @@ class MainActivity : FlutterActivity() {
         MethodChannel(messenger, "even_g1/video").setMethodCallHandler { call, result ->
             video.handle(call, result)
         }
+
+        // The diagnostics log to another app (messenger, mail, files).
+        MethodChannel(messenger, "even_g1/share").setMethodCallHandler { call, result ->
+            when (call.method) {
+                "text" -> {
+                    val send = Intent(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_TEXT, call.argument<String>("text") ?: "")
+                        .putExtra(Intent.EXTRA_SUBJECT, call.argument<String>("subject") ?: "")
+                    startActivity(Intent.createChooser(send, null))
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
 
     override fun onResume() {

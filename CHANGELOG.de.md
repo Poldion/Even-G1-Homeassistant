@@ -9,6 +9,14 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.54.0] - 2026-11-15
+
+### Added
+- *Diagnose → Protokoll*: das ganze Protokoll kopieren oder mit einer
+  anderen App teilen (Messenger, Mail, Dateien), mit Kopfzeilen (Datum,
+  App-Version, Brille, Home Assistant). Die App behält die letzten 1000
+  Zeilen statt 300.
+
 ## [0.53.1] - 2026-11-15
 
 ### Fixed
@@ -701,7 +709,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...HEAD
+[0.54.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...app-v0.54.0
 [0.53.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...app-v0.53.1
 [0.53.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...app-v0.53.0
 [0.52.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...app-v0.52.0

@@ -9,6 +9,13 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.54.0] - 2026-11-15
+
+### Added
+- *Diagnostics → Log*: copy the whole log or share it with another app
+  (messenger, mail, files), with a header (date, app version, glasses,
+  Home Assistant). The app keeps the last 1000 lines instead of 300.
+
 ## [0.53.1] - 2026-11-15
 
 ### Fixed
@@ -675,7 +682,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...HEAD
+[0.54.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...app-v0.54.0
 [0.53.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...app-v0.53.1
 [0.53.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...app-v0.53.0
 [0.52.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...app-v0.52.0

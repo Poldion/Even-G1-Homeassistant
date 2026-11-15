@@ -278,6 +278,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get diagLog => 'Protokoll';
 
   @override
+  String diagLogCopied(int lines) {
+    return 'Protokoll kopiert ($lines Zeilen)';
+  }
+
+  @override
+  String get diagLogCopy => 'Ganzes Protokoll kopieren';
+
+  @override
+  String get diagLogShare => 'Ganzes Protokoll teilen';
+
+  @override
+  String get diagLogSubject => 'Even G1 HA Protokoll';
+
+  @override
   String get diagShowOnGlasses => 'Auf Brille anzeigen';
 
   @override

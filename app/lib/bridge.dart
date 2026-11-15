@@ -251,12 +251,35 @@ class Bridge extends ChangeNotifier {
   bool _dashboardShown = false;
   bool _glassesSettingsApplied = false;
 
+  /// Lines kept in the log (the app shows the newest, copying and sharing
+  /// take all).
+  static const maxLogLines = 1000;
+
+  /// The whole log for copying or sharing: a header (date, glasses, Home
+  /// Assistant) and every line, oldest first.
+  String logReport({String appVersion = ''}) {
+    final now = DateTime.now();
+    String two(int v) => v.toString().padLeft(2, '0');
+    return [
+      'Even G1 HA $appVersion'.trim(),
+      '${now.year}-${two(now.month)}-${two(now.day)} '
+          '${two(now.hour)}:${two(now.minute)}',
+      '${tr.glasses}: ${g1.status}'
+          '${g1.firmwareVersion == null ? '' : ' (${g1.firmwareVersion})'}',
+      'Home Assistant: $haStatus',
+      '',
+      ...logLines,
+    ].join('\n');
+  }
+
   void _log(String line) {
     final now = DateTime.now();
     final ts =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
     logLines.add('$ts $line');
-    if (logLines.length > 300) logLines.removeRange(0, logLines.length - 300);
+    if (logLines.length > maxLogLines) {
+      logLines.removeRange(0, logLines.length - maxLogLines);
+    }
     debugPrint('[Bridge] $line');
     notifyListeners();
   }
