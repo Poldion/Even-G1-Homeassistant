@@ -224,9 +224,10 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   sonst alle 5 s), sodass ein `TILT`, das nie kam, das Dashboard nicht
   fernhalten kann.
 - **Wächter in der App**: Jede Minute fragt die App jeden Bügel nach
-  `VM_STATUS`; ein Programm, das nicht läuft oder dessen Timer nicht
-  gestellt ist (es stellt ihn bei jedem `TIMER` neu), wird neu gestartet,
-  wie nach einem `HALT`, höchstens dreimal in 10 Minuten.
+  `VM_STATUS`; ein Programm, das nicht läuft oder dessen Timer weder
+  gestellt ist noch auf seinen Aufruf wartet (es stellt ihn bei jedem
+  `TIMER` neu; zweimal gefragt, eine Sekunde auseinander), wird neu
+  gestartet, wie nach einem `HALT`, höchstens dreimal in 10 Minuten.
 - **Auf einmal**: Das Programm setzt alle Streifen des Dashboards im Bild
   der App zusammen (frei, solange die App nichts zeigt) und zeigt sie mit
   einem `DRAW`, statt mit einem `DRAW` pro Streifen, bei dem sich die Seite

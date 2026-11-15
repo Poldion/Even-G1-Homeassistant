@@ -170,6 +170,7 @@ class FakeArms {
   /// VM_STATUS: the program's state (1 running) and its timer.
   int vmState = 1;
   bool timerArmed = true;
+  int pending = 0;
 
   /// The asset store (VM.md §6.10), off unless a test turns it on.
   bool storeOn = false;
@@ -231,7 +232,9 @@ class FakeArms {
       SkCtrl.vmStatus => [
         vmState,
         0xff,
-        ...List.filled(26, 0),
+        pending & 0xff,
+        pending >> 8,
+        ...List.filled(24, 0),
         timerArmed ? 1 : 0,
         0,
         0,
@@ -510,6 +513,13 @@ void main() {
       // Running with its timer armed: nothing happens.
       await g1.fakeCheckPrograms();
       expect(starts(G1Side.right), before);
+      // The timer just fired and its handler waits (pending): all well.
+      arms.timerArmed = false;
+      arms.pending = 1 << SkTrigger.timer;
+      await g1.fakeCheckPrograms();
+      expect(starts(G1Side.right), before);
+      arms.timerArmed = true;
+      arms.pending = 0;
       // Halted (or its timer gone): started again, both arms.
       arms.vmState = 2;
       await g1.fakeCheckPrograms();

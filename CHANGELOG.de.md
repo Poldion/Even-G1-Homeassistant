@@ -9,6 +9,15 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.53.1] - 2026-11-15
+
+### Fixed
+- Die Programmprüfung aus 0.53.0 startete ein laufendes Programm ab und zu
+  neu („Das Programm läuft nicht wie es soll (timer)“): Sie fragte genau,
+  als der Timer gefeuert hatte und sein Aufruf noch wartete. Ein gefeuerter
+  Timer, der wartet oder läuft, gilt jetzt als gestellt, und die App fragt
+  eine Sekunde später noch einmal, bevor sie etwas neu startet.
+
 ## [0.53.0] - 2026-11-14
 
 ### Fixed
@@ -692,7 +701,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...HEAD
+[0.53.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...app-v0.53.1
 [0.53.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...app-v0.53.0
 [0.52.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...app-v0.52.0
 [0.51.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...app-v0.51.0

@@ -9,6 +9,15 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.53.1] - 2026-11-15
+
+### Fixed
+- The program check of 0.53.0 restarted a working program now and then
+  ("the program does not run as it should (timer)"): it asked just when the
+  timer had fired and its handler waited for its turn. A fired timer that
+  waits or runs counts as armed now, and the app asks once more a second
+  later before it restarts anything.
+
 ## [0.53.0] - 2026-11-14
 
 ### Fixed
@@ -666,7 +675,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...HEAD
+[0.53.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...app-v0.53.1
 [0.53.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...app-v0.53.0
 [0.52.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.51.0...app-v0.52.0
 [0.51.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.50.0...app-v0.51.0

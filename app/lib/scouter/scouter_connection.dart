@@ -1741,15 +1741,32 @@ class ScouterConnection extends G1Connection {
       if (!arm.ready || !arm.resident || arm.settingUp || arm.linking) {
         continue;
       }
-      final r = await _ctrl(arm, SkCtrl.vmStatus, const [], tries: 1);
-      if (r == null || r.status != 0 || r.body.length < 29) continue;
-      final state = r.body[0];
-      final timerArmed = r.body[28] & 1 != 0;
-      if (state == 1 && timerArmed) continue;
+      // A TIMER that fired and waits (pending) or runs right now counts as
+      // armed: with the head gestures it fires every 20 ms, and its handler
+      // may wait behind another one (150 ms for the other arm). Asked again
+      // a second later before anything is restarted.
+      Future<({int state, int halt, bool ok})?> status() async {
+        final r = await _ctrl(arm, SkCtrl.vmStatus, const [], tries: 1);
+        if (r == null || r.status != 0 || r.body.length < 29) return null;
+        final b = r.body;
+        final pending = b[2] | b[3] << 8;
+        final timer =
+            b[28] & 1 != 0 ||
+            pending & 1 << SkTrigger.timer != 0 ||
+            b[1] == SkTrigger.timer;
+        return (state: b[0], halt: b[15], ok: b[0] == 1 && timer);
+      }
+
+      final first = await status();
+      if (first == null || first.ok) continue;
+      await Future<void>.delayed(const Duration(seconds: 1));
+      final again = await status();
+      if (again == null || again.ok || !arm.resident) continue;
+      final state = again.state;
       _debug(
         tr.skLogProgramCheck(arm.side.code, switch (state) {
           1 => 'timer',
-          2 => 'halted ${skErrorName(r.body[15])}',
+          2 => 'halted ${skErrorName(again.halt)}',
           _ => 'stopped',
         }),
       );

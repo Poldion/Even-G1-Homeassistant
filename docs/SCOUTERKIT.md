@@ -216,9 +216,9 @@ gone, and the app loads it again.
   gestures, else every 5 s), so a `TILT` that never came cannot keep the
   dashboard away.
 - **Watch in the app**: every minute the app asks each arm for `VM_STATUS`;
-  a program that is not running or whose timer is not armed (it re-arms it
-  at every `TIMER`) is started again, as after a `HALT`, at most three times
-  in 10 minutes.
+  a program that is not running or whose timer is neither armed nor waiting
+  to run (it re-arms it at every `TIMER`; asked twice, a second apart) is
+  started again, as after a `HALT`, at most three times in 10 minutes.
 - **At once**: the program composes all bands of the dashboard in the app's
   frame (free while the app shows nothing) and shows them with one `DRAW`,
   instead of one `DRAW` per band, which built the page up visibly from top
