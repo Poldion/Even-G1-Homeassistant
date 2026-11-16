@@ -797,20 +797,20 @@ abstract class AppLocalizations {
   /// No description provided for @notifSetNavigationHelp.
   ///
   /// In en, this message translates to:
-  /// **'Arrow and distance on the glasses: at each new turn and at 500, 200 and 50 m; on head-up instead of the dashboard while you navigate.'**
+  /// **'Arrow and distance on the glasses: at each new turn, at 500, 200 and 50 m and right at the turn; on head-up instead of the dashboard while you navigate.'**
   String get notifSetNavigationHelp;
 
-  /// No description provided for @notifSetArArrow.
+  /// No description provided for @notifSetBigArrow.
   ///
   /// In en, this message translates to:
-  /// **'AR arrow'**
-  String get notifSetArArrow;
+  /// **'Animated arrow'**
+  String get notifSetBigArrow;
 
-  /// No description provided for @notifSetArArrowHelp.
+  /// No description provided for @notifSetBigArrowHelp.
   ///
   /// In en, this message translates to:
-  /// **'The turn as an arrow painted on the street ahead, below the text: it comes closer as the turn does, moves with your head and tilts back when you tilt it, so it stays roughly on the street. Off: a small arrow beside the text.'**
-  String get notifSetArArrowHelp;
+  /// **'A big arrow at the top of the view, above the text: it comes closer with every step, larger the nearer the turn, and right at the turn it swings into the direction to take. Off: a small arrow beside the text.'**
+  String get notifSetBigArrowHelp;
 
   /// No description provided for @notifSetNoAccess.
   ///

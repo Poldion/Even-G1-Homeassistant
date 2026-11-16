@@ -246,19 +246,32 @@ class NavArrow {
 }
 
 /// Follows a navigation and decides when the glasses show it: at a new
-/// step and when the turn comes closer than 500, 200 and 50 m.
+/// step, when the turn comes closer than 500, 200 and 50 m, and right at
+/// the turn ([atTurnMeters]).
 class Navigation {
-  static const thresholds = [500, 200, 50];
+  static const thresholds = [500, 200, 50, atTurnMeters];
+
+  /// Closer than this the turn is right ahead.
+  static const atTurnMeters = 25;
 
   NavUpdate? current;
   String? _step;
   final _announced = <int>{};
+
+  /// The step shown last is the one right at the turn.
+  bool atTurn = false;
 
   bool get active => current != null;
 
   /// Takes an update; true if the glasses should show it now.
   bool update(NavUpdate u) {
     current = u;
+    final show = _update(u);
+    if (show) atTurn = _announced.contains(atTurnMeters);
+    return show;
+  }
+
+  bool _update(NavUpdate u) {
     final step =
         '${u.instruction}\u0000${u.icon == null ? '' : _hash(u.icon!)}';
     final m = u.meters;
@@ -285,6 +298,7 @@ class Navigation {
     current = null;
     _step = null;
     _announced.clear();
+    atTurn = false;
   }
 
   /// The arrow to show: the app's, or one drawn for the turn.

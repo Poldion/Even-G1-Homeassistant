@@ -28,7 +28,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'ar_arrow_check.dart';
+import 'turn_arrow_check.dart';
 import 'fake_arms.dart';
 import 'fake_arms.dart' as fake show input;
 
@@ -62,12 +62,11 @@ class _Scenario {
   bool _mic = false;
 
   /// The navigation's cards (texts shown with its arrow), the screen's
-  /// changes, and whether the AR arrow must show after the last action
+  /// changes, and whether the arrow must show after the last action
   /// (null: no navigation step shown by it).
   final _navCards = <String>{};
   int _screenChanges = 0;
   bool? _arrowWanted;
-  final _font = loadTestFont();
 
   /// A navigation step (null: it ends) the way the phone sends it.
   void navigate(NavUpdate? update) {
@@ -78,7 +77,7 @@ class _Scenario {
     if (update != null &&
         _screenChanges > changes &&
         bridge.display.screen.value == card) {
-      _arrowWanted = settings.navigationArArrow;
+      _arrowWanted = settings.navigationArrow;
     }
   }
 
@@ -251,8 +250,7 @@ class _Scenario {
         ),
       );
     },
-    'ar arrow setting': () =>
-        settings.navigationArArrow = !settings.navigationArArrow,
+    'arrow setting': () => settings.navigationArrow = !settings.navigationArrow,
     'brightness': () => run(() async {
       await g1.setBrightnessCurve(rnd.nextBool());
       await g1.setAutoBrightnessOffset(rnd.nextInt(9) - 4);
@@ -293,7 +291,7 @@ class _Scenario {
         // Nothing shown: the program may draw.
         expect(busy, 0, reason: why('${side.code}: nothing shown, busy'));
       }
-      // The AR arrow only under a navigation step the app shows.
+      // The arrow only with a navigation step the app shows.
       if (word(side, SkResident.arrowOn) != 0) {
         expect(shown, isTrue, reason: why('${side.code}: arrow without text'));
         expect(busy, 1, reason: why('${side.code}: arrow, busy'));
@@ -303,17 +301,9 @@ class _Scenario {
           isTrue,
           reason: why('${side.code}: arrow under "$screen"'),
         );
-        // Below that text and on the panel, whatever the head does.
-        final lines = ScouterConnection.wrap(
-          _font,
-          screen ?? '',
-          640 - 2 * ScouterConnection.textLeft,
-        ).length;
+        // Above that text and on the panel, in every frame.
         expect(
-          arrowProblems(
-            arms.arenas[side]!,
-            textBottom: ScouterConnection.textTop + lines * _font.lineSpacing,
-          ),
+          arrowProblems(arms.arenas[side]!, textTop: ScouterConnection.textTop),
           isEmpty,
           reason: why('${side.code}: the arrow\'s words'),
         );
@@ -325,7 +315,7 @@ class _Scenario {
         expect(
           word(side, SkResident.arrowOn),
           wantArrow ? 1 : 0,
-          reason: why('${side.code}: AR arrow ${wantArrow ? 'on' : 'off'}'),
+          reason: why('${side.code}: arrow ${wantArrow ? 'on' : 'off'}'),
         );
       }
       final wanted =
@@ -498,7 +488,7 @@ void main() {
     });
   });
 
-  test('a navigation step shows its AR arrow until it closes', () {
+  test('a navigation step shows its arrow until it closes', () {
     fakeAsync((async) {
       final s = _Scenario(async, settings, 0)..setUp();
       int arrow(G1Side side) => s.word(side, SkResident.arrowOn);

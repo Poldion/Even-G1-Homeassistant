@@ -15,9 +15,9 @@ class FakeGlasses extends G1Connection {
   ({bool onHeadUp, String text})? dashboard;
   Uint8List? navigationIcon;
 
-  /// The AR arrow last set, and every call.
-  ({NavTurn turn, int? meters})? navigationArrow;
-  final arrowCalls = <({NavTurn turn, int? meters})?>[];
+  /// The navigation's arrow last set, and every call.
+  ({NavTurn turn, int? meters, bool atTurn})? navigationArrow;
+  final arrowCalls = <({NavTurn turn, int? meters, bool atTurn})?>[];
   bool? mic;
 
   /// A gesture as if it came from the glasses.
@@ -79,7 +79,7 @@ class FakeGlasses extends G1Connection {
   void setNavigationIcon(Uint8List? icon) => navigationIcon = icon;
 
   @override
-  void setNavigationArrow(({NavTurn turn, int? meters})? arrow) =>
+  void setNavigationArrow(({NavTurn turn, int? meters, bool atTurn})? arrow) =>
       arrowCalls.add(navigationArrow = arrow);
 
   @override

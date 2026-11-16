@@ -122,8 +122,12 @@ class Bridge extends ChangeNotifier {
     final show = navigation.update(update);
     g1.setNavigationIcon(navigation.icon);
     g1.setNavigationArrow(
-      settings.navigationArArrow
-          ? (turn: update.turn, meters: update.meters)
+      settings.navigationArrow
+          ? (
+              turn: update.turn,
+              meters: update.meters,
+              atTurn: navigation.atTurn,
+            )
           : null,
     );
     await _navigationChanged();

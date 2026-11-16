@@ -237,20 +237,18 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   der App zusammen (frei, solange die App nichts zeigt) und zeigt sie mit
   einem `DRAW`, statt mit einem `DRAW` pro Streifen, bei dem sich die Seite
   sichtbar von oben nach unten aufbaute.
-- **AR-Pfeil** (Navigation): Mit einem Navigationsschritt schickt die App
-  unter dem Text die Abbiegung als perspektivischen Pfeil auf der Straße
-  vor dir (`ArArrow`: seine Linien relativ zu einem Drehpunkt, Sinus und
-  Kosinus je Grad Neigung zur Seite, sein Rahmen je Winkel und die Zeilen,
-  in denen er bleibt, ab `0x3A800`) und setzt `arrowOn`. Höchstens alle
-  100 ms liest das Programm `PITCH` und `ROLL`; haben sie sich geändert,
-  verschiebt es den Pfeil um 3 px je Grad Kopfneigung (in Ruhe bei −10°,
-  wie beim Gehen) und dreht ihn gegen die seitliche Neigung (bis ±10°),
-  löscht den alten und den neuen Rahmen im Bild der App, zeichnet die
-  Linien und zeigt dieses Rechteck mit einem `DRAW`. Ein ruhiger Kopf
-  zeichnet nichts. Die Verschiebung ist je Winkel begrenzt, sodass der
-  Pfeil nie den Text verdeckt und nie das Panel verlässt; `busy` 0, ein
-  anderer Text, ein Video oder eine Animation setzen `arrowOn` auf 0
-  zurück.
+- **Navigationspfeil**: Mit einem Navigationsschritt schickt die App den
+  Pfeil über dem Text (`TurnArrow`: seine Linien relativ zu einem
+  Drehpunkt und bis zu 20 Bilder, jedes mit Kosinus und Sinus × Größe ×
+  4096, einer Verschiebung und dem Rahmen, den es bedeckt, ab `0x3A800`)
+  und setzt `arrowOn`, im Paket des zeitgesteuerten `DRAW`, sodass er nie
+  vor seinem Text erscheint. Alle 50 ms zeichnet das Programm das nächste
+  Bild (löscht den alten und den neuen Rahmen im Bild der App, zeichnet
+  die Linien, zeigt dieses Rechteck mit einem `DRAW`) und hält beim
+  letzten an, das stehen bleibt: näherkommend (klein und hoch bis zu
+  seiner Größe) oder an der Abbiegung in ihre Richtung schwenkend. `busy`
+  0, ein anderer Text, ein Video oder eine Animation setzen `arrowOn` auf
+  0 zurück.
 - **Beide Augen zusammen** (Funkverbindung der Bügel, VM.md §6.9): Nur der
   rechte Bügel folgt der Neigung. Bei einem Wechsel schickt er dem linken
   `PEER_SEND` 1 (hoch) oder 2 (runter) und schaltet 150 ms später; der

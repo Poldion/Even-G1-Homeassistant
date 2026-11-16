@@ -9,6 +9,16 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.56.0] - 2026-11-16
+
+### Changed
+- Navigation: instead of the AR arrow on the street, a **big arrow at the
+  top of the view**, above the text. With each step it comes closer,
+  larger the nearer the turn is; right at the turn (a new step at about
+  25 m) it swings into the direction to take and moves a little that
+  way. The glasses play the animation themselves; it no longer follows
+  the head. The setting is now *Animated arrow*.
+
 ## [0.55.0] - 2026-11-16
 
 ### Added
@@ -729,7 +739,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.55.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.56.0...HEAD
+[0.56.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.55.0...app-v0.56.0
 [0.55.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.3...app-v0.55.0
 [0.54.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...app-v0.54.3
 [0.54.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...app-v0.54.2

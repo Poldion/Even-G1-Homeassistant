@@ -76,11 +76,11 @@ class _NotificationSettingsState extends State<NotificationSettings>
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(tr.notifSetArArrow),
-              subtitle: Text(tr.notifSetArArrowHelp),
-              value: settings.navigationArArrow,
+              title: Text(tr.notifSetBigArrow),
+              subtitle: Text(tr.notifSetBigArrowHelp),
+              value: settings.navigationArrow,
               onChanged: settings.forwardNavigation
-                  ? (v) => setState(() => settings.navigationArArrow = v)
+                  ? (v) => setState(() => settings.navigationArrow = v)
                   : null,
             ),
             if (!_granted)

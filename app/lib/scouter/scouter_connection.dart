@@ -13,7 +13,7 @@ import '../l10n/l10n.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../navigation/ar_arrow.dart';
+import '../navigation/turn_arrow.dart';
 import '../navigation/navigation.dart';
 import 'sk_anim.dart';
 import 'sk_assets.dart';
@@ -275,10 +275,10 @@ class ScouterConnection extends G1Connection {
   void setNavigationIcon(Uint8List? icon) => _navigationIcon =
       icon != null && icon.length == SkIcons.bytes ? icon : null;
 
-  ({NavTurn turn, int? meters})? _navigationArrow;
+  ({NavTurn turn, int? meters, bool atTurn})? _navigationArrow;
 
   @override
-  void setNavigationArrow(({NavTurn turn, int? meters})? arrow) =>
+  void setNavigationArrow(({NavTurn turn, int? meters, bool atTurn})? arrow) =>
       _navigationArrow = arrow;
 
   /// A video plays (hidden player): nothing else draws meanwhile.
@@ -2272,7 +2272,7 @@ class ScouterConnection extends G1Connection {
     required int maxCode,
     int? icon,
     Uint8List? iconData,
-    ({NavTurn turn, int? meters})? arArrow,
+    ({NavTurn turn, int? meters, bool atTurn})? arArrow,
     void Function(Uint8List code)? arrowOn,
     bool draw = true,
     G1TextStyle style = G1TextStyle.plain,
@@ -2281,26 +2281,14 @@ class ScouterConnection extends G1Connection {
     SkFont? smallFont,
     bool? serverOnline,
   }) {
-    // The navigation's AR arrow below the text, if there is room for it
-    // (else its icon beside the text).
-    ArArrow? arrow;
-    if (arArrow != null) {
-      final plain = SkLayout.of(
-        font,
-        wrap(font, text, SkPanel.width - 2 * textLeft),
-        G1TextStyle.plain,
-        top: top,
-        left: textLeft,
-      );
-      final textEnd = plain.lines.isEmpty
-          ? top
-          : plain.lines.map((l) => l.y).reduce(max) + font.lineSpacing;
-      arrow = ArArrow.build(
-        arArrow.turn,
-        arArrow.meters,
-        top: textEnd + arrowGap,
-      );
-      if (arrow != null) iconData = null;
+    // The navigation's arrow above the text (else its icon beside it):
+    // coming closer, or at the turn swinging into its direction.
+    TurnArrow? arrow;
+    if (arArrow != null && top > TurnArrow.bottom) {
+      arrow = arArrow.atTurn
+          ? TurnArrow.at(arArrow.turn)
+          : TurnArrow.approach(arArrow.meters);
+      iconData = null;
     }
     final withIcon = icon != null || iconData != null;
     final left = withIcon ? iconTextLeft : textLeft;
@@ -2477,8 +2465,7 @@ class ScouterConnection extends G1Connection {
     }
     if (code.length > 0) packets.add(code.take());
     if (arrow != null) {
-      // The arrow's lines and tables, then the program draws it and
-      // follows the head (USER1).
+      // The arrow's lines and frames, then the program plays them (USER1).
       packets.addAll(skUpload(SkResident.arrowData, arrow.data(), maxCode));
       // With [arrowOn] the caller sends it after its own DRAW: the arrow
       // never shows before its text.
@@ -2487,10 +2474,10 @@ class ScouterConnection extends G1Connection {
               ..write(
                 SkResident.arrowOn.address,
                 SkLib.u32s([
-                  1,
-                  SkResident.arrowNone,
+                  1, // arrowOn
+                  0, // arrowFrame
                   0,
-                  0,
+                  0, // arrowAt
                   arrow.cx,
                   arrow.cy,
                   arrow.cx,

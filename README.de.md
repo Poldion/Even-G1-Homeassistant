@@ -176,28 +176,27 @@ Die Brille im offenen Ladeetui koppeln (Details in
 ### Navigation
 
 Navigiert Google Maps auf dem Handy, zeigt die Brille die nächste
-Abbiegung: mit dem Pfeil aus Maps, der Entfernung und der Anweisung bei
-jeder neuen Abbiegung und bei 500, 200 und 50 m (für 6 Sekunden); beim
+Abbiegung: die Entfernung und die Anweisung bei
+jeder neuen Abbiegung, bei 500, 200 und 50 m und direkt an der Abbiegung
+(für 6 Sekunden); beim
 Hochschauen ersetzt die Abbiegung das Dashboard, bis die Navigation endet.
 Dafür braucht die App den Zugriff auf Benachrichtigungen (*Einstellungen →
 Benachrichtigungen*), dort schaltet *Google-Maps-Navigation* sie ab. Im
 Ruhemodus erscheint nichts.
 
-Unter dem Text erscheint die Abbiegung als **AR-Pfeil**, perspektivisch
-auf die Straße vor dir gemalt: Er rückt näher und wird größer, je näher
-die Abbiegung kommt, und die Brille bewegt ihn mit deinem Kopf
-(Runterschauen hebt ihn, Hochschauen senkt ihn, Kopfneigen dreht ihn
-zurück), sodass er ungefähr auf der Straße bleibt. Das macht die Brille
-selbst, ohne das Handy. *AR-Pfeil* in den Benachrichtigungs-Einstellungen
-schaltet zurück auf den kleinen Pfeil neben dem Text. Die G1 hat weder
-Kamera noch Kompass: Der Pfeil weiß nicht, wo die Kreuzung wirklich liegt,
-er folgt nur der Haltung deines Kopfes.
+Über dem Text zeigt ein **großer Pfeil** die Abbiegung: Mit jedem Schritt
+kommt er näher, größer, je näher die Abbiegung ist; direkt an der
+Abbiegung (etwa 25 m) schwenkt er in die Richtung, in die du musst, und
+schiebt sich ein Stück dorthin (im Kreisverkehr eine Runde, geradeaus ein
+Stoß nach vorn). Die Animation spielt die Brille selbst ab. *Animierter
+Pfeil* in den Benachrichtigungs-Einstellungen schaltet zurück auf den
+kleinen Pfeil neben dem Text.
 
-| Neue Abbiegung, AR-Pfeil | Der Pfeil folgt dem Kopf |
+| Der Pfeil kommt näher | An der Abbiegung |
 | --- | --- |
-| ![Navigationsschritt mit AR-Pfeil](docs/images/de/navigation-ar.png) | ![AR-Pfeil bewegt sich mit dem Kopf](docs/images/de/navigation-ar.gif) |
+| ![Der Pfeil kommt näher](docs/images/de/navigation-arrow.gif) | ![Der Pfeil schwenkt in die Abbiegung](docs/images/de/navigation-arrow-turn.gif) |
 
-| AR-Pfeil aus | Hochschauen beim Navigieren |
+| Animierter Pfeil aus | Hochschauen beim Navigieren |
 | --- | --- |
 | ![Navigationsschritt](docs/images/de/navigation-step.png) | ![Dashboard beim Navigieren](docs/images/de/navigation-dashboard.png) |
 

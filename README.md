@@ -169,26 +169,24 @@ Pair the glasses in the open charging case (details in
 ### Navigation
 
 While Google Maps navigates on the phone, the glasses show the next turn:
-with the Maps arrow, the distance and the instruction at each new turn and
-at 500, 200 and 50 m (for 6 seconds); when you look up, the turn replaces
-the dashboard until the navigation ends. It needs the notification access
+the distance and the instruction at each new turn, at 500, 200 and 50 m
+and right at the turn (for 6 seconds); when you look up, the turn
+replaces the dashboard until the navigation ends. It needs the notification access
 (*Settings → Notifications*), where *Google Maps navigation* switches it
 off. Silent mode shows nothing.
 
-Below the text the turn appears as an **AR arrow**, painted on the street
-ahead in perspective: it comes closer and grows as the turn does, and the
-glasses move it with your head (looking down lifts it, looking up lowers
-it, tilting your head turns it back), so it stays roughly on the street.
-The glasses do this themselves, without the phone. *AR arrow* in the
-notification settings switches back to the small arrow beside the text.
-The G1 has no camera and no compass: the arrow cannot know where the
-crossing really is, it only follows how you hold your head.
+Above the text a **big arrow** shows the turn: with each step it comes
+closer, larger the nearer the turn is; right at the turn (about 25 m)
+it swings into the direction to take and moves a little that way (round
+once for a roundabout, a push ahead for straight on). The glasses play
+the animation themselves. *Animated arrow* in the notification settings
+switches back to the small arrow beside the text.
 
-| New turn, AR arrow | The arrow follows the head |
+| The arrow comes closer | At the turn |
 | --- | --- |
-| ![Navigation step with AR arrow](docs/images/en/navigation-ar.png) | ![AR arrow moving with the head](docs/images/en/navigation-ar.gif) |
+| ![The arrow coming closer](docs/images/en/navigation-arrow.gif) | ![The arrow swinging into the turn](docs/images/en/navigation-arrow-turn.gif) |
 
-| AR arrow off | Looking up while navigating |
+| Animated arrow off | Looking up while navigating |
 | --- | --- |
 | ![Navigation step](docs/images/en/navigation-step.png) | ![Dashboard while navigating](docs/images/en/navigation-dashboard.png) |
 

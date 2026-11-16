@@ -432,7 +432,7 @@ void dumpDesigns() {
           ),
           img,
         );
-        // The step with the AR arrow: the program draws it (resident).
+        // The step with its arrow: the program plays it (resident).
         {
           final p = SkResident.build(gestures: false, micArm: true);
           final ar = Uint8List.fromList(img);
@@ -441,19 +441,21 @@ void dumpDesigns() {
           ar.setRange(SkResident.pool, SkResident.pool + p.pool.length, p.pool);
           ar.setRange(SkResident.table, SkResident.table + 64, p.table);
           d.setUint32(SkResident.angle.address, 30, Endian.little);
-          for (final (name, turn, meters) in [
-            ('nav_ar_$lang', NavTurn.right, 200),
-            ('nav_ar_near_$lang', NavTurn.right, 40),
-            ('nav_ar_uturn_$lang', NavTurn.uTurn, 120),
+          for (final (name, turn, meters, atTurn) in [
+            ('nav_arrow_$lang', NavTurn.right, 200, false),
+            ('nav_arrow_turn_$lang', NavTurn.right, 20, true),
+            ('nav_arrow_uturn_$lang', NavTurn.uTurn, 20, true),
           ]) {
             save(
               name,
               ScouterConnection.textCode(
                 slotted,
-                nav.cardText,
+                atTurn
+                    ? nav.cardText.replaceFirst('200 m', '20 m')
+                    : nav.cardText,
                 maxCode: 242,
                 iconData: nav.icon,
-                arArrow: (turn: turn, meters: meters),
+                arArrow: (turn: turn, meters: meters, atTurn: atTurn),
               ),
               ar,
             );

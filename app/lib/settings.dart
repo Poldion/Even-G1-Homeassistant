@@ -48,10 +48,10 @@ class Settings {
   bool get forwardNavigation => _prefs.getBool('forward_navigation') ?? true;
   set forwardNavigation(bool v) => _prefs.setBool('forward_navigation', v);
 
-  /// The navigation's turn as an arrow on the street ahead that follows
-  /// the head (ScouterKit), instead of a small icon.
-  bool get navigationArArrow => _prefs.getBool('navigation_ar_arrow') ?? true;
-  set navigationArArrow(bool v) => _prefs.setBool('navigation_ar_arrow', v);
+  /// The navigation's turn as a big animated arrow above the text
+  /// (ScouterKit), instead of a small icon beside it.
+  bool get navigationArrow => _prefs.getBool('navigation_arrow') ?? true;
+  set navigationArrow(bool v) => _prefs.setBool('navigation_arrow', v);
 
   bool get forwardNotifications =>
       _prefs.getBool('forward_notifications') ?? true;

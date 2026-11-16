@@ -227,18 +227,16 @@ gone, and the app loads it again.
   frame (free while the app shows nothing) and shows them with one `DRAW`,
   instead of one `DRAW` per band, which built the page up visibly from top
   to bottom.
-- **AR arrow** (navigation): with a navigation step the app sends, below
-  the text, the turn as a perspective arrow on the street ahead
-  (`ArArrow`: its lines relative to a pivot, sin and cos per degree of
-  roll, its box per roll and the rows it keeps to, at `0x3A800`) and sets
-  `arrowOn`. Every 100 ms at most the program reads `PITCH` and `ROLL`;
-  when they changed it shifts the arrow by 3 px per degree of pitch
-  (at rest at −10°, as when walking) and turns it against the roll (up to
-  ±10°), clears the old and the new box in the app's frame, draws the
-  lines and shows that rectangle with one `DRAW`. A still head draws
-  nothing. The shift is limited per roll so that the arrow never covers
-  the text nor leaves the panel; `busy` 0, another text, a video or an
-  animation set `arrowOn` back to 0.
+- **Navigation arrow**: with a navigation step the app sends the arrow
+  above the text (`TurnArrow`: its lines relative to a pivot and up to 20
+  frames, each cos and sin × scale × 4096, a move and the box it covers,
+  at `0x3A800`) and sets `arrowOn`, in the packet of the timed `DRAW`, so
+  it never shows before its text. Every 50 ms the program draws the next
+  frame (clears the old and the new box in the app's frame, draws the
+  lines, shows that rectangle with one `DRAW`) and stops at the last,
+  which stays: coming closer (small and high to its size) or, at the
+  turn, swinging into its direction. `busy` 0, another text, a video or
+  an animation set `arrowOn` back to 0.
 - **Both eyes together** (arm-to-arm link, VM.md §6.9): only the right arm
   follows the tilt. On a change it sends `PEER_SEND` 1 (up) or 2 (down) to
   the left arm and switches 150 ms later; the left arm's `PEER` handler
