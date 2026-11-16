@@ -9,7 +9,10 @@ preview sheet:
 
 Needs Pillow.
 """
-import os, sys
+
+import os
+import sys
+
 from PIL import Image, ImageDraw
 
 RES = sys.argv[1]
@@ -29,31 +32,46 @@ ROOF = [(29.8, 54.3), (36.5, 48.4), (43.2, 54.3)]
 WALLS = [(32.0, 52.6), (32.0, 59.8), (41.0, 59.8), (41.0, 52.6)]
 DOOR = (35.3, 56.0, 2.4, 3.8)  # x, y, w, h
 
+
 def rr(x, y, w, h, r):
-    return (f"M{x+r},{y} H{x+w-r} A{r},{r} 0 0 1 {x+w},{y+r} V{y+h-r} "
-            f"A{r},{r} 0 0 1 {x+w-r},{y+h} H{x+r} A{r},{r} 0 0 1 {x},{y+h-r} "
-            f"V{y+r} A{r},{r} 0 0 1 {x+r},{y} Z")
+    return (
+        f"M{x + r},{y} H{x + w - r} A{r},{r} 0 0 1 {x + w},{y + r} V{y + h - r} "
+        f"A{r},{r} 0 0 1 {x + w - r},{y + h} H{x + r} A{r},{r} 0 0 1 {x},{y + h - r} "
+        f"V{y + r} A{r},{r} 0 0 1 {x + r},{y} Z"
+    )
+
 
 def vector(color, name, size=108, viewport=108, pad=0):
     lens = "\n".join(
-        f'    <path android:pathData="{rr(*l)}" android:fillColor="#00000000" '
-        f'android:strokeColor="{color}" android:strokeWidth="{STROKE}"/>' for l in LENSES)
+        f'    <path android:pathData="{rr(*lens_box)}" android:fillColor="#00000000" '
+        f'android:strokeColor="{color}" android:strokeWidth="{STROKE}"/>'
+        for lens_box in LENSES
+    )
     bx, by, bx2 = BRIDGE
-    bridge = (f'    <path android:pathData="M{bx},{by} Q{(bx+bx2)/2},{by-4} {bx2},{by}" '
-              f'android:fillColor="#00000000" android:strokeColor="{color}" '
-              f'android:strokeWidth="{STROKE}" android:strokeLineCap="round"/>')
+    bridge = (
+        f'    <path android:pathData="M{bx},{by} Q{(bx + bx2) / 2},{by - 4} {bx2},{by}" '
+        f'android:fillColor="#00000000" android:strokeColor="{color}" '
+        f'android:strokeWidth="{STROKE}" android:strokeLineCap="round"/>'
+    )
     lines = "\n".join(
-        f'    <path android:pathData="{rr(x, y, n, LINE_H, LINE_H/2)}" android:fillColor="{color}"/>'
-        for x, y, n in LINES)
+        f'    <path android:pathData="{rr(x, y, n, LINE_H, LINE_H / 2)}" android:fillColor="{color}"/>'
+        for x, y, n in LINES
+    )
+
     def poly(points):
-        return 'M' + ' L'.join(f'{x},{y}' for x, y in points)
-    house = '\n'.join(
+        return "M" + " L".join(f"{x},{y}" for x, y in points)
+
+    house = "\n".join(
         f'    <path android:pathData="{poly(pts)}" android:fillColor="#00000000" '
         f'android:strokeColor="{color}" android:strokeWidth="{HOUSE_STROKE}" '
-        f'android:strokeLineCap="round" android:strokeLineJoin="round"/>' for pts in (ROOF, WALLS))
+        f'android:strokeLineCap="round" android:strokeLineJoin="round"/>'
+        for pts in (ROOF, WALLS)
+    )
     dx, dy, dw, dh = DOOR
-    house += (f'\n    <path android:pathData="M{dx},{dy + dh} V{dy} H{dx + dw} V{dy + dh} Z" '
-              f'android:fillColor="{color}"/>')
+    house += (
+        f'\n    <path android:pathData="M{dx},{dy + dh} V{dy} H{dx + dw} V{dy + dh} Z" '
+        f'android:fillColor="{color}"/>'
+    )
     body = f"{lens}\n{bridge}\n{house}\n{lines}"
     if pad:
         body = f'  <group android:translateX="{-pad}" android:translateY="{-pad}">\n{body}\n  </group>'
@@ -67,25 +85,35 @@ def vector(color, name, size=108, viewport=108, pad=0):
 {body}
 </vector>
 '''
-    open(os.path.join(RES, 'drawable', name), 'w').write(xml)
+    open(os.path.join(RES, "drawable", name), "w").write(xml)
+
 
 def render(px, background=True, rounded=True, color=GREEN):
     s = 8
     W = px * s
-    im = Image.new('RGBA', (W, W), (0, 0, 0, 0))
+    im = Image.new("RGBA", (W, W), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
     if background:
-        d.rounded_rectangle([0, 0, W - 1, W - 1], radius=W * 0.22 if rounded else 0, fill=BG + (255,))
+        d.rounded_rectangle(
+            [0, 0, W - 1, W - 1], radius=W * 0.22 if rounded else 0, fill=BG + (255,)
+        )
     # Legacy icon: the 108 viewport's content (21..87) fills ~84 % of the square.
     k = W / 86.0
     off = -11 * k
-    def P(v): return off + v * k
+
+    def P(v):
+        return off + v * k
+
     sw = STROKE * k
     for x, y, w, h, r in LENSES:
         # The stroke centred on the outline, as in the vector.
         e = sw / 2
-        d.rounded_rectangle([P(x) - e, P(y) - e, P(x + w) + e, P(y + h) + e], radius=r * k + e,
-                            outline=color + (255,), width=round(sw))
+        d.rounded_rectangle(
+            [P(x) - e, P(y) - e, P(x + w) + e, P(y + h) + e],
+            radius=r * k + e,
+            outline=color + (255,),
+            width=round(sw),
+        )
     bx, by, bx2 = BRIDGE
     # Quadratic bridge as a polyline.
     pts = []
@@ -95,50 +123,80 @@ def render(px, background=True, rounded=True, color=GREEN):
         x = (1 - t) ** 2 * bx + 2 * (1 - t) * t * cx + t * t * bx2
         y = (1 - t) ** 2 * by + 2 * (1 - t) * t * cy + t * t * by
         pts.append((P(x), P(y)))
-    d.line(pts, fill=color + (255,), width=round(sw), joint='curve')
+    d.line(pts, fill=color + (255,), width=round(sw), joint="curve")
     for p in (pts[0], pts[-1]):
-        d.ellipse([p[0] - sw / 2, p[1] - sw / 2, p[0] + sw / 2, p[1] + sw / 2], fill=color + (255,))
+        d.ellipse(
+            [p[0] - sw / 2, p[1] - sw / 2, p[0] + sw / 2, p[1] + sw / 2],
+            fill=color + (255,),
+        )
     hs = HOUSE_STROKE * k
     for pts in (ROOF, WALLS):
         q = [(P(x), P(y)) for x, y in pts]
-        d.line(q, fill=color + (255,), width=round(hs), joint='curve')
+        d.line(q, fill=color + (255,), width=round(hs), joint="curve")
         for p in q:
-            d.ellipse([p[0] - hs / 2, p[1] - hs / 2, p[0] + hs / 2, p[1] + hs / 2], fill=color + (255,))
+            d.ellipse(
+                [p[0] - hs / 2, p[1] - hs / 2, p[0] + hs / 2, p[1] + hs / 2],
+                fill=color + (255,),
+            )
     dx, dy, dw, dh = DOOR
     d.rectangle([P(dx), P(dy), P(dx + dw), P(dy + dh)], fill=color + (255,))
     for x, y, n in LINES:
-        d.rounded_rectangle([P(x), P(y), P(x + n), P(y + LINE_H)], radius=LINE_H / 2 * k, fill=color + (255,))
+        d.rounded_rectangle(
+            [P(x), P(y), P(x + n), P(y + LINE_H)],
+            radius=LINE_H / 2 * k,
+            fill=color + (255,),
+        )
     return im.resize((px, px), Image.LANCZOS)
 
-if __name__ == '__main__':
-    os.makedirs(os.path.join(RES, 'drawable'), exist_ok=True)
-    vector('#FF46E678', 'ic_launcher_foreground.xml')
-    vector('#FFFFFFFF', 'ic_launcher_monochrome.xml')
+
+if __name__ == "__main__":
+    os.makedirs(os.path.join(RES, "drawable"), exist_ok=True)
+    vector("#FF46E678", "ic_launcher_foreground.xml")
+    vector("#FFFFFFFF", "ic_launcher_monochrome.xml")
     # Status bar icon: 24 dp, the glasses' area of the 108 viewport.
-    vector('#FFFFFFFF', 'ic_notification.xml', size=24, viewport=72, pad=18)
-    os.makedirs(os.path.join(RES, 'mipmap-anydpi-v26'), exist_ok=True)
-    open(os.path.join(RES, 'mipmap-anydpi-v26', 'ic_launcher.xml'), 'w').write('''<?xml version="1.0" encoding="utf-8"?>
+    vector("#FFFFFFFF", "ic_notification.xml", size=24, viewport=72, pad=18)
+    os.makedirs(os.path.join(RES, "mipmap-anydpi-v26"), exist_ok=True)
+    open(
+        os.path.join(RES, "mipmap-anydpi-v26", "ic_launcher.xml"), "w"
+    ).write("""<?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/ic_launcher_background"/>
     <foreground android:drawable="@drawable/ic_launcher_foreground"/>
     <monochrome android:drawable="@drawable/ic_launcher_monochrome"/>
 </adaptive-icon>
-''')
-    open(os.path.join(RES, 'values', 'ic_launcher_background.xml'), 'w').write('''<?xml version="1.0" encoding="utf-8"?>
+""")
+    open(
+        os.path.join(RES, "values", "ic_launcher_background.xml"), "w"
+    ).write("""<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#0E1512</color>
 </resources>
-''')
-    for d, px in [('mdpi', 48), ('hdpi', 72), ('xhdpi', 96), ('xxhdpi', 144), ('xxxhdpi', 192)]:
-        render(px).save(os.path.join(RES, f'mipmap-{d}', 'ic_launcher.png'), optimize=True)
+""")
+    for d, px in [
+        ("mdpi", 48),
+        ("hdpi", 72),
+        ("xhdpi", 96),
+        ("xxhdpi", 144),
+        ("xxxhdpi", 192),
+    ]:
+        render(px).save(
+            os.path.join(RES, f"mipmap-{d}", "ic_launcher.png"), optimize=True
+        )
     # Previews: legacy, round (as a launcher masks it), next to each other.
     big = render(512)
-    mask = Image.new('L', (512, 512), 0); ImageDraw.Draw(mask).ellipse([0, 0, 511, 511], fill=255)
-    sq = render(512, rounded=False); rnd = Image.new('RGBA', (512, 512), (0, 0, 0, 0)); rnd.paste(sq, (0, 0), mask)
-    sheet = Image.new('RGBA', (1600, 600), (245, 245, 245, 255))
-    sheet.alpha_composite(big, (40, 44)); sheet.alpha_composite(rnd, (600, 44))
-    small = render(96); sheet.alpha_composite(small, (1180, 100))
-    small2 = render(48); sheet.alpha_composite(small2, (1310, 124))
-    note = render(96, background=False, color=(60, 60, 60)); sheet.alpha_composite(note, (1180, 300))
+    mask = Image.new("L", (512, 512), 0)
+    ImageDraw.Draw(mask).ellipse([0, 0, 511, 511], fill=255)
+    sq = render(512, rounded=False)
+    rnd = Image.new("RGBA", (512, 512), (0, 0, 0, 0))
+    rnd.paste(sq, (0, 0), mask)
+    sheet = Image.new("RGBA", (1600, 600), (245, 245, 245, 255))
+    sheet.alpha_composite(big, (40, 44))
+    sheet.alpha_composite(rnd, (600, 44))
+    small = render(96)
+    sheet.alpha_composite(small, (1180, 100))
+    small2 = render(48)
+    sheet.alpha_composite(small2, (1310, 124))
+    note = render(96, background=False, color=(60, 60, 60))
+    sheet.alpha_composite(note, (1180, 300))
     sheet.save(OUT)
-    big.save(OUT.replace('.png', '_512.png'))
+    big.save(OUT.replace(".png", "_512.png"))
