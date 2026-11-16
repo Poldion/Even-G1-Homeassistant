@@ -175,7 +175,20 @@ the dashboard until the navigation ends. It needs the notification access
 (*Settings → Notifications*), where *Google Maps navigation* switches it
 off. Silent mode shows nothing.
 
-| New turn | Looking up while navigating |
+Below the text the turn appears as an **AR arrow**, painted on the street
+ahead in perspective: it comes closer and grows as the turn does, and the
+glasses move it with your head (looking down lifts it, looking up lowers
+it, tilting your head turns it back), so it stays roughly on the street.
+The glasses do this themselves, without the phone. *AR arrow* in the
+notification settings switches back to the small arrow beside the text.
+The G1 has no camera and no compass: the arrow cannot know where the
+crossing really is, it only follows how you hold your head.
+
+| New turn, AR arrow | The arrow follows the head |
+| --- | --- |
+| ![Navigation step with AR arrow](docs/images/en/navigation-ar.png) | ![AR arrow moving with the head](docs/images/en/navigation-ar.gif) |
+
+| AR arrow off | Looking up while navigating |
 | --- | --- |
 | ![Navigation step](docs/images/en/navigation-step.png) | ![Dashboard while navigating](docs/images/en/navigation-dashboard.png) |
 

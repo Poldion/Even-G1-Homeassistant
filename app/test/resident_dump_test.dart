@@ -432,6 +432,33 @@ void dumpDesigns() {
           ),
           img,
         );
+        // The step with the AR arrow: the program draws it (resident).
+        {
+          final p = SkResident.build(gestures: false, micArm: true);
+          final ar = Uint8List.fromList(img);
+          final d = ByteData.sublistView(ar);
+          ar.setRange(SkResident.code, SkResident.code + p.code.length, p.code);
+          ar.setRange(SkResident.pool, SkResident.pool + p.pool.length, p.pool);
+          ar.setRange(SkResident.table, SkResident.table + 64, p.table);
+          d.setUint32(SkResident.angle.address, 30, Endian.little);
+          for (final (name, turn, meters) in [
+            ('nav_ar_$lang', NavTurn.right, 200),
+            ('nav_ar_near_$lang', NavTurn.right, 40),
+            ('nav_ar_uturn_$lang', NavTurn.uTurn, 120),
+          ]) {
+            save(
+              name,
+              ScouterConnection.textCode(
+                slotted,
+                nav.cardText,
+                maxCode: 242,
+                iconData: nav.icon,
+                arArrow: (turn: turn, meters: meters),
+              ),
+              ar,
+            );
+          }
+        }
         save(
           'nav_dash_$lang',
           ScouterConnection.textCode(

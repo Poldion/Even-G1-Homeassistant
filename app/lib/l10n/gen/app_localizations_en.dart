@@ -438,6 +438,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Arrow and distance on the glasses: at each new turn and at 500, 200 and 50 m; on head-up instead of the dashboard while you navigate.';
 
   @override
+  String get notifSetArArrow => 'AR arrow';
+
+  @override
+  String get notifSetArArrowHelp =>
+      'The turn as an arrow painted on the street ahead, below the text: it comes closer as the turn does, moves with your head and tilts back when you tilt it, so it stays roughly on the street. Off: a small arrow beside the text.';
+
+  @override
   String get notifSetNoAccess => 'Access to notifications missing';
 
   @override

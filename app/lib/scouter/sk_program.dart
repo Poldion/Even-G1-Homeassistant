@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import '../navigation/ar_arrow.dart';
 import 'sk_asm.dart';
 import 'sk_protocol.dart';
 import 'sk_style.dart';
@@ -42,7 +43,13 @@ class SkResident {
   static const band = 0x37000;
   static const bandRows = 32;
   static const code = 0x39800;
-  static const codeEnd = SkArena.smallFont;
+  static const codeEnd = arrowData;
+
+  /// The navigation's AR arrow (ArArrow.data, written by the app): its
+  /// lines, where it turns, the rows it keeps to, sin and cos per roll and
+  /// its box per roll; up to the small font.
+  static const arrowData = 0x3A800;
+  static const arrowDataEnd = SkArena.smallFont;
 
   // State words (written by the app unless noted).
   static final busy = SkW.at(state); // 1 while the app shows something
@@ -95,6 +102,26 @@ class SkResident {
   static final _rotation = SkW.at(state + 188);
   // When the gyroscope last gave a sample (program).
   static final _gyroAt = SkW.at(state + 192);
+
+  /// 1 while the app shows a navigation step with the AR arrow: the
+  /// program draws the arrow below the text (written by the app).
+  static final arrowOn = SkW.at(state + 196);
+
+  // The arrow as last drawn (program; the app resets them with a new
+  // step): shift and roll index, when, its box (x0, y0, x1, y1) and the
+  // rectangle to clear and draw (x, y, w, h).
+  static final arrowShift = SkW.at(state + 200);
+  static final arrowRoll = SkW.at(state + 204);
+  static final arrowAt = SkW.at(state + 208);
+  static final arrowBox = SkW.at(state + 212);
+  static final _arrowRect = SkW.at(state + 228);
+
+  /// The arrow is drawn again at most this often, and only if the head
+  /// moved.
+  static const arrowPeriodUs = 100000;
+
+  /// No arrow drawn yet ([arrowShift]).
+  static const arrowNone = 0x7fffffff;
 
   // Connection symbols at the dashboard's top right (written by the app):
   // Home Assistant unreachable, where they go (y 0: nowhere); the program
@@ -394,8 +421,10 @@ class SkResident {
     a.call('statusCheck');
     a.end();
 
-    // USER1: the app set the clock anew.
+    // USER1: the app set the clock anew, or shows a navigation step with
+    // the AR arrow.
     a.label('user1');
+    a.call('arrow');
     a.call('armTimer');
     a.end();
 
@@ -431,6 +460,15 @@ class SkResident {
       a.bges(r2, c0, 'armSet');
       a.mov(r0, r1);
       a.label('armSet');
+      // The AR arrow follows the head: soon again while it shows.
+      a.beq(arrowOn, c0, 'armWrite');
+      a.beq(busy, c0, 'armWrite');
+      a.sysRead(r1, a.c(SkProp.timeUs));
+      a.add(r1, r1, a.c(arrowPeriodUs));
+      a.sub(r2, r1, r0);
+      a.bges(r2, c0, 'armWrite');
+      a.mov(r0, r1);
+      a.label('armWrite');
       a.sysWrite(a.c(SkProp.timer), r0);
     }
     a.ret();
@@ -852,6 +890,145 @@ class SkResident {
     a.beq(r1, statusShown, 'ret');
     a.jmp('stDraw');
 
+    // arrow: the navigation's AR arrow below the app's text (ArArrow),
+    // moved with the head's pitch and turned against its roll, so it stays
+    // roughly on the street; drawn again only when the head moved, at most
+    // every arrowPeriodUs.
+    a.label('arrow');
+    a.beq(arrowOn, c0, 'ret');
+    a.beq(busy, c0, 'ret');
+    a.sysRead(r0, a.c(SkProp.timeUs));
+    a.sub(r1, r0, arrowAt);
+    a.bltu(r1, a.c(arrowPeriodUs), 'ret');
+    {
+      SkW d(int offset) => SkW.at(arrowData + offset);
+      final unknown = a.c(SkProp.unknown);
+      final rollMax = a.c(ArArrow.rollMax);
+      // r2 = the roll's index (0…2·rollMax).
+      a.sysRead(r2, a.c(SkProp.roll));
+      a.bne(r2, unknown, 'arRoll');
+      a.mov(r2, c0);
+      a.label('arRoll');
+      a.bges(r2, a.c(-ArArrow.rollMax), 'arRollLo');
+      a.mov(r2, a.c(-ArArrow.rollMax));
+      a.label('arRollLo');
+      a.bges(rollMax, r2, 'arRollHi');
+      a.mov(r2, rollMax);
+      a.label('arRollHi');
+      a.add(r2, r2, rollMax);
+      // r1 = the shift: (pitch + pitchAdd) · gain, 0 without a pitch.
+      a.sysRead(r1, a.c(SkProp.pitch));
+      a.beq(r1, unknown, 'arRest');
+      a.add(r1, r1, d(24));
+      a.mul(r1, r1, d(20));
+      a.jmp('arBox');
+      a.label('arRest');
+      a.mov(r1, c0);
+      // r5…r8 = the box at this roll; the shift keeps it within top and
+      // bottom.
+      a.label('arBox');
+      a.mul(r9, r2, a.c(4));
+      final boxes = a.c(arrowData + ArArrow.boxesAt);
+      for (final r in [r5, r6, r7, r8]) {
+        a.ld32(r, boxes, r9);
+        a.add(r9, r9, c1);
+      }
+      a.sub(r10, d(12), r6);
+      a.bges(r1, r10, 'arLo');
+      a.mov(r1, r10);
+      a.label('arLo');
+      a.sub(r10, d(16), r8);
+      a.bges(r10, r1, 'arHi');
+      a.mov(r1, r10);
+      a.label('arHi');
+      a.bne(r1, arrowShift, 'arGo');
+      a.beq(r2, arrowRoll, 'ret');
+      a.label('arGo');
+      a.mov(arrowAt, r0);
+      a.mov(arrowShift, r1);
+      a.mov(arrowRoll, r2);
+      a.add(r6, r6, r1);
+      a.add(r8, r8, r1);
+      // Never outside the panel (the frame's rows go on into the arena).
+      a.blts(r5, c0, 'ret');
+      a.blts(r6, c0, 'ret');
+      a.bges(r7, a.c(SkPanel.width), 'ret');
+      a.bges(r8, a.c(SkPanel.height), 'ret');
+      // r9…r12 = the old box and the new one together; the new one kept.
+      final b0 = SkW(arrowBox.index), b1 = SkW(arrowBox.index + 1);
+      final b2 = SkW(arrowBox.index + 2), b3 = SkW(arrowBox.index + 3);
+      a.mov(r9, r5);
+      a.bges(b0, r9, 'arU0');
+      a.mov(r9, b0);
+      a.label('arU0');
+      a.mov(r10, r6);
+      a.bges(b1, r10, 'arU1');
+      a.mov(r10, b1);
+      a.label('arU1');
+      a.mov(r11, r7);
+      a.bges(r11, b2, 'arU2');
+      a.mov(r11, b2);
+      a.label('arU2');
+      a.mov(r12, r8);
+      a.bges(r12, b3, 'arU3');
+      a.mov(r12, b3);
+      a.label('arU3');
+      a.mov(b0, r5);
+      a.mov(b1, r6);
+      a.mov(b2, r7);
+      a.mov(b3, r8);
+      a.sub(r11, r11, r9);
+      a.add(r11, r11, c1);
+      a.sub(r12, r12, r10);
+      a.add(r12, r12, c1);
+      final rx = SkW(_arrowRect.index), ry = SkW(_arrowRect.index + 1);
+      final rw = SkW(_arrowRect.index + 2), rh = SkW(_arrowRect.index + 3);
+      a.mov(rx, r9);
+      a.mov(ry, r10);
+      a.mov(rw, r11);
+      a.mov(rh, r12);
+      final frame = a.c(SkArena.frame), stride = a.c(SkPanel.stride);
+      a.fill(frame, stride, r9, r10, r11, r12, c0);
+      // The lines: each end turned by the roll (sin r3, cos r4, × 4096)
+      // around (cx, cy) and shifted.
+      a.ld32(r3, a.c(arrowData + ArArrow.sinAt), r2);
+      a.ld32(r4, a.c(arrowData + ArArrow.cosAt), r2);
+      a.mov(r5, c0);
+      a.beq(d(0), c0, 'arDraw');
+      a.label('arLine');
+      a.mul(r6, r5, a.c(5));
+      final segments = a.c(arrowData + ArArrow.segmentsAt);
+      for (final r in [r7, r8, r9, r10, r12]) {
+        a.ld32(r, segments, r6);
+        a.add(r6, r6, c1);
+      }
+      final q = a.c(4096);
+      void turn(SkW x, SkW y) {
+        a.mul(r13, x, r4);
+        a.mul(r14, y, r3);
+        a.add(r13, r13, r14);
+        a.divs(r13, r13, q);
+        a.add(r13, r13, d(4));
+        a.mul(r14, y, r4);
+        a.mul(r2, x, r3);
+        a.sub(r14, r14, r2);
+        a.divs(r14, r14, q);
+        a.add(r14, r14, d(8));
+        a.add(r14, r14, r1);
+        a.mov(x, r13);
+        a.mov(y, r14);
+      }
+
+      turn(r7, r8);
+      turn(r9, r10);
+      a.line(frame, stride, r7, r8, r9, r10, r12);
+      a.add(r5, r5, c1);
+      a.bltu(r5, d(0), 'arLine');
+      a.label('arDraw');
+      a.draw(frame, stride, rx, ry, rx, ry, rw, rh);
+      a.ret();
+    }
+
     // hide: the panel off again unless the app shows something.
     a.label('hide');
     a.beq(shown, c0, 'ret');
@@ -902,6 +1079,7 @@ class SkResident {
       a.call('headCheck');
       a.call('light');
       a.label('noHead');
+      a.call('arrow');
       a.add(_tick, _tick, c1);
       a.beq(_cool, c0, 'sample');
       a.sub(_cool, _cool, c1);
@@ -963,6 +1141,7 @@ class SkResident {
       a.call('headCheck');
       a.call('tick');
       a.call('watch');
+      a.call('arrow');
       a.call('armTimer');
       a.end();
     }
@@ -998,6 +1177,7 @@ class SkResident {
     assert(labelH <= bandRows && standH <= bandRows);
     final bytes = a.build();
     if (code + bytes.length > codeEnd) throw StateError('program too long');
+    assert(arrowData + ArArrow.dataMax <= arrowDataEnd);
     final t = ByteData(64);
     void entry(int trigger, String label) =>
         t.setUint32(trigger * 4, a.addressOf(label), Endian.little);

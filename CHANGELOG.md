@@ -9,7 +9,15 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.55.0] - 2026-11-16
+
 ### Added
+- Navigation: an **AR arrow** below the turn's text, painted on the
+  street ahead in perspective; it comes closer and grows as the turn
+  does. The glasses move it with the head themselves (looking down lifts
+  it, looking up lowers it, tilting the head turns it back), redrawn only
+  when the head moves, at most ten times a second. On by default;
+  *Settings → Notifications → AR arrow* switches back to the small arrow.
 - The state tests also cover head gestures, the gyro check, the head-up
   angle, the server status, the dashboard label, navigation, brightness
   and wear detection; a guard fails when the glasses connection gets a
@@ -721,7 +729,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.3...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.55.0...HEAD
+[0.55.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.3...app-v0.55.0
 [0.54.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...app-v0.54.3
 [0.54.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...app-v0.54.2
 [0.54.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...app-v0.54.1

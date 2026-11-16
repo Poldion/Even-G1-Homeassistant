@@ -13,6 +13,8 @@ import '../l10n/l10n.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../navigation/ar_arrow.dart';
+import '../navigation/navigation.dart';
 import 'sk_anim.dart';
 import 'sk_assets.dart';
 import 'sk_asm.dart';
@@ -272,6 +274,12 @@ class ScouterConnection extends G1Connection {
   @override
   void setNavigationIcon(Uint8List? icon) => _navigationIcon =
       icon != null && icon.length == SkIcons.bytes ? icon : null;
+
+  ({NavTurn turn, int? meters})? _navigationArrow;
+
+  @override
+  void setNavigationArrow(({NavTurn turn, int? meters})? arrow) =>
+      _navigationArrow = arrow;
 
   /// A video plays (hidden player): nothing else draws meanwhile.
   bool _video = false;
@@ -1092,18 +1100,12 @@ class ScouterConnection extends G1Connection {
     var failed = false;
     Timer? startTimer;
     try {
-      // The app shows something (busy = 1, shown = 0): a black panel.
+      // The app shows something (busy = 1, shown = 0, no arrow): a black
+      // panel.
       final start =
-          (SkCode()..write(SkResident.busy.address, const [
-                1,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-              ]))
+          (SkCode()
+                ..write(SkResident.busy.address, const [1, 0, 0, 0, 0, 0, 0, 0])
+                ..write(SkResident.arrowOn.address, const [0, 0, 0, 0]))
               .take();
       final ok = await Future.wait(
         arms.map((a) => a.link.run([start, layout.startCode()])),
@@ -1806,7 +1808,10 @@ class ScouterConnection extends G1Connection {
     if (!_appShowing && !_video) {
       final font = await _textFont();
       await arm.link.run([
-        (SkCode()..write(SkResident.busy.address, const [0, 0, 0, 0])).take(),
+        (SkCode()
+              ..write(SkResident.busy.address, const [0, 0, 0, 0])
+              ..write(SkResident.arrowOn.address, const [0, 0, 0, 0]))
+            .take(),
         _residentState(font),
       ]);
     }
@@ -2186,6 +2191,7 @@ class ScouterConnection extends G1Connection {
     final maxCode = arms.map((a) => a.link.maxPacket).reduce(min) - 2;
     // The navigation's arrow goes with the text, the others from slots.
     final iconData = icon == SkIcons.navigation ? _navigationIcon : null;
+    final arArrow = icon == SkIcons.navigation ? _navigationArrow : null;
     if (icon == SkIcons.navigation) icon = null;
     final name = icon == null ? null : _iconName(icon);
     if (name != null) {
@@ -2203,6 +2209,7 @@ class ScouterConnection extends G1Connection {
       maxCode: maxCode,
       icon: iconAt,
       iconData: iconData,
+      arArrow: arArrow,
       serverOnline: serverOnline,
       draw: !synced,
       style: style,
@@ -2262,6 +2269,7 @@ class ScouterConnection extends G1Connection {
     required int maxCode,
     int? icon,
     Uint8List? iconData,
+    ({NavTurn turn, int? meters})? arArrow,
     bool draw = true,
     G1TextStyle style = G1TextStyle.plain,
     bool micStand = false,
@@ -2269,6 +2277,27 @@ class ScouterConnection extends G1Connection {
     SkFont? smallFont,
     bool? serverOnline,
   }) {
+    // The navigation's AR arrow below the text, if there is room for it
+    // (else its icon beside the text).
+    ArArrow? arrow;
+    if (arArrow != null) {
+      final plain = SkLayout.of(
+        font,
+        wrap(font, text, SkPanel.width - 2 * textLeft),
+        G1TextStyle.plain,
+        top: top,
+        left: textLeft,
+      );
+      final textEnd = plain.lines.isEmpty
+          ? top
+          : plain.lines.map((l) => l.y).reduce(max) + font.lineSpacing;
+      arrow = ArArrow.build(
+        arArrow.turn,
+        arArrow.meters,
+        top: textEnd + arrowGap,
+      );
+      if (arrow != null) iconData = null;
+    }
     final withIcon = icon != null || iconData != null;
     final left = withIcon ? iconTextLeft : textLeft;
     final layout = SkLayout.of(
@@ -2288,8 +2317,9 @@ class ScouterConnection extends G1Connection {
     }
 
     // The app shows something: the resident program draws nothing now
-    // (busy = 1, shown = 0).
+    // (busy = 1, shown = 0), no arrow until this one's is there.
     code.write(SkResident.busy.address, const [1, 0, 0, 0, 0, 0, 0, 0]);
+    code.write(SkResident.arrowOn.address, const [0, 0, 0, 0]);
     room(skOpSize(7));
     code.fill(
       SkArena.frame,
@@ -2442,8 +2472,34 @@ class ScouterConnection extends G1Connection {
       );
     }
     if (code.length > 0) packets.add(code.take());
+    if (arrow != null) {
+      // The arrow's lines and tables, then the program draws it and
+      // follows the head (USER1).
+      packets.addAll(skUpload(SkResident.arrowData, arrow.data(), maxCode));
+      packets.add(
+        (SkCode()
+              ..write(
+                SkResident.arrowOn.address,
+                SkLib.u32s([
+                  1,
+                  SkResident.arrowNone,
+                  0,
+                  0,
+                  arrow.cx,
+                  arrow.cy,
+                  arrow.cx,
+                  arrow.cy,
+                ]),
+              )
+              ..raise(SkTrigger.user1))
+            .take(),
+      );
+    }
     return packets;
   }
+
+  /// Rows between the navigation's text and its AR arrow.
+  static const arrowGap = 14;
 
   /// The baseline of a label of [SkResident.labelH] rows in [font].
   static int labelBase(SkFont font) =>
@@ -2499,6 +2555,7 @@ class ScouterConnection extends G1Connection {
     _appShowing = false;
     final code = SkCode()
       ..write(SkResident.busy.address, const [0, 0, 0, 0])
+      ..write(SkResident.arrowOn.address, const [0, 0, 0, 0])
       ..sysWrite(SkProp.panel, 0)
       // The microphone keeps the panel on: the program draws its stand.
       ..raise(SkTrigger.user3);

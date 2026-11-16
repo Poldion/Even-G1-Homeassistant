@@ -196,6 +196,8 @@ class _Scenario {
               ),
       ),
     ),
+    'ar arrow setting': () =>
+        settings.navigationArArrow = !settings.navigationArArrow,
     'brightness': () => run(() async {
       await g1.setBrightnessCurve(rnd.nextBool());
       await g1.setAutoBrightnessOffset(rnd.nextInt(9) - 4);
@@ -235,6 +237,11 @@ class _Scenario {
       } else if (!bridge.assistRunning) {
         // Nothing shown: the program may draw.
         expect(busy, 0, reason: why('${side.code}: nothing shown, busy'));
+      }
+      // The AR arrow only under a navigation step the app shows.
+      if (word(side, SkResident.arrowOn) != 0) {
+        expect(shown, isTrue, reason: why('${side.code}: arrow without text'));
+        expect(busy, 1, reason: why('${side.code}: arrow, busy'));
       }
       final wanted =
           (bridge.haConfig.dashboardOnHeadUp || bridge.navigation.active) &&
@@ -324,6 +331,7 @@ const _coverage = <String, String>{
   'setHomeAssistantOnline': 'action: server online',
   'setMic': 'action: microphone',
   'setNavigationIcon': 'action: navigation',
+  'setNavigationArrow': 'action: navigation',
   'setSilentMode': 'action: silent mode',
   'setWearDetection': 'action: wear detection',
   'two': 'exempt: helper',

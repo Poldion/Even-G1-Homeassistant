@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../navigation/navigation.dart';
 import 'protocol.dart';
 
 /// Placeholder for the time in the dashboard (Home Assistant sends it when
@@ -162,6 +163,10 @@ abstract class G1Connection extends ChangeNotifier {
   /// The arrow of the next turn while a navigation runs (50 × 50 pixels at
   /// 4 bpp), shown with the icon name `navigation`; null when it ended.
   void setNavigationIcon(Uint8List? icon) {}
+
+  /// The next turn as an AR arrow below the navigation's text (ScouterKit):
+  /// its kind and distance, null for the icon instead.
+  void setNavigationArrow(({NavTurn turn, int? meters})? arrow) {}
 
   /// Switches the display off.
   Future<bool> blankScreen();

@@ -74,6 +74,15 @@ class _NotificationSettingsState extends State<NotificationSettings>
               value: settings.forwardNavigation,
               onChanged: (v) => setState(() => settings.forwardNavigation = v),
             ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: Text(tr.notifSetArArrow),
+              subtitle: Text(tr.notifSetArArrowHelp),
+              value: settings.navigationArArrow,
+              onChanged: settings.forwardNavigation
+                  ? (v) => setState(() => settings.navigationArArrow = v)
+                  : null,
+            ),
             if (!_granted)
               Card(
                 child: ListTile(

@@ -83,6 +83,7 @@ class SkProp {
   static const inCase = 0x13;
   static const worn = 0x14;
   static const pitch = 0x1B;
+  static const roll = 0x1D;
   static const light = 0x1C;
   static const brightness = 0x20;
   static const panel = 0x21;

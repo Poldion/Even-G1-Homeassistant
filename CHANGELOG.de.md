@@ -9,7 +9,16 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.55.0] - 2026-11-16
+
 ### Added
+- Navigation: ein **AR-Pfeil** unter dem Text der Abbiegung, perspektivisch
+  auf die Straße vor dir gemalt; er rückt näher und wird größer, je näher
+  die Abbiegung kommt. Die Brille bewegt ihn selbst mit dem Kopf
+  (Runterschauen hebt ihn, Hochschauen senkt ihn, Kopfneigen dreht ihn
+  zurück), neu gezeichnet nur, wenn sich der Kopf bewegt, höchstens
+  zehnmal pro Sekunde. Standardmäßig an; *Einstellungen →
+  Benachrichtigungen → AR-Pfeil* schaltet zurück auf den kleinen Pfeil.
 - Die Zustandstests decken auch Kopfgesten, Gyro-Prüfung, Winkel,
   Serverstatus, Dashboard-Beschriftung, Navigation, Helligkeit und
   Trageerkennung ab; ein Wächter schlägt fehl, wenn die Verbindung zur
@@ -749,7 +758,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.3...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.55.0...HEAD
+[0.55.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.3...app-v0.55.0
 [0.54.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...app-v0.54.3
 [0.54.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...app-v0.54.2
 [0.54.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...app-v0.54.1

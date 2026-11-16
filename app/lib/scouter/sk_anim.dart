@@ -243,7 +243,9 @@ class SkAnimation {
     }
 
     // The app's texts and the dashboard program draw nothing meanwhile.
-    code.write(SkResident.busy.address, const [1, 0, 0, 0, 0, 0, 0, 0]);
+    code
+      ..write(SkResident.busy.address, const [1, 0, 0, 0, 0, 0, 0, 0])
+      ..write(SkResident.arrowOn.address, const [0, 0, 0, 0]);
     // Texts and the scene's fixed words.
     final glyphs = BytesBuilder();
     final words = <int>[region.x, region.y, region.w, region.h];

@@ -440,6 +440,13 @@ class AppLocalizationsDe extends AppLocalizations {
       'Pfeil und Entfernung auf der Brille: bei jeder neuen Abbiegung und bei 500, 200 und 50 m; beim Hochschauen statt des Dashboards, solange du navigierst.';
 
   @override
+  String get notifSetArArrow => 'AR-Pfeil';
+
+  @override
+  String get notifSetArArrowHelp =>
+      'Die Abbiegung als Pfeil, der unter dem Text auf die Straße vor dir gemalt ist: Er rückt näher, je näher die Abbiegung ist, wandert mit dem Kopf mit und kippt zurück, wenn du ihn neigst, sodass er ungefähr auf der Straße bleibt. Aus: ein kleiner Pfeil neben dem Text.';
+
+  @override
   String get notifSetNoAccess => 'Zugriff auf Benachrichtigungen fehlt';
 
   @override

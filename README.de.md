@@ -183,7 +183,21 @@ Dafür braucht die App den Zugriff auf Benachrichtigungen (*Einstellungen →
 Benachrichtigungen*), dort schaltet *Google-Maps-Navigation* sie ab. Im
 Ruhemodus erscheint nichts.
 
-| Neue Abbiegung | Hochschauen beim Navigieren |
+Unter dem Text erscheint die Abbiegung als **AR-Pfeil**, perspektivisch
+auf die Straße vor dir gemalt: Er rückt näher und wird größer, je näher
+die Abbiegung kommt, und die Brille bewegt ihn mit deinem Kopf
+(Runterschauen hebt ihn, Hochschauen senkt ihn, Kopfneigen dreht ihn
+zurück), sodass er ungefähr auf der Straße bleibt. Das macht die Brille
+selbst, ohne das Handy. *AR-Pfeil* in den Benachrichtigungs-Einstellungen
+schaltet zurück auf den kleinen Pfeil neben dem Text. Die G1 hat weder
+Kamera noch Kompass: Der Pfeil weiß nicht, wo die Kreuzung wirklich liegt,
+er folgt nur der Haltung deines Kopfes.
+
+| Neue Abbiegung, AR-Pfeil | Der Pfeil folgt dem Kopf |
+| --- | --- |
+| ![Navigationsschritt mit AR-Pfeil](docs/images/de/navigation-ar.png) | ![AR-Pfeil bewegt sich mit dem Kopf](docs/images/de/navigation-ar.gif) |
+
+| AR-Pfeil aus | Hochschauen beim Navigieren |
 | --- | --- |
 | ![Navigationsschritt](docs/images/de/navigation-step.png) | ![Dashboard beim Navigieren](docs/images/de/navigation-dashboard.png) |
 
