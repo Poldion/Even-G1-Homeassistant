@@ -176,9 +176,8 @@ Die Brille im offenen Ladeetui koppeln (Details in
 ### Navigation
 
 Navigiert Google Maps auf dem Handy, zeigt die Brille die nächste
-Abbiegung: die Entfernung und die Anweisung bei
-jeder neuen Abbiegung, bei 500, 200 und 50 m und direkt an der Abbiegung
-(für 6 Sekunden); beim
+Abbiegung: die Entfernung und die Anweisung bei jeder neuen Abbiegung,
+bei 500, 200 und 50 m und direkt an der Abbiegung (für 6 Sekunden); beim
 Hochschauen ersetzt die Abbiegung das Dashboard, bis die Navigation endet.
 Dafür braucht die App den Zugriff auf Benachrichtigungen (*Einstellungen →
 Benachrichtigungen*), dort schaltet *Google-Maps-Navigation* sie ab. Im
