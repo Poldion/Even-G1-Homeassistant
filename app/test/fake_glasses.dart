@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
+import 'package:even_g1_ha/navigation/navigation.dart';
 
 /// Glasses for widget and unit tests: always answer, draw nothing, record
 /// the texts sent.
@@ -13,6 +14,10 @@ class FakeGlasses extends G1Connection {
   final icons = <String?>[];
   ({bool onHeadUp, String text})? dashboard;
   Uint8List? navigationIcon;
+
+  /// The AR arrow last set, and every call.
+  ({NavTurn turn, int? meters})? navigationArrow;
+  final arrowCalls = <({NavTurn turn, int? meters})?>[];
   bool? mic;
 
   /// A gesture as if it came from the glasses.
@@ -72,6 +77,10 @@ class FakeGlasses extends G1Connection {
 
   @override
   void setNavigationIcon(Uint8List? icon) => navigationIcon = icon;
+
+  @override
+  void setNavigationArrow(({NavTurn turn, int? meters})? arrow) =>
+      arrowCalls.add(navigationArrow = arrow);
 
   @override
   Future<bool> blankScreen() async => true;

@@ -2202,6 +2202,8 @@ class ScouterConnection extends G1Connection {
     // Emojis into the arms' font slots first.
     text = await _emojify(text, arms);
     final synced = arms.length == 2 && arms.every((a) => a.clock.known);
+    // Synced: the arrow goes on with the timed DRAW, not before it.
+    final arrowOn = <_SkArm, Uint8List>{};
     List<Uint8List> codes(_SkArm arm) => textCode(
       font,
       text,
@@ -2210,6 +2212,7 @@ class ScouterConnection extends G1Connection {
       icon: iconAt,
       iconData: iconData,
       arArrow: arArrow,
+      arrowOn: synced ? (code) => arrowOn[arm] = code : null,
       serverOnline: serverOnline,
       draw: !synced,
       style: style,
@@ -2222,7 +2225,7 @@ class ScouterConnection extends G1Connection {
     // Both frames are ready: both eyes show them at the same moment.
     final at = SkClock.hostNow() + _drawLeadUs(arms);
     final shown = await Future.wait(
-      arms.map((a) => a.link.run([drawAtCode(a.clock.toArm(at))])),
+      arms.map((a) => a.link.run([drawAtCode(a.clock.toArm(at)), ?arrowOn[a]])),
     );
     _scheduleLightRead();
     return shown.every((r) => r);
@@ -2270,6 +2273,7 @@ class ScouterConnection extends G1Connection {
     int? icon,
     Uint8List? iconData,
     ({NavTurn turn, int? meters})? arArrow,
+    void Function(Uint8List code)? arrowOn,
     bool draw = true,
     G1TextStyle style = G1TextStyle.plain,
     bool micStand = false,
@@ -2476,7 +2480,9 @@ class ScouterConnection extends G1Connection {
       // The arrow's lines and tables, then the program draws it and
       // follows the head (USER1).
       packets.addAll(skUpload(SkResident.arrowData, arrow.data(), maxCode));
-      packets.add(
+      // With [arrowOn] the caller sends it after its own DRAW: the arrow
+      // never shows before its text.
+      (arrowOn ?? packets.add)(
         (SkCode()
               ..write(
                 SkResident.arrowOn.address,

@@ -28,6 +28,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'ar_arrow_check.dart';
 import 'fake_arms.dart';
 import 'fake_arms.dart' as fake show input;
 
@@ -42,6 +43,7 @@ class _Scenario {
     // Half the runs on a busy link: the arm answers "microphone on" late.
     if (seed.isOdd) arms.micOnDelay = const Duration(milliseconds: 300);
     bridge = Bridge(settings, g1: g1);
+    bridge.display.screen.addListener(() => _screenChanges++);
     // The arms' clocks and the video follow the fake time.
     SkClock.fakeNow = () => 1000000 + async.elapsed.inMicroseconds;
   }
@@ -58,6 +60,27 @@ class _Scenario {
   final steps = <String>[];
 
   bool _mic = false;
+
+  /// The navigation's cards (texts shown with its arrow), the screen's
+  /// changes, and whether the AR arrow must show after the last action
+  /// (null: no navigation step shown by it).
+  final _navCards = <String>{};
+  int _screenChanges = 0;
+  bool? _arrowWanted;
+  final _font = loadTestFont();
+
+  /// A navigation step (null: it ends) the way the phone sends it.
+  void navigate(NavUpdate? update) {
+    final changes = _screenChanges;
+    run(() => bridge.onNavigation(update));
+    final card = bridge.navigation.cardText;
+    if (update != null && card.isNotEmpty) _navCards.add(card);
+    if (update != null &&
+        _screenChanges > changes &&
+        bridge.display.screen.value == card) {
+      _arrowWanted = settings.navigationArArrow;
+    }
+  }
 
   int word(G1Side side, SkW w) =>
       ByteData.sublistView(arms.arenas[side]!)
@@ -185,17 +208,49 @@ class _Scenario {
         run(() => g1.setHomeAssistantOnline(rnd.nextInt(3) != 0)),
     'dashboard label': () =>
         run(() => g1.setDashboardLabel(rnd.nextBool() ? 'REC' : null)),
-    'navigation': () => run(
-      () => bridge.onNavigation(
-        rnd.nextInt(3) == 0
-            ? null
-            : NavUpdate(
-                title: '${50 + rnd.nextInt(500)} m',
-                text: rnd.nextBool() ? 'Rechts abbiegen' : 'Links abbiegen',
-                subText: '14:32',
-              ),
-      ),
+    'navigation': () => navigate(
+      rnd.nextInt(3) == 0
+          ? null
+          : NavUpdate(
+              title: '${50 + rnd.nextInt(500)} m',
+              text: rnd.nextBool() ? 'Rechts abbiegen' : 'Links abbiegen',
+              subText: '14:32',
+            ),
     ),
+    // Every kind of turn, in English and German, with and without a
+    // distance.
+    'navigation turns': () {
+      const steps = [
+        ('Turn right onto Main St', 'Rechts abbiegen auf Hauptstraße'),
+        ('Turn left onto Elm St', 'Links abbiegen auf Ulmenweg'),
+        ('Keep left at the fork', 'Leicht links halten'),
+        ('Take exit 12', 'Ausfahrt 12 nehmen'),
+        ('Sharp right', 'Scharf rechts abbiegen'),
+        ('Sharp left', 'Scharf links abbiegen'),
+        ('Make a U-turn', 'Wenden'),
+        (
+          'At the roundabout, take the 2nd exit',
+          'Im Kreisverkehr die 2. Ausfahrt',
+        ),
+        ('Continue on B27', 'Weiter auf B27'),
+        ('You have arrived at your destination', 'Ziel erreicht'),
+      ];
+      final (en, de) = steps[rnd.nextInt(steps.length)];
+      final distance = [
+        '',
+        '${rnd.nextInt(40)} m',
+        '${40 + rnd.nextInt(800)} m',
+        '1,${rnd.nextInt(10)} km',
+        '0.${1 + rnd.nextInt(9)} mi',
+      ][rnd.nextInt(5)];
+      navigate(
+        NavUpdate(
+          title: distance,
+          text: rnd.nextBool() ? en : de,
+          subText: rnd.nextBool() ? '12 min · 14:32' : '',
+        ),
+      );
+    },
     'ar arrow setting': () =>
         settings.navigationArArrow = !settings.navigationArArrow,
     'brightness': () => run(() async {
@@ -242,6 +297,36 @@ class _Scenario {
       if (word(side, SkResident.arrowOn) != 0) {
         expect(shown, isTrue, reason: why('${side.code}: arrow without text'));
         expect(busy, 1, reason: why('${side.code}: arrow, busy'));
+        final screen = bridge.display.screen.value;
+        expect(
+          _navCards.contains(screen),
+          isTrue,
+          reason: why('${side.code}: arrow under "$screen"'),
+        );
+        // Below that text and on the panel, whatever the head does.
+        final lines = ScouterConnection.wrap(
+          _font,
+          screen ?? '',
+          640 - 2 * ScouterConnection.textLeft,
+        ).length;
+        expect(
+          arrowProblems(
+            arms.arenas[side]!,
+            textBottom: ScouterConnection.textTop + lines * _font.lineSpacing,
+          ),
+          isEmpty,
+          reason: why('${side.code}: the arrow\'s words'),
+        );
+      }
+      // A step just shown: its arrow with the setting on, its icon without.
+      final wantArrow = _arrowWanted;
+      if (wantArrow != null &&
+          bridge.display.screen.value == bridge.navigation.cardText) {
+        expect(
+          word(side, SkResident.arrowOn),
+          wantArrow ? 1 : 0,
+          reason: why('${side.code}: AR arrow ${wantArrow ? 'on' : 'off'}'),
+        );
       }
       final wanted =
           (bridge.haConfig.dashboardOnHeadUp || bridge.navigation.active) &&
@@ -263,6 +348,7 @@ class _Scenario {
       _mic ? 1 : 0,
       reason: why('microphone stand'),
     );
+    _arrowWanted = null;
   }
 
   void play(int count) {
@@ -331,7 +417,7 @@ const _coverage = <String, String>{
   'setHomeAssistantOnline': 'action: server online',
   'setMic': 'action: microphone',
   'setNavigationIcon': 'action: navigation',
-  'setNavigationArrow': 'action: navigation',
+  'setNavigationArrow': 'action: navigation turns',
   'setSilentMode': 'action: silent mode',
   'setWearDetection': 'action: wear detection',
   'two': 'exempt: helper',
@@ -408,6 +494,43 @@ void main() {
       s.wait(const Duration(seconds: 1));
       s.check('double tap');
       expect(s.word(G1Side.right, SkResident.busy), 0);
+      s.dispose();
+    });
+  });
+
+  test('a navigation step shows its AR arrow until it closes', () {
+    fakeAsync((async) {
+      final s = _Scenario(async, settings, 0)..setUp();
+      int arrow(G1Side side) => s.word(side, SkResident.arrowOn);
+      final step = NavUpdate(
+        title: '200 m',
+        text: 'Turn right onto Main St',
+        subText: '14:32',
+      );
+      s.navigate(step);
+      s.wait(const Duration(seconds: 1));
+      s.check('navigation');
+      for (final side in G1Side.values) {
+        expect(arrow(side), 1, reason: '${side.code}: the step\'s arrow');
+      }
+      // The step closes by itself: the arrow with it.
+      s.wait(Bridge.navigationDuration);
+      s.check('closed');
+      expect(s.bridge.display.active, isFalse);
+      for (final side in G1Side.values) {
+        expect(arrow(side), 0, reason: '${side.code}: closed');
+      }
+      // Silent mode: no step on the glasses, no arrow.
+      s.run(() => s.bridge.setSilentMode(true));
+      s.wait(const Duration(seconds: 3));
+      s.navigate(
+        NavUpdate(title: '40 m', text: 'Links abbiegen', subText: '14:33'),
+      );
+      s.wait(const Duration(seconds: 1));
+      s.check('silent navigation');
+      for (final side in G1Side.values) {
+        expect(arrow(side), 0, reason: '${side.code}: silent mode');
+      }
       s.dispose();
     });
   });

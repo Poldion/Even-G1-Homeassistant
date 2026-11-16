@@ -345,7 +345,10 @@ class ArArrow {
   /// The arrow's lines on the ground (x right, z ahead, m) and their levels.
   static _Ground _ground(NavTurn turn, double zt) {
     final g = _Ground();
-    const l = 2.4;
+    // What reaches to the side shrinks with a near turn, so the arrow
+    // grows as a whole instead of only getting wider.
+    final k = ((zt - _z0) / 5).clamp(0.5, 1.0);
+    final l = 2.4 * k;
     final s = switch (turn) {
       NavTurn.right || NavTurn.slightRight || NavTurn.sharpRight => 1.0,
       _ => -1.0,
@@ -356,11 +359,15 @@ class ArArrow {
       case NavTurn.left || NavTurn.right:
         g.band([(0, _z0), (0, zt), (s * l, zt)], head: true);
       case NavTurn.slightLeft || NavTurn.slightRight:
-        g.band([(0, _z0), (0, zt), (s * 1.9, zt + 1.9)], head: true);
+        g.band([(0, _z0), (0, zt), (s * 1.9 * k, zt + 1.9 * k)], head: true);
       case NavTurn.sharpLeft || NavTurn.sharpRight:
-        g.band([(0, _z0), (0, zt + 1), (s * 1.9, zt + 1 - 1.5)], head: true);
+        g.band([
+          (0, _z0),
+          (0, zt + k),
+          (s * 1.9 * k, zt + k - 1.5 * k),
+        ], head: true);
       case NavTurn.uTurn:
-        const r = 1.0;
+        final r = 1.0 * k;
         g.band([
           (0, _z0),
           (0, zt),
