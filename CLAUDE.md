@@ -40,3 +40,12 @@ words gets an action in `app/test/consistency_test.dart` (and a rule in
   and see the test fail.
 
 See `docs/DEVELOPMENT.md` → "Program and app in agreement".
+
+## Tests by a second agent
+
+After every feature or fix, and before the release, hand the change to the
+`test-writer` agent (`.claude/agents/test-writer.md`): give it the commit
+range or the files touched and what the change should do, not your own
+reading of it. It writes the tests and checks independently, proves each
+fails on broken code, and reports bugs as failing tests. Fix what it finds,
+then release. Small text-only or doc-only changes need no test agent.
