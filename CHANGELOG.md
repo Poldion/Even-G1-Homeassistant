@@ -19,6 +19,12 @@ integration share the same version number.
   way. The glasses play the animation themselves; it no longer follows
   the head. The setting is now *Animated arrow*.
 
+### Fixed
+- Navigation: when Maps' distance jumped past a mark (300 m, then 20 m),
+  the glasses showed the step again for every mark it skipped, and the
+  arrow would not swing at the turn. Every mark already reached now
+  counts at once.
+
 ## [0.55.0] - 2026-11-16
 
 ### Added

@@ -20,6 +20,12 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
   ab; der Kopfbewegung folgt er nicht mehr. Die Einstellung heißt jetzt
   *Animierter Pfeil*.
 
+### Fixed
+- Navigation: Sprang die Entfernung aus Maps an einer Marke vorbei (300 m,
+  dann 20 m), zeigte die Brille den Schritt für jede übersprungene Marke
+  erneut, und der Pfeil schwenkte an der Abbiegung nicht. Jede schon
+  erreichte Marke zählt jetzt sofort.
+
 ## [0.55.0] - 2026-11-16
 
 ### Added

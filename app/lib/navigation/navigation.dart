@@ -286,8 +286,8 @@ class Navigation {
     if (m == null) return false;
     for (final t in thresholds) {
       if (m <= t && _announced.add(t)) {
-        // The nearer marks count as reached too.
-        _announced.addAll(thresholds.where((s) => s > t));
+        // Every mark already reached counts (updates may skip some).
+        _announced.addAll(thresholds.where((s) => m <= s));
         return true;
       }
     }

@@ -2491,9 +2491,6 @@ class ScouterConnection extends G1Connection {
     return packets;
   }
 
-  /// Rows between the navigation's text and its AR arrow.
-  static const arrowGap = 14;
-
   /// The baseline of a label of [SkResident.labelH] rows in [font].
   static int labelBase(SkFont font) =>
       (SkResident.labelH - font.ascent - font.descent) ~/ 2 + font.ascent;

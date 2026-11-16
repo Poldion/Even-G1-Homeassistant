@@ -18,6 +18,7 @@ import 'package:even_g1_ha/bridge.dart';
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/navigation/navigation.dart';
+import 'package:even_g1_ha/navigation/turn_arrow.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_asm.dart';
 import 'package:even_g1_ha/scouter/sk_clock.dart';
@@ -68,18 +69,53 @@ class _Scenario {
   int _screenChanges = 0;
   bool? _arrowWanted;
 
+  /// The arrows the bridge handed to the glasses (their words), and the
+  /// one of the step just shown: coming closer, or at the turn its swing.
+  final _arrows = <String>{};
+  String? _arrowShown;
+
+  /// The arrow's words for [update] as the step is shown now.
+  String _arrowFor(NavUpdate update) =>
+      (bridge.navigation.atTurn
+              ? TurnArrow.at(update.turn)
+              : TurnArrow.approach(update.meters))
+          .data()
+          .join(',');
+
   /// A navigation step (null: it ends) the way the phone sends it.
   void navigate(NavUpdate? update) {
     final changes = _screenChanges;
     run(() => bridge.onNavigation(update));
     final card = bridge.navigation.cardText;
     if (update != null && card.isNotEmpty) _navCards.add(card);
+    final arrow =
+        update != null && settings.forwardNavigation && settings.navigationArrow
+        ? _arrowFor(update)
+        : null;
+    if (arrow != null) _arrows.add(arrow);
     if (update != null &&
         _screenChanges > changes &&
         bridge.display.screen.value == card) {
       _arrowWanted = settings.navigationArrow;
+      _arrowShown = arrow;
     }
   }
+
+  /// One step of a drive towards a turn: the same instruction ever nearer
+  /// (500, 200, 50 m and right at the turn), then the next turn.
+  int _drive = 0;
+  int _driveTurn = 0;
+  static const _driveMeters = [700, 480, 190, 45, 20, 8];
+  static const _driveSteps = [
+    'Rechts abbiegen auf Hauptstraße',
+    'Turn left onto Elm St',
+    'Make a U-turn',
+    'Im Kreisverkehr die 2. Ausfahrt',
+    'Sharp right',
+    'Leicht links halten',
+    'Continue on B27',
+    'Ziel erreicht',
+  ];
 
   int word(G1Side side, SkW w) =>
       ByteData.sublistView(arms.arenas[side]!)
@@ -250,6 +286,21 @@ class _Scenario {
         ),
       );
     },
+    // A drive: the step comes closer, its arrow with it, until it swings
+    // into the turn.
+    'navigation drive': () {
+      if (_drive == _driveMeters.length) {
+        _drive = 0;
+        _driveTurn = rnd.nextInt(_driveSteps.length);
+      }
+      navigate(
+        NavUpdate(
+          title: '${_driveMeters[_drive++]} m',
+          text: _driveSteps[_driveTurn],
+          subText: '14:32',
+        ),
+      );
+    },
     'arrow setting': () => settings.navigationArrow = !settings.navigationArrow,
     'brightness': () => run(() async {
       await g1.setBrightnessCurve(rnd.nextBool());
@@ -307,6 +358,18 @@ class _Scenario {
           isEmpty,
           reason: why('${side.code}: the arrow\'s words'),
         );
+        // The words of an arrow the bridge handed over, never another's.
+        final words = arms.arenas[side]!.sublist(
+          SkResident.arrowData,
+          SkResident.arrowData +
+              TurnArrow.segmentsAt +
+              20 * word(side, SkW.at(SkResident.arrowData)),
+        );
+        expect(
+          _arrows.contains(words.join(',')),
+          isTrue,
+          reason: why('${side.code}: arrow of no step'),
+        );
       }
       // A step just shown: its arrow with the setting on, its icon without.
       final wantArrow = _arrowWanted;
@@ -317,6 +380,27 @@ class _Scenario {
           wantArrow ? 1 : 0,
           reason: why('${side.code}: arrow ${wantArrow ? 'on' : 'off'}'),
         );
+        // The step's own arrow: coming closer, or right at the turn the
+        // swing into its direction.
+        final shownArrow = _arrowShown;
+        if (wantArrow && shownArrow != null) {
+          final a = arms.arenas[side]!;
+          final words = a
+              .sublist(
+                SkResident.arrowData,
+                SkResident.arrowData + shownArrow.split(',').length,
+              )
+              .join(',');
+          expect(
+            words == shownArrow,
+            isTrue,
+            reason: why(
+              '${side.code}: not the arrow of the step just shown '
+              '(${bridge.navigation.atTurn ? 'at the turn' : 'coming closer'}'
+              ', ${bridge.navigation.current?.meters} m)',
+            ),
+          );
+        }
       }
       final wanted =
           (bridge.haConfig.dashboardOnHeadUp || bridge.navigation.active) &&
@@ -339,6 +423,7 @@ class _Scenario {
       reason: why('microphone stand'),
     );
     _arrowWanted = null;
+    _arrowShown = null;
   }
 
   void play(int count) {
@@ -520,6 +605,70 @@ void main() {
       s.check('silent navigation');
       for (final side in G1Side.values) {
         expect(arrow(side), 0, reason: '${side.code}: silent mode');
+      }
+      s.dispose();
+    });
+  });
+
+  test('a drive: the arrow comes closer, then swings into the turn', () {
+    fakeAsync((async) {
+      final s = _Scenario(async, settings, 0)..setUp();
+      Uint8List words(G1Side side, TurnArrow a) => s.arms.arenas[side]!.sublist(
+        SkResident.arrowData,
+        SkResident.arrowData + a.data().length,
+      );
+      for (final (m, atTurn) in [
+        (700, false),
+        (480, false),
+        (190, false),
+        (45, false),
+        (20, true),
+      ]) {
+        s.steps.add('$m m');
+        s.navigate(
+          NavUpdate(
+            title: '$m m',
+            text: 'Links abbiegen auf Ulmenweg',
+            subText: '14:32',
+          ),
+        );
+        s.wait(const Duration(milliseconds: 500));
+        s.check('$m m');
+        expect(s.bridge.navigation.atTurn, atTurn, reason: '$m m');
+        final want = atTurn
+            ? TurnArrow.at(NavTurn.left)
+            : TurnArrow.approach(m);
+        for (final side in G1Side.values) {
+          expect(
+            s.word(side, SkResident.arrowOn),
+            1,
+            reason: '${side.code} $m m',
+          );
+          expect(words(side, want), want.data(), reason: '${side.code} $m m');
+        }
+      }
+      // Past the turn: no step shown again, the swing stays.
+      s.navigate(
+        NavUpdate(
+          title: '5 m',
+          text: 'Links abbiegen auf Ulmenweg',
+          subText: '14:32',
+        ),
+      );
+      s.wait(const Duration(milliseconds: 500));
+      final swing = TurnArrow.at(NavTurn.left);
+      for (final side in G1Side.values) {
+        expect(words(side, swing), swing.data(), reason: side.code);
+      }
+      // The arrow switched off: the next step with its icon.
+      s.settings.navigationArrow = false;
+      s.navigate(
+        NavUpdate(title: '300 m', text: 'Rechts abbiegen', subText: '14:32'),
+      );
+      s.wait(const Duration(milliseconds: 500));
+      s.check('arrow off');
+      for (final side in G1Side.values) {
+        expect(s.word(side, SkResident.arrowOn), 0, reason: side.code);
       }
       s.dispose();
     });
