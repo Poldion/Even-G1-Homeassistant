@@ -811,8 +811,14 @@ class Bridge extends ChangeNotifier {
       case G1Event.singleTap:
         if (!await _onTapDashboard(gesture)) await display.onTap(event.side);
       case G1Event.doubleTap:
-        display.onDismissed();
+        // The glasses' program keeps the text (and leaves the dashboard
+        // to the app) until the app switches the display off.
         _dashboardShown = false;
+        if (display.active || display.screen.value != null) {
+          await display.clear();
+        } else {
+          display.onDismissed();
+        }
         if (assistRunning) await _abortAssist();
       case G1Event.headUp:
         unawaited(_onHeadUp());

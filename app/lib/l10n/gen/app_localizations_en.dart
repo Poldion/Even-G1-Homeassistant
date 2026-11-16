@@ -707,6 +707,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String skLogDashboardWriteFailed(String arm) {
+    return '$arm: the dashboard did not reach the arm';
+  }
+
+  @override
+  String skLogDashboardRewrite(String arm) {
+    return '$arm: dashboard written again';
+  }
+
+  @override
   String skLogProgramCheck(String arm, String reason) {
     return '$arm: the program does not run as it should ($reason)';
   }

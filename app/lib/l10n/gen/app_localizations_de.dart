@@ -712,6 +712,16 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String skLogDashboardWriteFailed(String arm) {
+    return '$arm: Das Dashboard kam nicht beim Bügel an';
+  }
+
+  @override
+  String skLogDashboardRewrite(String arm) {
+    return '$arm: Dashboard erneut geschrieben';
+  }
+
+  @override
   String skLogProgramCheck(String arm, String reason) {
     return '$arm: Das Programm läuft nicht wie es soll ($reason)';
   }

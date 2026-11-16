@@ -564,6 +564,24 @@ void main() {
       expect(starts(G1Side.right), before + 3);
     });
 
+    test(
+      'the minute check frees a dashboard a lost text end left off',
+      () async {
+        arms.props[SkProp.inCase] = 0;
+        await g1.fakeSetup();
+        int busy(G1Side side) =>
+            ByteData.sublistView(arms.arenas[side]!)
+                .getUint32(SkResident.busy.address, Endian.little);
+        // A text's end got lost on the way: the app shows nothing, the
+        // program still thinks it does.
+        arms.arenas[G1Side.right]![SkResident.busy.address] = 1;
+        await g1.fakeCheckPrograms();
+        for (final side in G1Side.values) {
+          expect(busy(side), 0);
+        }
+      },
+    );
+
     test('a text is drawn on both arms', () async {
       g1.fakeReady(epoch: arms.epoch);
       expect(await g1.sendText('Hallo Welt\nZweite Zeile'), isTrue);

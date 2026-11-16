@@ -183,6 +183,8 @@
   "skLogOffsetOnArms": "Automatische Helligkeit {offset} auf der Brille",
   "skLogOtherArm": "{arm} arm meldet sich als anderer Bügel",
   "skLogPacketError": "{arm}: Fehler in Paket {seq}: {error} (op 0x{op}, Detail {detail})",
+  "skLogDashboardWriteFailed": "{arm}: Das Dashboard kam nicht beim Bügel an",
+  "skLogDashboardRewrite": "{arm}: Dashboard erneut geschrieben",
   "skLogProgramCheck": "{arm}: Das Programm läuft nicht wie es soll ({reason})",
   "skLogProgramHalted": "{arm}: Programm angehalten: {error} (0x{address}, op 0x{op})",
   "skLogProgramNotLoaded": "{arm}: Programm nicht geladen",

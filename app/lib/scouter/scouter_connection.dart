@@ -56,6 +56,10 @@ class _SkArm {
   /// MTU, services and setup run after the link came up.
   bool linking = false;
   bool probing = false;
+
+  /// The last dashboard write reached the arm (else the minute check
+  /// writes it again).
+  bool dashboardWritten = true;
   int mtu = 23;
 
   /// Epoch of the arm's session (VM.md §6.2); null before the first.
@@ -1036,6 +1040,9 @@ class ScouterConnection extends G1Connection {
     // Time for the first packets to arrive before the first frame.
     final at = SkClock.hostNow() + _drawLeadUs(arms) + 150000;
     _debug(on ? tr.skLogAnimationOn : tr.skLogAnimationOff);
+    _animationUntil = DateTime.now().add(
+      Duration(microseconds: anim.durationUs + 2000000),
+    );
     await Future.wait(
       arms.map(
         (a) => a.link.run(
@@ -1463,7 +1470,12 @@ class ScouterConnection extends G1Connection {
     final last = SkCode()..write(SkResident.count.address, u32(_residentRows));
     if (redraw) last.raise(SkTrigger.user0);
     codes.add(last.take());
-    return arm.link.run(codes);
+    final ok = await arm.link.run(codes);
+    if (!ok && arm.dashboardWritten) {
+      _debug(tr.skLogDashboardWriteFailed(arm.side.code));
+    }
+    arm.dashboardWritten = ok;
+    return ok;
   }
 
   /// Host code that sets the program's clock: where its digits are, when
@@ -1758,7 +1770,11 @@ class ScouterConnection extends G1Connection {
       }
 
       final first = await status();
-      if (first == null || first.ok) continue;
+      if (first == null) continue;
+      if (first.ok) {
+        await _healResident(arm);
+        continue;
+      }
       await Future<void>.delayed(const Duration(seconds: 1));
       final again = await status();
       if (again == null || again.ok || !arm.resident) continue;
@@ -1772,6 +1788,25 @@ class ScouterConnection extends G1Connection {
       );
       arm.resident = false;
       await _revive(arm);
+    }
+  }
+
+  /// The program runs: its view of the app set again, in case a write got
+  /// lost (a text's end that never arrived leaves the dashboard off).
+  Future<void> _healResident(_SkArm arm) async {
+    if (_video || DateTime.now().isBefore(_animationUntil)) return;
+    if (!arm.dashboardWritten) {
+      _debug(tr.skLogDashboardRewrite(arm.side.code));
+      await _writeDashboard(arm, redraw: true);
+    }
+    // The app shows nothing: the program may draw (busy = 0); the panel is
+    // left as it is.
+    if (!_appShowing && !_video) {
+      final font = await _textFont();
+      await arm.link.run([
+        (SkCode()..write(SkResident.busy.address, const [0, 0, 0, 0])).take(),
+        _residentState(font),
+      ]);
     }
   }
 
@@ -2755,6 +2790,9 @@ class ScouterConnection extends G1Connection {
 
   /// The app shows a text (its frame is on the panel).
   bool _appShowing = false;
+
+  /// The silent mode animation plays until then (it ends with busy = 0).
+  DateTime _animationUntil = DateTime(0);
 
   /// Counts setMic calls (a later one wins).
   int _micTurn = 0;

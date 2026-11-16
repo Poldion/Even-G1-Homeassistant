@@ -1202,6 +1202,18 @@ abstract class AppLocalizations {
     int detail,
   );
 
+  /// No description provided for @skLogDashboardWriteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: the dashboard did not reach the arm'**
+  String skLogDashboardWriteFailed(String arm);
+
+  /// No description provided for @skLogDashboardRewrite.
+  ///
+  /// In en, this message translates to:
+  /// **'{arm}: dashboard written again'**
+  String skLogDashboardRewrite(String arm);
+
   /// No description provided for @skLogProgramCheck.
   ///
   /// In en, this message translates to:

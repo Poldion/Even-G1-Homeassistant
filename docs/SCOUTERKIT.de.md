@@ -228,6 +228,11 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   gestellt ist noch auf seinen Aufruf wartet (es stellt ihn bei jedem
   `TIMER` neu; zweimal gefragt, eine Sekunde auseinander), wird neu
   gestartet, wie nach einem `HALT`, höchstens dreimal in 10 Minuten.
+  Ein Programm, das läuft, bekommt in derselben Prüfung seine Einstellungen
+  erneut: `busy` zurück auf 0, solange die App nichts zeigt (ein verlorenes
+  Ende eines Texts hielte das Dashboard sonst für immer fern), und das
+  Dashboard neu geschrieben, wenn es beim letzten Mal nicht beim Bügel
+  ankam.
 - **Auf einmal**: Das Programm setzt alle Streifen des Dashboards im Bild
   der App zusammen (frei, solange die App nichts zeigt) und zeigt sie mit
   einem `DRAW`, statt mit einem `DRAW` pro Streifen, bei dem sich die Seite

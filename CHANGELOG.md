@@ -9,6 +9,17 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.54.2] - 2026-11-16
+
+### Fixed
+- The dashboard stopped coming on head up after a while: a double tap
+  closed a text only in the app, and the glasses' program kept waiting for
+  the app to finish. A double tap now switches the display off on the
+  glasses too.
+- As a safety net, the minute check tells a running program again that the
+  app shows nothing and writes the dashboard again if its last write did
+  not reach the arm (logged).
+
 ## [0.54.1] - 2026-11-16
 
 ### Fixed
@@ -691,7 +702,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...HEAD
+[0.54.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...app-v0.54.2
 [0.54.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...app-v0.54.1
 [0.54.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...app-v0.54.0
 [0.53.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...app-v0.53.1

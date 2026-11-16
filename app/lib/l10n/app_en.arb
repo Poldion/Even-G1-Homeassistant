@@ -679,6 +679,22 @@
       }
     }
   },
+  "skLogDashboardWriteFailed": "{arm}: the dashboard did not reach the arm",
+  "@skLogDashboardWriteFailed": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
+  "skLogDashboardRewrite": "{arm}: dashboard written again",
+  "@skLogDashboardRewrite": {
+    "placeholders": {
+      "arm": {
+        "type": "String"
+      }
+    }
+  },
   "skLogProgramCheck": "{arm}: the program does not run as it should ({reason})",
   "@skLogProgramCheck": {
     "placeholders": {

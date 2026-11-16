@@ -9,6 +9,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.54.2] - 2026-11-16
+
+### Fixed
+- Das Dashboard kam nach einer Weile beim Hochschauen nicht mehr: Ein
+  Doppeltipp schloss einen Text nur in der App, und das Programm der Brille
+  wartete weiter darauf, dass die App fertig wird. Ein Doppeltipp schaltet
+  die Anzeige jetzt auch auf der Brille aus.
+- Als Sicherheitsnetz sagt die minütliche Prüfung einem laufenden Programm
+  erneut, dass die App nichts zeigt, und schreibt das Dashboard neu, wenn
+  es beim letzten Mal nicht beim Bügel ankam (protokolliert).
+
 ## [0.54.1] - 2026-11-16
 
 ### Fixed
@@ -718,7 +729,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...HEAD
+[0.54.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...app-v0.54.2
 [0.54.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...app-v0.54.1
 [0.54.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...app-v0.54.0
 [0.53.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...app-v0.53.1
