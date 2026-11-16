@@ -42,7 +42,10 @@ after every step. A failure names the seed and the last steps.
 
 A new feature that draws on the glasses, switches something on them or
 writes the program's words gets an entry in `_Scenario.actions` (and, if
-it adds a state, a rule in `check`). Before relying on a new rule, break
+it adds a state, a rule in `check`). A guard in the same file lists every
+public method of `G1Connection` and `ScouterConnection` in `_coverage`,
+each with the action that calls it or the reason it needs none; a new
+method fails the tests until it is listed. Before relying on a new rule, break
 the code on purpose once and see the test fail.
 
 ## Texts in two languages

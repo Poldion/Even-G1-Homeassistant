@@ -10,12 +10,14 @@
 /// glasses or changes the program's words belongs in [_Scenario.actions].
 library;
 
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:even_g1_ha/bridge.dart';
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
+import 'package:even_g1_ha/navigation/navigation.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_asm.dart';
 import 'package:even_g1_ha/scouter/sk_clock.dart';
@@ -176,6 +178,30 @@ class _Scenario {
       ),
     ),
     'silent mode': () => run(() => bridge.setSilentMode(rnd.nextBool())),
+    'head gestures': () => run(() => bridge.setHeadGestures(rnd.nextBool())),
+    'gyro check': () => run(() => bridge.setHeadUpGyroCheck(rnd.nextBool())),
+    'head-up angle': () => run(() => g1.setHeadUpAngle(10 + rnd.nextInt(30))),
+    'server online': () =>
+        run(() => g1.setHomeAssistantOnline(rnd.nextInt(3) != 0)),
+    'dashboard label': () =>
+        run(() => g1.setDashboardLabel(rnd.nextBool() ? 'REC' : null)),
+    'navigation': () => run(
+      () => bridge.onNavigation(
+        rnd.nextInt(3) == 0
+            ? null
+            : NavUpdate(
+                title: '${50 + rnd.nextInt(500)} m',
+                text: rnd.nextBool() ? 'Rechts abbiegen' : 'Links abbiegen',
+                subText: '14:32',
+              ),
+      ),
+    ),
+    'brightness': () => run(() async {
+      await g1.setBrightnessCurve(rnd.nextBool());
+      await g1.setAutoBrightnessOffset(rnd.nextInt(9) - 4);
+      await g1.setBrightness(rnd.nextInt(101), auto: rnd.nextBool());
+    }),
+    'wear detection': () => run(() => bridge.setWearDetection(rnd.nextBool())),
     'minute check': () => run(g1.fakeCheckPrograms),
     'short wait': () => wait(Duration(milliseconds: rnd.nextInt(800))),
     'long wait': () => wait(const Duration(seconds: 12)),
@@ -211,7 +237,8 @@ class _Scenario {
         expect(busy, 0, reason: why('${side.code}: nothing shown, busy'));
       }
       final wanted =
-          bridge.haConfig.dashboardOnHeadUp && bridge.silentMode != true;
+          (bridge.haConfig.dashboardOnHeadUp || bridge.navigation.active) &&
+          bridge.silentMode != true;
       final flags = word(side, SkResident.flags);
       expect(
         flags & SkResident.flagDashboard != 0,
@@ -264,6 +291,73 @@ class _Scenario {
   }
 }
 
+/// What the connection to the glasses can do, and where this test covers
+/// it: an action in [_Scenario.actions], or why it needs none. A new
+/// method makes the guard below fail until it is listed here.
+const _coverage = <String, String>{
+  'blankScreen': 'action: clear',
+  'connect': 'exempt: the scenario starts connected (fakeSetup)',
+  'disconnect': 'exempt: the scenario stays connected',
+  'dispose': 'exempt: end of the scenario',
+  'emitAudio': 'exempt: audio to the app, nothing on the glasses',
+  'emitEvent': 'action: tap',
+  'layoutPages': 'exempt: computes pages, writes nothing',
+  'note': 'exempt: logging',
+  'notifyListeners': 'exempt: app state only',
+  'playSilentModeAnimation': 'action: silent mode',
+  'playVideo': 'action: video',
+  'readBrightnessLevel': 'exempt: reads only',
+  'readWearDetection': 'exempt: reads only',
+  'receive': 'action: tap',
+  'refreshBattery': 'exempt: reads only',
+  'sendText': 'action: text',
+  'setAutoBrightnessOffset': 'action: brightness',
+  'setBrightness': 'action: brightness',
+  'setBrightnessCurve': 'action: brightness',
+  'setBrightnessLevel': 'action: brightness',
+  'setDashboard': 'action: dashboard text',
+  'setDashboardLabel': 'action: dashboard label',
+  'setFastConnection': 'exempt: Bluetooth priority only',
+  'setHeadGestures': 'action: head gestures',
+  'setHeadUpAngle': 'action: head-up angle',
+  'setHeadUpGyroCheck': 'action: gyro check',
+  'setHomeAssistantOnline': 'action: server online',
+  'setMic': 'action: microphone',
+  'setNavigationIcon': 'action: navigation',
+  'setSilentMode': 'action: silent mode',
+  'setWearDetection': 'action: wear detection',
+  'two': 'exempt: helper',
+  'labelBase': 'exempt: layout helper, writes nothing',
+  'loadFont': 'exempt: loads an asset',
+  'loadSmallFont': 'exempt: loads an asset',
+  'scan': 'exempt: finds glasses, writes nothing',
+  'wrap': 'exempt: layout helper, writes nothing',
+};
+
+/// The public methods of the connection's interface and of ScouterKit's.
+Set<String> _connectionMethods() {
+  final names = <String>{};
+  final method = RegExp(
+    r'^  (?:static )?(?:Future<[^ ]+>|Stream<[^ ]+>|void|bool|int|String|'
+    r'[A-Z][A-Za-z<>?, ]*) ([a-z][A-Za-z0-9]*)\(',
+    multiLine: true,
+  );
+  for (final path in [
+    'lib/g1/g1_connection.dart',
+    'lib/scouter/scouter_connection.dart',
+  ]) {
+    final lines = File(path).readAsLinesSync();
+    for (var i = 0; i < lines.length; i++) {
+      final m = method.firstMatch(lines[i]);
+      if (m == null) continue;
+      // Test helpers are marked @visibleForTesting.
+      if (i > 0 && lines[i - 1].contains('@visibleForTesting')) continue;
+      names.add(m.group(1)!);
+    }
+  }
+  return names;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -271,6 +365,28 @@ void main() {
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     settings = await Settings.load();
+  });
+
+  test('every way to change the glasses is covered or exempt', () {
+    final missing = _connectionMethods().difference(_coverage.keys.toSet());
+    expect(
+      missing,
+      isEmpty,
+      reason:
+          'New methods on the glasses connection: add an action for each '
+          'to _Scenario.actions and list it in _coverage (or list it as '
+          'exempt with the reason).',
+    );
+    // Each listed action exists.
+    final s = _Scenario(FakeAsync(), settings, 0);
+    for (final e in _coverage.entries) {
+      if (!e.value.startsWith('action: ')) {
+        expect(e.value, startsWith('exempt: '), reason: e.key);
+        continue;
+      }
+      final action = e.value.substring('action: '.length);
+      expect(s.actions.keys, contains(action), reason: e.key);
+    }
   });
 
   test('a double tap on a text leaves the dashboard free', () {

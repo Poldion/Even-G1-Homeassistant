@@ -9,6 +9,12 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+### Added
+- Die Zustandstests decken auch Kopfgesten, Gyro-Prüfung, Winkel,
+  Serverstatus, Dashboard-Beschriftung, Navigation, Helligkeit und
+  Trageerkennung ab; ein Wächter schlägt fehl, wenn die Verbindung zur
+  Brille eine Methode bekommt, die die Tests nicht abdecken.
+
 ## [0.54.3] - 2026-11-16
 
 ### Added

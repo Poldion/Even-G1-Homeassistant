@@ -27,5 +27,16 @@ commit:
 Every feature that draws on the glasses, switches something on them
 (microphone, panel, animations, video) or writes the resident program's
 words gets an action in `app/test/consistency_test.dart` (and a rule in
-`check` if it adds state), in the same commit. See
-`docs/DEVELOPMENT.md` → "Program and app in agreement".
+`check` if it adds state), in the same commit. This is not optional:
+
+- A new public method on `G1Connection` or `ScouterConnection` goes into
+  `_coverage` in that test, as `action: <name>` of an action that calls it,
+  or as `exempt: <reason>` only if it writes nothing to the glasses. The
+  guard test fails for every method not listed.
+- A new feature reached through the `Bridge` (a Home Assistant command, a
+  gesture, a setting) gets its own action even if it only uses existing
+  connection methods.
+- Before relying on a new rule in `check`, break the code on purpose once
+  and see the test fail.
+
+See `docs/DEVELOPMENT.md` → "Program and app in agreement".

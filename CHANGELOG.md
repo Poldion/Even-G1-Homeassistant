@@ -9,6 +9,12 @@ integration share the same version number.
 
 ## [Unreleased]
 
+### Added
+- The state tests also cover head gestures, the gyro check, the head-up
+  angle, the server status, the dashboard label, navigation, brightness
+  and wear detection; a guard fails when the glasses connection gets a
+  method the tests do not cover.
+
 ## [0.54.3] - 2026-11-16
 
 ### Added

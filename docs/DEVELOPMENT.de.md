@@ -43,7 +43,11 @@ nennt den Seed und die letzten Schritte.
 
 Eine neue Funktion, die auf der Brille zeichnet, dort etwas einschaltet oder
 Wörter des Programms schreibt, bekommt einen Eintrag in `_Scenario.actions`
-(und, wenn sie einen Zustand hinzufügt, eine Regel in `check`). Bevor man
+(und, wenn sie einen Zustand hinzufügt, eine Regel in `check`). Ein Wächter
+in derselben Datei führt jede öffentliche Methode von `G1Connection` und
+`ScouterConnection` in `_coverage`, jeweils mit der Aktion, die sie aufruft,
+oder dem Grund, warum sie keine braucht; eine neue Methode lässt die Tests
+fehlschlagen, bis sie eingetragen ist. Bevor man
 sich auf eine neue Regel verlässt, den Code einmal absichtlich kaputt machen
 und den Test fehlschlagen sehen.
 
