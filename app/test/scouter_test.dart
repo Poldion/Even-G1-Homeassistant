@@ -168,6 +168,9 @@ class FakeArms {
   int writes = 0;
 
   /// VM_STATUS: the program's state (1 running) and its timer.
+  /// A late answer to "microphone on".
+  Duration? micOnDelay;
+
   int vmState = 1;
   bool timerArmed = true;
   int pending = 0;
@@ -257,9 +260,14 @@ class FakeArms {
       );
     }
     final status = op == SkCtrl.mic ? micStatus : 0;
-    scheduleMicrotask(
-      () => connection.receive(side, reply(epoch, op, tag, status, body)),
-    );
+    void answer() =>
+        connection.receive(side, reply(epoch, op, tag, status, body));
+    if (op == SkCtrl.mic && data[2] == 1 && micOnDelay != null) {
+      // The arm answers a switch-on late (a busy link).
+      Future<void>.delayed(micOnDelay!, answer);
+    } else {
+      scheduleMicrotask(answer);
+    }
   }
 
   /// The NOTICE 8 of the job just started on each arm.
@@ -502,6 +510,28 @@ void main() {
       expect(again.writes, lessThan(first * 2 ~/ 3));
       g2.dispose();
     });
+
+    test(
+      'a switch-on overtaken by the switch-off leaves the mic off',
+      () async {
+        g1.fakeReady(epoch: arms.epoch);
+        int micOn() =>
+            ByteData.sublistView(arms.arenas[G1Side.right]!)
+                .getUint32(SkResident.micOn.address, Endian.little);
+        // The recording's keep-alive switches on while the user stops it,
+        // and the arm's answer to it comes late.
+        arms.micOnDelay = const Duration(milliseconds: 200);
+        final on = g1.setMic(true);
+        final off = g1.setMic(false);
+        await on;
+        await off;
+        await Future<void>.delayed(const Duration(milliseconds: 1200));
+        expect(micOn(), 0);
+        // The last command to the arm switched the microphone off.
+        final mics = arms.ctrl[G1Side.right]!.where((c) => c[0] == SkCtrl.mic);
+        expect(mics.last[2], 0);
+      },
+    );
 
     test('a program that stopped is started again', () async {
       arms.props[SkProp.inCase] = 0;

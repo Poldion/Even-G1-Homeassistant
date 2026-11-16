@@ -9,6 +9,15 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.54.1] - 2026-11-16
+
+### Fixed
+- Nach dem Ende einer Aufnahme zeigte die Brille manchmal weiter das
+  Mikrofon: Die Aufnahme schaltete das Mikrofon gerade wieder ein, als es
+  gestoppt wurde, und die späte Antwort meldete der Brille erneut „an“. Ein
+  Einschalten, das vom Ausschalten überholt wurde, meldet nichts mehr, und
+  die App schickt eine Sekunde nach dem Stoppen noch einmal „aus“.
+
 ## [0.54.0] - 2026-11-15
 
 ### Added
@@ -709,7 +718,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...HEAD
+[0.54.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...app-v0.54.1
 [0.54.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...app-v0.54.0
 [0.53.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...app-v0.53.1
 [0.53.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...app-v0.53.0

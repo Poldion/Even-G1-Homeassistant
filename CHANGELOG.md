@@ -9,6 +9,15 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.54.1] - 2026-11-16
+
+### Fixed
+- After a recording ended, the glasses sometimes kept showing the
+  microphone: the recording's keep-alive switched the microphone on just
+  as it was stopped, and its late answer told the glasses "on" again. A
+  switch-on overtaken by a switch-off no longer reports anything, and the
+  app sends "off" once more a second after stopping.
+
 ## [0.54.0] - 2026-11-15
 
 ### Added
@@ -682,7 +691,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...HEAD
+[0.54.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...app-v0.54.1
 [0.54.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...app-v0.54.0
 [0.53.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.0...app-v0.53.1
 [0.53.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.52.0...app-v0.53.0

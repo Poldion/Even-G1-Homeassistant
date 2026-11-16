@@ -2723,17 +2723,28 @@ class ScouterConnection extends G1Connection {
   Future<bool> setMic(bool enable) async {
     final arm = _arms[G1Side.right];
     if (arm == null || !arm.ready) return false;
+    // Each call counts: a switch-on still waiting for the arm when the
+    // microphone is switched off again must not report it on afterwards
+    // (the stand stayed on after a recording ended).
+    final turn = ++_micTurn;
     if (!enable) {
       _micTimer?.cancel();
       _micOn = false;
       final r = await _ctrl(arm, SkCtrl.mic, const [0, 0]);
       unawaited(_updatePriority());
-      unawaited(_micStand(arm, false));
+      await _micStand(arm, false);
+      // A renewal that was on its way may have switched it on again.
+      Timer(const Duration(seconds: 1), () {
+        if (_micOn || turn != _micTurn || !arm.ready) return;
+        unawaited(_ctrl(arm, SkCtrl.mic, const [0, 0], tries: 1));
+        unawaited(_micStand(arm, false));
+      });
       return r != null && r.status == 0;
     }
     _micOn = true;
     unawaited(_updatePriority());
     final ok = await _renewMic(arm);
+    if (turn != _micTurn || !_micOn) return ok;
     unawaited(_micStand(arm, true));
     _micTimer?.cancel();
     _micTimer = Timer.periodic(const Duration(milliseconds: 800), (_) {
@@ -2744,6 +2755,9 @@ class ScouterConnection extends G1Connection {
 
   /// The app shows a text (its frame is on the panel).
   bool _appShowing = false;
+
+  /// Counts setMic calls (a later one wins).
+  int _micTurn = 0;
 
   /// Tells the right arm's program about the microphone (it draws the
   /// stand); over an app text the stand is cleared here.
