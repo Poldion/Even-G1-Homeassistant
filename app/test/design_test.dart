@@ -14,7 +14,7 @@ import 'package:even_g1_ha/scouter/sk_protocol.dart';
 import 'package:even_g1_ha/scouter/sk_style.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'scouter_test.dart' show FakeArms, execute, loadTestFont;
+import 'fake_arms.dart' show FakeArms, execute, loadTestFont;
 
 SkFont _font() =>
     SkFont.parse(File(ScouterConnection.fontAsset).readAsBytesSync())

@@ -13,6 +13,7 @@ import 'navigation/navigation.dart';
 import 'notifications/phone_notifications.dart';
 import 'scouter/scouter_connection.dart';
 import 'scouter/sk_icons.dart';
+import 'scouter/sk_video.dart';
 import 'l10n/l10n.dart';
 import 'recording/recorder.dart';
 import 'settings.dart';
@@ -379,6 +380,46 @@ class Bridge extends ChangeNotifier {
     haStatus = status;
     notifyListeners();
   }
+
+  /// Plays a video on the glasses (the hidden player): the display is
+  /// emptied before, and after, since texts that came meanwhile were not
+  /// drawn.
+  Future<SkVideoEnd> playVideo({
+    required int width,
+    required int height,
+    required double fps,
+    required int frames,
+    required Future<Uint8List> Function(int start, int count) read,
+    void Function()? onStart,
+    void Function(int frame, int skipped)? onProgress,
+    bool Function()? stopped,
+  }) async {
+    final glasses = g1;
+    if (glasses is! ScouterConnection || !glasses.connected) {
+      return SkVideoEnd.unavailable;
+    }
+    _dashboardShown = false;
+    await display.clear();
+    try {
+      return await glasses.playVideo(
+        width: width,
+        height: height,
+        fps: fps,
+        frames: frames,
+        read: read,
+        onStart: onStart,
+        onProgress: onProgress,
+        stopped: stopped,
+      );
+    } finally {
+      _dashboardShown = false;
+      await display.clear();
+    }
+  }
+
+  /// A command as Home Assistant sends it (tests).
+  @visibleForTesting
+  Future<void> fakeHaCommand(Map<String, dynamic> event) => _onHaCommand(event);
 
   Future<void> _onHaCommand(Map<String, dynamic> event) async {
     switch (event['type']) {

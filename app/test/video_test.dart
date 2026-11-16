@@ -7,7 +7,7 @@ import 'package:even_g1_ha/scouter/sk_protocol.dart';
 import 'package:even_g1_ha/scouter/sk_video.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'scouter_test.dart' show FakeArms, loadTestFont;
+import 'fake_arms.dart' show FakeArms, loadTestFont;
 
 /// A small test picture: a square moving down to the right and diagonal
 /// lines (frame [k], 1 bit per pixel).

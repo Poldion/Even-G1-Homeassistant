@@ -1,10 +1,17 @@
+import 'package:flutter/foundation.dart';
+
 /// Clock model of one arm (VM.md §7): `PING` samples give the offset of the
 /// arm's device time (u32 µs since its boot) from the host's clock, so both
 /// eyes can be told to draw at the same moment.
 class SkClock {
   /// The host's monotonic clock in µs, wrapped like the arms' clocks.
   static final Stopwatch _host = Stopwatch()..start();
-  static int hostNow() => _host.elapsedMicroseconds & 0xffffffff;
+  static int hostNow() =>
+      (fakeNow?.call() ?? _host.elapsedMicroseconds) & 0xffffffff;
+
+  /// The host's time in tests that run on a fake clock (µs).
+  @visibleForTesting
+  static int Function()? fakeNow;
 
   static const keep = 16;
 

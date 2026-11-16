@@ -28,6 +28,25 @@ HA_URL=http://localhost:8123 HA_TOKEN=... HA_STT_ENGINE=stt.dein_stt flutter tes
 Die Integration wird in CI gegen die älteste unterstützte und die neueste
 Home-Assistant-Version getestet (`.github/workflows/integration.yml`).
 
+### Programm und App einig
+
+Das Programm der Brille zeigt das Dashboard beim Hochschauen nur, solange
+die App nichts zeigt (`busy` = 0), das Dashboard an ist (`flags`) und es
+Zeilen hat (`count` > 0). Ein falsch stehendes Wort hält das Dashboard fern,
+bis die App neu startet. `app/test/consistency_test.dart` spielt zufällige
+Abfolgen von allem, worauf die App reagiert (Benachrichtigungen, Texte,
+Tipps, Kopfbewegungen, Assist, Mikrofon, Ruhemodus, Videoplayer,
+Einstellungen aus Home Assistant, die minütliche Prüfung), durch die echte `Bridge` und
+`ScouterConnection` gegen simulierte Bügel (`app/test/fake_arms.dart`, mit
+simulierter Zeit) und prüft diese Wörter nach jedem Schritt. Ein Fehler
+nennt den Seed und die letzten Schritte.
+
+Eine neue Funktion, die auf der Brille zeichnet, dort etwas einschaltet oder
+Wörter des Programms schreibt, bekommt einen Eintrag in `_Scenario.actions`
+(und, wenn sie einen Zustand hinzufügt, eine Regel in `check`). Bevor man
+sich auf eine neue Regel verlässt, den Code einmal absichtlich kaputt machen
+und den Test fehlschlagen sehen.
+
 ## Texte in zwei Sprachen
 
 Englisch ist die Hauptsprache, Deutsch die zweite (siehe `CLAUDE.md`).

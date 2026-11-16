@@ -122,11 +122,13 @@ class ScouterConnection extends G1Connection {
   ScouterConnection.fake(
     Future<void> Function(G1Side side, int channel, Uint8List data) write, {
     required SkFont font,
+    int? mtu,
   }) : _fontLoader = (() async => font) {
     _fake = true;
     for (final side in G1Side.values) {
       final arm = _newArm(side, null)
         ..writeOverride = (channel, data) => write(side, channel, data);
+      if (mtu != null) arm.mtu = mtu;
       _arms[side] = arm;
     }
   }

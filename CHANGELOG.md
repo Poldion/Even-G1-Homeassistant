@@ -9,6 +9,19 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.54.3] - 2026-11-16
+
+### Added
+- Tests that play random sequences of notifications, taps, head
+  movements, Assist, microphone, silent mode and settings against
+  simulated arms and check after every step that the glasses' program may
+  show the dashboard again (they find the bugs of 0.54.1 and 0.54.2).
+
+### Fixed
+- A video started while a text was shown removed it from the glasses,
+  but the app still counted it as shown. The video player now empties the
+  display before and after the video.
+
 ## [0.54.2] - 2026-11-16
 
 ### Fixed
@@ -702,7 +715,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.3...HEAD
+[0.54.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...app-v0.54.3
 [0.54.2]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.1...app-v0.54.2
 [0.54.1]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.0...app-v0.54.1
 [0.54.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.53.1...app-v0.54.0

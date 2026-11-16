@@ -21,3 +21,11 @@ commit:
   `docs/images/de/` under the same file names.
 - **Designs:** a change to a design, animation or layout is re-rendered and
   checked in both languages.
+
+## Glasses state stays consistent
+
+Every feature that draws on the glasses, switches something on them
+(microphone, panel, animations, video) or writes the resident program's
+words gets an action in `app/test/consistency_test.dart` (and a rule in
+`check` if it adds state), in the same commit. See
+`docs/DEVELOPMENT.md` → "Program and app in agreement".

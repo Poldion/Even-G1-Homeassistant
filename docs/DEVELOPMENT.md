@@ -28,6 +28,23 @@ HA_URL=http://localhost:8123 HA_TOKEN=... HA_STT_ENGINE=stt.your_stt flutter tes
 CI tests the integration against the oldest supported and the newest Home
 Assistant version (`.github/workflows/integration.yml`).
 
+### Program and app in agreement
+
+The glasses' program shows the dashboard on head up only while the app
+shows nothing (`busy` = 0), the dashboard is on (`flags`) and it has lines
+(`count` > 0). A word left wrong keeps the dashboard away until the app
+restarts. `app/test/consistency_test.dart` plays random sequences of
+everything the app reacts to (notifications, texts, taps, head movements,
+Assist, microphone, silent mode, the video player, settings from Home
+Assistant, the minute check) through the real `Bridge` and `ScouterConnection` against simulated
+arms (`app/test/fake_arms.dart`, with fake time) and checks these words
+after every step. A failure names the seed and the last steps.
+
+A new feature that draws on the glasses, switches something on them or
+writes the program's words gets an entry in `_Scenario.actions` (and, if
+it adds a state, a rule in `check`). Before relying on a new rule, break
+the code on purpose once and see the test fail.
+
 ## Texts in two languages
 
 English is the main language, German the second (see `CLAUDE.md`). App texts

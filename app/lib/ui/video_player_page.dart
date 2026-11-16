@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../bridge.dart';
 import '../l10n/l10n.dart';
-import '../scouter/scouter_connection.dart';
 import '../scouter/sk_video.dart';
 
 /// The hidden video player (seven taps on the installed version): plays a
@@ -79,8 +78,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   }
 
   Future<void> _play() async {
-    final g1 = widget.bridge.g1;
-    if (g1 is! ScouterConnection || !g1.connected) {
+    if (!widget.bridge.g1.connected) {
       setState(() => _message = tr.videoNotConnected);
       return;
     }
@@ -93,7 +91,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       _skipped = 0;
       _message = null;
     });
-    final end = await g1.playVideo(
+    final end = await widget.bridge.playVideo(
       width: info.width,
       height: info.height,
       fps: info.fps,
