@@ -230,7 +230,7 @@ gone, and the app loads it again.
 - **Navigation at the turn**: right at the turn the app sends, with the
   step, the icon's wiggle (`NavWiggle`: up to 24 offsets and the icon's
   pixels, at `0x3A800`) and sets `arrowOn`, in the packet of the timed
-  `DRAW`, so it never starts before its text. Every 50 ms the program
+  `DRAW`, so it never starts before its text. Every 40 ms the program
   takes the next offset: clears the icon's old and new box in the app's
   frame, copies the icon there (`BLIT`) and shows that rectangle with one
   `DRAW`; the last offset is the icon's place. `busy` 0, another text, a

@@ -22,6 +22,7 @@ import 'package:even_g1_ha/navigation/nav_wiggle.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_asm.dart';
 import 'package:even_g1_ha/scouter/sk_clock.dart';
+import 'package:even_g1_ha/scouter/sk_icons.dart';
 import 'package:even_g1_ha/scouter/sk_program.dart';
 import 'package:even_g1_ha/scouter/sk_protocol.dart';
 import 'package:even_g1_ha/settings.dart';
@@ -37,7 +38,14 @@ import 'fake_arms.dart' as fake show input;
 class _Scenario {
   _Scenario(this.async, this.settings, this.seed) : rnd = Random(seed) {
     arms = FakeArms();
-    g1 = ScouterConnection.fake(arms.write, font: loadTestFont(), mtu: 247);
+    g1 = ScouterConnection.fake(
+      (side, channel, data) {
+        if (channel == 0) _watchFills(side, data);
+        return arms.write(side, channel, data);
+      },
+      font: font,
+      mtu: 247,
+    );
     arms.connection = g1;
     arms.props[SkProp.inCase] = 0;
     arms.props[SkProp.worn] = 1;
@@ -51,6 +59,7 @@ class _Scenario {
 
   final FakeAsync async;
   final Settings settings;
+  final font = loadTestFont();
   final int seed;
   final Random rnd;
   late final FakeArms arms;
@@ -82,6 +91,90 @@ class _Scenario {
     y: ScouterConnection.textTop,
   ).data().join(',');
 
+  /// Per arm, the navigation's bar (FILLs of its size) in the frame since
+  /// the frame was last cleared: (x, y, w, h, level).
+  final _bars = {
+    for (final s in G1Side.values) s: <(int, int, int, int, int)>[],
+  };
+
+  /// The bar the step just shown must have: its filled width, null for
+  /// none (no distance); not set when no step was shown.
+  ({int? fill})? _barWanted;
+
+  /// The FILLs of a CMD packet, decoded with the operand words it writes
+  /// into the scratch words before them.
+  void _watchFills(G1Side side, Uint8List data) {
+    final code = Uint8List.sublistView(data, 2);
+    final arena = arms.arenas[side]!;
+    final scratch = Uint8List.fromList(
+      arena.sublist(SkArena.params, SkArena.params + 256),
+    );
+    int word(int index) {
+      final at = index * 4;
+      final b = at >= SkArena.params && at + 4 <= SkArena.params + 256
+          ? scratch
+          : arena;
+      final o = b == scratch ? at - SkArena.params : at;
+      return ByteData.sublistView(b).getInt32(o, Endian.little);
+    }
+
+    var i = 0;
+    while (i < code.length) {
+      final op = code[i];
+      if (op == SkOp.write) {
+        final addr = code[i + 1] | code[i + 2] << 8 | code[i + 3] << 16;
+        final n = code[i + 4];
+        for (var j = 0; j < n; j++) {
+          final a = addr + j - SkArena.params;
+          if (a >= 0 && a < 256) scratch[a] = code[i + 5 + j];
+        }
+        i += 5 + n;
+        continue;
+      }
+      if (op == SkOp.writeRle) {
+        i += 7 + code[i + 6];
+        continue;
+      }
+      if (op == SkOp.call) {
+        i += 4;
+        continue;
+      }
+      if (op == SkOp.end) {
+        i += 1;
+        continue;
+      }
+      final k = switch (op) {
+        SkOp.sleepUntil || SkOp.raise => 1,
+        SkOp.add => 3,
+        SkOp.sysRead || SkOp.sysWrite => 2,
+        SkOp.fill || SkOp.line => 7,
+        SkOp.blit => 12,
+        SkOp.glyphs => 9,
+        SkOp.draw => 8,
+        SkOp.video => 10,
+        SkOp.assetLoad => 4,
+        _ => throw StateError('op 0x${op.toRadixString(16)}'),
+      };
+      final at = i + 1 + (k + 1) ~/ 2;
+      List<int> operands() => [
+        for (var j = 0; j < k; j++)
+          word(code[at + 2 * j] | code[at + 2 * j + 1] << 8),
+      ];
+      if (op == SkOp.fill) {
+        final [dst, _, x, y, w, h, level] = operands();
+        if (dst == SkArena.frame) {
+          if (x <= 0 && y <= 0 && w >= SkPanel.width && h >= SkPanel.height) {
+            _bars[side]!.clear();
+          } else if (x == ScouterConnection.iconTextLeft &&
+              h == ScouterConnection.barHeight) {
+            _bars[side]!.add((x, y, w, h, level));
+          }
+        }
+      }
+      i = at + 2 * k;
+    }
+  }
+
   /// A navigation step (null: it ends) the way the phone sends it.
   void navigate(NavUpdate? update) {
     final changes = _screenChanges;
@@ -98,12 +191,21 @@ class _Scenario {
         bridge.display.screen.value == card) {
       _arrowWanted = arrow != null;
       _arrowShown = arrow;
+      final m = update.meters;
+      _barWanted = (
+        fill: m == null
+            ? null
+            : bridge.navigation.atTurn
+            ? 0
+            : (360 * min(m, 500) / 500).round(),
+      );
     }
   }
 
   /// One step of a drive towards a turn: the same instruction ever nearer
   /// (500, 200, 50 m and right at the turn), then the next turn.
   int _drive = 0;
+  int _mapsIcon = 0;
   int _driveTurn = 0;
   static const _driveMeters = [700, 480, 190, 45, 20, 8];
   static const _driveSteps = [
@@ -301,6 +403,24 @@ class _Scenario {
         ),
       );
     },
+    // Google Maps' own turn icon (50 × 50, 4 bpp) on a drive to the turn,
+    // with the bar emptying and right at the turn the icon's push.
+    'navigation maps icon': () {
+      final icon = Uint8List(SkIcons.bytes);
+      for (var i = 0; i < icon.length; i++) {
+        icon[i] = (i * 7 + _mapsIcon * 31) & 0xff;
+      }
+      final m = const [900, 480, 300, 190, 120, 45, 30, 20, 3][rnd.nextInt(9)];
+      if (rnd.nextInt(4) == 0) _mapsIcon++;
+      navigate(
+        NavUpdate(
+          title: '$m m',
+          text: rnd.nextBool() ? 'Turn left onto Elm St' : 'Links abbiegen',
+          subText: '14:32',
+          icon: icon,
+        ),
+      );
+    },
     'brightness': () => run(() async {
       await g1.setBrightnessCurve(rnd.nextBool());
       await g1.setAutoBrightnessOffset(rnd.nextInt(9) - 4);
@@ -367,6 +487,69 @@ class _Scenario {
           isTrue,
           reason: why('${side.code}: arrow of no step'),
         );
+        // From its first frame, the icon's box at its place (the program
+        // clears the box before each frame: no trail of the icon).
+        final x = armWord(arms.arenas[side]!, SkResident.arrowData + 4);
+        final y = armWord(arms.arenas[side]!, SkResident.arrowData + 8);
+        expect(
+          [
+            word(side, SkResident.arrowFrame),
+            word(side, SkResident.arrowAt),
+            for (var k = 0; k < 4; k++)
+              armWord(arms.arenas[side]!, SkResident.arrowBox.address + 4 * k),
+          ],
+          [0, 0, x, y, x + SkIcons.size - 1, y + SkIcons.size - 1],
+          reason: why('${side.code}: the wiggle not from its first frame'),
+        );
+      }
+      // The bar of the way left: under the step just shown, as far as the
+      // turn is; never under another text.
+      final screen = bridge.display.screen.value;
+      final bar = _barWanted;
+      if (bar != null && screen == bridge.navigation.cardText) {
+        final bars = _bars[side]!;
+        final fill = bar.fill;
+        if (fill == null) {
+          expect(
+            bars,
+            isEmpty,
+            reason: why('${side.code}: a bar, no distance'),
+          );
+        } else {
+          expect(
+            [for (final b in bars) (b.$1, b.$3, b.$4, b.$5)],
+            [
+              (
+                ScouterConnection.iconTextLeft,
+                ScouterConnection.barWidth,
+                ScouterConnection.barHeight,
+                ScouterConnection.barTrack,
+              ),
+              if (fill > 0)
+                (
+                  ScouterConnection.iconTextLeft,
+                  fill,
+                  ScouterConnection.barHeight,
+                  ScouterConnection.barLevel,
+                ),
+            ],
+            reason: why(
+              '${side.code}: the bar at ${bridge.navigation.current?.meters} m'
+              '${bridge.navigation.atTurn ? ' (at the turn)' : ''}',
+            ),
+          );
+          expect(
+            bars.first.$2,
+            greaterThan(ScouterConnection.textTop + font.lineSpacing),
+            reason: why('${side.code}: the bar on the text'),
+          );
+        }
+      } else if (shown && screen != null && !_navCards.contains(screen)) {
+        expect(
+          _bars[side],
+          isEmpty,
+          reason: why('${side.code}: a bar under "$screen"'),
+        );
       }
       // A step just shown: the wiggle right at the turn, none before.
       final wantArrow = _arrowWanted;
@@ -420,6 +603,7 @@ class _Scenario {
       reason: why('microphone stand'),
     );
     _arrowWanted = null;
+    _barWanted = null;
     _arrowShown = null;
   }
 
@@ -498,6 +682,9 @@ const _coverage = <String, String>{
   'loadSmallFont': 'exempt: loads an asset',
   'scan': 'exempt: finds glasses, writes nothing',
   'wrap': 'exempt: layout helper, writes nothing',
+  'navigationBar': 'exempt: layout helper (the bar\'s place), writes nothing',
+  'dashboardLabelAt': 'exempt: layout helper, writes nothing',
+  'dashboardStatusAt': 'exempt: layout helper, writes nothing',
 };
 
 /// The public methods of the connection's interface and of ScouterKit's.
@@ -505,7 +692,8 @@ Set<String> _connectionMethods() {
   final names = <String>{};
   final method = RegExp(
     r'^  (?:static )?(?:Future<[^ ]+>|Stream<[^ ]+>|void|bool|int|String|'
-    r'[A-Z][A-Za-z<>?, ]*) ([a-z][A-Za-z0-9]*)\(',
+    // Records too: `(int, int)? name(`, `({int x, int y}) name(`.
+    r'[A-Z][A-Za-z<>?, ]*|\([^()]*\)\??) ([a-z][A-Za-z0-9]*)\(',
     multiLine: true,
   );
   for (final path in [

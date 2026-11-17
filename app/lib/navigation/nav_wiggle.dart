@@ -43,11 +43,10 @@ class NavWiggle {
       for (var k = 1; k <= 12; k++) {
         final a = 2 * pi * k / 12;
         offsets.add((
-          (-sin(a) * reach * 0.75).round(),
+          (sin(a) * reach * 0.75).round(),
           (-(1 - cos(a)) * reach * 0.75).round(),
         ));
       }
-      offsets.add((0, 0));
     } else {
       final (ux, uy) = direction(turn);
       const steps = [0.4, 0.8, 1.0, 0.6, 0.2, 0.0];
@@ -114,7 +113,10 @@ class NavWiggle {
   /// cleared, then the icon.
   void drawInto(Uint8List panel, int k) {
     final now = box(k);
-    final before = k > 0 ? box(k - 1) : (x, y, x, y);
+    // Before the first frame the icon is at its place.
+    final before = k > 0
+        ? box(k - 1)
+        : (x, y, x + SkIcons.size - 1, y + SkIcons.size - 1);
     final x0 = min(now.$1, before.$1), y0 = min(now.$2, before.$2);
     final x1 = max(now.$3, before.$3), y1 = max(now.$4, before.$4);
     for (var py = y0; py <= y1; py++) {

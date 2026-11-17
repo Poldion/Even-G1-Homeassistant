@@ -241,7 +241,7 @@ Neustart des Bügels ist es weg, und die App lädt es neu.
   App mit dem Schritt das Wippen des Pfeils (`NavWiggle`: bis zu 24
   Verschiebungen und die Pixel des Pfeils, ab `0x3A800`) und setzt
   `arrowOn`, im Paket des zeitgesteuerten `DRAW`, sodass es nie vor
-  seinem Text beginnt. Alle 50 ms nimmt das Programm die nächste
+  seinem Text beginnt. Alle 40 ms nimmt das Programm die nächste
   Verschiebung: löscht den alten und den neuen Rahmen des Pfeils im Bild
   der App, kopiert den Pfeil dorthin (`BLIT`) und zeigt dieses Rechteck
   mit einem `DRAW`; die letzte Verschiebung ist sein Platz. `busy` 0, ein

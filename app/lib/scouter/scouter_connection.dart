@@ -2445,7 +2445,9 @@ class ScouterConnection extends G1Connection {
         }
       }
     }
-    final bar = arArrow == null ? null : navigationBar(font, layout, arArrow);
+    final bar = arArrow == null
+        ? null
+        : navigationBar(font, layout, arArrow, left: left);
     if (bar != null) {
       // The way left to the turn: a bar under the text that empties.
       final (x, y, fill) = bar;
@@ -2519,8 +2521,9 @@ class ScouterConnection extends G1Connection {
   static (int, int, int)? navigationBar(
     SkFont font,
     SkLayout layout,
-    ({NavTurn turn, int? meters, bool atTurn}) step,
-  ) {
+    ({NavTurn turn, int? meters, bool atTurn}) step, {
+    int left = iconTextLeft,
+  }) {
     final m = step.meters;
     if (m == null || layout.lines.isEmpty) return null;
     final last = layout.lines.map((l) => l.y).reduce(max);
@@ -2529,7 +2532,7 @@ class ScouterConnection extends G1Connection {
     final fill = step.atTurn
         ? 0
         : (barWidth * min(m, barMeters) / barMeters).round();
-    return (iconTextLeft, y, fill);
+    return (left, y, fill);
   }
 
   static const barWidth = 360, barHeight = 6, barMeters = 500;

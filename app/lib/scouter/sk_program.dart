@@ -114,7 +114,7 @@ class SkResident {
   static final arrowBox = SkW.at(state + 212);
 
   /// One frame of the wiggle every so often.
-  static const arrowPeriodUs = 50000;
+  static const arrowPeriodUs = 40000;
 
   // Connection symbols at the dashboard's top right (written by the app):
   // Home Assistant unreachable, where they go (y 0: nowhere); the program
@@ -1111,6 +1111,8 @@ class SkResident {
     final bytes = a.build();
     if (code + bytes.length > codeEnd) throw StateError('program too long');
     assert(arrowData + NavWiggle.dataMax <= arrowDataEnd);
+    // A multiple of the gesture detector's tick: both eyes in step.
+    assert(arrowPeriodUs % periodUs == 0);
     final t = ByteData(64);
     void entry(int trigger, String label) =>
         t.setUint32(trigger * 4, a.addressOf(label), Endian.little);
