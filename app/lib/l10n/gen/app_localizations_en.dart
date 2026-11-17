@@ -438,13 +438,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Arrow and distance on the glasses: at each new turn, at 500, 200 and 50 m and right at the turn; on head-up instead of the dashboard while you navigate.';
 
   @override
-  String get notifSetBigArrow => 'Animated arrow';
-
-  @override
-  String get notifSetBigArrowHelp =>
-      'A big arrow at the top of the view, above the text: it comes closer with every step, larger the nearer the turn, and right at the turn it swings into the direction to take. Off: a small arrow beside the text.';
-
-  @override
   String get notifSetNoAccess => 'Access to notifications missing';
 
   @override

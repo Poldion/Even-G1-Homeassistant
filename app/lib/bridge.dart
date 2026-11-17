@@ -121,15 +121,11 @@ class Bridge extends ChangeNotifier {
     if (!navigation.active) _log(tr.coreLogNavigationStart);
     final show = navigation.update(update);
     g1.setNavigationIcon(navigation.icon);
-    g1.setNavigationArrow(
-      settings.navigationArrow
-          ? (
-              turn: update.turn,
-              meters: update.meters,
-              atTurn: navigation.atTurn,
-            )
-          : null,
-    );
+    g1.setNavigationArrow((
+      turn: update.turn,
+      meters: update.meters,
+      atTurn: navigation.atTurn,
+    ));
     await _navigationChanged();
     if (!show || !g1.connected || silentMode == true || assistRunning) return;
     _log(tr.coreLogNavigationStep(navigation.cardText.split('\n').first));

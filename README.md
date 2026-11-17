@@ -171,24 +171,18 @@ Pair the glasses in the open charging case (details in
 While Google Maps navigates on the phone, the glasses show the next turn:
 the distance and the instruction at each new turn, at 500, 200 and 50 m
 and right at the turn (for 6 seconds); when you look up, the turn
-replaces the dashboard until the navigation ends. It needs the notification access
-(*Settings → Notifications*), where *Google Maps navigation* switches it
-off. Silent mode shows nothing.
+replaces the dashboard until the navigation ends. It needs the
+notification access (*Settings → Notifications*), where *Google Maps
+navigation* switches it off. Silent mode shows nothing.
 
-Above the text a **big arrow** shows the turn: with each step it comes
-closer, larger the nearer the turn is; right at the turn (about 25 m)
-it swings into the direction to take and moves a little that way (round
-once for a roundabout, a push ahead for straight on). The glasses play
-the animation themselves. *Animated arrow* in the notification settings
-switches back to the small arrow beside the text.
+Beside the distance the turn's arrow (Google Maps' own), under the text
+a bar of the way left that empties towards the turn; right at the turn
+the arrow pushes a few times into the direction to take (round once for
+a roundabout). The glasses play the animation themselves.
 
-| The arrow comes closer | At the turn |
+| A drive towards a turn | Looking up while navigating |
 | --- | --- |
-| ![The arrow coming closer](docs/images/en/navigation-arrow.gif) | ![The arrow swinging into the turn](docs/images/en/navigation-arrow-turn.gif) |
-
-| Animated arrow off | Looking up while navigating |
-| --- | --- |
-| ![Navigation step](docs/images/en/navigation-step.png) | ![Dashboard while navigating](docs/images/en/navigation-dashboard.png) |
+| ![The arrow beside the distance, the bar emptying, the push at the turn](docs/images/en/navigation-drive.gif) | ![Dashboard while navigating](docs/images/en/navigation-dashboard.png) |
 
 ### In Home Assistant
 

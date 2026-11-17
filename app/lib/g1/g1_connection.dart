@@ -164,9 +164,9 @@ abstract class G1Connection extends ChangeNotifier {
   /// 4 bpp), shown with the icon name `navigation`; null when it ended.
   void setNavigationIcon(Uint8List? icon) {}
 
-  /// The next turn as a big arrow above the navigation's text (ScouterKit):
-  /// its kind, its distance and whether it is right ahead (the arrow swings
-  /// into its direction); null for the icon beside the text instead.
+  /// The next turn (ScouterKit): its kind, its distance (the bar of the way
+  /// left under the text) and whether it is right ahead (the icon pushes
+  /// into its direction); null when the navigation ended.
   void setNavigationArrow(({NavTurn turn, int? meters, bool atTurn})? arrow) {}
 
   /// Switches the display off.

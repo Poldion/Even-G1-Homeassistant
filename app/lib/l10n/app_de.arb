@@ -117,8 +117,6 @@
   "notifSetForward": "Handy-Benachrichtigungen weiterleiten",
   "notifSetNavigation": "Google-Maps-Navigation",
   "notifSetNavigationHelp": "Pfeil und Entfernung auf der Brille: bei jeder neuen Abbiegung, bei 500, 200 und 50 m und direkt an der Abbiegung; beim Hochschauen statt des Dashboards, solange du navigierst.",
-  "notifSetBigArrow": "Animierter Pfeil",
-  "notifSetBigArrowHelp": "Ein großer Pfeil oben im Sichtfeld, über dem Text: Er kommt mit jedem Schritt näher, größer, je näher die Abbiegung ist, und direkt an der Abbiegung schwenkt er in die Richtung, in die du musst. Aus: ein kleiner Pfeil neben dem Text.",
   "notifSetNoAccess": "Zugriff auf Benachrichtigungen fehlt",
   "notifSetNoAccessHelp": "Erlaube „Even G1 HA“ in den Android-Einstellungen, Benachrichtigungen zu lesen.\nMeldet Android „App wurde Zugriff verweigert“: Einstellungen → Apps → Even G1 HA → ⋮ → „Eingeschränkte Einstellungen zulassen“, dann erneut auf Erlauben tippen.",
   "notifSetNoApps": "Apps erscheinen hier, sobald sie eine Benachrichtigung gesendet haben. Neue Apps werden standardmäßig weitergeleitet.",

@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
-import '../navigation/turn_arrow.dart';
+import '../navigation/nav_wiggle.dart';
 import 'sk_asm.dart';
+import 'sk_icons.dart';
 import 'sk_protocol.dart';
 import 'sk_style.dart';
 
@@ -45,8 +46,8 @@ class SkResident {
   static const code = 0x39800;
   static const codeEnd = arrowData;
 
-  /// The navigation's arrow (TurnArrow.data, written by the app): its
-  /// lines, its pivot and its animation's frames; up to the small font.
+  /// The navigation's wiggle (NavWiggle.data, written by the app): its
+  /// frames, the icon's place and pixels; up to the small font.
   static const arrowData = 0x3A800;
   static const arrowDataEnd = SkArena.smallFont;
 
@@ -102,19 +103,17 @@ class SkResident {
   // When the gyroscope last gave a sample (program).
   static final _gyroAt = SkW.at(state + 192);
 
-  /// 1 while the app shows a navigation step with its arrow: the program
-  /// plays the arrow's frames above the text (written by the app).
+  /// 1 while the app shows a navigation step right at the turn: the
+  /// program plays the icon's wiggle (written by the app).
   static final arrowOn = SkW.at(state + 196);
 
-  // The arrow (program; the app resets them with a step): the next frame,
-  // when the last was drawn, its box (x0, y0, x1, y1) and the rectangle to
-  // clear and draw (x, y, w, h).
+  // The wiggle (program; the app resets them with a step): the next frame,
+  // when the last was drawn and the icon's box (x0, y0, x1, y1).
   static final arrowFrame = SkW.at(state + 200);
   static final arrowAt = SkW.at(state + 208);
   static final arrowBox = SkW.at(state + 212);
-  static final _arrowRect = SkW.at(state + 228);
 
-  /// One frame of the arrow's animation every so often.
+  /// One frame of the wiggle every so often.
   static const arrowPeriodUs = 50000;
 
   // Connection symbols at the dashboard's top right (written by the app):
@@ -415,8 +414,8 @@ class SkResident {
     a.call('statusCheck');
     a.end();
 
-    // USER1: the app set the clock anew, or shows a navigation step with
-    // its arrow.
+    // USER1: the app set the clock anew, or shows a navigation step right
+    // at the turn.
     a.label('user1');
     a.call('arrow');
     a.call('armTimer');
@@ -454,10 +453,10 @@ class SkResident {
       a.bges(r2, c0, 'armSet');
       a.mov(r0, r1);
       a.label('armSet');
-      // The arrow's next frame, while it has one.
+      // The wiggle's next frame, while it has one.
       a.beq(arrowOn, c0, 'armWrite');
       a.beq(busy, c0, 'armWrite');
-      a.bgeu(arrowFrame, SkW.at(arrowData + 12), 'armWrite');
+      a.bgeu(arrowFrame, SkW.at(arrowData), 'armWrite');
       a.sysRead(r1, a.c(SkProp.timeUs));
       a.add(r1, r1, a.c(arrowPeriodUs));
       a.sub(r2, r1, r0);
@@ -885,26 +884,31 @@ class SkResident {
     a.beq(r1, statusShown, 'ret');
     a.jmp('stDraw');
 
-    // arrow: the navigation's arrow above the app's text (TurnArrow): its
-    // next frame every arrowPeriodUs until the last, which stays.
+    // arrow: right at the turn the navigation's icon beside the app's text
+    // pushes into the direction to take (NavWiggle): its next frame every
+    // arrowPeriodUs until the last (back at its place).
     a.label('arrow');
     a.beq(arrowOn, c0, 'ret');
     a.beq(busy, c0, 'ret');
     {
       SkW d(int offset) => SkW.at(arrowData + offset);
-      a.bgeu(arrowFrame, d(12), 'ret');
+      a.bgeu(arrowFrame, d(0), 'ret');
       a.sysRead(r0, a.c(SkProp.timeUs));
       a.sub(r1, r0, arrowAt);
       a.bltu(r1, a.c(arrowPeriodUs), 'ret');
       a.mov(arrowAt, r0);
-      // r1…r4 = cos, sin (× scale × 4096), dx, dy; r5…r8 = its box.
-      a.mul(r9, arrowFrame, a.c(TurnArrow.frameBytes ~/ 4));
+      // r5, r6 = where the icon goes; r7, r8 = its far corner.
+      a.add(r9, arrowFrame, arrowFrame);
       a.add(arrowFrame, arrowFrame, c1);
-      final frames = a.c(arrowData + TurnArrow.framesAt);
-      for (final r in [r4, r3, r1, r2, r5, r6, r7, r8]) {
-        a.ld32(r, frames, r9);
-        a.add(r9, r9, c1);
-      }
+      final offsets = a.c(arrowData + NavWiggle.offsetsAt);
+      a.ld32(r1, offsets, r9);
+      a.add(r9, r9, c1);
+      a.ld32(r2, offsets, r9);
+      a.add(r5, d(4), r1);
+      a.add(r6, d(8), r2);
+      final last = a.c(SkIcons.size - 1);
+      a.add(r7, r5, last);
+      a.add(r8, r6, last);
       // Never outside the panel (the frame's rows go on into the arena).
       a.blts(r5, c0, 'ret');
       a.blts(r6, c0, 'ret');
@@ -937,50 +941,24 @@ class SkResident {
       a.add(r11, r11, c1);
       a.sub(r12, r12, r10);
       a.add(r12, r12, c1);
-      final rx = SkW(_arrowRect.index), ry = SkW(_arrowRect.index + 1);
-      final rw = SkW(_arrowRect.index + 2), rh = SkW(_arrowRect.index + 3);
-      a.mov(rx, r9);
-      a.mov(ry, r10);
-      a.mov(rw, r11);
-      a.mov(rh, r12);
       final frame = a.c(SkArena.frame), stride = a.c(SkPanel.stride);
       a.fill(frame, stride, r9, r10, r11, r12, c0);
-      // The lines: each end turned and scaled (cos r4, sin r3) around
-      // (cx + dx, cy + dy).
-      a.add(r1, r1, d(4));
-      a.add(r2, r2, d(8));
-      a.mov(r5, c0);
-      a.beq(d(0), c0, 'arDraw');
-      a.label('arLine');
-      a.mul(r6, r5, a.c(5));
-      final segments = a.c(arrowData + TurnArrow.segmentsAt);
-      for (final r in [r7, r8, r9, r10, r12]) {
-        a.ld32(r, segments, r6);
-        a.add(r6, r6, c1);
-      }
-      final q = a.c(4096);
-      void turn(SkW x, SkW y) {
-        a.mul(r13, x, r4);
-        a.mul(r14, y, r3);
-        a.add(r13, r13, r14);
-        a.divs(r13, r13, q);
-        a.add(r13, r13, r1);
-        a.mul(r14, y, r4);
-        a.mul(r0, x, r3);
-        a.sub(r14, r14, r0);
-        a.divs(r14, r14, q);
-        a.add(r14, r14, r2);
-        a.mov(x, r13);
-        a.mov(y, r14);
-      }
-
-      turn(r7, r8);
-      turn(r9, r10);
-      a.line(frame, stride, r7, r8, r9, r10, r12);
-      a.add(r5, r5, c1);
-      a.bltu(r5, d(0), 'arLine');
-      a.label('arDraw');
-      a.draw(frame, stride, rx, ry, rx, ry, rw, rh);
+      final size = a.c(SkIcons.size);
+      a.blit(
+        a.c(arrowData + NavWiggle.iconAt),
+        a.c(SkIcons.stride),
+        c0,
+        c0,
+        frame,
+        stride,
+        r5,
+        r6,
+        size,
+        size,
+        c0, // COPY
+        a.c(15),
+      );
+      a.draw(frame, stride, r9, r10, r9, r10, r11, r12);
       a.ret();
     }
 
@@ -1132,7 +1110,7 @@ class SkResident {
     assert(labelH <= bandRows && standH <= bandRows);
     final bytes = a.build();
     if (code + bytes.length > codeEnd) throw StateError('program too long');
-    assert(arrowData + TurnArrow.dataMax <= arrowDataEnd);
+    assert(arrowData + NavWiggle.dataMax <= arrowDataEnd);
     final t = ByteData(64);
     void entry(int trigger, String label) =>
         t.setUint32(trigger * 4, a.addressOf(label), Endian.little);

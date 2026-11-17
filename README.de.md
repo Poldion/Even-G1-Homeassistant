@@ -183,21 +183,15 @@ Dafür braucht die App den Zugriff auf Benachrichtigungen (*Einstellungen →
 Benachrichtigungen*), dort schaltet *Google-Maps-Navigation* sie ab. Im
 Ruhemodus erscheint nichts.
 
-Über dem Text zeigt ein **großer Pfeil** die Abbiegung: Mit jedem Schritt
-kommt er näher, größer, je näher die Abbiegung ist; direkt an der
-Abbiegung (etwa 25 m) schwenkt er in die Richtung, in die du musst, und
-schiebt sich ein Stück dorthin (im Kreisverkehr eine Runde, geradeaus ein
-Stoß nach vorn). Die Animation spielt die Brille selbst ab. *Animierter
-Pfeil* in den Benachrichtigungs-Einstellungen schaltet zurück auf den
-kleinen Pfeil neben dem Text.
+Neben der Entfernung steht der Pfeil der Abbiegung (der aus Google Maps),
+unter dem Text ein Balken mit dem Restweg, der sich zur Abbiegung hin
+leert; direkt an der Abbiegung wippt der Pfeil ein paar Mal in die
+Richtung, in die du musst (im Kreisverkehr eine Runde). Die Animation
+spielt die Brille selbst ab.
 
-| Der Pfeil kommt näher | An der Abbiegung |
+| Eine Fahrt zur Abbiegung | Hochschauen beim Navigieren |
 | --- | --- |
-| ![Der Pfeil kommt näher](docs/images/de/navigation-arrow.gif) | ![Der Pfeil schwenkt in die Abbiegung](docs/images/de/navigation-arrow-turn.gif) |
-
-| Animierter Pfeil aus | Hochschauen beim Navigieren |
-| --- | --- |
-| ![Navigationsschritt](docs/images/de/navigation-step.png) | ![Dashboard beim Navigieren](docs/images/de/navigation-dashboard.png) |
+| ![Der Pfeil neben der Entfernung, der Balken leert sich, das Wippen an der Abbiegung](docs/images/de/navigation-drive.gif) | ![Dashboard beim Navigieren](docs/images/de/navigation-dashboard.png) |
 
 ### In Home Assistant
 

@@ -13,7 +13,7 @@ import '../l10n/l10n.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../navigation/turn_arrow.dart';
+import '../navigation/nav_wiggle.dart';
 import '../navigation/navigation.dart';
 import 'sk_anim.dart';
 import 'sk_assets.dart';
@@ -2281,15 +2281,10 @@ class ScouterConnection extends G1Connection {
     SkFont? smallFont,
     bool? serverOnline,
   }) {
-    // The navigation's arrow above the text (else its icon beside it):
-    // coming closer, or at the turn swinging into its direction.
-    TurnArrow? arrow;
-    if (arArrow != null && top > TurnArrow.bottom) {
-      arrow = arArrow.atTurn
-          ? TurnArrow.at(arArrow.turn)
-          : TurnArrow.approach(arArrow.meters);
-      iconData = null;
-    }
+    // Right at the turn the navigation's icon pushes into its direction.
+    final wiggle = arArrow != null && arArrow.atTurn && iconData != null
+        ? NavWiggle.of(arArrow.turn, iconData, x: textLeft, y: top)
+        : null;
     final withIcon = icon != null || iconData != null;
     final left = withIcon ? iconTextLeft : textLeft;
     final layout = SkLayout.of(
@@ -2450,6 +2445,32 @@ class ScouterConnection extends G1Connection {
         }
       }
     }
+    final bar = arArrow == null ? null : navigationBar(font, layout, arArrow);
+    if (bar != null) {
+      // The way left to the turn: a bar under the text that empties.
+      final (x, y, fill) = bar;
+      room(2 * skOpSize(7));
+      code.fill(
+        SkArena.frame,
+        SkPanel.stride,
+        x,
+        y,
+        barWidth,
+        barHeight,
+        barTrack,
+      );
+      if (fill > 0) {
+        code.fill(
+          SkArena.frame,
+          SkPanel.stride,
+          x,
+          y,
+          fill,
+          barHeight,
+          barLevel,
+        );
+      }
+    }
     if (draw) {
       room(skOpSize(8));
       code.draw(
@@ -2464,11 +2485,12 @@ class ScouterConnection extends G1Connection {
       );
     }
     if (code.length > 0) packets.add(code.take());
-    if (arrow != null) {
-      // The arrow's lines and frames, then the program plays them (USER1).
-      packets.addAll(skUpload(SkResident.arrowData, arrow.data(), maxCode));
-      // With [arrowOn] the caller sends it after its own DRAW: the arrow
-      // never shows before its text.
+    if (wiggle != null) {
+      // The wiggle's frames and icon, then the program plays it (USER1).
+      packets.addAll(skUpload(SkResident.arrowData, wiggle.data(), maxCode));
+      // With [arrowOn] the caller sends it after its own DRAW: the wiggle
+      // never starts before its text shows.
+      final rest = wiggle.box(wiggle.offsets.length - 1);
       (arrowOn ?? packets.add)(
         (SkCode()
               ..write(
@@ -2478,10 +2500,10 @@ class ScouterConnection extends G1Connection {
                   0, // arrowFrame
                   0,
                   0, // arrowAt
-                  arrow.cx,
-                  arrow.cy,
-                  arrow.cx,
-                  arrow.cy,
+                  rest.$1,
+                  rest.$2,
+                  rest.$3,
+                  rest.$4,
                 ]),
               )
               ..raise(SkTrigger.user1))
@@ -2490,6 +2512,28 @@ class ScouterConnection extends G1Connection {
     }
     return packets;
   }
+
+  /// The navigation's bar of the way left to the turn: under the text,
+  /// full at [barMeters] or more, empty at the turn; null without a
+  /// distance. (x, y, filled width).
+  static (int, int, int)? navigationBar(
+    SkFont font,
+    SkLayout layout,
+    ({NavTurn turn, int? meters, bool atTurn}) step,
+  ) {
+    final m = step.meters;
+    if (m == null || layout.lines.isEmpty) return null;
+    final last = layout.lines.map((l) => l.y).reduce(max);
+    final y = last + font.lineSpacing + 6;
+    if (y + barHeight > SkPanel.height) return null;
+    final fill = step.atTurn
+        ? 0
+        : (barWidth * min(m, barMeters) / barMeters).round();
+    return (iconTextLeft, y, fill);
+  }
+
+  static const barWidth = 360, barHeight = 6, barMeters = 500;
+  static const barTrack = 3, barLevel = 12;
 
   /// The baseline of a label of [SkResident.labelH] rows in [font].
   static int labelBase(SkFont font) =>

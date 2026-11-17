@@ -9,6 +9,17 @@ tragen ab 0.8.0 dieselbe Versionsnummer.
 
 ## [Unreleased]
 
+## [0.57.0] - 2026-11-17
+
+### Changed
+- Navigation: statt des großen Pfeils über dem Text bleibt der Pfeil der
+  Abbiegung klein neben der Entfernung (der aus Google Maps, so ist die
+  Richtung schon aus der Ferne zu sehen), mit einem Balken des Restwegs
+  unter dem Text, der sich zur Abbiegung hin leert; direkt an der
+  Abbiegung wippt der Pfeil ein paar Mal in die Richtung, in die du musst
+  (im Kreisverkehr eine Runde). Die Einstellung *Animierter Pfeil*
+  entfällt.
+
 ## [0.56.0] - 2026-11-16
 
 ### Changed
@@ -775,7 +786,8 @@ beide Firmwares. Der alte Stand für nur Evens Firmware bleibt im Branch
   Gesten-Events; Flutter-App mit BLE-Verbindung zur G1, Textanzeige und
   Assist über das Brillen-Mikrofon.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.56.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.57.0...HEAD
+[0.57.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.56.0...app-v0.57.0
 [0.56.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.55.0...app-v0.56.0
 [0.55.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.3...app-v0.55.0
 [0.54.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...app-v0.54.3

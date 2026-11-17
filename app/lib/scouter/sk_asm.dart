@@ -55,6 +55,7 @@ class SkAsmOp {
   static const sysRead = 0x44;
   static const sysWrite = 0x45;
   static const fill = 0x50;
+  static const blit = 0x51;
   static const glyphs = 0x52;
   static const draw = 0x53;
   static const line = 0x54;
@@ -161,6 +162,36 @@ class SkAsm {
 
   void fill(SkW dst, SkW stride, SkW x, SkW y, SkW w, SkW h, SkW level) =>
       _op(SkAsmOp.fill, [dst, stride, x, y, w, h, level]);
+
+  /// BLIT (VM.md §3.3): the source rectangle combined into the 4-bpp
+  /// destination at (dstX, dstY).
+  void blit(
+    SkW src,
+    SkW srcStride,
+    SkW srcX,
+    SkW srcY,
+    SkW dst,
+    SkW dstStride,
+    SkW dstX,
+    SkW dstY,
+    SkW w,
+    SkW h,
+    SkW mode,
+    SkW level,
+  ) => _op(SkAsmOp.blit, [
+    src,
+    srcStride,
+    srcX,
+    srcY,
+    dst,
+    dstStride,
+    dstX,
+    dstY,
+    w,
+    h,
+    mode,
+    level,
+  ]);
 
   void glyphs(
     SkW font,

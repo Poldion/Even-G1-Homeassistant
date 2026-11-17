@@ -18,7 +18,7 @@ import 'package:even_g1_ha/bridge.dart';
 import 'package:even_g1_ha/g1/g1_connection.dart';
 import 'package:even_g1_ha/g1/protocol.dart';
 import 'package:even_g1_ha/navigation/navigation.dart';
-import 'package:even_g1_ha/navigation/turn_arrow.dart';
+import 'package:even_g1_ha/navigation/nav_wiggle.dart';
 import 'package:even_g1_ha/scouter/scouter_connection.dart';
 import 'package:even_g1_ha/scouter/sk_asm.dart';
 import 'package:even_g1_ha/scouter/sk_clock.dart';
@@ -29,7 +29,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'turn_arrow_check.dart';
+import 'nav_wiggle_check.dart';
 import 'fake_arms.dart';
 import 'fake_arms.dart' as fake show input;
 
@@ -69,18 +69,18 @@ class _Scenario {
   int _screenChanges = 0;
   bool? _arrowWanted;
 
-  /// The arrows the bridge handed to the glasses (their words), and the
-  /// one of the step just shown: coming closer, or at the turn its swing.
+  /// The wiggles the bridge handed to the glasses (their words), and the
+  /// one of the step just shown right at the turn.
   final _arrows = <String>{};
   String? _arrowShown;
 
-  /// The arrow's words for [update] as the step is shown now.
-  String _arrowFor(NavUpdate update) =>
-      (bridge.navigation.atTurn
-              ? TurnArrow.at(update.turn)
-              : TurnArrow.approach(update.meters))
-          .data()
-          .join(',');
+  /// The wiggle's words for [update] right at the turn.
+  String _arrowFor(NavUpdate update) => NavWiggle.of(
+    update.turn,
+    bridge.navigation.icon,
+    x: ScouterConnection.textLeft,
+    y: ScouterConnection.textTop,
+  ).data().join(',');
 
   /// A navigation step (null: it ends) the way the phone sends it.
   void navigate(NavUpdate? update) {
@@ -89,14 +89,14 @@ class _Scenario {
     final card = bridge.navigation.cardText;
     if (update != null && card.isNotEmpty) _navCards.add(card);
     final arrow =
-        update != null && settings.forwardNavigation && settings.navigationArrow
+        update != null && settings.forwardNavigation && bridge.navigation.atTurn
         ? _arrowFor(update)
         : null;
     if (arrow != null) _arrows.add(arrow);
     if (update != null &&
         _screenChanges > changes &&
         bridge.display.screen.value == card) {
-      _arrowWanted = settings.navigationArrow;
+      _arrowWanted = arrow != null;
       _arrowShown = arrow;
     }
   }
@@ -301,7 +301,6 @@ class _Scenario {
         ),
       );
     },
-    'arrow setting': () => settings.navigationArrow = !settings.navigationArrow,
     'brightness': () => run(() async {
       await g1.setBrightnessCurve(rnd.nextBool());
       await g1.setAutoBrightnessOffset(rnd.nextInt(9) - 4);
@@ -352,18 +351,16 @@ class _Scenario {
           isTrue,
           reason: why('${side.code}: arrow under "$screen"'),
         );
-        // Above that text and on the panel, in every frame.
+        // Beside the text and on the panel, in every frame.
         expect(
-          arrowProblems(arms.arenas[side]!, textTop: ScouterConnection.textTop),
+          wiggleProblems(arms.arenas[side]!),
           isEmpty,
-          reason: why('${side.code}: the arrow\'s words'),
+          reason: why('${side.code}: the wiggle\'s words'),
         );
         // The words of an arrow the bridge handed over, never another's.
         final words = arms.arenas[side]!.sublist(
           SkResident.arrowData,
-          SkResident.arrowData +
-              TurnArrow.segmentsAt +
-              20 * word(side, SkW.at(SkResident.arrowData)),
+          SkResident.arrowData + NavWiggle.dataMax,
         );
         expect(
           _arrows.contains(words.join(',')),
@@ -371,7 +368,7 @@ class _Scenario {
           reason: why('${side.code}: arrow of no step'),
         );
       }
-      // A step just shown: its arrow with the setting on, its icon without.
+      // A step just shown: the wiggle right at the turn, none before.
       final wantArrow = _arrowWanted;
       if (wantArrow != null &&
           bridge.display.screen.value == bridge.navigation.cardText) {
@@ -396,7 +393,7 @@ class _Scenario {
             isTrue,
             reason: why(
               '${side.code}: not the arrow of the step just shown '
-              '(${bridge.navigation.atTurn ? 'at the turn' : 'coming closer'}'
+              '(${bridge.navigation.atTurn ? 'at the turn' : 'before it'}'
               ', ${bridge.navigation.current?.meters} m)',
             ),
           );
@@ -573,102 +570,61 @@ void main() {
     });
   });
 
-  test('a navigation step shows its arrow until it closes', () {
+  test('right at the turn the icon wiggles until the step closes', () {
     fakeAsync((async) {
       final s = _Scenario(async, settings, 0)..setUp();
       int arrow(G1Side side) => s.word(side, SkResident.arrowOn);
-      final step = NavUpdate(
-        title: '200 m',
-        text: 'Turn right onto Main St',
-        subText: '14:32',
+      void step(int m) => s.navigate(
+        NavUpdate(
+          title: '$m m',
+          text: 'Turn right onto Main St',
+          subText: '14:32',
+        ),
       );
-      s.navigate(step);
+      // Before the turn: the icon and the bar, no wiggle.
+      step(200);
       s.wait(const Duration(seconds: 1));
-      s.check('navigation');
+      s.check('200 m');
       for (final side in G1Side.values) {
-        expect(arrow(side), 1, reason: '${side.code}: the step\'s arrow');
+        expect(arrow(side), 0, reason: '${side.code}: 200 m');
       }
-      // The step closes by itself: the arrow with it.
+      step(20);
+      s.wait(const Duration(seconds: 1));
+      s.check('20 m');
+      final want = NavWiggle.of(
+        NavTurn.right,
+        s.bridge.navigation.icon,
+        x: ScouterConnection.textLeft,
+        y: ScouterConnection.textTop,
+      ).data();
+      for (final side in G1Side.values) {
+        expect(arrow(side), 1, reason: '${side.code}: the wiggle');
+        expect(
+          s.arms.arenas[side]!.sublist(
+            SkResident.arrowData,
+            SkResident.arrowData + want.length,
+          ),
+          want,
+          reason: side.code,
+        );
+      }
+      // The step closes by itself: the wiggle with it.
       s.wait(Bridge.navigationDuration);
       s.check('closed');
       expect(s.bridge.display.active, isFalse);
       for (final side in G1Side.values) {
         expect(arrow(side), 0, reason: '${side.code}: closed');
       }
-      // Silent mode: no step on the glasses, no arrow.
+      // Silent mode: no step on the glasses, no wiggle.
       s.run(() => s.bridge.setSilentMode(true));
       s.wait(const Duration(seconds: 3));
       s.navigate(
-        NavUpdate(title: '40 m', text: 'Links abbiegen', subText: '14:33'),
+        NavUpdate(title: '10 m', text: 'Links abbiegen', subText: '14:33'),
       );
       s.wait(const Duration(seconds: 1));
       s.check('silent navigation');
       for (final side in G1Side.values) {
         expect(arrow(side), 0, reason: '${side.code}: silent mode');
-      }
-      s.dispose();
-    });
-  });
-
-  test('a drive: the arrow comes closer, then swings into the turn', () {
-    fakeAsync((async) {
-      final s = _Scenario(async, settings, 0)..setUp();
-      Uint8List words(G1Side side, TurnArrow a) => s.arms.arenas[side]!.sublist(
-        SkResident.arrowData,
-        SkResident.arrowData + a.data().length,
-      );
-      for (final (m, atTurn) in [
-        (700, false),
-        (480, false),
-        (190, false),
-        (45, false),
-        (20, true),
-      ]) {
-        s.steps.add('$m m');
-        s.navigate(
-          NavUpdate(
-            title: '$m m',
-            text: 'Links abbiegen auf Ulmenweg',
-            subText: '14:32',
-          ),
-        );
-        s.wait(const Duration(milliseconds: 500));
-        s.check('$m m');
-        expect(s.bridge.navigation.atTurn, atTurn, reason: '$m m');
-        final want = atTurn
-            ? TurnArrow.at(NavTurn.left)
-            : TurnArrow.approach(m);
-        for (final side in G1Side.values) {
-          expect(
-            s.word(side, SkResident.arrowOn),
-            1,
-            reason: '${side.code} $m m',
-          );
-          expect(words(side, want), want.data(), reason: '${side.code} $m m');
-        }
-      }
-      // Past the turn: no step shown again, the swing stays.
-      s.navigate(
-        NavUpdate(
-          title: '5 m',
-          text: 'Links abbiegen auf Ulmenweg',
-          subText: '14:32',
-        ),
-      );
-      s.wait(const Duration(milliseconds: 500));
-      final swing = TurnArrow.at(NavTurn.left);
-      for (final side in G1Side.values) {
-        expect(words(side, swing), swing.data(), reason: side.code);
-      }
-      // The arrow switched off: the next step with its icon.
-      s.settings.navigationArrow = false;
-      s.navigate(
-        NavUpdate(title: '300 m', text: 'Rechts abbiegen', subText: '14:32'),
-      );
-      s.wait(const Duration(milliseconds: 500));
-      s.check('arrow off');
-      for (final side in G1Side.values) {
-        expect(s.word(side, SkResident.arrowOn), 0, reason: side.code);
       }
       s.dispose();
     });

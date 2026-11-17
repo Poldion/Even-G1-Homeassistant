@@ -440,13 +440,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Pfeil und Entfernung auf der Brille: bei jeder neuen Abbiegung, bei 500, 200 und 50 m und direkt an der Abbiegung; beim Hochschauen statt des Dashboards, solange du navigierst.';
 
   @override
-  String get notifSetBigArrow => 'Animierter Pfeil';
-
-  @override
-  String get notifSetBigArrowHelp =>
-      'Ein großer Pfeil oben im Sichtfeld, über dem Text: Er kommt mit jedem Schritt näher, größer, je näher die Abbiegung ist, und direkt an der Abbiegung schwenkt er in die Richtung, in die du musst. Aus: ein kleiner Pfeil neben dem Text.';
-
-  @override
   String get notifSetNoAccess => 'Zugriff auf Benachrichtigungen fehlt';
 
   @override

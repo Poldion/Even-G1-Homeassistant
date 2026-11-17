@@ -9,6 +9,16 @@ integration share the same version number.
 
 ## [Unreleased]
 
+## [0.57.0] - 2026-11-17
+
+### Changed
+- Navigation: instead of the big arrow above the text, the turn's arrow
+  stays small beside the distance (Google Maps' own, so it shows the
+  direction from afar), with a bar of the way left under the text that
+  empties towards the turn; right at the turn the arrow pushes a few
+  times into the direction to take (round once for a roundabout). The
+  *Animated arrow* setting is gone.
+
 ## [0.56.0] - 2026-11-16
 
 ### Changed
@@ -745,7 +755,8 @@ firmwares. The old state for Even's firmware only stays in the branch
   gesture events; Flutter app with BLE connection to the G1, text display and
   Assist via the glasses' microphone.
 
-[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.56.0...HEAD
+[Unreleased]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.57.0...HEAD
+[0.57.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.56.0...app-v0.57.0
 [0.56.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.55.0...app-v0.56.0
 [0.55.0]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.3...app-v0.55.0
 [0.54.3]: https://github.com/Poldion/Even-G1-Homeassistant/compare/app-v0.54.2...app-v0.54.3

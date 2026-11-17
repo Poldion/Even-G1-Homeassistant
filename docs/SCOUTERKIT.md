@@ -227,16 +227,15 @@ gone, and the app loads it again.
   frame (free while the app shows nothing) and shows them with one `DRAW`,
   instead of one `DRAW` per band, which built the page up visibly from top
   to bottom.
-- **Navigation arrow**: with a navigation step the app sends the arrow
-  above the text (`TurnArrow`: its lines relative to a pivot and up to 20
-  frames, each cos and sin × scale × 4096, a move and the box it covers,
-  at `0x3A800`) and sets `arrowOn`, in the packet of the timed `DRAW`, so
-  it never shows before its text. Every 50 ms the program draws the next
-  frame (clears the old and the new box in the app's frame, draws the
-  lines, shows that rectangle with one `DRAW`) and stops at the last,
-  which stays: coming closer (small and high to its size) or, at the
-  turn, swinging into its direction. `busy` 0, another text, a video or
-  an animation set `arrowOn` back to 0.
+- **Navigation at the turn**: right at the turn the app sends, with the
+  step, the icon's wiggle (`NavWiggle`: up to 24 offsets and the icon's
+  pixels, at `0x3A800`) and sets `arrowOn`, in the packet of the timed
+  `DRAW`, so it never starts before its text. Every 50 ms the program
+  takes the next offset: clears the icon's old and new box in the app's
+  frame, copies the icon there (`BLIT`) and shows that rectangle with one
+  `DRAW`; the last offset is the icon's place. `busy` 0, another text, a
+  video or an animation set `arrowOn` back to 0. The bar of the way left
+  is part of the app's text.
 - **Both eyes together** (arm-to-arm link, VM.md §6.9): only the right arm
   follows the tilt. On a change it sends `PEER_SEND` 1 (up) or 2 (down) to
   the left arm and switches 150 ms later; the left arm's `PEER` handler
